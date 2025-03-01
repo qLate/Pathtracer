@@ -66,7 +66,6 @@ void Shader::use() const
 	glUseProgram(id);
 }
 
-
 void Shader::setBool(const std::string& name, bool value) const
 {
 	glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value);
@@ -95,7 +94,6 @@ void Shader::setMatrix4X4(const std::string& name, glm::mat<4, 4, float> mat) co
 {
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, false, value_ptr(mat));
 }
-
 
 void Shader::checkCompileErrors(unsigned shader, const std::string& type)
 {

@@ -36,54 +36,10 @@ bool SDLHandler::update()
 	{
 		Input::handleSDLEvent(event);
 
-		if (event.type == SDL_QUIT)
-			return false;
+		if (event.type == SDL_QUIT) return false;
 	}
 	return true;
 }
-
-//void SDLDisplayer::loop()
-//{
-//	auto pixels = new uint32_t[height * width];
-//	memset(pixels, 0, height * width * sizeof(uint32_t));
-//	PixelMatrix pixelMatrix(pixels, width, height);
-//
-//	bool quit = false;
-//	while (true)
-//	{
-//		while (SDL_PollEvent(&event))
-//		{
-//			Input::handleSDLEvent(event);
-//
-//			if (event.type == SDL_QUIT)
-//			{
-//				quit = true;
-//				break;
-//			}
-//		}
-//		if (quit) break;
-//
-//		Time::updateTime();
-//		Input::updateInput();
-//		onUpdate();
-//
-//		Camera::instance->updatePixelMatrix(pixelMatrix);
-//		Canvas::mainCanvas->drawUI(&pixelMatrix);
-//		 //Stats
-//		FPSCounter::updateFPSCounter();
-//		TriangleCounter::updateTriangleCounter();
-//		if (Input::isFocused)
-//			std::cout
-//				<< "FPS: " << FPSCounter::fps
-//				<< " Triangles: " << TriangleCounter::triangleCount
-//				<< " Graphical Objects: " << Scene::graphicalObjects.size()
-//				<< " Bounding Boxes: " << BVHNode::boxCount << '\n';
-//
-//		SDL_UpdateTexture(renderTexture, nullptr, pixels, width * sizeof(uint32_t));
-//		SDL_RenderCopy(renderer, renderTexture, nullptr, nullptr);
-//		SDL_RenderPresent(renderer);
-//	}
-//}
 
 void SDLHandler::quit()
 {

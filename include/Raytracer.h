@@ -5,9 +5,9 @@
 
 class Raytracer
 {
-	inline static constexpr int triangleBufferSize = 1000;
+	inline static constexpr int TRIANGLE_BUFFER_SIZE = 1000;
 
-	static void initializeSkybox();
+	//static void initializeSkybox();
 	static void initializeScene();
 	static void initializeFBO(Shader*& screenShader, unsigned& fbo, unsigned& renderTexture);
 

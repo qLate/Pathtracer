@@ -14,8 +14,8 @@ void Input::updateInput()
 {
 	if (!SDLHandler::windowFocused) return;
 
-	auto moveSpeed = defaultMoveSpeed;
 	auto& camera = Camera::instance;
+	auto moveSpeed = defaultMoveSpeed;
 	auto keyboardState = SDL_GetKeyboardState(nullptr);
 
 	// Movement
@@ -61,6 +61,7 @@ void Input::updateInput()
 		camera->getRot() = {1, 0, 0, 0};
 	}
 }
+
 void Input::handleSDLEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_KEYDOWN)
@@ -78,27 +79,6 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			else
 				SDL_SetRelativeMouseMode(SDL_FALSE);
 		}
-
-		/* Block placing
-		 *if (event.key.keysym.sym == SDLK_SPACE)
-		{
-			auto dir = Camera::instance->getScreenCenter() - Camera::instance->getPos();
-			auto ray = Ray(Camera::instance->getPos(), dir);
-			if (Physics::castRay(ray))
-			{
-				auto interPoint = ray.interPoint;
-				interPoint.x = (int)(interPoint.x / 2) * 2;
-				interPoint.y = (int)(interPoint.y / 2) * 2;
-				interPoint.z = (int)(interPoint.z / 2) * 2;
-				auto obj1 = new ImportedGraphicalObject("../../models/cube.obj", interPoint, {{0, 0, 0}});
-				auto tex = std::make_shared<Texture>();
-				obj1->setMaterial(Material(Color::white(), tex, true, 1, 0.5f, 2000, 0));
-
-				auto intersectables = std::vector<IBoundable*>(Scene::graphicalObjects.size());
-				std::ranges::transform(Scene::graphicalObjects, intersectables.begin(), [](const GraphicalObject* obj) { return (IBoundable*)obj; });
-				BVHNode::root = BVHNode::buildTree(intersectables, BVHNode::maxObjectsPerBox);
-			}
-		}*/
 	}
 
 	if (event.type == SDL_MOUSEMOTION && SDLHandler::windowFocused)

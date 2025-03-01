@@ -7,11 +7,11 @@ TraceShader::TraceShader(const char* vertexPath, const char* fragmentPath) : Sha
 	vaoScreen = new VAO();
 	setUpScreenTriangles();
 
-	ssboMaterials = new SSBO(materialAlign, 1);
-	ssboLights = new SSBO(lightAlign, 2);
-	ssboObjects = new SSBO(objectAlign, 3);
-	ssboTriangles = new SSBO(triangleAlign, 4);
-	ssboBVHNodes = new SSBO(bvhNodeAlign, 5);
+	ssboMaterials = new SSBO(MATERIAL_ALIGN, 1);
+	ssboLights = new SSBO(LIGHT_ALIGN, 2);
+	ssboObjects = new SSBO(OBJECT_ALIGN, 3);
+	ssboTriangles = new SSBO(TRIANGLE_ALIGN, 4);
+	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN, 5);
 
 	skybox = new GLCubeMap();
 }
@@ -25,7 +25,6 @@ void TraceShader::setUpScreenTriangles() const
 	vaoScreen->setVertices(screenVertices, 18);
 	glEnableVertexAttribArray(0);
 }
-
 
 void TraceShader::addTexture2D(const Texture* texture)
 {

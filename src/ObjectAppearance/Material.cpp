@@ -1,18 +1,16 @@
-#include "Material.h"
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <iostream>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include "Material.h"
 #include "Scene.h"
 
+Texture* const Texture::DEFAULT_TEX = new Texture(); //"textures/minecraft.png"
 
-Texture* const Texture::defaultTex = new Texture();//"textures/minecraft.png"
-
-Material* const Material::debugLine = new Material({50,100,200}, false);
-Material* const Material::defaultLit = new Material(Color::white(), true);
-Material* const Material::defaultUnlit = new Material(Color::white(), false);
-
+Material* const Material::DEBUG_LINE = new Material({50, 100, 200}, false);
+Material* const Material::DEFAULT_LIT = new Material(Color::white(), true);
+Material* const Material::DEFAULT_UNLIT = new Material(Color::white(), false);
 
 Texture::Texture() : width(2), height(2)
 {
@@ -73,15 +71,15 @@ Color Texture::getColor(int x, int y) const
 }
 
 
-Material::Material(Color color, bool lit): lit(lit), color(color), texture(Texture::defaultTex != nullptr ? Texture::defaultTex : new Texture())
+Material::Material(Color color, bool lit): lit(lit), color(color), texture(Texture::DEFAULT_TEX != nullptr ? Texture::DEFAULT_TEX : new Texture())
 {
 	this->indexID = Scene::materials.size();
 	Scene::materials.push_back(this);
 }
 
 Material::Material(Color color, bool lit, Texture* texture, float diffuseCoeff, float specularCoeff, float specularDegree,
-                   float reflection): lit{lit}, color{color}, texture{texture}, diffuseCoeff{diffuseCoeff}, specularCoeff{specularCoeff},
-                                      specularDegree{specularDegree}, reflection{reflection}
+                   float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoeff {diffuseCoeff}, specularCoeff {specularCoeff},
+                                      specularDegree {specularDegree}, reflection {reflection}
 {
 	this->indexID = Scene::materials.size();
 	Scene::materials.push_back(this);

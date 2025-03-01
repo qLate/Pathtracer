@@ -21,8 +21,6 @@ public:
 
 	Color getColor() const { return color; }
 	float getIntensity() const { return intensity; }
-
-	nlohmann::basic_json<> toJson() override;
 };
 
 class PointLight : public Light
@@ -33,8 +31,6 @@ public:
 	PointLight(glm::vec3 pos, Color color, float intensity, float distance);
 
 	void getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& inSpecular) override;
-
-	nlohmann::basic_json<> toJson() override;
 };
 
 class AreaLight : public Light
@@ -49,8 +45,6 @@ public:
 	AreaLight(glm::vec3 pos, Color color, float intensity, float distance, glm::vec3 size, glm::vec3 pointSize);
 
 	void getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& inSpecular) override;
-
-	nlohmann::basic_json<> toJson() override;
 };
 
 class GlobalLight : public Light

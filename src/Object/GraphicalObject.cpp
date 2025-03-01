@@ -1,6 +1,5 @@
 #include "GraphicalObject.h"
 
-#include <memory>
 #include <utility>
 
 #include "Camera.h"
@@ -9,7 +8,6 @@
 #include "Triangle.h"
 #include "Model.h"
 #include "Ray.h"
-
 
 GraphicalObject::GraphicalObject(glm::vec3 pos, glm::quat rot) : Object(pos, rot)
 
@@ -32,18 +30,6 @@ Mesh::~Mesh()
 		delete triangle;
 }
 
-//void Mesh::updateCameraFacingTriangles()
-//{
-//	cameraFacingTriangles.clear();
-//	for (const auto& triangle : triangles)
-//	{
-//		auto dir = triangle->vertices[0].pos - Camera::instance->getPos();
-//		if (dot(triangle->globalNormal, dir) >= 0)
-//			continue;
-//		cameraFacingTriangles.emplace_back(triangle);
-//	}
-//}
-
 Square::Square(glm::vec3 pos, float side, glm::quat rot) : Mesh(pos, generateTriangles(side), rot) {}
 
 std::vector<Triangle*> Square::generateTriangles(float side)
@@ -63,7 +49,6 @@ std::vector<Triangle*> Square::generateTriangles(float side)
 	triangles.push_back(new Triangle(this, vertex1, vertex3, vertex4));
 	return triangles;
 }
-
 
 Cube::Cube(glm::vec3 pos, float side, glm::quat rot) : Mesh(pos, generateTriangles(side), rot), side(side) {}
 
@@ -97,8 +82,7 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 	return triangles;
 }
 
-
-Sphere::Sphere(glm::vec3 pos, float radius) : GraphicalObject(pos, {}), radius(radius), radiusSquared(radius * radius) { }
+Sphere::Sphere(glm::vec3 pos, float radius) : GraphicalObject(pos, {}), radiusSquared(radius * radius), radius(radius) { }
 
 bool Sphere::intersect(Ray& ray)
 {
@@ -127,7 +111,6 @@ bool Sphere::intersect(Ray& ray)
 	return false;
 }
 
-
 Plane::Plane(glm::vec3 pos, glm::vec3 normal) : GraphicalObject({}, pos), normal{normalize(normal)} { }
 
 bool Plane::intersect(Ray& ray)
@@ -149,46 +132,4 @@ bool Plane::intersect(Ray& ray)
 		}
 	}
 	return false;
-}
-
-
-nlohmann::basic_json<> GraphicalObject::toJson()
-{
-	auto j = Object::toJson();
-	j["material"]["color"][0] = material->color[0];
-	j["material"]["color"][1] = material->color[1];
-	j["material"]["color"][2] = material->color[2];
-	j["material"]["texturePath"] = material->texture->getPath();
-	j["material"]["lit"] = material->lit;
-	j["material"]["diffuseCoeff"] = material->diffuseCoeff;
-	j["material"]["specularCoeff"] = material->specularCoeff;
-	j["material"]["specularDegree"] = material->specularDegree;
-	j["material"]["reflection"] = material->reflection;
-	return j;
-}
-
-nlohmann::basic_json<> Cube::toJson()
-{
-	auto j = GraphicalObject::toJson();
-	j["type"] = "Cube";
-	j["side"] = side;
-	return j;
-}
-
-nlohmann::basic_json<> Sphere::toJson()
-{
-	auto j = GraphicalObject::toJson();
-	j["type"] = "Sphere";
-	j["radius"] = radius;
-	return j;
-}
-
-nlohmann::basic_json<> Plane::toJson()
-{
-	auto j = GraphicalObject::toJson();
-	j["type"] = "Plane";
-	j["normal"][0] = normal[0];
-	j["normal"][1] = normal[1];
-	j["normal"][2] = normal[2];
-	return j;
 }

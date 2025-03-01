@@ -3,7 +3,6 @@
 #include "glm/gtx/string_cast.hpp"
 #include "glm/vec3.hpp"
 #include <cfloat>
-#include <ostream>
 
 class Triangle;
 class GraphicalObject;
@@ -21,8 +20,6 @@ struct Ray
 
 	Ray(glm::vec3 pos, glm::vec3 dir, float maxDist = FLT_MAX) : pos {pos}, dir {normalize(dir)}, closestT(FLT_MAX), closestMat(nullptr), surfaceNormal(), interPoint(),
 	                                                             maxDist(maxDist) {}
-
-
 	bool hit() const { return surfaceNormal != glm::vec3(); }
 };
 

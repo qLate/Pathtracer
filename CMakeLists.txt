@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME}
         "src/Object/Light.cpp"
         "src/ObjectAppearance/Model.cpp"
         "src/System/BVH.cpp"
-        "src/System/Canvas.cpp"
+        
         "src/Object/Triangle.cpp"
         "libs/stb_image/stb_image.h"
         "src/Utils/Utils.cpp"

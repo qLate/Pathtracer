@@ -3,7 +3,6 @@
 #include <fstream>
 #include <sstream>
 
-
 Model::Model(const std::filesystem::path& path)
 {
 	parse(path);

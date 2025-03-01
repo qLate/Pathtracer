@@ -4,12 +4,10 @@
 
 #include "Material.h"
 
-
 GLBuffer::GLBuffer()
 {
 	glGenBuffers(1, &id);
 }
-
 
 VAO::VAO()
 {
@@ -48,12 +46,10 @@ void SSBO::setData(const float* data, int count)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-
 GLTexture::GLTexture()
 {
 	glGenTextures(1, &id);
 }
-
 
 GLCubeMap::GLCubeMap()
 {
@@ -73,7 +69,6 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 		0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 	);
 }
-
 
 GLTexture2D::GLTexture2D(const Texture* texture)
 {

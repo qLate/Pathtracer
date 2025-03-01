@@ -56,7 +56,7 @@ void Triangle::recalculateCoefficients()
 	}
 }
 
-Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : vertices({v1, v2, v3}),localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos)))
+Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))),vertices({v1, v2, v3})
 {
 	for (auto& v : vertices)
 	{
@@ -74,7 +74,7 @@ void Triangle::attachTo(Mesh* obj)
 	updateGeometry();
 }
 
-bool Triangle::intersect(Ray& ray, bool intersectAll) const
+bool Triangle::intersect(Ray& ray) const
 {
 	const float dz = dot(row3, ray.dir);
 	if (dz == 0.0f)

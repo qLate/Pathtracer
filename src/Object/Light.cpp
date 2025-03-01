@@ -5,20 +5,9 @@
 #include "Raycast.h"
 #include "Scene.h"
 
-
 Light::Light(const glm::vec3& pos, const Color& color, float intensity) : Object(pos), color(color), intensity(intensity), colorIntensified(color * intensity)
 {
 	Scene::lights.emplace_back(this);
-}
-
-nlohmann::basic_json<> Light::toJson()
-{
-	auto j = Object::toJson();
-	j["color"][0] = color[0];
-	j["color"][1] = color[1];
-	j["color"][2] = color[2];
-	j["intensity"] = intensity;
-	return j;
 }
 
 PointLight::PointLight(glm::vec3 pos, Color color, float intensity, float distance) : Light(pos, color, intensity), distance(distance) { }
@@ -31,7 +20,7 @@ void PointLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& i
 		return;
 
 	dir = normalize(dir);
-	if (Raycast::castShadowRays({pos, -dir, dist}))
+	if (Raycast::castShadowRay({pos, -dir, dist}))
 		return;
 
 	auto distanceImpact = (float)std::min(1 - (dist / distance), 1.f);
@@ -41,14 +30,6 @@ void PointLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& i
 	auto h = normalize(dir - ray.dir);
 	inSpecular += distanceImpact * (float)std::pow(std::max(dot(h, ray.surfaceNormal), 0.0f), ray.closestMat->specularDegree) * colorIntensified;
 }
-
-nlohmann::basic_json<> PointLight::toJson()
-{
-	auto j = Light::toJson();
-	j["type"] = "PointLight";
-	j["distance"] = distance;
-	return j;
-};
 
 AreaLight::AreaLight(glm::vec3 pos, Color color, float intensity, float distance, glm::vec3 size, glm::vec3 pointSize) : Light(pos, color, intensity),
 distance(distance), size(size), pointSize(pointSize)
@@ -79,7 +60,7 @@ void AreaLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& in
 			continue;
 
 		auto dir = normalize(lightPoint - ray.interPoint);
-		if (Raycast::castShadowRays({/*getPos()*/lightPoint, -dir, dist}))
+		if (Raycast::castShadowRay({lightPoint, -dir, dist}))
 			continue;
 
 		auto distanceImpact = (float)std::max(1 - (dist / distance), 0.f);
@@ -91,24 +72,11 @@ void AreaLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& in
 	}
 }
 
-nlohmann::basic_json<> AreaLight::toJson()
-{
-	auto j = Light::toJson();
-	j["type"] = "AreaLight";
-	j["size"][0] = size[0];
-	j["size"][1] = size[1];
-	j["size"][2] = size[2];
-	j["pointSize"][0] = pointSize[0];
-	j["pointSize"][1] = pointSize[1];
-	j["pointSize"][2] = pointSize[2];
-	return j;
-};
-
 GlobalLight::GlobalLight(glm::vec3 direction, Color color, float intensity) : Light({}, color, intensity), direction(direction) {}
 
 void GlobalLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Color& inSpecular)
 {
-	if (Raycast::castShadowRays({ray.interPoint, direction, FLT_MAX}))
+	if (Raycast::castShadowRay({ray.interPoint, direction, FLT_MAX}))
 		return;
 
 	auto light = std::max(dot(direction, ray.surfaceNormal), 0.f);
@@ -123,7 +91,6 @@ void EverywhereLight::getIlluminationAtPoint(const Ray& ray, Color& inColor, Col
 {
 	inColor += colorIntensified;
 }
-
 
 std::pair<Color, Color> getIlluminationAtPoint(const Ray& ray)
 {

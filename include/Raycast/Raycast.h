@@ -10,5 +10,5 @@ class Raycast
 {
 public:
 	static Color castRay(Ray ray, int bounce = 1);
-	static bool castShadowRays(Ray ray);
+	static bool castShadowRay(Ray ray);
 };

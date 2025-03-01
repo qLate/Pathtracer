@@ -32,8 +32,4 @@ public:
 
 	glm::vec3 getScreenCenter() const;
 	glm::vec3 getLeftBotCorner() const;
-
-	void updatePixelMatrix(const PixelMatrix& pixelMatrix);
-
-	nlohmann::basic_json<> toJson() override;
 };

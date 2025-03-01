@@ -6,7 +6,6 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-
 void BVHBuilder::initializeBVH()
 {
 	buildTree(Scene::triangles);
@@ -77,10 +76,10 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Trian
 	nodes[leftInd] = std::make_shared<BVHNode>(nodes, triangles, start, splitIdx, maxTrianglesPerBox, rightInd);
 	nodes[rightInd] = std::make_shared<BVHNode>(nodes, triangles, splitIdx + 1, end, maxTrianglesPerBox, nextRightNode);
 
-
 	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
 }
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {
 	glm::vec3 min {FLT_MAX}, max {-FLT_MAX};
@@ -107,7 +106,6 @@ int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end
 	while (triangles[splitIdx]->getCenter()[axis] < splitPos && splitIdx < end - 1) splitIdx++;
 	return splitIdx;
 }
-
 
 bool BVHNode::intersect(Ray& ray) const
 {

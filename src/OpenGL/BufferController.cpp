@@ -7,7 +7,6 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-
 void BufferController::initializeUniformBuffers()
 {
 	initializeTexturesBuffer();

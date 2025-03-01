@@ -7,7 +7,7 @@ class BufferController
 	struct LightStruct
 	{
 		float lightType;
-		glm::vec3 PAD;
+		glm::vec3 _pad;
 		glm::vec4 pos;
 		glm::vec4 color;
 		glm::vec4 properties1;

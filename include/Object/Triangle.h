@@ -30,12 +30,11 @@ public:
 	glm::vec2 texVecU{};
 	glm::vec2 texVecV{};
 
-
 	Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3);
 	void attachTo(Mesh* obj);
 	void recalculateCoefficients();
 
-	bool intersect(Ray& ray, bool intersectAll = false) const;
+	bool intersect(Ray& ray) const;
 	Color getColorAt(float u, float v) const;
 	glm::vec3 getNormalAt(float u, float v, bool invert) const;
 

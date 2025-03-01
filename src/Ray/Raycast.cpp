@@ -6,22 +6,16 @@
 #include "Ray.h"
 #include "BVH.h"
 
-
 Color Raycast::castRay(Ray ray, int bounce)
 {
-	Color color{};
+	Color color {};
 	bool hit = false;
 	float colorImpact = 1;
 	for (int i = 0; i < bounce; ++i)
 	{
-		//for (const auto& obj : Scene::graphicalObjects)
-		//{
-		//	if (obj->includeInBVH()) continue;
-		//	obj->intersect(ray);
-		//}
 		BVHBuilder::nodes[0]->intersect(ray);
-		if (!ray.hit())
-			break;
+
+		if (!ray.hit()) break;
 		hit = true;
 
 		ray.interPoint += ray.surfaceNormal * ray.closestT / 100.f;
@@ -48,15 +42,8 @@ Color Raycast::castRay(Ray ray, int bounce)
 	return hit ? color : Camera::instance->bgColor;
 }
 
-bool Raycast::castShadowRays(Ray ray)
+bool Raycast::castShadowRay(Ray ray)
 {
-	//for (const auto& obj : Scene::graphicalObjects)
-	//{
-	//	if (obj->includeInBVH())continue;
-	//	if (obj->intersect(ray))
-	//		return true;
-	//}
-
 	BVHBuilder::nodes[0]->intersect(ray);
 	return ray.hit();
 }

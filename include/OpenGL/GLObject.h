@@ -2,7 +2,6 @@
 
 #include "glad.h"
 
-
 class Texture;
 
 class GLObject

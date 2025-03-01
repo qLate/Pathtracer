@@ -1,4 +1,6 @@
 #pragma once
+
+// ReSharper disable once CppUnusedIncludeDirective
 #include <ostream>
 #include <glm/common.hpp>
 #include <glm/vec4.hpp>

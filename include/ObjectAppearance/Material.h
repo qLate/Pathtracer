@@ -5,7 +5,6 @@
 
 #include "Color.h"
 
-
 class Texture
 {
 	std::filesystem::path path;
@@ -13,6 +12,8 @@ class Texture
 	bool readImage(std::vector<uint8_t>& image, const std::filesystem::path& filename);
 
 public:
+	static Texture* const DEFAULT_TEX;
+
 	int indexID;
 
 	std::vector<Color> pixelColors;
@@ -27,15 +28,16 @@ public:
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
 	std::filesystem::path getPath() const { return path; }
-
-
-	static Texture* const defaultTex;
 };
 
 
 class Material
 {
 public:
+	static Material* const DEBUG_LINE;
+	static Material* const DEFAULT_LIT;
+	static Material* const DEFAULT_UNLIT;
+
 	int indexID;
 
 	bool lit;
@@ -46,7 +48,6 @@ public:
 	float specularCoeff = 0;
 	float specularDegree = 0;
 	float reflection = 0;
-
 
 	Material(Color color = Color::white(), bool lit = true);
 	Material(Color color,
@@ -61,9 +62,4 @@ public:
 	{
 		return texture->getColor(u, v) * color;
 	}
-
-
-	static Material* const debugLine;
-	static Material* const defaultLit;
-	static Material* const defaultUnlit;
 };

@@ -3,8 +3,8 @@
 #include "glm/vec3.hpp"
 
 constexpr float PI = 3.14159265358979323846f;
-constexpr float DEG_TO_RAD = (1 / (180 / PI));
-constexpr float RAD_TO_DEG = (180 / PI);
+constexpr float DEG_TO_RAD = 1 / (180 / PI);
+constexpr float RAD_TO_DEG = 180 / PI;
 
 inline float det(const glm::vec3& v1, const glm::vec3& v2,
                  const glm::vec3& v3)
@@ -25,7 +25,7 @@ namespace vec3
 	static glm::vec3 down() { return {0, 0, -1}; }
 	static glm::vec3 left() { return {-1, 0, 0}; }
 	static glm::vec3 right() { return {1, 0, 0}; }
-} // namespace vec3
+}
 
 static bool solveQuadratic(float a, float b, float c, float& x0, float& x1)
 {
