@@ -1,4 +1,4 @@
-#include "Raytracer.h"
+#include "Pathtracer.h"
 
 #include <iostream>
 #include <SDL.h>
@@ -17,21 +17,21 @@
 
 int main(int argc, char* argv[])
 {
-	Raytracer::initialize(640 * 2, 360 * 2);
+	Pathtracer::initialize(640 * 2, 360 * 2);
 
-	Raytracer::loop();
+	Pathtracer::loop();
 
-	Raytracer::quit();
+	Pathtracer::quit();
 	return 0;
 }
 
-void Raytracer::initialize(int width, int height)
+void Pathtracer::initialize(int width, int height)
 {
-	Raytracer::width = width;
-	Raytracer::height = height;
+	Pathtracer::width = width;
+	Pathtracer::height = height;
 
 	SDLHandler::initialize(width, height);
-	shader = new TraceShader("shaders/raytracer.vert", "shaders/raytracer.frag");
+	shader = new TraceShader("shaders/pathtracer.vert", "shaders/pathtracer.frag");
 	shader->use();
 
 	shader->setInt("maxRayBounce", 5);
@@ -47,7 +47,7 @@ void Raytracer::initialize(int width, int height)
 	BufferController::initializeUniformBuffers();
 }
 
-void Raytracer::initializeFBO(Shader*& screenShader, unsigned& fbo, unsigned& renderTexture)
+void Pathtracer::initializeFBO(Shader*& screenShader, unsigned& fbo, unsigned& renderTexture)
 {
 	screenShader = new Shader("shaders/screen.vert", "shaders/screen.frag");
 	screenShader->use();
@@ -79,12 +79,12 @@ void Raytracer::initializeFBO(Shader*& screenShader, unsigned& fbo, unsigned& re
 	glUniform1i(glGetUniformLocation(screenShader->id, "screenTexture"), 1);
 }
 
-void Raytracer::initializeScene()
+void Pathtracer::initializeScene()
 {
 	SceneSetup::setupScene();
 }
 
-void Raytracer::loop()
+void Pathtracer::loop()
 {
 	auto currRow = 0;
 	while (true)
@@ -105,7 +105,7 @@ void Raytracer::loop()
 	}
 }
 
-void Raytracer::quit()
+void Pathtracer::quit()
 {
 	SDLHandler::quit();
 	delete shader;

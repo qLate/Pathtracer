@@ -80,6 +80,6 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 	return triangles;
 }
 
-Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radiusSquared(radius * radius), radius(radius) { }
+Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radius(radius) { }
 
 Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal{normalize(normal)} { }

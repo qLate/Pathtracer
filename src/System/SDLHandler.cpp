@@ -13,7 +13,7 @@ void SDLHandler::initialize(int width, int height)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	window = SDL_CreateWindow("Raytracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -28,7 +28,6 @@ void SDLHandler::initialize(int width, int height)
 	glViewport(0, 0, w, h);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-
 }
 bool SDLHandler::update()
 {

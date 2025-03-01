@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "TraceShader.h"
 
-class Raytracer
+class Pathtracer
 {
 	inline static constexpr int TRIANGLE_BUFFER_SIZE = 1000;
 

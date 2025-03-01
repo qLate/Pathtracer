@@ -8,7 +8,6 @@
 
 class BVHNode;
 class AABB;
-struct Ray;
 class Triangle;
 
 class Graphical : public Object
@@ -52,8 +51,6 @@ public:
 
 class Sphere final : public Graphical
 {
-	float radiusSquared;
-
 public:
 	float radius;
 

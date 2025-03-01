@@ -6,9 +6,6 @@
 #include "Object.h"
 #include "Action.h"
 
-struct PixelMatrix;
-struct Ray;
-
 class Camera : public Object
 {
 public:
