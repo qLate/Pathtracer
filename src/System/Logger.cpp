@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "BoundingBoxes.h"
+#include "BVH.h"
 #include "Scene.h"
 #include "SDLHandler.h"
 

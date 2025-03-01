@@ -1,6 +1,6 @@
 #include "BufferController.h"
 
-#include "BoundingBoxes.h"
+#include "BVH.h"
 #include "GraphicalObject.h"
 #include "Light.h"
 #include "Raytracer.h"

@@ -1,6 +1,6 @@
 #include "Triangle.h"
 
-#include "BoundingBoxes.h"
+#include "BVH.h"
 #include "Ray.h"
 
 void Triangle::recalculateCoefficients()

@@ -3,7 +3,6 @@
 #include "Matrix.h"
 #include "Scene.h"
 
-
 Object::Object(const glm::vec3 pos, glm::quat rot) : pos(pos), rot(rot)
 {
 	Scene::objects.emplace_back(this);

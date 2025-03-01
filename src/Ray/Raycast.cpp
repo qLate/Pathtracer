@@ -4,7 +4,7 @@
 #include "GraphicalObject.h"
 #include "Light.h"
 #include "Ray.h"
-#include "BoundingBoxes.h"
+#include "BVH.h"
 
 
 Color Raycast::castRay(Ray ray, int bounce)

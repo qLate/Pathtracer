@@ -8,9 +8,7 @@
 void Canvas::drawUI(const PixelMatrix* pixelMatrix) const
 {
 	for (const auto& element : elements)
-	{
 		element->draw(pixelMatrix);
-	}
 }
 
 void Canvas::addElement(const std::shared_ptr<UIElement>& element)

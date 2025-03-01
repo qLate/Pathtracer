@@ -1,8 +1,8 @@
-#include "RaytracerShader.h"
+#include "TraceShader.h"
 
 #include "glad.h"
 
-RaytracerShader::RaytracerShader(const char* vertexPath, const char* fragmentPath) : Shader(vertexPath, fragmentPath)
+TraceShader::TraceShader(const char* vertexPath, const char* fragmentPath) : Shader(vertexPath, fragmentPath)
 {
 	vaoScreen = new VAO();
 	setUpScreenTriangles();
@@ -16,7 +16,7 @@ RaytracerShader::RaytracerShader(const char* vertexPath, const char* fragmentPat
 	skybox = new GLCubeMap();
 }
 
-void RaytracerShader::setUpScreenTriangles() const
+void TraceShader::setUpScreenTriangles() const
 {
 	float screenVertices[] = {
 		-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
@@ -27,7 +27,7 @@ void RaytracerShader::setUpScreenTriangles() const
 }
 
 
-void RaytracerShader::addTexture2D(const Texture* texture)
+void TraceShader::addTexture2D(const Texture* texture)
 {
 	textures.push_back(new GLTexture2D(texture));
 }

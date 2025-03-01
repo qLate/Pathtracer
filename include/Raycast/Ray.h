@@ -17,11 +17,10 @@ struct Ray
 	glm::vec3 surfaceNormal;
 	glm::vec3 interPoint;
 	float maxDist;
-    Color color;
+	Color color;
 
-	Ray(glm::vec3 pos, glm::vec3 dir, float maxDist = FLT_MAX) : pos{pos}, dir{normalize(dir)}, closestT(FLT_MAX),
-	                                                             closestMat(nullptr),
-	                                                             surfaceNormal(), interPoint(), maxDist(maxDist){}
+	Ray(glm::vec3 pos, glm::vec3 dir, float maxDist = FLT_MAX) : pos {pos}, dir {normalize(dir)}, closestT(FLT_MAX), closestMat(nullptr), surfaceNormal(), interPoint(),
+	                                                             maxDist(maxDist) {}
 
 
 	bool hit() const { return surfaceNormal != glm::vec3(); }

@@ -6,7 +6,7 @@
 #include "Shader.h"
 
 
-class RaytracerShader : public Shader
+class TraceShader : public Shader
 {
 public:
 	SSBO* ssboLights;
@@ -28,7 +28,7 @@ public:
 	static constexpr int bvhNodeAlign = 12;
 
 	void setUpScreenTriangles() const;
-	RaytracerShader(const char* vertexPath, const char* fragmentPath);
+	TraceShader(const char* vertexPath, const char* fragmentPath);
 
 	void addTexture2D(const Texture* texture);
 };

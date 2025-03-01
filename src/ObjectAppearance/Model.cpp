@@ -1,4 +1,4 @@
-#include "ObjectParser.h"
+#include "Model.h"
 
 #include <fstream>
 #include <sstream>
@@ -6,11 +6,11 @@
 
 Model::Model(const std::filesystem::path& path)
 {
-	parseObject(path);
+	parse(path);
 }
 
-constexpr char delimiter = '/';
-void Model::parseObject(const std::filesystem::path& path)
+constexpr char DELIM = '/';
+void Model::parse(const std::filesystem::path& path)
 {
 	std::ifstream file(path);
 	std::string line;
@@ -60,12 +60,12 @@ void Model::parseObject(const std::filesystem::path& path)
 			std::string str;
 			while (ss >> str)
 			{
-				std::string substr = str.substr(0, str.find(delimiter));
-				str.erase(0, str.find(delimiter) + 1);
+				std::string substr = str.substr(0, str.find(DELIM));
+				str.erase(0, str.find(DELIM) + 1);
 				num1 = std::stoi(substr);
 
-				substr = str.substr(0, str.find(delimiter));
-				auto ind = str.find(delimiter);
+				substr = str.substr(0, str.find(DELIM));
+				auto ind = str.find(DELIM);
 				str.erase(0, ind != std::string::npos ? ind + 1 : str.size());
 				if (!substr.empty())
 					num2 = std::stoi(substr);

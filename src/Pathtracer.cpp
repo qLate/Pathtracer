@@ -4,7 +4,7 @@
 #include <SDL.h>
 
 #include "BufferController.h"
-#include "BoundingBoxes.h"
+#include "BVH.h"
 #include "Camera.h"
 #include "GraphicalObject.h"
 #include "Input.h"
@@ -12,10 +12,10 @@
 #include "Logger.h"
 #include "MathExtensions.h"
 #include "MyTime.h"
-#include "ObjectParser.h"
+#include "Model.h"
 #include "SDLHandler.h"
 #include "Triangle.h"
-#include "RaytracerShader.h"
+#include "TraceShader.h"
 
 //#define ROW_BY_ROW
 
@@ -36,7 +36,7 @@ void Raytracer::initialize(int width, int height)
 	Raytracer::height = height;
 
 	SDLHandler::initialize(width, height);
-	shader = new RaytracerShader("shaders/raytracer.vert", "shaders/raytracer.frag");
+	shader = new TraceShader("shaders/raytracer.vert", "shaders/raytracer.frag");
 	shader->use();
 
 	// SETTINGS
@@ -53,6 +53,7 @@ void Raytracer::initialize(int width, int height)
 	BVHBuilder::initializeBVH();
 	BufferController::initializeUniformBuffers();
 }
+
 //void Raytracer::initializeSkybox()
 //{
 //	std::string cubemapPaths[6] =
@@ -72,6 +73,7 @@ void Raytracer::initialize(int width, int height)
 //		mainShader->skybox->setFaceTexture(data, i, width, height);
 //	}
 //}
+
 void museumScene()
 {
 	auto camera = new Camera({9.092605, -4.376354, 2.479673}, 1, 0, glm::vec2((float)Raytracer::width / (float)Raytracer::height, 1));

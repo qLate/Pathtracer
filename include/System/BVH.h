@@ -4,14 +4,13 @@
 #include <cfloat>
 #include "GraphicalObject.h"
 
-
 class GraphicalObject;
 class Triangle;
 class BVHNode;
 
 class BVHBuilder
 {
-	inline static constexpr int maxTrianglesPerBox = 3;
+	inline static constexpr int MAX_TRIANGLES_PER_BOX = 3;
 	inline static bool showBoxes = false;
 	inline static float lineWidth = 0.1f;
 
@@ -46,7 +45,7 @@ public:
 	int hitNext = -1, missNext = -1;
 
 	BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode = -1);
-	int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end) const;
+	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
 
 	bool intersect(Ray& ray) const;
 };

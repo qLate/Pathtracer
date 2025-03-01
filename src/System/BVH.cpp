@@ -1,4 +1,4 @@
-#include "BoundingBoxes.h"
+#include "BVH.h"
 
 #include <algorithm>
 
@@ -12,15 +12,13 @@ void BVHBuilder::initializeBVH()
 	buildTree(Scene::triangles);
 }
 
-
 void BVHBuilder::buildTree(const std::vector<Triangle*>& objects)
 {
 	nodes.clear();
 
 	nodes.push_back(nullptr);
-	nodes[0] = std::make_shared<BVHNode>(nodes, Scene::triangles, 0, Scene::triangles.size() - 1, maxTrianglesPerBox);
+	nodes[0] = std::make_shared<BVHNode>(nodes, Scene::triangles, 0, Scene::triangles.size() - 1, MAX_TRIANGLES_PER_BOX);
 }
-
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
 {
@@ -53,8 +51,7 @@ bool AABB::intersects(const Ray& ray, float tMin, float tMax) const
 	return tMax > 0;
 }
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles,
-                 int start, int end, int maxTrianglesPerBox, int nextRightNode)
+BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode)
 {
 	missNext = nextRightNode;
 	if (end - start < maxTrianglesPerBox)
@@ -84,9 +81,9 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Trian
 	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
 }
 
-int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end) const
+int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {
-	glm::vec3 min{FLT_MAX}, max{-FLT_MAX};
+	glm::vec3 min {FLT_MAX}, max {-FLT_MAX};
 	for (size_t i = start; i <= end; i++)
 	{
 		auto pos = triangles[i]->getCenter();

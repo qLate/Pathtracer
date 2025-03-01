@@ -6,7 +6,6 @@
 #include "Object.h"
 #include "Material.h"
 
-
 class BVHNode;
 class AABB;
 struct Ray;

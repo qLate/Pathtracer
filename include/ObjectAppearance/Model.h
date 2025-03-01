@@ -7,7 +7,7 @@
 
 class Model
 {
-    void parseObject(const std::filesystem::path& path);
+    void parse(const std::filesystem::path& path);
 
 public:
     std::vector<Triangle*> triangles;

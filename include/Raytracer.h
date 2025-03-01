@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Action.h"
-#include "RaytracerShader.h"
+#include "TraceShader.h"
 
 class Raytracer
 {
@@ -14,7 +14,7 @@ class Raytracer
 public:
 	inline static int width, height;
 
-	inline static RaytracerShader* shader;
+	inline static TraceShader* shader;
 
 	inline static Action onUpdate{};
 

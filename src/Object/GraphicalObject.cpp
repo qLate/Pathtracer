@@ -7,7 +7,7 @@
 #include "MathExtensions.h"
 #include "Scene.h"
 #include "Triangle.h"
-#include "ObjectParser.h"
+#include "Model.h"
 #include "Ray.h"
 
 

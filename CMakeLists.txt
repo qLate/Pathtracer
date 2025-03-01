@@ -13,10 +13,11 @@ include_directories(include/Object)
 include_directories(include/Object/GraphicalObject)
 include_directories(include/Raycast)
 include_directories(include/ObjectAppearance)
-include_directories(include/Parsers)
 include_directories(include/Physics)
 include_directories(include/shaders)
 include_directories(include/OpenGL)
+include_directories(include/System)
+include_directories(include/Utils)
 
 include_directories(libs/thread_pool_light)
 include_directories(include/UI)
@@ -33,25 +34,20 @@ add_executable(${PROJECT_NAME}
         "src/Object/Object.cpp"
         "src/Ray/Raycast.cpp"
         "src/Object/Camera.cpp"
-        "src/Input.cpp"
+        "src/System/Input.cpp"
         "src/Object/Light.cpp"
-        "src/Parsers/ObjectParser.cpp"
-        "src/BoundingBoxes.cpp"
-        "src/UI/Canvas.cpp"
+        "src/ObjectAppearance/Model.cpp"
+        "src/System/BVH.cpp"
+        "src/System/Canvas.cpp"
         "src/Object/Triangle.cpp"
         "libs/stb_image/stb_image.h"
-        
-        "src/Parsers/SceneParser.cpp"
-        "src/Object/PolyMesh.cpp"
-        "include/Object/Vertex.h" 
-        "src/Physics/Physics.cpp"
-        "src/Utils.cpp"
-        "src/UI/SDLHandler.cpp"
+        "src/Utils/Utils.cpp"
+        "src/System/SDLHandler.cpp"
+        "src/System/MyTime.cpp"
         "src/OpenGL/glad.c" 
         "src/OpenGL/Shader.cpp"
-        "src/Logger.cpp" 
-        "src/MyTime.cpp" 
-        "src/OpenGL/RaytracerShader.cpp"
+        "src/System/Logger.cpp" 
+        "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
         "src/ObjectAppearance/Material.cpp"
         "src/OpenGL/GLObject.cpp")
