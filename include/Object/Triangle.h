@@ -2,7 +2,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#include "GraphicalObject.h"
+#include "Graphical.h"
 #include "Vertex.h"
 
 class Triangle
@@ -31,12 +31,8 @@ public:
 	glm::vec2 texVecV{};
 
 	Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3);
-	void attachTo(Mesh* obj);
+	void attachTo(Mesh* mesh);
 	void recalculateCoefficients();
-
-	bool intersect(Ray& ray) const;
-	Color getColorAt(float u, float v) const;
-	glm::vec3 getNormalAt(float u, float v, bool invert) const;
 
 	AABB getBoundingBox() const;
 	glm::vec3 getCenter() const;

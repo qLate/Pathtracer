@@ -1,10 +1,9 @@
 #pragma once
 
 #include <glm/vec3.hpp>
-#include <cfloat>
-#include "GraphicalObject.h"
+#include "Graphical.h"
 
-class GraphicalObject;
+class Graphical;
 class Triangle;
 class BVHNode;
 
@@ -30,8 +29,6 @@ public:
 	AABB() : min(), max() { }
 	AABB(glm::vec3 min, glm::vec3 max) : min(min), max(max) { }
 
-	bool intersects(const Ray& ray, float tMin = 0, float tMax = FLT_MAX) const;
-
 	static AABB getUnitedBox(const AABB& box1, const AABB& box2);
 };
 
@@ -46,6 +43,4 @@ public:
 
 	BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode = -1);
 	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
-
-	bool intersect(Ray& ray) const;
 };

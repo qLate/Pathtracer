@@ -2,8 +2,6 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-#include <thread_pool_light.hpp>
-
 #include "Color.h"
 #include "Object.h"
 #include "Action.h"
@@ -21,7 +19,6 @@ public:
 	float focalDistance, lensRadius;
 	glm::vec2 size;
 	Color bgColor;
-	BS::thread_pool_light pool;
 
 	Camera(glm::vec3 pos, float focalDistance, float lensRadius, glm::vec2 size);
 

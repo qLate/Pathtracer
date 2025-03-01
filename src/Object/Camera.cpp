@@ -3,7 +3,6 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "MathExtensions.h"
-#include "Raycast.h"
 #include "Raytracer.h"
 #include "Triangle.h"
 

@@ -1,7 +1,6 @@
 #include "Triangle.h"
 
 #include "BVH.h"
-#include "Ray.h"
 
 void Triangle::recalculateCoefficients()
 {
@@ -67,51 +66,11 @@ Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : localNormal(no
 	if (mesh != nullptr)
 		attachTo(mesh);
 }
-void Triangle::attachTo(Mesh* obj)
+void Triangle::attachTo(Mesh* mesh)
 {
-	this->mesh = obj;
+	this->mesh = mesh;
 
 	updateGeometry();
-}
-
-bool Triangle::intersect(Ray& ray) const
-{
-	const float dz = dot(row3, ray.dir);
-	if (dz == 0.0f)
-		return false;
-
-	const float oz = dot(row3, ray.pos) + row3Val;
-	const float t = -oz / dz;
-	if (t < 0 || ray.closestT < t || t >= ray.maxDist)
-		return false;
-
-	const auto hitPos = ray.pos + ray.dir * t;
-	const float u = dot(row1, hitPos) + row1Val;
-	if (u < 0.0f || u > 1.0f)
-		return false;
-
-	const float v = dot(row2, hitPos) + row2Val;
-	if (v < 0.0f || u + v > 1.0f)
-		return false;
-
-	ray.closestT = t;
-	ray.closestMat = mesh->material;
-	ray.surfaceNormal = getNormalAt(u, v, dot(globalNormal, ray.dir) > 0);
-	ray.interPoint = hitPos;
-	ray.closestT = t;
-	ray.color = getColorAt(u, v);
-	return true;
-}
-
-Color Triangle::getColorAt(float u, float v) const
-{
-	auto d = vertices[0].uvPos + u * texVecU + v * texVecV;
-	return mesh->material->texture->getColor(d.x, 1 - d.y);
-}
-glm::vec3 Triangle::getNormalAt(float u, float v, bool invert) const
-{
-	auto interpolatedNormal = normalize((1 - u - v) * globalVertexNormals[0] + u * globalVertexNormals[1] + v * globalVertexNormals[2]);
-	return invert ? -interpolatedNormal : interpolatedNormal;
 }
 
 AABB Triangle::getBoundingBox() const

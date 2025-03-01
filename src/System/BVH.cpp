@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "Ray.h"
 #include "Scene.h"
 #include "Triangle.h"
 
@@ -16,7 +15,7 @@ void BVHBuilder::buildTree(const std::vector<Triangle*>& objects)
 	nodes.clear();
 
 	nodes.push_back(nullptr);
-	nodes[0] = std::make_shared<BVHNode>(nodes, Scene::triangles, 0, Scene::triangles.size() - 1, MAX_TRIANGLES_PER_BOX);
+	nodes[0] = std::make_shared<BVHNode>(nodes, Scene::triangles, 0, (int)Scene::triangles.size() - 1, MAX_TRIANGLES_PER_BOX);
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
@@ -30,24 +29,6 @@ AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
 	auto z_min = std::min(box1.min.z, box2.min.z);
 	auto z_max = std::max(box1.max.z, box2.max.z);
 	return {{x_min, y_min, z_min}, {x_max, y_max, z_max}};
-}
-
-bool AABB::intersects(const Ray& ray, float tMin, float tMax) const
-{
-	for (int i = 0; i < 3; i++)
-	{
-		auto invD = 1.0f / ray.dir[i];
-		auto t0 = (min[i] - ray.pos[i]) * invD;
-		auto t1 = (max[i] - ray.pos[i]) * invD;
-		if (invD < 0.0f)
-			std::swap(t0, t1);
-
-		tMin = t0 > tMin ? t0 : tMin;
-		tMax = t1 < tMax ? t1 : tMax;
-		if (tMax <= tMin)
-			return false;
-	}
-	return tMax > 0;
 }
 
 BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode)
@@ -65,7 +46,7 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Trian
 		return;
 	}
 
-	size_t splitIdx = getSplitIndex(triangles, start, end);
+	int splitIdx = getSplitIndex(triangles, start, end);
 
 	leftInd = (int)BVHBuilder::nodes.size();
 	rightInd = (int)BVHBuilder::nodes.size() + 1;
@@ -83,7 +64,7 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Trian
 int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {
 	glm::vec3 min {FLT_MAX}, max {-FLT_MAX};
-	for (size_t i = start; i <= end; i++)
+	for (int i = start; i <= end; i++)
 	{
 		auto pos = triangles[i]->getCenter();
 		min.x = std::min(min.x, pos.x);
@@ -105,25 +86,4 @@ int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end
 	auto splitIdx = start;
 	while (triangles[splitIdx]->getCenter()[axis] < splitPos && splitIdx < end - 1) splitIdx++;
 	return splitIdx;
-}
-
-bool BVHNode::intersect(Ray& ray) const
-{
-	if (!box.intersects(ray))
-		return false;
-
-	if (isLeaf)
-	{
-		bool hit = false;
-		for (int i = leafTrianglesStart; i < leafTrianglesStart + leafTriangleCount; i++)
-		{
-			if (!Scene::triangles[i]->intersect(ray)) continue;
-			hit = true;
-		}
-		return hit;
-	}
-
-	auto hitLeft = Scene::triangles[leftInd]->intersect(ray);
-	auto hitRight = Scene::triangles[rightInd]->intersect(ray);
-	return hitLeft || hitRight;
 }

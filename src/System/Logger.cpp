@@ -25,6 +25,6 @@ void Logger::logStats()
 	std::cout
 		<< "FPS: " << fps
 		<< " Triangles: " << Scene::triangles.size()
-		<< " Graphical Objects: " << Scene::graphicalObjects.size()
+		<< " Graphical Objects: " << Scene::graphicals.size()
 		<< " Bounding Boxes: " << BVHBuilder::nodes.size()<< '\n';
 }

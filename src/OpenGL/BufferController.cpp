@@ -1,7 +1,7 @@
 #include "BufferController.h"
 
 #include "BVH.h"
-#include "GraphicalObject.h"
+#include "Graphical.h"
 #include "Light.h"
 #include "Raytracer.h"
 #include "Scene.h"
@@ -46,8 +46,8 @@ void BufferController::initializeLightsBuffer()
 	{
 		LightStruct lightStruct{};
 		lightStruct.pos = glm::vec4(light->getPos(), 0);
-		lightStruct.color = light->getColor();
-		lightStruct.properties1.x = light->getIntensity();
+		lightStruct.color = light->color;
+		lightStruct.properties1.x = light->intensity;
 
 		if (dynamic_cast<GlobalLight*>(light) != nullptr)
 		{
@@ -77,7 +77,7 @@ void BufferController::initializeObjectsBuffer()
 {
 	auto triangleCount = 0;
 	std::vector<ObjectStruct> data{};
-	for (const auto& obj : Scene::graphicalObjects)
+	for (const auto& obj : Scene::graphicals)
 	{
 		ObjectStruct objectStruct{};
 		objectStruct.data.y = obj->material->indexID;

@@ -11,28 +11,24 @@ class AABB;
 struct Ray;
 class Triangle;
 
-class GraphicalObject : public Object
+class Graphical : public Object
 {
 protected:
-	GraphicalObject(glm::vec3 pos = {}, glm::quat rot = {});
+	Graphical(glm::vec3 pos = {}, glm::quat rot = {});
 
 public:
 	int indexID;
 	Material* material = Material::DEFAULT_LIT;
-
-	virtual bool intersect(Ray& ray) { return false; }
 };
 
 
-class Mesh : public GraphicalObject
+class Mesh : public Graphical
 {
 public:
 	std::vector<Triangle*> triangles {};
 
 	Mesh(glm::vec3 pos, std::vector<Triangle*> triangles, glm::quat rot = {});
 	~Mesh() override;
-
-	//void updateCameraFacingTriangles();
 };
 
 
@@ -54,7 +50,7 @@ public:
 };
 
 
-class Sphere final : public GraphicalObject
+class Sphere final : public Graphical
 {
 	float radiusSquared;
 
@@ -62,17 +58,13 @@ public:
 	float radius;
 
 	Sphere(glm::vec3 pos, float radius);
-
-	bool intersect(Ray& ray) override;
 };
 
 
-class Plane final : public GraphicalObject
+class Plane final : public Graphical
 {
 public:
 	glm::vec3 normal;
 
 	Plane(glm::vec3 pos, glm::vec3 normal);
-
-	bool intersect(Ray& ray) override;
 };

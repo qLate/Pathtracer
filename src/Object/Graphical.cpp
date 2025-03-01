@@ -1,22 +1,20 @@
-#include "GraphicalObject.h"
+#include "Graphical.h"
 
 #include <utility>
 
 #include "Camera.h"
-#include "MathExtensions.h"
 #include "Scene.h"
 #include "Triangle.h"
 #include "Model.h"
-#include "Ray.h"
 
-GraphicalObject::GraphicalObject(glm::vec3 pos, glm::quat rot) : Object(pos, rot)
+Graphical::Graphical(glm::vec3 pos, glm::quat rot) : Object(pos, rot)
 
 {
-	this->indexID = Scene::graphicalObjects.size();
-	Scene::graphicalObjects.emplace_back(this);
+	this->indexID = Scene::graphicals.size();
+	Scene::graphicals.emplace_back(this);
 }
 
-Mesh::Mesh(glm::vec3 pos, std::vector<Triangle*> triangles, glm::quat rot) : GraphicalObject(pos, rot), triangles(std::move(triangles))
+Mesh::Mesh(glm::vec3 pos, std::vector<Triangle*> triangles, glm::quat rot) : Graphical(pos, rot), triangles(std::move(triangles))
 {
 	for (auto& t : this->triangles)
 	{
@@ -82,54 +80,6 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 	return triangles;
 }
 
-Sphere::Sphere(glm::vec3 pos, float radius) : GraphicalObject(pos, {}), radiusSquared(radius * radius), radius(radius) { }
+Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radiusSquared(radius * radius), radius(radius) { }
 
-bool Sphere::intersect(Ray& ray)
-{
-	float x0, x1;
-	auto inter = (ray.pos - pos);
-	float a = dot(ray.dir, ray.dir);
-	float b = dot(ray.dir + ray.dir, inter);
-	float c = fabsf(dot(inter, inter)) - radiusSquared;
-	if (solveQuadratic(a, b, c, x0, x1))
-	{
-		if (x0 > 0 && x0 < ray.closestT && x0 < ray.maxDist)
-		{
-			ray.closestT = x0;
-			ray.interPoint = ray.pos + x0 * ray.dir;
-			ray.surfaceNormal = normalize(ray.interPoint - pos);
-			ray.closestMat = material;
-
-			auto n = ray.surfaceNormal;
-			float u = atan2(-n.x, n.y) / (2.0f * PI) + 0.5f;
-			float v = -n.z * 0.5f + 0.5f;
-			ray.color = material->getColor(u, v);
-
-			return true;
-		}
-	}
-	return false;
-}
-
-Plane::Plane(glm::vec3 pos, glm::vec3 normal) : GraphicalObject({}, pos), normal{normalize(normal)} { }
-
-bool Plane::intersect(Ray& ray)
-{
-	float denom = -dot(normal, ray.dir);
-	if (denom > 1e-6f)
-	{
-		glm::vec3 dir = pos - ray.pos;
-		float t = -dot(dir, normal) / denom;
-		if (t < ray.closestT && t > 0 && t < ray.maxDist)
-		{
-			ray.closestT = t;
-			ray.color = material->color;
-			ray.interPoint = ray.pos + t * ray.dir;
-			ray.surfaceNormal = normal;
-			ray.closestMat = material;
-
-			return true;
-		}
-	}
-	return false;
-}
+Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal{normalize(normal)} { }
