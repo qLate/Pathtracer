@@ -4,11 +4,6 @@
 
 #include "Material.h"
 
-GLBuffer::GLBuffer()
-{
-	glGenBuffers(1, &id);
-}
-
 VAO::VAO()
 {
 	glGenVertexArrays(1, &id);
@@ -26,6 +21,28 @@ void VAO::setVertices(const float* data, int size) const
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
 }
 
+GLBuffer::GLBuffer()
+{
+	glGenBuffers(1, &id);
+}
+
+UBO::UBO(int align, int baseIndex) : align(align)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, id);
+	if (baseIndex != -1)
+		glBindBufferBase(GL_UNIFORM_BUFFER, baseIndex, id);
+}
+
+void UBO::bindBase(int index)
+{
+	glBindBufferBase(GL_UNIFORM_BUFFER, index, id);
+}
+void UBO::setData(const float* data, int count)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, id);
+	glBufferData(GL_UNIFORM_BUFFER, count * align * sizeof(float), data, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
 SSBO::SSBO(int align, int baseIndex) : align(align)
 {
@@ -38,7 +55,6 @@ void SSBO::bindBase(int index)
 {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, id);
 }
-
 void SSBO::setData(const float* data, int count)
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
@@ -75,8 +91,6 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//float borderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
-	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -91,5 +105,4 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D, 0);
 }

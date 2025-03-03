@@ -18,7 +18,6 @@ void SDLHandler::initialize(int width, int height)
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	gladLoadGLLoader(SDL_GL_GetProcAddress);
-	//SDL_GL_SetSwapInterval(1);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -29,6 +28,7 @@ void SDLHandler::initialize(int width, int height)
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
+
 bool SDLHandler::update()
 {
 	while (SDL_PollEvent(&event))

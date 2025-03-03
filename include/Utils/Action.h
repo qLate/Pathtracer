@@ -2,10 +2,9 @@
 
 #include <functional>
 
-template <typename... Ts>
-class Action
+template <typename... Ts> class Action
 {
-	std::vector<std::function<void(Ts...)>> callbacks{};
+	std::vector<std::function<void(Ts...)>> callbacks {};
 
 public:
 	int subscribe(const std::function<void(Ts...)>& func)

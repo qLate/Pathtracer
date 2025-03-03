@@ -8,10 +8,51 @@
 #include "Model.h"
 
 Graphical::Graphical(glm::vec3 pos, glm::quat rot) : Object(pos, rot)
-
 {
 	this->indexID = Scene::graphicals.size();
 	Scene::graphicals.emplace_back(this);
+}
+Graphical::~Graphical()
+{
+	delete _material;
+}
+
+Material* Graphical::material()
+{
+	if (_material) return _material;
+
+	_material = new Material(*_sharedMaterial);
+	return _material;
+}
+Material* Graphical::materialNoCopy() const
+{
+	if (_material) return _material;
+	return _sharedMaterial;
+}
+Material* Graphical::sharedMaterial() const
+{
+	return _sharedMaterial;
+}
+
+void Graphical::setMaterial(const Material& material)
+{
+	if (_material)
+	{
+		delete _material;
+		_material = nullptr;
+	}
+
+	this->_material = new Material(material);
+}
+void Graphical::setSharedMaterial(Material* material)
+{
+	if (_material)
+	{
+		delete _material;
+		_material = nullptr;
+	}
+
+	_sharedMaterial = material;
 }
 
 Mesh::Mesh(glm::vec3 pos, std::vector<Triangle*> triangles, glm::quat rot) : Graphical(pos, rot), triangles(std::move(triangles))
@@ -37,10 +78,10 @@ std::vector<Triangle*> Square::generateTriangles(float side)
 	auto p3 = glm::vec3(side / 2, 0, side / 2);
 	auto p4 = glm::vec3(side / 2, 0, -side / 2);
 
-	Vertex vertex1{p1, {0, 0}};
-	Vertex vertex2{p2, {1, 0}};
-	Vertex vertex3{p3, {1, 1}};
-	Vertex vertex4{p4, {0, 1}};
+	Vertex vertex1 {p1, {0, 0}};
+	Vertex vertex2 {p2, {1, 0}};
+	Vertex vertex3 {p3, {1, 1}};
+	Vertex vertex4 {p4, {0, 1}};
 
 	std::vector<Triangle*> triangles;
 	triangles.push_back(new Triangle(this, vertex1, vertex2, vertex3));
@@ -82,4 +123,4 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 
 Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radius(radius) { }
 
-Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal{normalize(normal)} { }
+Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal {normalize(normal)} { }

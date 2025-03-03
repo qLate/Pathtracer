@@ -26,27 +26,24 @@ void Model::parse(const std::filesystem::path& path)
 		{
 			std::vector<float> pos;
 			while (ss >> token)
-			{
 				pos.push_back(std::stof(token));
-			}
+
 			vertexPositions.emplace_back(pos[0], pos[1], pos[2]);
 		}
 		else if (token == "vt")
 		{
 			std::vector<float> uv;
 			while (ss >> token)
-			{
 				uv.push_back(std::stof(token));
-			}
+
 			vertexUVs.emplace_back(uv[0], uv[1]);
 		}
 		else if (token == "vn")
 		{
 			std::vector<float> normal;
 			while (ss >> token)
-			{
 				normal.push_back(std::stof(token));
-			}
+
 			vertexNormals.push_back(normalize(glm::vec3(normal[0], normal[1], normal[2])));
 		}
 		else if (token == "f")
@@ -56,21 +53,25 @@ void Model::parse(const std::filesystem::path& path)
 			std::vector<int> normalIndexes;
 
 			int num1 = 0, num2 = 0, num3 = 0;
-			std::string str;
+			std::string str, substr;
 			while (ss >> str)
 			{
-				std::string substr = str.substr(0, str.find(DELIM));
-				str.erase(0, str.find(DELIM) + 1);
+				int ind1 = str.find(DELIM);
+				substr = str.substr(0, ind1);
 				num1 = std::stoi(substr);
 
-				substr = str.substr(0, str.find(DELIM));
-				auto ind = str.find(DELIM);
-				str.erase(0, ind != std::string::npos ? ind + 1 : str.size());
-				if (!substr.empty())
+				if (ind1 != std::string::npos)
+				{
+					int ind2 = str.find(DELIM, ind1 + 1);
+					substr = str.substr(ind1 + 1, ind2);
 					num2 = std::stoi(substr);
 
-				if (!str.empty())
-					num3 = std::stoi(str);
+					if (ind2 != std::string::npos)
+					{
+						substr = str.substr(ind2 + 1);
+						num3 = std::stoi(substr);
+					}
+				}
 
 				posIndexes.push_back(num1 - 1);
 				uvIndexes.push_back(num2 - 1);

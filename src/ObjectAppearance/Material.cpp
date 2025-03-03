@@ -6,7 +6,7 @@
 #include "Material.h"
 #include "Scene.h"
 
-Texture* const Texture::DEFAULT_TEX = new Texture(); //"textures/minecraft.png"
+Texture* const Texture::DEFAULT_TEX = new Texture("textures/marble.jpg");
 
 Material* const Material::DEBUG_LINE = new Material({50, 100, 200}, false);
 Material* const Material::DEFAULT_LIT = new Material(Color::white(), true);
@@ -83,4 +83,10 @@ Material::Material(Color color, bool lit, Texture* texture, float diffuseCoeff, 
 {
 	this->indexID = Scene::materials.size();
 	Scene::materials.push_back(this);
+}
+Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoeff, material.specularCoeff,
+                                                        material.specularDegree, material.reflection) {}
+Material::~Material()
+{
+	std::ranges::remove(Scene::materials, this);
 }

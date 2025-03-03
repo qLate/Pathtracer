@@ -12,12 +12,21 @@ class Triangle;
 
 class Graphical : public Object
 {
+	Material* _sharedMaterial = Material::DEFAULT_LIT;
+	Material* _material = nullptr;
+
 protected:
 	Graphical(glm::vec3 pos = {}, glm::quat rot = {});
+	~Graphical() override;
 
 public:
 	int indexID;
-	Material* material = Material::DEFAULT_LIT;
+
+	Material* material();
+	Material* materialNoCopy() const;
+	Material* sharedMaterial() const;
+	void setMaterial(const Material& material);
+	void setSharedMaterial(Material* material);
 };
 
 

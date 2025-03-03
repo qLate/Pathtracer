@@ -7,80 +7,78 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-void BufferController::initializeUniformBuffers()
+void BufferController::updateAllBuffers()
 {
-	initializeTexturesBuffer();
-	initializeMaterialsBuffer();
-	initializeLightsBuffer();
-	initializeObjectsBuffer();
-	initializeTrianglesBuffer();
-	initializeBVHBuffer();
+	updateTexturesBuffer();
+	updateMaterialsBuffer();
+	updateLightsBuffer();
+	updateObjectsBuffer();
+	updateTrianglesBuffer();
+	updateBVHBuffer();
 }
 
-void BufferController::initializeTexturesBuffer()
+void BufferController::updateTexturesBuffer()
 {
 	for (const auto& tex : Scene::textures)
-	{
-		Pathtracer::shader->addTexture2D(tex);
-	}
+		Pathtracer::shaderProgram->fragShader->addTexture2D(tex);
 }
-void BufferController::initializeMaterialsBuffer()
+
+void BufferController::updateMaterialsBuffer()
 {
-	std::vector<MaterialStruct> data{};
+	std::vector<MaterialStruct> data {};
 	for (const auto& mat : Scene::materials)
 	{
-		MaterialStruct materialStruct{};
+		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
 		materialStruct.properties1 = glm::vec4(mat->lit, mat->diffuseCoeff, mat->specularCoeff, mat->specularDegree);
 		materialStruct.properties2.x = mat->reflection;
 		materialStruct.properties2.y = mat->texture->indexID;
+
 		data.push_back(materialStruct);
 	}
-	Pathtracer::shader->ssboMaterials->setData((float*)data.data(), data.size());
-	Pathtracer::shader->setInt("materialCount", data.size());
+
+	Pathtracer::shaderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
+	Pathtracer::shaderProgram->setInt("materialCount", data.size());
 }
-void BufferController::initializeLightsBuffer()
+
+void BufferController::updateLightsBuffer()
 {
-	std::vector<LightStruct> data{};
+	std::vector<LightStruct> data {};
 	for (const auto& light : Scene::lights)
 	{
-		LightStruct lightStruct{};
+		LightStruct lightStruct {};
 		lightStruct.pos = glm::vec4(light->getPos(), 0);
 		lightStruct.color = light->color;
 		lightStruct.properties1.x = light->intensity;
 
-		if (dynamic_cast<GlobalLight*>(light) != nullptr)
+		if (dynamic_cast<DirectionalLight*>(light) != nullptr)
 		{
-			auto globalLight = (GlobalLight*)light;
+			auto globalLight = (DirectionalLight*)light;
 			lightStruct.lightType = 0;
-			lightStruct.properties1 = glm::vec4(lightStruct.properties1.x, globalLight->direction);
+			lightStruct.properties1 = glm::vec4(lightStruct.properties1.x, globalLight->dir);
 		}
 		else if (dynamic_cast<PointLight*>(light))
 		{
 			auto pointLight = (PointLight*)light;
 			lightStruct.lightType = 1;
-			lightStruct.properties1.y = pointLight->distance;
+			lightStruct.properties1.y = pointLight->dis;
 		}
-		else if (dynamic_cast<AreaLight*>(light))
-		{
-			auto pointLight = (AreaLight*)light;
-			lightStruct.lightType = 2;
-			lightStruct.properties1 = glm::vec4(lightStruct.properties1.x, pointLight->size);
-			lightStruct.properties2 = glm::vec4(pointLight->distance, pointLight->pointSize);
-		}
+
 		data.push_back(lightStruct);
 	}
-	Pathtracer::shader->ssboLights->setData((float*)data.data(), data.size());
-	Pathtracer::shader->setInt("lightCount", data.size());
+
+	Pathtracer::shaderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
+	Pathtracer::shaderProgram->setInt("lightCount", data.size());
 }
-void BufferController::initializeObjectsBuffer()
+
+void BufferController::updateObjectsBuffer()
 {
 	auto triangleCount = 0;
-	std::vector<ObjectStruct> data{};
+	std::vector<ObjectStruct> data {};
 	for (const auto& obj : Scene::graphicals)
 	{
-		ObjectStruct objectStruct{};
-		objectStruct.data.y = obj->material->indexID;
+		ObjectStruct objectStruct {};
+		objectStruct.data.y = obj->materialNoCopy()->indexID;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
@@ -103,46 +101,52 @@ void BufferController::initializeObjectsBuffer()
 			objectStruct.data.x = 2;
 			objectStruct.properties = glm::vec4(plane->normal, 0);
 		}
+
 		data.push_back(objectStruct);
 	}
-	Pathtracer::shader->ssboObjects->setData((float*)data.data(), data.size());
-	Pathtracer::shader->setInt("objectCount", data.size());
+
+	Pathtracer::shaderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
+	Pathtracer::shaderProgram->setInt("objectCount", data.size());
 }
 
-void BufferController::initializeTrianglesBuffer()
+void BufferController::updateTrianglesBuffer()
 {
-	std::vector<TriangleStruct> data{};
+	std::vector<TriangleStruct> data {};
 	for (const auto& triangle : Scene::triangles)
 	{
-		TriangleStruct triangleStruct{};
+		TriangleStruct triangleStruct {};
 		for (int k = 0; k < 3; ++k)
 		{
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->globalVertexPositions[k], triangle->vertices[k].uvPos.x);
 			triangleStruct.vertices[k].normalV = glm::vec4(triangle->globalVertexNormals[k], triangle->vertices[k].uvPos.y);
 		}
-		triangleStruct.materialIndex = glm::vec4(triangle->mesh->material->indexID, triangle->globalNormal);
+		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->indexID, 0, 0, 0);
 
 		triangleStruct.rows[0] = glm::vec4(triangle->row1, triangle->row1Val);
 		triangleStruct.rows[1] = glm::vec4(triangle->row2, triangle->row2Val);
 		triangleStruct.rows[2] = glm::vec4(triangle->row3, triangle->row3Val);
-		triangleStruct.texVec = glm::vec4(triangle->texVecU, triangle->texVecV);
+
 		data.push_back(triangleStruct);
 	}
-	Pathtracer::shader->ssboTriangles->setData((float*)data.data(), data.size());
-	Pathtracer::shader->setInt("triangleCount", data.size());
+
+	Pathtracer::shaderProgram->fragShader->uboTriangles->setData((float*)data.data(), data.size());
+	Pathtracer::shaderProgram->setInt("triangleCount", data.size());
 }
-void BufferController::initializeBVHBuffer()
+
+void BufferController::updateBVHBuffer()
 {
 	const auto& nodes = BVHBuilder::nodes;
-	std::vector<BVHNodeStruct> data{};
+	std::vector<BVHNodeStruct> data {};
 	for (const auto& node : nodes)
 	{
-		BVHNodeStruct bvhNodeStruct{};
+		BVHNodeStruct bvhNodeStruct {};
 		bvhNodeStruct.min = glm::vec4(node->box.min, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::vec4(node->hitNext, node->missNext, node->isLeaf, 0);
+
 		data.push_back(bvhNodeStruct);
 	}
-	Pathtracer::shader->ssboBVHNodes->setData((float*)data.data(), data.size());
-	Pathtracer::shader->setInt("bvhNodeCount", data.size());
+
+	Pathtracer::shaderProgram->fragShader->uboBVHNodes->setData((float*)data.data(), data.size());
+	Pathtracer::shaderProgram->setInt("bvhNodeCount", data.size());
 }

@@ -7,11 +7,11 @@
 
 class Model
 {
-    void parse(const std::filesystem::path& path);
+	void parse(const std::filesystem::path& path);
 
 public:
-    std::vector<Triangle*> triangles;
-    std::vector<Vertex> vertices;
+	std::vector<Triangle*> triangles;
+	std::vector<Vertex> vertices;
 
-    explicit Model(const std::filesystem::path& path);
+	explicit Model(const std::filesystem::path& path);
 };

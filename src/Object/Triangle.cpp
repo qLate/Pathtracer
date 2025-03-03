@@ -4,9 +4,6 @@
 
 void Triangle::recalculateCoefficients()
 {
-	texVecU = vertices[1].uvPos - vertices[0].uvPos;
-	texVecV = vertices[2].uvPos - vertices[0].uvPos;
-
 	auto p1 = globalVertexPositions[0], p2 = globalVertexPositions[1], p3 = globalVertexPositions[2];
 	auto e1 = p2 - p1;
 	auto e2 = p3 - p1;
@@ -37,7 +34,7 @@ void Triangle::recalculateCoefficients()
 		row1 = {e2.y / normal.z, -e2.x / normal.z, 0.0f};
 		row1Val = cross(p3, p1).z / normal.z;
 		row2 = {-e1.y / normal.z, e1.x / normal.z, 0.0f};
-		row2Val = -glm::cross(p2, p1).z / normal.z;
+		row2Val = -cross(p2, p1).z / normal.z;
 		row3 = {normal.x / normal.z, normal.y / normal.z, 1.0f};
 		row3Val = -dot(p1, normal) / normal.z;
 	}
@@ -55,7 +52,7 @@ void Triangle::recalculateCoefficients()
 	}
 }
 
-Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))),vertices({v1, v2, v3})
+Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))), vertices({v1, v2, v3})
 {
 	for (auto& v : vertices)
 	{

@@ -5,9 +5,9 @@
 
 struct Vertex
 {
-    glm::vec3 pos;
-    glm::vec2 uvPos;
-    glm::vec3 normal;
+	glm::vec3 pos;
+	glm::vec2 uvPos;
+	glm::vec3 normal;
 
-    Vertex(glm::vec3 pos, glm::vec2 uvPos = glm::vec2{}, glm::vec3 normal = glm::vec3{}) : pos(pos), uvPos(uvPos), normal(normal) { }
+	Vertex(glm::vec3 pos, glm::vec2 uvPos = glm::vec2 {}, glm::vec3 normal = glm::vec3 {}) : pos(pos), uvPos(uvPos), normal(normal) { }
 };

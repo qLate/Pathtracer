@@ -1,6 +1,6 @@
 #include "Object.h"
 
-#include "Matrix.h"
+#include "MathExtensions.h"
 #include "Scene.h"
 
 Object::Object(const glm::vec3 pos, glm::quat rot) : pos(pos), rot(rot)

@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[])
 {
-	Pathtracer::initialize(640 * 2, 360 * 2);
+	Pathtracer::initialize();
 
 	Pathtracer::loop();
 
@@ -25,58 +25,22 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void Pathtracer::initialize(int width, int height)
+void Pathtracer::initialize()
 {
-	Pathtracer::width = width;
-	Pathtracer::height = height;
+	SDLHandler::initialize(W_WIDTH, W_HEIGHT);
 
-	SDLHandler::initialize(width, height);
-	shader = new TraceShader("shaders/pathtracer.vert", "shaders/pathtracer.frag");
-	shader->use();
-
-	shader->setInt("maxRayBounce", 5);
-	shader->setFloat2("pixelSize", {width, height});
+	shaderProgram = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	shaderProgram->use();
+	shaderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	shaderProgram->setFloat2("pixelSize", W_SIZE);
 
 	onUpdate += Time::updateTime;
 	onUpdate += Input::updateInput;
 	onUpdate += Logger::updateFPSCounter;
-	onUpdate += Logger::logStats;
 
 	initializeScene();
 	BVHBuilder::initializeBVH();
-	BufferController::initializeUniformBuffers();
-}
-
-void Pathtracer::initializeFBO(Shader*& screenShader, unsigned& fbo, unsigned& renderTexture)
-{
-	screenShader = new Shader("shaders/screen.vert", "shaders/screen.frag");
-	screenShader->use();
-	screenShader->setInt("width", width);
-	screenShader->setInt("height", height);
-
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-	glGenTextures(1, &renderTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, renderTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture, 0);
-
-	unsigned int rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	screenShader->use();
-	glUniform1i(glGetUniformLocation(screenShader->id, "screenTexture"), 1);
+	BufferController::updateAllBuffers();
 }
 
 void Pathtracer::initializeScene()
@@ -86,19 +50,17 @@ void Pathtracer::initializeScene()
 
 void Pathtracer::loop()
 {
-	auto currRow = 0;
 	while (true)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Draw scene
 		onUpdate();
-		shader->use();
-		glBindVertexArray(shader->vaoScreen->id);
+
+		shaderProgram->use();
+		glBindVertexArray(shaderProgram->fragShader->vaoScreen->id);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
-
-		shader->setInt("currRow", currRow++);
 
 		SDL_GL_SwapWindow(SDLHandler::window);
 		if (!SDLHandler::update()) break;
@@ -108,5 +70,5 @@ void Pathtracer::loop()
 void Pathtracer::quit()
 {
 	SDLHandler::quit();
-	delete shader;
+	delete shaderProgram;
 }

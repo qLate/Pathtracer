@@ -35,13 +35,13 @@ add_executable(${PROJECT_NAME}
         "src/System/SDLHandler.cpp"
         "src/System/MyTime.cpp"
         "src/System/Logger.cpp" 
+        "src/System/Scene.cpp"
         "src/OpenGL/glad.c"
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
-        "src/OpenGL/GLObject.cpp"  "src/System/Scene.cpp"
-        "src/Utils/Utils.cpp"
-        "libs/stb_image/stb_image.h")
+        "src/OpenGL/GLObject.cpp"
+        "libs/stb_image/stb_image.h" "include/Utils/Utils.h")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

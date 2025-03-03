@@ -33,6 +33,18 @@ protected:
 };
 
 
+class UBO : public GLBuffer
+{
+public:
+	int align = -1;
+
+	UBO(int align, int baseIndex = -1);
+
+	void bindBase(int index) override;
+	void setData(const float* data, int count) override;
+};
+
+
 class SSBO : public GLBuffer
 {
 public:

@@ -14,17 +14,12 @@ void Logger::updateFPSCounter()
 		fps = (int)((float)frameCount / (float)(currTime - lastFrameTime) * 1000.0f);
 		frameCount = 0;
 		lastFrameTime = currTime;
+
+		std::cout
+			<< "FPS: " << fps
+			<< " Triangles: " << Scene::triangles.size()
+			<< " Graphical Objects: " << Scene::graphicals.size()
+			<< " Bounding Boxes: " << BVHBuilder::nodes.size() << '\n';
 	}
 	frameCount++;
-}
-
-void Logger::logStats()
-{
-	if (!SDLHandler::windowFocused) return;
-
-	std::cout
-		<< "FPS: " << fps
-		<< " Triangles: " << Scene::triangles.size()
-		<< " Graphical Objects: " << Scene::graphicals.size()
-		<< " Bounding Boxes: " << BVHBuilder::nodes.size()<< '\n';
 }

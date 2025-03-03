@@ -12,7 +12,6 @@ class BufferController
 		glm::vec4 pos;
 		glm::vec4 color;
 		glm::vec4 properties1;
-		glm::vec4 properties2;
 	};
 
 	struct MaterialStruct
@@ -40,7 +39,6 @@ class BufferController
 		VertexStruct vertices[3];
 		glm::vec4 materialIndex;
 		glm::vec4 rows[3];
-		glm::vec4 texVec;
 	};
 
 	struct BVHNodeStruct
@@ -50,13 +48,13 @@ class BufferController
 		glm::vec4 values;
 	};
 
-	static void initializeTexturesBuffer();
-	static void initializeMaterialsBuffer();
-	static void initializeLightsBuffer();
-	static void initializeObjectsBuffer();
-	static void initializeTrianglesBuffer();
-	static void initializeBVHBuffer();
-
 public:
-	static void initializeUniformBuffers();
+	static void updateAllBuffers();
+
+	static void updateTexturesBuffer();
+	static void updateMaterialsBuffer();
+	static void updateLightsBuffer();
+	static void updateObjectsBuffer();
+	static void updateTrianglesBuffer();
+	static void updateBVHBuffer();
 };

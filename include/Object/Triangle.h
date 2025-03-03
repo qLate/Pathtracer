@@ -20,15 +20,12 @@ public:
 	void updateGeometry();
 
 	// precalculated
-	glm::vec3 row1{};
-	glm::vec3 row2{};
-	glm::vec3 row3{};
-	float row1Val{};
-	float row2Val{};
-	float row3Val{};
-
-	glm::vec2 texVecU{};
-	glm::vec2 texVecV{};
+	glm::vec3 row1 {};
+	glm::vec3 row2 {};
+	glm::vec3 row3 {};
+	float row1Val {};
+	float row2Val {};
+	float row3Val {};
 
 	Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3);
 	void attachTo(Mesh* mesh);

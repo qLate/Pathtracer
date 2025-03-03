@@ -10,8 +10,8 @@ class Camera : public Object
 {
 public:
 	inline static Camera* instance = nullptr;
-	inline static Action onCameraMove{};
-	inline static Action onCameraRotate{};
+	inline static Action onCameraMove {};
+	inline static Action onCameraRotate {};
 
 	float focalDistance, lensRadius;
 	glm::vec2 size;

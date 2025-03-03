@@ -57,6 +57,8 @@ public:
 	         float specularCoeff,
 	         float specularDegree,
 	         float reflection);
+	Material(const Material& material);
+	~Material();
 
 	Color getColor(float u, float v) const
 	{

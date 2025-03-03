@@ -16,32 +16,15 @@ public:
 class PointLight : public Light
 {
 public:
-	float distance;
+	float dis;
 
-	PointLight(glm::vec3 pos, Color color, float intensity, float distance);
+	PointLight(glm::vec3 pos, Color color, float intensity, float dis);
 };
 
-class AreaLight : public Light
+class DirectionalLight : public Light
 {
 public:
-	float distance;
-	glm::vec3 size;
-	glm::vec3 pointSize;
+	glm::vec3 dir;
 
-	AreaLight(glm::vec3 pos, Color color, float intensity, float distance, glm::vec3 size, glm::vec3 pointSize);
+	DirectionalLight(glm::vec3 dir, Color color, float intensity);
 };
-
-class GlobalLight : public Light
-{
-public:
-	glm::vec3 direction;
-
-	GlobalLight(glm::vec3 direction, Color color, float intensity);
-};
-
-class EverywhereLight : public Light
-{
-public:
-	EverywhereLight(const Color& color, float intensity);
-};
-

@@ -6,7 +6,6 @@
 void Time::updateTime()
 {
 	auto new_time = (float)SDL_GetTicks() / 1000.0f;
-	deltaTime = new_time - time;
-	clampedDeltaTime = glm::clamp(deltaTime, 0.0f, 1.0f);
+	deltaTime = glm::clamp(new_time - time, 0.0f, MAX_DELTA_TIME);
 	time = new_time;
 }
