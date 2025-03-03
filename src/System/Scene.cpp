@@ -43,7 +43,7 @@ void SceneSetup::redGreenRoom()
 	auto camera = new Camera({0, -30, 0}, 1, 0, Pathtracer::W_RATIO);
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 25};
+	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35};
 	auto square = new Square {{0, 0, 9.995f}, 5, {{-90 * DEG_TO_RAD, 0, 0}}};
 	square->material()->color = Color::white() * 3;
 	auto plane1 = new Square {{-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}}};

@@ -178,7 +178,6 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
     return true;
 }
 
-
 bool intersectTriangledObject(inout Ray ray, Object obj)
 {
     bool hit = false;

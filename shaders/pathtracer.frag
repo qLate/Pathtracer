@@ -1,7 +1,6 @@
 #version 460 core
 out vec4 outColor;
 
-
 #define FLT_MAX  1000000
 #define PI 3.14159265359
 #define PHI 1.61803398874
@@ -12,7 +11,6 @@ out vec4 outColor;
 /// #include "default/utils.glsl"
 float random(in vec2 xy, in float seed);
 bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1);
-
 
 // ----------- OPTIONS -----------
 //#define SHOW_BOXES
@@ -29,8 +27,6 @@ uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec4 bgColor = vec4(0, 0, 0, 1);
-
-uniform mat4x4 cameraRotMat = mat4x4(1.0);
 
 struct Light
 {
@@ -78,7 +74,7 @@ struct Ray
 {
     vec3 pos, dir;
     float maxDis;
-    float closestT;
+    float t;
     int materialIndex;
     vec3 surfaceNormal;
     vec3 interPoint;
@@ -87,6 +83,8 @@ struct Ray
 
 
 // ----------- BUFFERS -----------
+uniform mat4x4 cameraRotMat = mat4x4(1.0);
+
 uniform int textureCount;
 uniform sampler2D[] textures;
 

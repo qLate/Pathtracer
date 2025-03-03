@@ -2,8 +2,7 @@ bool castShadowRays(Ray ray)
 {
     for (int objInd = 0; objInd < objectCount; objInd++)
     {
-        if (objects[objInd].data.x != 0 && intersectObj(ray, objects[objInd]))
-            return true;
+        if (objects[objInd].data.x != 0 && intersectObj(ray, objects[objInd])) return true;
     }
     return intersectBVHTree(ray, true);
 }
@@ -23,13 +22,12 @@ void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, in
 {
     vec3 dir = pointLight.pos.xyz - ray.interPoint;
     float dist = length(dir);
-    if (dist > pointLight.properties1.y)
-        return;
+    if (dist > pointLight.properties1.y) return;
 
     dir = normalize(dir);
     if (castShadowRays(Ray(pointLight.pos.xyz, -dir, dist, RAY_DEFAULT_ARGS_WO_DIST))) return;
 
-    float distanceImpact = min(1 - (dist / pointLight.properties1.y), 1.);
+    float distanceImpact = min(pow(1 - dist / pointLight.properties1.y, 2), 1.);
     float lightFacingAtPoint = max(dot(dir, ray.surfaceNormal), 0.0);
     diffuse += (distanceImpact * lightFacingAtPoint) * pointLight.color * pointLight.properties1.x;
 
