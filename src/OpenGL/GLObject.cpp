@@ -66,29 +66,40 @@ GLTexture::GLTexture()
 {
 	glGenTextures(1, &id);
 }
+GLTexture::~GLTexture()
+{
+	glDeleteTextures(1, &id);
+}
 
 GLCubeMap::GLCubeMap()
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width, int height) const
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
 	glTexImage2D(
 		GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceInd,
 		0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 	);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 GLTexture2D::GLTexture2D(const Texture* texture)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -105,4 +116,36 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+GLTexture2D::GLTexture2D(int width, int height)
+{
+	glBindTexture(GL_TEXTURE_2D, id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+GLFrameBuffer::GLFrameBuffer(int width, int height)
+{
+	glGenFramebuffers(1, &id);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+	renderTexture = new GLTexture2D(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLFrameBuffer::~GLFrameBuffer()
+{
+	delete renderTexture;
+	glDeleteFramebuffers(1, &id);
 }

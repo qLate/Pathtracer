@@ -75,6 +75,7 @@ int BVHNode::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end
 		max.y = std::max(max.y, pos.y);
 		max.z = std::max(max.z, pos.z);
 	}
+
 	auto range = max - min;
 	int axis = 0;
 	if (range.y > range.x) axis = 1;

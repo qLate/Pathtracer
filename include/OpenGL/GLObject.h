@@ -61,6 +61,7 @@ class GLTexture : public GLObject
 {
 public:
 	GLTexture();
+	~GLTexture() override;
 };
 
 
@@ -77,4 +78,15 @@ class GLTexture2D : public GLTexture
 {
 public:
 	GLTexture2D(const Texture* texture);
+	GLTexture2D(int width, int height);
+};
+
+
+class GLFrameBuffer : public GLObject
+{
+public:
+	GLTexture2D* renderTexture = nullptr;
+
+	GLFrameBuffer(int width, int height);
+	~GLFrameBuffer() override;
 };

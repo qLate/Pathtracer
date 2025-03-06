@@ -27,48 +27,39 @@ int main(int argc, char* argv[])
 
 void Pathtracer::initialize()
 {
-	SDLHandler::initialize(W_WIDTH, W_HEIGHT);
+	SDLHandler::initialize();
 
-	shaderProgram = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
-	shaderProgram->use();
-	shaderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	shaderProgram->setFloat2("pixelSize", W_SIZE);
+	traceShaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	traceShaderP->use();
+	traceShaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	traceShaderP->setFloat2("pixelSize", SDLHandler::W_SIZE);
 
 	onUpdate += Time::updateTime;
 	onUpdate += Input::updateInput;
-	onUpdate += Logger::updateFPSCounter;
+	onUpdate += Logger::updatePrintFPS;
 
-	initializeScene();
+	SceneSetup::setupScene();
 	BVHBuilder::initializeBVH();
 	BufferController::updateAllBuffers();
-}
-
-void Pathtracer::initializeScene()
-{
-	SceneSetup::setupScene();
 }
 
 void Pathtracer::loop()
 {
 	while (true)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// Draw scene
 		onUpdate();
 
-		shaderProgram->use();
-		glBindVertexArray(shaderProgram->fragShader->vaoScreen->id);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
+		SDLHandler::updateDrawScene();
+
+		SDLHandler::updateImGui();
 
 		SDL_GL_SwapWindow(SDLHandler::window);
-		if (!SDLHandler::update()) break;
+		if (!SDLHandler::updateEvents()) break;
 	}
 }
 
 void Pathtracer::quit()
 {
 	SDLHandler::quit();
-	delete shaderProgram;
+	delete traceShaderP;
 }

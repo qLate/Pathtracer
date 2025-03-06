@@ -20,7 +20,7 @@ void BufferController::updateAllBuffers()
 void BufferController::updateTexturesBuffer()
 {
 	for (const auto& tex : Scene::textures)
-		Pathtracer::shaderProgram->fragShader->addTexture2D(tex);
+		Pathtracer::traceShaderP->fragShader->addTexture2D(tex);
 }
 
 void BufferController::updateMaterialsBuffer()
@@ -31,14 +31,13 @@ void BufferController::updateMaterialsBuffer()
 		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
 		materialStruct.properties1 = glm::vec4(mat->lit, mat->diffuseCoeff, mat->specularCoeff, mat->specularDegree);
-		materialStruct.properties2.x = mat->reflection;
-		materialStruct.properties2.y = mat->texture->indexID;
+		materialStruct.properties2 = glm::vec4(mat->reflection, mat->indexID, 0, 0);
 
 		data.push_back(materialStruct);
 	}
 
-	Pathtracer::shaderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
-	Pathtracer::shaderProgram->setInt("materialCount", data.size());
+	Pathtracer::traceShaderP->fragShader->uboMaterials->setData((float*)data.data(), data.size());
+	Pathtracer::traceShaderP->setInt("materialCount", data.size());
 }
 
 void BufferController::updateLightsBuffer()
@@ -67,8 +66,8 @@ void BufferController::updateLightsBuffer()
 		data.push_back(lightStruct);
 	}
 
-	Pathtracer::shaderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
-	Pathtracer::shaderProgram->setInt("lightCount", data.size());
+	Pathtracer::traceShaderP->fragShader->uboLights->setData((float*)data.data(), data.size());
+	Pathtracer::traceShaderP->setInt("lightCount", data.size());
 }
 
 void BufferController::updateObjectsBuffer()
@@ -105,8 +104,8 @@ void BufferController::updateObjectsBuffer()
 		data.push_back(objectStruct);
 	}
 
-	Pathtracer::shaderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
-	Pathtracer::shaderProgram->setInt("objectCount", data.size());
+	Pathtracer::traceShaderP->fragShader->uboObjects->setData((float*)data.data(), data.size());
+	Pathtracer::traceShaderP->setInt("objectCount", data.size());
 }
 
 void BufferController::updateTrianglesBuffer()
@@ -129,8 +128,8 @@ void BufferController::updateTrianglesBuffer()
 		data.push_back(triangleStruct);
 	}
 
-	Pathtracer::shaderProgram->fragShader->uboTriangles->setData((float*)data.data(), data.size());
-	Pathtracer::shaderProgram->setInt("triangleCount", data.size());
+	Pathtracer::traceShaderP->fragShader->uboTriangles->setData((float*)data.data(), data.size());
+	Pathtracer::traceShaderP->setInt("triangleCount", data.size());
 }
 
 void BufferController::updateBVHBuffer()
@@ -147,6 +146,6 @@ void BufferController::updateBVHBuffer()
 		data.push_back(bvhNodeStruct);
 	}
 
-	Pathtracer::shaderProgram->fragShader->uboBVHNodes->setData((float*)data.data(), data.size());
-	Pathtracer::shaderProgram->setInt("bvhNodeCount", data.size());
+	Pathtracer::traceShaderP->fragShader->uboBVHNodes->setData((float*)data.data(), data.size());
+	Pathtracer::traceShaderP->setInt("bvhNodeCount", data.size());
 }

@@ -18,6 +18,8 @@ include_directories(include/Utils)
 include_directories(libs)
 include_directories(libs/SDL2/include)
 include_directories(libs/stb_image)
+include_directories(libs/imgui/include)
+
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
 
@@ -41,7 +43,15 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
         "src/OpenGL/GLObject.cpp"
-        "libs/stb_image/stb_image.h" "include/Utils/Utils.h")
+
+        "libs/imgui/src/imgui.cpp"
+        "libs/imgui/src/imgui_demo.cpp"
+        "libs/imgui/src/imgui_draw.cpp"
+        "libs/imgui/src/imgui_widgets.cpp"
+        "libs/imgui/src/imgui_tables.cpp"
+        "libs/imgui/src/imgui_impl_sdl2.cpp"
+        "libs/imgui/src/imgui_impl_opengl3.cpp"
+)
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

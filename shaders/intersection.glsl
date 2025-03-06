@@ -11,7 +11,7 @@ bool intersectTriangle(inout Ray ray, Triangle tri)
 
     float oz = dot(tri.rows[2].xyz, ray.pos) + tri.rows[2].w;
     float t = -oz / dz;
-    if (t < 0.0 || t > ray.closestT || t > ray.maxDis) return false;
+    if (t < 0.0 || t > ray.t || t > ray.maxDis) return false;
 
     vec3 hitPos = ray.pos + ray.dir * t;
     float u = dot(tri.rows[0].xyz, hitPos) + tri.rows[0].w;
@@ -20,7 +20,7 @@ bool intersectTriangle(inout Ray ray, Triangle tri)
     float v = dot(tri.rows[1].xyz, hitPos) + tri.rows[1].w;
     if (v < 0.0 || u + v > 1.0) return false;
 
-    ray.closestT = t;
+    ray.t = t;
     ray.materialIndex = int(tri.materialIndex.x);
     ray.surfaceNormal = getTriangleNormalAt(tri, u, v, false);
     ray.interPoint = hitPos;
@@ -54,8 +54,8 @@ bool intersectTriangle(inout Ray ray, Triangle tri)
 //     uvt.xyz = uvt.xyz / det;
 //     uvt.w = 1.0 - uvt.x - uvt.y;
 
-//     if (all(greaterThanEqual(uvt, vec4(0.0))) && (uvt.z < ray.closestT)) {
-//         ray.closestT = uvt.z;
+//     if (all(greaterThanEqual(uvt, vec4(0.0))) && (uvt.z < ray.t)) {
+//         ray.t = uvt.z;
 //         ray.materialIndex = int(tri.materialIndex.x);
 //         ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y, false);
 //         ray.interPoint = ray.pos + ray.dir * uvt.z;
@@ -75,9 +75,9 @@ bool intersectSphere(inout Ray ray, Object sphere)
     float c = abs(dot(inter, inter)) - sphere.properties.x;
 
     if (!solveQuadratic(a, b, c, x0, x1)) return false;
-    if (!(x0 > 0 && x0 < ray.closestT && x0 < ray.maxDis)) return false;
+    if (!(x0 > 0 && x0 < ray.t && x0 < ray.maxDis)) return false;
 
-    ray.closestT = x0;
+    ray.t = x0;
     ray.interPoint = ray.pos + x0 * dir;
     ray.surfaceNormal = normalize(ray.interPoint - sphere.pos.xyz);
     ray.materialIndex = int(sphere.data.y);
@@ -98,9 +98,9 @@ bool intersectPlane(inout Ray ray, Object plane)
 
     vec3 dir = plane.pos.xyz - ray.pos;
     float t = -dot(normal, dir) / denom;
-    if (t >= ray.closestT || t <= 0 || t >= ray.maxDis) return false;
+    if (t >= ray.t || t <= 0 || t >= ray.maxDis) return false;
 
-    ray.closestT = t;
+    ray.t = t;
     ray.interPoint = ray.pos + t * ray.dir;
     ray.surfaceNormal = normal;
     ray.materialIndex = int(plane.data.y);
@@ -133,7 +133,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
     {
         float t = ts[i];
         vec3 point = ray.pos + t * ray.dir;
-        if (ray.closestT > t && ((abs(min_.x - point.x) <= boxLineWidth || abs(max_.x - point.x) <= boxLineWidth ||
+        if (ray.t > t && ((abs(min_.x - point.x) <= boxLineWidth || abs(max_.x - point.x) <= boxLineWidth ||
                     abs(min_.y - point.y) <= boxLineWidth || abs(max_.y - point.y) <= boxLineWidth) &&
                     (abs(min_.y - point.y) <= boxLineWidth || abs(max_.y - point.y) <= boxLineWidth ||
                         abs(min_.z - point.z) <= boxLineWidth || abs(max_.z - point.z) <= boxLineWidth) &&
@@ -142,7 +142,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
         {
             ray.surfaceNormal = vec3(0, 0, 1);
             ray.interPoint = point;
-            ray.closestT = t;
+            ray.t = t;
             ray.materialIndex = 0;
             return true;
         }

@@ -16,11 +16,11 @@ void SceneSetup::setupScene()
 
 void SceneSetup::museumScene()
 {
-	auto camera = new Camera({9.09, -4.37, 2.47}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({9.09, -4.37, 2.47}, 1, 0, SDLHandler::W_RATIO);
 	camera->setRot({0.83f, 0.05f, 0.036f, 0.54f});
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto model = Model("models/museum1.obj");
+	auto model = Model("assets/models/museum1.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
 	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
 	auto light = new PointLight {{-5.56, -0.19, 14.79}, {255 / 255.0f, 255 / 255.0f, 255.0 / 255.0f}, 1.3f, FLT_MAX};
@@ -28,11 +28,11 @@ void SceneSetup::museumScene()
 
 void SceneSetup::churchScene()
 {
-	auto camera = new Camera({0.30f, -9.57f, 3.03f}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({0.30f, -9.57f, 3.03f}, 1, 0, SDLHandler::W_RATIO);
 	camera->setRot({0.99f, 0.12f, 0, 0});
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto model = Model("models/west.obj");
+	auto model = Model("assets/models/west.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
 	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
 	auto light = new PointLight {{0.33f, 2.0f, 14.72f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
@@ -40,7 +40,7 @@ void SceneSetup::churchScene()
 
 void SceneSetup::redGreenRoom()
 {
-	auto camera = new Camera({0, -30, 0}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({0, -30, 0}, 1, 0, SDLHandler::W_RATIO);
 	auto tex = Texture::DEFAULT_TEX;
 
 	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35};
@@ -67,12 +67,12 @@ void SceneSetup::redGreenRoom()
 
 void SceneSetup::minecraftHouseScene()
 {
-	auto camera = new Camera({38.405102, 35.592041, 7.974061}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({38.405102, 35.592041, 7.974061}, 1, 0, SDLHandler::W_RATIO);
 	camera->setRot({0.38f, {-0.04f, -0.11f, 0.91f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto model = Model("models/minecraft.obj");
+	auto model = Model("assets/models/minecraft.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles, {{90 * DEG_TO_RAD, 0, 0}});
 	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
 	auto light = new PointLight {{25, 25, 15}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
@@ -80,12 +80,12 @@ void SceneSetup::minecraftHouseScene()
 
 void SceneSetup::kokuraScene()
 {
-	auto camera = new Camera({177.24, 173.63, 35.03}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({177.24, 173.63, 35.03}, 1, 0, SDLHandler::W_RATIO);
 	camera->setRot({0.38f, {0, 0, 0.92f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto model = Model("models/kokura.obj");
+	auto model = Model("assets/models/kokura.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles, {{0, 0, 0}});
 	obj->setMaterial({Color::white(), false, tex, 1, 0.2f, 2000, 0});
 	auto light = new PointLight {{177.24, 173.63, 100.03}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
@@ -93,12 +93,12 @@ void SceneSetup::kokuraScene()
 
 void SceneSetup::skeletonScene()
 {
-	auto camera = new Camera({-365.9f, -1406.9f, 508.46f}, 1, 0, Pathtracer::W_RATIO);
+	auto camera = new Camera({-365.9f, -1406.9f, 508.46f}, 1, 0, SDLHandler::W_RATIO);
 	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;
 
-	auto model = Model("models/skeleton.obj");
+	auto model = Model("assets/models/skeleton.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
 	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
 	auto light = new PointLight {{1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};

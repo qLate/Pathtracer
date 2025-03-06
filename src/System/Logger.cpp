@@ -5,21 +5,18 @@
 #include "BVH.h"
 #include "Scene.h"
 #include "SDLHandler.h"
+#include "Utils.h"
 
-void Logger::updateFPSCounter()
+void Logger::updatePrintFPS()
 {
 	uint32_t currTime = SDL_GetTicks();
-	if (currTime >= lastFrameTime + 200)
+	if (currTime >= lastFPSPrintTime + 200)
 	{
-		fps = (int)((float)frameCount / (float)(currTime - lastFrameTime) * 1000.0f);
-		frameCount = 0;
-		lastFrameTime = currTime;
+		lastFPSPrintTime = currTime;
 
 		std::cout
-			<< "FPS: " << fps
+			<< "FPS: " << Utils::round(SDLHandler::io->Framerate, 1)
 			<< " Triangles: " << Scene::triangles.size()
-			<< " Graphical Objects: " << Scene::graphicals.size()
 			<< " Bounding Boxes: " << BVHBuilder::nodes.size() << '\n';
 	}
-	frameCount++;
 }

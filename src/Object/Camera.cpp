@@ -13,14 +13,14 @@ Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius, glm::vec2 s
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
-	Pathtracer::shaderProgram->setFloat3("cameraPos", pos);
+	Pathtracer::traceShaderP->setFloat3("cameraPos", pos);
 
-	Pathtracer::shaderProgram->setFloat("focalDistance", focalDistance);
-	Pathtracer::shaderProgram->setFloat("lensRadius", lensRadius);
-	Pathtracer::shaderProgram->setFloat2("screenSize", size);
+	Pathtracer::traceShaderP->setFloat("focalDistance", focalDistance);
+	Pathtracer::traceShaderP->setFloat("lensRadius", lensRadius);
+	Pathtracer::traceShaderP->setFloat2("screenSize", size);
 
-	onCameraRotate += [this] { Pathtracer::shaderProgram->setMatrix4X4("cameraRotMat", mat4_cast(this->rot)); };
-	onCameraMove += [this] { Pathtracer::shaderProgram->setFloat3("cameraPos", this->pos); };
+	onCameraRotate += [this] { Pathtracer::traceShaderP->setMatrix4X4("cameraRotMat", mat4_cast(this->rot)); };
+	onCameraMove += [this] { Pathtracer::traceShaderP->setFloat3("cameraPos", this->pos); };
 	//onCameraMove += [this] { std::cout << to_string(this->pos); };
 	//onCameraRotate += [this] { std::cout << to_string(this->rot); };
 }
@@ -28,7 +28,7 @@ Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius, glm::vec2 s
 void Camera::setBackgroundColor(Color color)
 {
 	bgColor = color;
-	Pathtracer::shaderProgram->setFloat4("bgColor", bgColor);
+	Pathtracer::traceShaderP->setFloat4("bgColor", bgColor);
 }
 
 void Camera::setRot(glm::quat rot)

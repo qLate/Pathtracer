@@ -6,7 +6,7 @@
 #include "Material.h"
 #include "Scene.h"
 
-Texture* const Texture::DEFAULT_TEX = new Texture("textures/marble.jpg");
+Texture* const Texture::DEFAULT_TEX = new Texture("assets/textures/marble.jpg");
 
 Material* const Material::DEBUG_LINE = new Material({50, 100, 200}, false);
 Material* const Material::DEFAULT_LIT = new Material(Color::white(), true);
@@ -88,5 +88,5 @@ Material::Material(const Material& material) : Material(material.color, material
                                                         material.specularDegree, material.reflection) {}
 Material::~Material()
 {
-	std::ranges::remove(Scene::materials, this);
+	std::erase(Scene::materials, this);
 }

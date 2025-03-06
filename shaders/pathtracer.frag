@@ -40,7 +40,7 @@ struct Material
 {
     vec4 color;
     vec4 properties1; // lit, diffuse coeff, specular coeff, specular degree
-    vec4 properties2; // reflection, textureIndex
+    vec4 properties2; // reflection, indexID
 };
 
 struct Object
@@ -81,7 +81,6 @@ struct Ray
     vec2 uvPos;
 };
 
-
 // ----------- BUFFERS -----------
 uniform mat4x4 cameraRotMat = mat4x4(1.0);
 
@@ -118,6 +117,15 @@ layout(std140, binding = 5) uniform BVHNodes
     BVHNode nodes[1];
 };
 
+Material getMaterial(int index)
+{
+    for (int i = 0; i < materialCount; i++)
+    {
+        if (materials[i].properties2.y == index)
+            return materials[i];
+    }
+    return materials[0];
+}
 
 // **************************************************************************
 // ------------------------------ INTERSECTION ------------------------------
@@ -133,7 +141,6 @@ bool intersectTriangledObject(inout Ray ray, Object obj);
 bool intersectObj(inout Ray ray, Object obj);
 bool intersectBVHTree(inout Ray ray, bool castingShadows);
 
-
 // *************************************************************************
 // --------------------------------- LIGHT ---------------------------------
 // *************************************************************************
@@ -142,7 +149,6 @@ bool castShadowRays(Ray ray);
 void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse, inout vec4 specular);
 void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, inout vec4 specular);
 void getIllumination(Ray ray, inout vec4 diffuse, inout vec4 specular);
-
 
 // **************************************************************************
 // ---------------------------------- MAIN ----------------------------------
@@ -167,7 +173,7 @@ vec4 castRay(Ray ray)
         hit = true;
         ray.interPoint += ray.surfaceNormal * 0.01;
 
-        Material mat = materials[ray.materialIndex];
+        Material mat = getMaterial(ray.materialIndex);
         vec4 uvColor = texture(textures[0], vec2(ray.uvPos.x, 1 - ray.uvPos.y));
         if (mat.properties1.x == 1)
         {
