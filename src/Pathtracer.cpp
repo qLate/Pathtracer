@@ -7,6 +7,7 @@
 #include "BVH.h"
 #include "Camera.h"
 #include "Graphical.h"
+#include "ImGUIHandler.h"
 #include "Input.h"
 #include "Logger.h"
 #include "MyTime.h"
@@ -43,19 +44,31 @@ void Pathtracer::initialize()
 	BufferController::updateAllBuffers();
 }
 
+
 void Pathtracer::loop()
 {
 	while (true)
 	{
-		onUpdate();
+		traceScene();
 
-		SDLHandler::updateDrawScene();
-
-		SDLHandler::updateImGui();
+		ImGUIHandler::update();
 
 		SDL_GL_SwapWindow(SDLHandler::window);
 		if (!SDLHandler::updateEvents()) break;
+
+		onUpdate();
 	}
+}
+void Pathtracer::traceScene()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, sceneViewFBO->id);
+
+	traceShaderP->use();
+	glBindVertexArray(traceShaderP->fragShader->vaoScreen->id);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Pathtracer::quit()

@@ -10,10 +10,14 @@ class Pathtracer
 
 public:
 	inline static ShaderProgram<TraceShader>* traceShaderP;
+	inline static GLFrameBuffer* sceneViewFBO;
 
 	inline static Action onUpdate {};
 
 	static void initialize();
+
 	static void loop();
+	static void traceScene();
+
 	static void quit();
 };

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "BVH.h"
+#include "ImGUIHandler.h"
 #include "Scene.h"
 #include "SDLHandler.h"
 #include "Utils.h"
@@ -15,7 +16,7 @@ void Logger::updatePrintFPS()
 		lastFPSPrintTime = currTime;
 
 		std::cout
-			<< "FPS: " << Utils::round(SDLHandler::io->Framerate, 1)
+			<< "FPS: " << Utils::round(ImGUIHandler::io->Framerate, 1)
 			<< " Triangles: " << Scene::triangles.size()
 			<< " Bounding Boxes: " << BVHBuilder::nodes.size() << '\n';
 	}

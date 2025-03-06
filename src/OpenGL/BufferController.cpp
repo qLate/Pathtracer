@@ -21,6 +21,9 @@ void BufferController::updateTexturesBuffer()
 {
 	for (const auto& tex : Scene::textures)
 		Pathtracer::traceShaderP->fragShader->addTexture2D(tex);
+
+	// Fix this
+	glBindTexture(GL_TEXTURE_2D, Pathtracer::traceShaderP->fragShader->textures[0]->id);
 }
 
 void BufferController::updateMaterialsBuffer()

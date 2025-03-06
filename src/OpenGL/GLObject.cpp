@@ -15,10 +15,14 @@ void VAO::setVertices(const float* data, int size) const
 
 	unsigned int vbo;
 	glGenBuffers(1, &vbo);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
 }
 
 GLBuffer::GLBuffer()
@@ -31,6 +35,7 @@ UBO::UBO(int align, int baseIndex) : align(align)
 	glBindBuffer(GL_UNIFORM_BUFFER, id);
 	if (baseIndex != -1)
 		glBindBufferBase(GL_UNIFORM_BUFFER, baseIndex, id);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void UBO::bindBase(int index)
@@ -49,6 +54,7 @@ SSBO::SSBO(int align, int baseIndex) : align(align)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 	if (baseIndex != -1)
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, baseIndex, id);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void SSBO::bindBase(int index)
@@ -116,6 +122,8 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 GLTexture2D::GLTexture2D(int width, int height)
 {

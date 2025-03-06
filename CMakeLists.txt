@@ -51,7 +51,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
-)
+ "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
