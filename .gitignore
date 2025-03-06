@@ -12,8 +12,9 @@ out/
 
 libs/glslang/
 
-assets/
-
 Folder.DotSettings.user
 
 CMakeSettings.json
+
+assets/models
+assets/textures

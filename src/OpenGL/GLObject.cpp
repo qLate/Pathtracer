@@ -116,8 +116,6 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 GLTexture2D::GLTexture2D(int width, int height)
 {
