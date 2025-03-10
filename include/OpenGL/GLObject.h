@@ -77,8 +77,12 @@ public:
 class GLTexture2D : public GLTexture
 {
 public:
+	int width, height;
+
 	GLTexture2D(const Texture* texture);
 	GLTexture2D(int width, int height);
+
+	void resize(int width, int height);
 };
 
 
@@ -89,4 +93,6 @@ public:
 
 	GLFrameBuffer(int width, int height);
 	~GLFrameBuffer() override;
+
+	void resize(int width, int height) const;
 };

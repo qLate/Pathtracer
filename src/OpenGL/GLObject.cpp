@@ -102,7 +102,7 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(const Texture* texture)
+GLTexture2D::GLTexture2D(const Texture* texture) : width(texture->width), height(texture->height)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
 
@@ -125,16 +125,33 @@ GLTexture2D::GLTexture2D(const Texture* texture)
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-GLTexture2D::GLTexture2D(int width, int height)
+GLTexture2D::GLTexture2D(int width, int height) : width(width), height(height)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GLTexture2D::resize(int width, int height)
+{
+	if (width == this->width && height == this->height) return;
+	this->width = width;
+	this->height = height;
+
+	glBindTexture(GL_TEXTURE_2D, id);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 GLFrameBuffer::GLFrameBuffer(int width, int height)
@@ -146,12 +163,26 @@ GLFrameBuffer::GLFrameBuffer(int width, int height)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << '\n';
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 GLFrameBuffer::~GLFrameBuffer()
 {
 	delete renderTexture;
 	glDeleteFramebuffers(1, &id);
+}
+
+void GLFrameBuffer::resize(int width, int height) const
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+	renderTexture->resize(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete after resize!" << '\n';
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

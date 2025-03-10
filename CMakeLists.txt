@@ -23,7 +23,7 @@ link_directories(libs/SDL2/lib/x64)
 enable_testing()
 
 add_executable(${PROJECT_NAME}
-        "src/Pathtracer.cpp"
+        "src/Program.cpp"
         "src/Object/Graphical.cpp"
         "src/Object/Object.cpp"
         "src/Object/Camera.cpp"
@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
- "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp" "include/Utils/Debug.h")
+ "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp" "include/Utils/Debug.h" "include/Pathtracer.h" "src/Pathtracer.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

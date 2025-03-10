@@ -127,6 +127,7 @@ Material getMaterial(int index)
     return materials[0];
 }
 
+
 // **************************************************************************
 // ------------------------------ INTERSECTION ------------------------------
 // **************************************************************************
@@ -141,6 +142,7 @@ bool intersectTriangledObject(inout Ray ray, Object obj);
 bool intersectObj(inout Ray ray, Object obj);
 bool intersectBVHTree(inout Ray ray, bool castingShadows);
 
+
 // *************************************************************************
 // --------------------------------- LIGHT ---------------------------------
 // *************************************************************************
@@ -149,6 +151,7 @@ bool castShadowRays(Ray ray);
 void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse, inout vec4 specular);
 void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, inout vec4 specular);
 void getIllumination(Ray ray, inout vec4 diffuse, inout vec4 specular);
+
 
 // **************************************************************************
 // ---------------------------------- MAIN ----------------------------------

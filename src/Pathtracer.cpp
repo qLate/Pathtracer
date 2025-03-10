@@ -1,76 +1,43 @@
 #include "Pathtracer.h"
 
-#include <SDL.h>
-
-#include "BufferController.h"
-#include "BVH.h"
-#include "Graphical.h"
+#include "Camera.h"
+#include "GLObject.h"
 #include "ImGUIHandler.h"
-#include "Input.h"
-#include "MyTime.h"
-#include "SDLHandler.h"
-#include "Triangle.h"
-#include "TraceShader.h"
-#include "Scene.h"
-#include "Debug.h"
 
-int main(int argc, char* argv[])
-{
-	Pathtracer::initialize();
-
-	Pathtracer::loop();
-
-	Pathtracer::quit();
-	return 0;
-}
-
-void Pathtracer::initialize()
-{
-	SDLHandler::initialize();
-	initTraceShader();
-	SceneSetup::setupScene();
-	BVHBuilder::initializeBVH();
-	BufferController::updateAllBuffers();
-
-	onUpdate += Time::updateTime;
-	onUpdate += Input::updateInput;
-}
 void Pathtracer::initTraceShader()
 {
-	traceShaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
-	traceShaderP->use();
-	traceShaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	traceShaderP->setFloat2("pixelSize", ImGUIHandler::RENDER_SIZE);
+	shaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	shaderP->use();
+	shaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	shaderP->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
 }
 
-void Pathtracer::loop()
-{
-	while (true)
-	{
-		traceScene();
-
-		ImGUIHandler::update();
-
-		SDL_GL_SwapWindow(SDLHandler::window);
-		if (!SDLHandler::updateEvents()) break;
-
-		onUpdate();
-	}
-}
 void Pathtracer::traceScene()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, sceneViewFBO->id);
 
-	traceShaderP->use();
-	glBindVertexArray(traceShaderP->fragShader->vaoScreen->id);
+	glBindTexture(GL_TEXTURE_2D, shaderP->fragShader->textures[0]->id);
+
+	shaderP->use();
+	glBindVertexArray(shaderP->fragShader->vaoScreen->id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Pathtracer::quit()
+void Pathtracer::resizeView(glm::ivec2 size)
 {
-	SDLHandler::quit();
-	delete traceShaderP;
+	delete sceneViewFBO;
+	sceneViewFBO = new GLFrameBuffer(size.x, size.y);
+
+	shaderP->setFloat2("pixelSize", size);
+	Camera::instance->setSize({size.x / (float)size.y, 1});
 }
+
+void Pathtracer::uninit()
+{
+	delete shaderP;
+	delete sceneViewFBO;
+}
+

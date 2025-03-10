@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Action.h"
-
+#include "Shader.h"
+#include "glm/vec2.hpp"
 #include "TraceShader.h"
+
+class GLFrameBuffer;
 
 class Pathtracer
 {
@@ -10,16 +12,14 @@ class Pathtracer
 	static constexpr int MAX_RAY_BOUNCE = 5;
 
 public:
-	inline static ShaderProgram<TraceShader>* traceShaderP;
+	inline static ShaderProgram<TraceShader>* shaderP;
 	inline static GLFrameBuffer* sceneViewFBO;
 
-	inline static Action onUpdate {};
-
 	static void initTraceShader();
-	static void initialize();
 
-	static void loop();
 	static void traceScene();
 
-	static void quit();
+	static void resizeView(glm::ivec2 size);
+
+	static void uninit();
 };

@@ -9,11 +9,12 @@
 #include "glm/gtx/string_cast.hpp"
 #include "MyMath.h"
 #include "MyTime.h"
+#include "Pathtracer.h"
 #include "Scene.h"
 
 void Input::updateInput()
 {
-	if (!SDLHandler::windowFocused) return;
+	if (!SDLHandler::sceneFocused) return;
 
 	auto& camera = Camera::instance;
 	auto moveSpeed = MOVE_SPEED;
@@ -69,7 +70,7 @@ void Input::updateInput()
 	// Other
 	if (keyboardState[SDL_SCANCODE_Y])
 	{
-		std::cout << "Player is at:" << " pos " << vec3::to_string(camera->getPos()) << " rot " << vec3::to_string(camera->getRotVec4()) << std::endl;
+		std::cout << "Player is at:" << " pos " << vec3::to_string(camera->getPos()) << " rot " << vec3::to_string(camera->getRotVec4()) << '\n';
 	}
 
 	if (keyboardState[SDL_SCANCODE_L] && !Scene::lights.empty())
@@ -77,7 +78,7 @@ void Input::updateInput()
 		Scene::lights[0]->setPos(camera->getPos());
 		BufferController::updateLightsBuffer();
 
-		std::cout << "Light set to position: " << vec3::to_string(Scene::lights[0]->getPos()) << std::endl;
+		std::cout << "Light set to position: " << vec3::to_string(Scene::lights[0]->getPos()) << '\n';
 	}
 }
 
@@ -92,8 +93,8 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		}
 		else if (event.key.keysym.sym == SDLK_ESCAPE)
 		{
-			SDLHandler::windowFocused = !SDLHandler::windowFocused;
-			if (SDLHandler::windowFocused)
+			SDLHandler::sceneFocused = !SDLHandler::sceneFocused;
+			if (SDLHandler::sceneFocused)
 				SDL_SetRelativeMouseMode(SDL_TRUE);
 			else
 				SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -106,7 +107,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			currentMoveAcceleration = 1;
 	}
 
-	if (event.type == SDL_MOUSEMOTION && SDLHandler::windowFocused)
+	if (event.type == SDL_MOUSEMOTION && SDLHandler::sceneFocused)
 	{
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;

@@ -11,7 +11,7 @@ public:
 	inline static SDL_Event event;
 	inline static SDL_GLContext context;
 
-	inline static bool windowFocused = true;
+	inline static bool sceneFocused = true;
 	inline static bool isFullscreen = false;
 
 	static void initialize();

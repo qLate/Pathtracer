@@ -9,25 +9,30 @@ class ImGUIHandler
 	static constexpr char GLSL_VERSION[] = "#version 460";
 	static constexpr int INSPECTOR_WIDTH = 300;
 
+	inline static bool init = true;
+
 public:
-	static constexpr int RENDER_WIDTH = 640 * 2;
-	static constexpr int RENDER_HEIGHT = 360 * 2;
-	static constexpr glm::ivec2 RENDER_SIZE = {RENDER_WIDTH, RENDER_HEIGHT};
-	static constexpr glm::vec2 RENDER_RATIO = {RENDER_WIDTH / (float)RENDER_HEIGHT, 1};
+	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
+	static constexpr glm::ivec2 calculateInitialFullWindowSize();
+
+	inline static glm::ivec2 currRenderSize = INIT_RENDER_SIZE;
 
 	inline static ImGuiIO* io;
 
-	static constexpr glm::ivec2 calculateRequiredWindowSize()
-	{
-		return { RENDER_WIDTH + INSPECTOR_WIDTH, RENDER_HEIGHT };
-	}
-
-	static void init();
-	static void tryInitInitialDocking();
+	static void initialize();
+	static void initDocking();
 
 	static void update();
-	static void updateImGui_drawScene();
-	static void updateImGui_drawScene_displayInfo(bool barVisible);
-	static void updateImGui_drawInspector();
-	static void updateImGui_finalizeViewports();
+	static void updateDocking();
+
+	static void drawScene();
+	static void drawScene_displayInfo(bool barVisible);
+	static void drawInspector();
+
+	static void finalizeViewports();
 };
+
+constexpr glm::ivec2 ImGUIHandler::calculateInitialFullWindowSize()
+{
+	return {INIT_RENDER_SIZE.x + INSPECTOR_WIDTH, INIT_RENDER_SIZE.y};
+}
