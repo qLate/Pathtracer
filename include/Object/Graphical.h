@@ -5,10 +5,10 @@
 
 #include "Object.h"
 #include "Material.h"
+#include "Triangle.h"
 
 class BVHNode;
 class AABB;
-class Triangle;
 
 class Graphical : public Object
 {
@@ -73,4 +73,15 @@ public:
 	glm::vec3 normal;
 
 	Plane(glm::vec3 pos, glm::vec3 normal);
+};
+
+class Model
+{
+	void parse(const std::filesystem::path& path);
+
+public:
+	std::vector<Triangle*> triangles;
+	std::vector<Vertex> vertices;
+
+	explicit Model(const std::filesystem::path& path);
 };

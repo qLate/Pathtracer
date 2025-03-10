@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/include/SDL_events.h>
+#include "SDL_events.h"
 
 class Input
 {
@@ -9,7 +9,7 @@ class Input
 	static constexpr float MOVE_ACCELERATION = 0.45f;
 
 	static constexpr float KEY_ROTATION_SPEED = 90.0f;
-	static constexpr float MOUSE_ROTATION_SPEED = 0.4f;
+	static constexpr float MOUSE_ROTATION_SPEED = 0.3f;
 
 	inline static float currentMoveAcceleration = 1;
 

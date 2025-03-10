@@ -1,6 +1,7 @@
 #include "Triangle.h"
 
 #include "BVH.h"
+#include "Graphical.h"
 
 void Triangle::recalculateCoefficients()
 {
@@ -9,8 +10,6 @@ void Triangle::recalculateCoefficients()
 	auto e2 = p3 - p1;
 	auto normal = mesh->getRot() * cross(vertices[1].pos - vertices[0].pos, vertices[2].pos - vertices[1].pos);
 
-	// Depending on which component of the normal is largest, calculate
-	// coefficients:
 	if (fabs(normal.x) > fabs(normal.y) && fabs(normal.x) > fabs(normal.z))
 	{
 		row1 = {0.0f, e2.z / normal.x, -e2.y / normal.x};
@@ -40,9 +39,6 @@ void Triangle::recalculateCoefficients()
 	}
 	else
 	{
-		// This triangle is degenerate. Set the transformation matrix to
-		// the 0 matrix, which in turn will yield 0 values in places that
-		// intersection calculations will detect and treat as a miss.
 		row1 = {};
 		row1Val = 0.0f;
 		row2 = {};

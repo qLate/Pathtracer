@@ -1,9 +1,20 @@
 #pragma once
 
+#include <vector>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Graphical.h"
-#include "Vertex.h"
+#include "BVH.h"
+
+class Mesh;
+
+struct Vertex
+{
+	glm::vec3 pos;
+	glm::vec2 uvPos;
+	glm::vec3 normal;
+
+	Vertex(glm::vec3 pos, glm::vec2 uvPos = glm::vec2 {}, glm::vec3 normal = glm::vec3 {}) : pos(pos), uvPos(uvPos), normal(normal) {}
+};
 
 class Triangle
 {
@@ -19,7 +30,7 @@ public:
 
 	void updateGeometry();
 
-	// precalculated
+	// Precalculated
 	glm::vec3 row1 {};
 	glm::vec3 row2 {};
 	glm::vec3 row3 {};

@@ -10,7 +10,6 @@ project("Pathtracer")
 include(FetchContent)
 include_directories(include)
 include_directories(include/Object)
-include_directories(include/ObjectAppearance)
 include_directories(include/OpenGL)
 include_directories(include/System)
 include_directories(include/Utils)
@@ -30,13 +29,13 @@ add_executable(${PROJECT_NAME}
         "src/Object/Camera.cpp"
         "src/Object/Light.cpp"
         "src/Object/Triangle.cpp"
-        "src/ObjectAppearance/Model.cpp"
-        "src/ObjectAppearance/Material.cpp"
+        "src/Object/Material.cpp"
+        
         "src/System/Input.cpp"
         "src/System/BVH.cpp"
         "src/System/SDLHandler.cpp"
         "src/System/MyTime.cpp"
-        "src/System/Logger.cpp" 
+         
         "src/System/Scene.cpp"
         "src/OpenGL/glad.c"
         "src/OpenGL/Shader.cpp"
@@ -51,7 +50,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
- "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp")
+ "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp" "include/Utils/Debug.h")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

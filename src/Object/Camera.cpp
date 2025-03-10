@@ -2,27 +2,24 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include "MathExtensions.h"
+#include "ImGUIHandler.h"
 #include "Pathtracer.h"
 #include "Triangle.h"
 
-Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius, glm::vec2 size) : Object(pos), focalDistance(focalDistance), lensRadius(lensRadius),
-                                                                                       bgColor(Color::black())
+Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(pos), size(ImGUIHandler::RENDER_RATIO), focalDistance(focalDistance), lensRadius(lensRadius),
+                                                                       bgColor(Color::black())
 {
 	if (instance != nullptr)
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
 	Pathtracer::traceShaderP->setFloat3("cameraPos", pos);
-
+	Pathtracer::traceShaderP->setFloat2("screenSize", size);
 	Pathtracer::traceShaderP->setFloat("focalDistance", focalDistance);
 	Pathtracer::traceShaderP->setFloat("lensRadius", lensRadius);
-	Pathtracer::traceShaderP->setFloat2("screenSize", size);
 
 	onCameraRotate += [this] { Pathtracer::traceShaderP->setMatrix4X4("cameraRotMat", mat4_cast(this->rot)); };
 	onCameraMove += [this] { Pathtracer::traceShaderP->setFloat3("cameraPos", this->pos); };
-	//onCameraMove += [this] { std::cout << to_string(this->pos); };
-	//onCameraRotate += [this] { std::cout << to_string(this->rot); };
 }
 
 void Camera::setBackgroundColor(Color color)

@@ -3,8 +3,7 @@
 #include "Camera.h"
 #include "Graphical.h"
 #include "Light.h"
-#include "MathExtensions.h"
-#include "Model.h"
+#include "MyMath.h"
 #include "Pathtracer.h"
 #include "SDLHandler.h"
 #include "Triangle.h"
@@ -16,7 +15,7 @@ void SceneSetup::setupScene()
 
 void SceneSetup::museumScene()
 {
-	auto camera = new Camera({9.09, -4.37, 2.47}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({9.09, -4.37, 2.47});
 	camera->setRot({0.83f, 0.05f, 0.036f, 0.54f});
 	auto tex = Texture::DEFAULT_TEX;
 
@@ -28,7 +27,7 @@ void SceneSetup::museumScene()
 
 void SceneSetup::churchScene()
 {
-	auto camera = new Camera({0.30f, -9.57f, 3.03f}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({0.30f, -9.57f, 3.03f});
 	camera->setRot({0.99f, 0.12f, 0, 0});
 	auto tex = Texture::DEFAULT_TEX;
 
@@ -40,7 +39,7 @@ void SceneSetup::churchScene()
 
 void SceneSetup::redGreenRoom()
 {
-	auto camera = new Camera({0, -30, 0}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({0, -30, 0});
 	auto tex = Texture::DEFAULT_TEX;
 
 	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35};
@@ -67,7 +66,7 @@ void SceneSetup::redGreenRoom()
 
 void SceneSetup::minecraftHouseScene()
 {
-	auto camera = new Camera({38.405102, 35.592041, 7.974061}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({38.405102, 35.592041, 7.974061});
 	camera->setRot({0.38f, {-0.04f, -0.11f, 0.91f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;
@@ -80,7 +79,7 @@ void SceneSetup::minecraftHouseScene()
 
 void SceneSetup::kokuraScene()
 {
-	auto camera = new Camera({177.24, 173.63, 35.03}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({177.24, 173.63, 35.03});
 	camera->setRot({0.38f, {0, 0, 0.92f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;
@@ -93,7 +92,7 @@ void SceneSetup::kokuraScene()
 
 void SceneSetup::skeletonScene()
 {
-	auto camera = new Camera({-365.9f, -1406.9f, 508.46f}, 1, 0, SDLHandler::W_RATIO);
+	auto camera = new Camera({-365.9f, -1406.9f, 508.46f});
 	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
 	camera->setBackgroundColor({0.1f, 0.1f, 0.1f});
 	auto tex = Texture::DEFAULT_TEX;

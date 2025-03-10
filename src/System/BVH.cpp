@@ -20,14 +20,14 @@ void BVHBuilder::buildTree(const std::vector<Triangle*>& objects)
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
 {
-	auto x_min = std::min(box1.min.x, box2.min.x);
-	auto x_max = std::max(box1.max.x, box2.max.x);
+	auto x_min = std::min(box1.min_.x, box2.min_.x);
+	auto x_max = std::max(box1.max_.x, box2.max_.x);
 
-	auto y_min = std::min(box1.min.y, box2.min.y);
-	auto y_max = std::max(box1.max.y, box2.max.y);
+	auto y_min = std::min(box1.min_.y, box2.min_.y);
+	auto y_max = std::max(box1.max_.y, box2.max_.y);
 
-	auto z_min = std::min(box1.min.z, box2.min.z);
-	auto z_max = std::max(box1.max.z, box2.max.z);
+	auto z_min = std::min(box1.min_.z, box2.min_.z);
+	auto z_max = std::max(box1.max_.z, box2.max_.z);
 	return {{x_min, y_min, z_min}, {x_max, y_max, z_max}};
 }
 

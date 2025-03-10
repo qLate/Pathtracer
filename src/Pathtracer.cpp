@@ -1,20 +1,18 @@
 #include "Pathtracer.h"
 
-#include <iostream>
 #include <SDL.h>
 
 #include "BufferController.h"
 #include "BVH.h"
-#include "Camera.h"
 #include "Graphical.h"
 #include "ImGUIHandler.h"
 #include "Input.h"
-#include "Logger.h"
 #include "MyTime.h"
 #include "SDLHandler.h"
 #include "Triangle.h"
 #include "TraceShader.h"
 #include "Scene.h"
+#include "Debug.h"
 
 int main(int argc, char* argv[])
 {
@@ -29,21 +27,21 @@ int main(int argc, char* argv[])
 void Pathtracer::initialize()
 {
 	SDLHandler::initialize();
-
-	traceShaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
-	traceShaderP->use();
-	traceShaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	traceShaderP->setFloat2("pixelSize", SDLHandler::W_SIZE);
-
-	onUpdate += Time::updateTime;
-	onUpdate += Input::updateInput;
-	onUpdate += Logger::updatePrintFPS;
-
+	initTraceShader();
 	SceneSetup::setupScene();
 	BVHBuilder::initializeBVH();
 	BufferController::updateAllBuffers();
-}
 
+	onUpdate += Time::updateTime;
+	onUpdate += Input::updateInput;
+}
+void Pathtracer::initTraceShader()
+{
+	traceShaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	traceShaderP->use();
+	traceShaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	traceShaderP->setFloat2("pixelSize", ImGUIHandler::RENDER_SIZE);
+}
 
 void Pathtracer::loop()
 {

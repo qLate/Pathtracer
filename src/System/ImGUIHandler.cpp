@@ -4,8 +4,10 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_internal.h"
 #include "Pathtracer.h"
+#include "Scene.h"
 #include "SDLHandler.h"
 #include "SDL_video.h"
+#include "Utils.h"
 
 void ImGUIHandler::init()
 {
@@ -46,7 +48,7 @@ void ImGUIHandler::tryInitInitialDocking()
 	ImGui::DockBuilderAddNode(dockSpace);
 	ImGui::DockBuilderSetNodeSize(dockSpace, mainSize);
 
-	ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Left, 0.25f, &dock_id_left, &dock_id_right);
+	ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Left, INSPECTOR_WIDTH / (float)RENDER_WIDTH, &dock_id_left, &dock_id_right);
 	ImGui::DockBuilderDockWindow("Inspector", dock_id_left);
 	ImGui::DockBuilderDockWindow("Scene", dock_id_right);
 
@@ -78,12 +80,31 @@ void ImGUIHandler::updateImGui_drawScene()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar);
-	ImGui::Image(Pathtracer::sceneViewFBO->renderTexture->id, ImVec2(SDLHandler::W_WIDTH, SDLHandler::W_HEIGHT), ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Begin("Scene");
+	{
+		auto node = ImGui::FindWindowByName("Scene")->DockNode;
+		if (!node->IsHiddenTabBar())
+			node->WantHiddenTabBarToggle = true;
+
+		ImGui::Image(Pathtracer::sceneViewFBO->renderTexture->id, ImVec2(RENDER_WIDTH, RENDER_HEIGHT), ImVec2(0, 1), ImVec2(1, 0));
+
+		updateImGui_drawScene_displayInfo(!node->IsHiddenTabBar());
+	}
 	ImGui::End();
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
+}
+void ImGUIHandler::updateImGui_drawScene_displayInfo(bool barVisible)
+{
+	static float currFPS;
+	static Timer updateTimer = Timer(100);
+
+	if (updateTimer.trigger())
+		currFPS = io->Framerate;
+
+	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
+	ImGui::Text("%.1f FPS (%.3f ms)\n%zu Triangles", currFPS, 1000.0f / currFPS, Scene::triangles.size());
 }
 
 void ImGUIHandler::updateImGui_drawInspector()
@@ -93,18 +114,19 @@ void ImGUIHandler::updateImGui_drawInspector()
 	static int counter = 0;
 
 	ImGui::Begin("Inspector");
+	{
+		ImGui::Text("This is some useful text.");
 
-	ImGui::Text("This is some useful text.");
+		ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-	ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-	ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+		if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
+			counter++;
+		ImGui::SameLine();
+		ImGui::Text("counter = %d", counter);
 
-	if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-		counter++;
-	ImGui::SameLine();
-	ImGui::Text("counter = %d", counter);
-
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+	}
 	ImGui::End();
 }
 

@@ -34,13 +34,12 @@ Texture::Texture(const std::filesystem::path& path) : path(path)
 	if (!success)
 		std::cerr << "Error loading texture " << path << "\n";
 
-	const size_t RGBA = 4;
 	pixelColors.reserve(static_cast<size_t>(width) * static_cast<size_t>(height));
 	for (int y = 0; y < height; ++y)
 	{
 		for (int x = 0; x < width; ++x)
 		{
-			size_t index = RGBA * (y * width + x);
+			size_t index = 4 * (y * width + x);
 			pixelColors.emplace_back(image[index + 0], image[index + 1], image[index + 2], image[index + 3]);
 		}
 	}

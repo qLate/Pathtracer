@@ -7,7 +7,7 @@
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
-#include "MathExtensions.h"
+#include "MyMath.h"
 #include "MyTime.h"
 #include "Scene.h"
 

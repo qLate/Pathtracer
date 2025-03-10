@@ -142,8 +142,8 @@ void BufferController::updateBVHBuffer()
 	for (const auto& node : nodes)
 	{
 		BVHNodeStruct bvhNodeStruct {};
-		bvhNodeStruct.min = glm::vec4(node->box.min, node->leafTrianglesStart);
-		bvhNodeStruct.max = glm::vec4(node->box.max, node->leafTriangleCount);
+		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
+		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::vec4(node->hitNext, node->missNext, node->isLeaf, 0);
 
 		data.push_back(bvhNodeStruct);

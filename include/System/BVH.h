@@ -1,7 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <vector>
 #include <glm/vec3.hpp>
-#include "Graphical.h"
 
 class Graphical;
 class Triangle;
@@ -9,7 +10,8 @@ class BVHNode;
 
 class BVHBuilder
 {
-	inline static constexpr int MAX_TRIANGLES_PER_BOX = 3;
+	static constexpr int MAX_TRIANGLES_PER_BOX = 3;
+
 	inline static bool showBoxes = false;
 	inline static float lineWidth = 0.1f;
 
@@ -24,10 +26,10 @@ public:
 class AABB
 {
 public:
-	glm::vec3 min, max;
+	glm::vec3 min_, max_;
 
-	AABB() : min(), max() { }
-	AABB(glm::vec3 min, glm::vec3 max) : min(min), max(max) { }
+	AABB() : min_(), max_() {}
+	AABB(glm::vec3 min, glm::vec3 max) : min_(min), max_(max) {}
 
 	static AABB getUnitedBox(const AABB& box1, const AABB& box2);
 };

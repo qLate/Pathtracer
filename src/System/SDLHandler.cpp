@@ -1,7 +1,5 @@
 #include "SDLHandler.h"
 
-#include <iostream>
-
 #include "glad.h"
 #include "ImGUIHandler.h"
 #include "imgui_impl_sdl2.h"
@@ -20,7 +18,8 @@ void SDLHandler::initialize()
 
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
-	window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, W_WIDTH, W_HEIGHT, SDL_WINDOW_OPENGL);
+	auto requiredSize = ImGUIHandler::calculateRequiredWindowSize();
+	window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, requiredSize.x, requiredSize.y, SDL_WINDOW_OPENGL);
 	context = SDL_GL_CreateContext(window);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -34,7 +33,7 @@ void SDLHandler::initOpenGL()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	Pathtracer::sceneViewFBO = new GLFrameBuffer(W_WIDTH, W_HEIGHT);
+	Pathtracer::sceneViewFBO = new GLFrameBuffer(ImGUIHandler::RENDER_WIDTH, ImGUIHandler::RENDER_HEIGHT);
 }
 
 bool SDLHandler::updateEvents()
@@ -55,4 +54,9 @@ void SDLHandler::quit()
 
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+}
+
+void SDLHandler::setWindowSize(glm::ivec2 size)
+{
+	SDL_SetWindowSize(window, size.x, size.y);
 }
