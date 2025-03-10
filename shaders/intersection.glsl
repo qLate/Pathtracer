@@ -127,6 +127,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
         tMax = min(t1, tMax);
         if (tMax <= tMin) return false;
     }
+    float boxLineWidth = boxLineWidth * (1 + tMax / 10);
 
     vec2 ts = vec2(tMin, tMax);
     for (int i = 0; i < 2; i++)
@@ -175,6 +176,10 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
         if (tMax <= tMin)
             return false;
     }
+
+    #ifdef SHOW_BOXES
+    COLOR_ADD.x += pow(1 - COLOR_ADD.x, 3) * 0.05;
+    #endif
     return true;
 }
 

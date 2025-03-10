@@ -1,5 +1,6 @@
 #version 460 core
 out vec4 outColor;
+vec4 COLOR_ADD = vec4(0);
 
 #define FLT_MAX  1000000
 #define PI 3.14159265359
@@ -13,7 +14,7 @@ float random(in vec2 xy, in float seed);
 bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1);
 
 // ----------- OPTIONS -----------
-//#define SHOW_BOXES
+#define SHOW_BOXES
 
 // ----------- SETTINGS -----------
 const float boxLineWidth = 0.02;
@@ -106,13 +107,13 @@ layout(std140, binding = 3) uniform Objects
 };
 
 uniform int triangleCount;
-layout(std140, binding = 4) uniform Triangles
+layout(std140, binding = 4) buffer Triangles
 {
     Triangle triangles[1];
 };
 
 uniform int bvhNodeCount;
-layout(std140, binding = 5) uniform BVHNodes
+layout(std140, binding = 5) buffer BVHNodes
 {
     BVHNode nodes[1];
 };
@@ -222,5 +223,5 @@ void main()
     }
 
     color /= samplesPerPixel;
-    outColor = color;
+    outColor = color + COLOR_ADD;
 }

@@ -9,8 +9,8 @@ public:
 	UBO* uboLights;
 	UBO* uboMaterials;
 	UBO* uboObjects;
-	UBO* uboTriangles;
-	UBO* uboBVHNodes;
+	SSBO* ssboTriangles;
+	SSBO* ssboBVHNodes;
 
 	VAO* vaoScreen;
 

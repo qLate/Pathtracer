@@ -24,6 +24,8 @@ enable_testing()
 
 add_executable(${PROJECT_NAME}
         "src/Program.cpp"
+        "src/Pathtracer.cpp"
+
         "src/Object/Graphical.cpp"
         "src/Object/Object.cpp"
         "src/Object/Camera.cpp"
@@ -35,6 +37,7 @@ add_executable(${PROJECT_NAME}
         "src/System/BVH.cpp"
         "src/System/SDLHandler.cpp"
         "src/System/MyTime.cpp"
+        "src/System/ImGUIHandler.cpp"
          
         "src/System/Scene.cpp"
         "src/OpenGL/glad.c"
@@ -43,14 +46,14 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/BufferController.cpp" 
         "src/OpenGL/GLObject.cpp"
 
+
         "libs/imgui/src/imgui.cpp"
         "libs/imgui/src/imgui_demo.cpp"
         "libs/imgui/src/imgui_draw.cpp"
         "libs/imgui/src/imgui_widgets.cpp"
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
-        "libs/imgui/src/imgui_impl_opengl3.cpp"
- "include/System/ImGUIHandler.h" "src/System/ImGUIHandler.cpp" "include/Utils/Debug.h" "include/Pathtracer.h" "src/Pathtracer.cpp")
+        "libs/imgui/src/imgui_impl_opengl3.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

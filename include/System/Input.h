@@ -13,7 +13,14 @@ class Input
 
 	inline static float currentMoveAcceleration = 1;
 
+	inline static Uint8 lastKeyboardState[SDL_NUM_SCANCODES];
+	inline static Uint8 keyboardState[SDL_NUM_SCANCODES];
+
 public:
 	static void updateInput();
 	static void handleSDLEvent(const SDL_Event& event);
+
+	static bool isKeyPressed(uint8_t key);
+	static bool wasKeyPressed(uint8_t key);
+	static bool wasKeyReleased(uint8_t key);
 };

@@ -5,6 +5,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_internal.h"
+#include "Input.h"
 #include "Pathtracer.h"
 #include "Scene.h"
 #include "SDLHandler.h"
@@ -46,7 +47,7 @@ void ImGUIHandler::initDocking()
 	ImGui::DockBuilderAddNode(dockSpace);
 	ImGui::DockBuilderSetNodeSize(dockSpace, mainSize);
 
-	ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Left, INSPECTOR_WIDTH / (float)calculateInitialFullWindowSize().x, &dock_id_left, &dock_id_right);
+	ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Left, INSPECTOR_WIDTH / (float)INIT_FULL_WINDOW_SIZE.x, &dock_id_left, &dock_id_right);
 	ImGui::DockBuilderDockWindow("Inspector", dock_id_left);
 	ImGui::DockBuilderDockWindow("Scene", dock_id_right);
 
@@ -62,6 +63,7 @@ void ImGUIHandler::update()
 	if (init) initDocking();
 	updateDocking();
 
+	drawMenuBar();
 	drawScene();
 	drawInspector();
 
@@ -76,6 +78,29 @@ void ImGUIHandler::updateDocking()
 {
 	ImGuiID dockSpace_id = ImGui::GetID("MyDockSpace");
 	ImGui::DockSpaceOverViewport(dockSpace_id);
+}
+
+void ImGUIHandler::drawMenuBar()
+{
+	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
+		showInspector = !showInspector;
+
+	if (SDLHandler::isFullscreen) return;
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::MenuItem("Inspector", "Tab", showInspector))
+				showInspector = !showInspector;
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
 }
 
 void ImGUIHandler::drawScene()
@@ -141,6 +166,8 @@ void ImGUIHandler::drawScene_displayInfo(bool barVisible)
 }
 void ImGUIHandler::drawInspector()
 {
+	if (!showInspector) return;
+
 	auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	static float f = 0.0f;
 	static int counter = 0;

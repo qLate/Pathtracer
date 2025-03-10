@@ -29,9 +29,6 @@ void Program::initialize()
 	SceneSetup::setupScene();
 	BVHBuilder::initializeBVH();
 	BufferController::updateAllBuffers();
-
-	onUpdate += Time::updateTime;
-	onUpdate += Input::updateInput;
 }
 
 void Program::loop()
@@ -45,13 +42,15 @@ void Program::loop()
 		lastUpdateTime += delta;
 		// Limit FPS
 
+		Time::updateTime();
+		Input::updateInput();
+
 		Pathtracer::traceScene();
 		ImGUIHandler::update();
 
 		SDL_GL_SwapWindow(SDLHandler::window);
 		if (!SDLHandler::updateEvents()) break;
 
-		onUpdate();
 	}
 }
 

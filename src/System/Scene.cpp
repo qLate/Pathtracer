@@ -4,13 +4,12 @@
 #include "Graphical.h"
 #include "Light.h"
 #include "MyMath.h"
-#include "Pathtracer.h"
 #include "SDLHandler.h"
 #include "Triangle.h"
 
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()

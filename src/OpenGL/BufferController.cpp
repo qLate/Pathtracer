@@ -128,7 +128,7 @@ void BufferController::updateTrianglesBuffer()
 		data.push_back(triangleStruct);
 	}
 
-	Pathtracer::shaderP->fragShader->uboTriangles->setData((float*)data.data(), data.size());
+	Pathtracer::shaderP->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
 	Pathtracer::shaderP->setInt("triangleCount", data.size());
 }
 
@@ -146,6 +146,6 @@ void BufferController::updateBVHBuffer()
 		data.push_back(bvhNodeStruct);
 	}
 
-	Pathtracer::shaderP->fragShader->uboBVHNodes->setData((float*)data.data(), data.size());
+	Pathtracer::shaderP->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Pathtracer::shaderP->setInt("bvhNodeCount", data.size());
 }

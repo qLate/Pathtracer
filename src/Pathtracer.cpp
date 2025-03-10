@@ -33,6 +33,7 @@ void Pathtracer::resizeView(glm::ivec2 size)
 
 	shaderP->setFloat2("pixelSize", size);
 	Camera::instance->setSize({size.x / (float)size.y, 1});
+	glViewport(0, 0, size.x, size.y);
 }
 
 void Pathtracer::uninit()

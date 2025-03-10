@@ -13,11 +13,13 @@ class ImGUIHandler
 
 public:
 	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
-	static constexpr glm::ivec2 calculateInitialFullWindowSize();
+	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
 
 	inline static glm::ivec2 currRenderSize = INIT_RENDER_SIZE;
 
 	inline static ImGuiIO* io;
+
+	inline static bool showInspector = true;
 
 	static void initialize();
 	static void initDocking();
@@ -25,14 +27,11 @@ public:
 	static void update();
 	static void updateDocking();
 
+	static void drawMenuBar();
+
 	static void drawScene();
 	static void drawScene_displayInfo(bool barVisible);
 	static void drawInspector();
 
 	static void finalizeViewports();
 };
-
-constexpr glm::ivec2 ImGUIHandler::calculateInitialFullWindowSize()
-{
-	return {INIT_RENDER_SIZE.x + INSPECTOR_WIDTH, INIT_RENDER_SIZE.y};
-}

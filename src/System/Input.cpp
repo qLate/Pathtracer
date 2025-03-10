@@ -4,12 +4,12 @@
 
 #include "BufferController.h"
 #include "Camera.h"
+#include "Debug.h"
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
 #include "MyMath.h"
 #include "MyTime.h"
-#include "Pathtracer.h"
 #include "Scene.h"
 
 void Input::updateInput()
@@ -19,7 +19,11 @@ void Input::updateInput()
 	auto& camera = Camera::instance;
 	auto moveSpeed = MOVE_SPEED;
 	auto moveDir = vec3::ZERO;
-	auto keyboardState = SDL_GetKeyboardState(nullptr);
+
+	memcpy(lastKeyboardState, keyboardState, SDL_NUM_SCANCODES);
+
+	auto keyboardStatePtr = SDL_GetKeyboardState(nullptr);
+	memcpy(keyboardState, keyboardStatePtr, SDL_NUM_SCANCODES);
 
 	// Movement
 	if (keyboardState[SDL_SCANCODE_LSHIFT])
@@ -86,18 +90,21 @@ void Input::handleSDLEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (event.key.keysym.sym == SDLK_F11)
-		{
-			SDLHandler::isFullscreen = !SDLHandler::isFullscreen;
-			SDL_SetWindowFullscreen(SDLHandler::window, SDLHandler::isFullscreen ? 1 : 0);
-		}
-		else if (event.key.keysym.sym == SDLK_ESCAPE)
+		if (event.key.keysym.sym == SDLK_ESCAPE)
 		{
 			SDLHandler::sceneFocused = !SDLHandler::sceneFocused;
 			if (SDLHandler::sceneFocused)
 				SDL_SetRelativeMouseMode(SDL_TRUE);
 			else
 				SDL_SetRelativeMouseMode(SDL_FALSE);
+		}
+		else if (event.key.keysym.sym == SDLK_f)
+		{
+			SDLHandler::isFullscreen = !SDLHandler::isFullscreen;
+			if (SDLHandler::isFullscreen)
+				SDL_SetWindowFullscreen(SDLHandler::window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			else
+				SDL_SetWindowFullscreen(SDLHandler::window, 0);
 		}
 	}
 
@@ -122,4 +129,17 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		auto newRot = glm::vec3(newX, newY, newZ);
 		camera->setRot({newRot * DEG_TO_RAD});
 	}
+}
+
+bool Input::isKeyPressed(uint8_t key)
+{
+	return keyboardState[key];
+}
+bool Input::wasKeyPressed(uint8_t key)
+{
+	return !lastKeyboardState[key] && keyboardState[key];
+}
+bool Input::wasKeyReleased(uint8_t key)
+{
+	return lastKeyboardState[key] && !keyboardState[key];
 }
