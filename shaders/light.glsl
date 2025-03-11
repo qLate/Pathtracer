@@ -30,7 +30,7 @@ void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, in
     float distanceImpact = min(pow(1 - dist / pointLight.properties1.y, 2), 1.);
     float lightFacingAtPoint = max(dot(dir, ray.surfaceNormal), 0.0);
     diffuse += (distanceImpact * lightFacingAtPoint) * pointLight.color * pointLight.properties1.x;
-
+    
     vec3 h = normalize(dir - ray.dir);
     specular += distanceImpact * pow(max(dot(h, ray.surfaceNormal), 0.0), materials[ray.materialIndex].properties1.w) * pointLight.color * pointLight.properties1.x;
 }

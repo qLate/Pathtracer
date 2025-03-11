@@ -175,7 +175,7 @@ vec4 castRay(Ray ray)
         ray.interPoint += ray.surfaceNormal * 0.01;
 
         Material mat = getMaterial(ray.materialIndex);
-        vec4 uvColor = texture(texArray, vec3(ray.uvPos.x, 1 - ray.uvPos.y, mat.properties2.z + 0.5));
+        vec4 uvColor = texture(texArray, vec3(ray.uvPos.x, 1 - ray.uvPos.y, mat.properties2.z));
         if (mat.properties1.x == 1)
         {
             vec4 diffuse, specular;
@@ -192,7 +192,6 @@ vec4 castRay(Ray ray)
         vec3 dir = ray.dir - 2 * dot(ray.dir, ray.surfaceNormal) * ray.surfaceNormal;
         ray = Ray(ray.interPoint, dir, RAY_DEFAULT_ARGS);
     }
-
     color += colorImpact * bgColor;
     return hit ? color : bgColor;
 }

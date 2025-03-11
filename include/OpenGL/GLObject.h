@@ -82,7 +82,7 @@ class GLTexture2D : public GLTexture
 public:
 	int width, height;
 
-	GLTexture2D(int width, int height, const unsigned char* data = nullptr);
+	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA);
 };
 
 

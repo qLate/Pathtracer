@@ -104,11 +104,11 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data) : width(width), height(height)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type) : width(width), height(height)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, type, GL_UNSIGNED_BYTE, data);
 	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -148,7 +148,7 @@ GLFrameBuffer::GLFrameBuffer(int width, int height)
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
-	renderTexture = new GLTexture2D(width, height);
+	renderTexture = new GLTexture2D(width, height, nullptr, GL_RGB);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

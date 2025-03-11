@@ -9,7 +9,6 @@ class Color : public glm::vec4
 {
 public:
 	Color(float r, float g, float b, float a = 1) : glm::vec4(r, g, b, a) {}
-	Color(int r, int g, int b, int a = 255) : glm::vec4((float)r / 255.f, (float)g / 255.f, (float)b / 255.f, (float)a / 255.f) {}
 	Color() : Color {0, 0, 0, 0} {}
 
 	static Color white() { return {1.f, 1.f, 1.f}; }
@@ -25,8 +24,6 @@ public:
 	static Color darkGreen() { return {0.f, 0.5f, 0.f}; }
 	static Color skyblue() { return {.529f, .808f, .922f}; }
 	static Color gold() { return {1.f, .843f, 0.f}; }
-	static Color pink() { return {255, 192, 203}; }
-	static Color hotPink() { return {255, 105, 180}; }
 
 	float r() const { return x; }
 	float g() const { return y; }
