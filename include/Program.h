@@ -7,7 +7,7 @@ class Program
 	static constexpr float FPS_LIMIT = 500;
 
 public:
-	static void initialize();
+	static void init();
 
 	static void loop();
 

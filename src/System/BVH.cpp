@@ -5,7 +5,7 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-void BVHBuilder::initializeBVH()
+void BVHBuilder::initBVH()
 {
 	buildTree(Scene::triangles);
 }

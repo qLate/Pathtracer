@@ -1,32 +1,54 @@
-#include "Pathtracer.h"
+#include "Renderer.h"
+
+#include <iostream>
 
 #include "Camera.h"
 #include "GLObject.h"
 #include "ImGUIHandler.h"
+#include "Material.h"
+#include "MyMath.h"
 
-void Pathtracer::initTraceShader()
+void Renderer::init()
 {
 	shaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
 	shaderP->use();
 	shaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
 	shaderP->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
+
+	texArray = new GLTexture2DArray(1024, 512, 32, GL_RGBA8);
+	shaderP->setInt("texArray", 0);
+
+	Texture::defaultTex = new Texture("assets/textures/default.png");
+	Material::defaultLit = new Material(Color::white(), true);
+	Material::defaultUnlit = new Material(Color::white(), false);
+}
+void Renderer::uninit()
+{
+	delete shaderP;
+	delete sceneViewFBO;
+	delete texArray;
 }
 
-void Pathtracer::traceScene()
+void Renderer::render()
 {
+	bindTextures();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, sceneViewFBO->id);
 
-	glBindTexture(GL_TEXTURE_2D, shaderP->fragShader->textures[0]->id);
-
 	shaderP->use();
+
 	glBindVertexArray(shaderP->fragShader->vaoScreen->id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+void Renderer::bindTextures()
+{
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray->id);
+}
 
-void Pathtracer::resizeView(glm::ivec2 size)
+void Renderer::resizeView(glm::ivec2 size)
 {
 	delete sceneViewFBO;
 	sceneViewFBO = new GLFrameBuffer(size.x, size.y);
@@ -35,10 +57,3 @@ void Pathtracer::resizeView(glm::ivec2 size)
 	Camera::instance->setSize({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 }
-
-void Pathtracer::uninit()
-{
-	delete shaderP;
-	delete sceneViewFBO;
-}
-

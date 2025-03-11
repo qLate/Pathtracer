@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 
 #include "SDL_timer.h"
 

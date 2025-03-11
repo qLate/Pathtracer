@@ -18,7 +18,7 @@ class BVHBuilder
 public:
 	inline static std::vector<std::shared_ptr<BVHNode>> nodes;
 
-	static void initializeBVH();
+	static void initBVH();
 
 	static void buildTree(const std::vector<Triangle*>& objects);
 };

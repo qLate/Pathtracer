@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+
+#include "Color.h"
 #include "glad.h"
 
 class Texture;
@@ -79,10 +82,20 @@ class GLTexture2D : public GLTexture
 public:
 	int width, height;
 
-	GLTexture2D(const Texture* texture);
-	GLTexture2D(int width, int height);
+	GLTexture2D(int width, int height, const unsigned char* data = nullptr);
+};
 
-	void resize(int width, int height);
+
+class GLTexture2DArray : public GLTexture
+{
+	int currentFreeSpotIndex = 0;
+
+public:
+	int width, height, layers;
+
+	GLTexture2DArray(int width, int height, int layers, GLenum type = GL_RGBA8);
+
+	int addTexture(const Texture* tex, GLenum type = GL_RGBA);
 };
 
 
@@ -93,6 +106,4 @@ public:
 
 	GLFrameBuffer(int width, int height);
 	~GLFrameBuffer() override;
-
-	void resize(int width, int height) const;
 };

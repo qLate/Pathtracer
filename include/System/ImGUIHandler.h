@@ -9,7 +9,7 @@ class ImGUIHandler
 	static constexpr char GLSL_VERSION[] = "#version 460";
 	static constexpr int INSPECTOR_WIDTH = 300;
 
-	inline static bool init = true;
+	inline static bool isInit = true;
 
 public:
 	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
@@ -21,7 +21,7 @@ public:
 
 	inline static bool showInspector = true;
 
-	static void initialize();
+	static void init();
 	static void initDocking();
 
 	static void update();

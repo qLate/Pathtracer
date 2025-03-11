@@ -1,6 +1,6 @@
 #version 460 core
 out vec4 outColor;
-vec4 COLOR_ADD = vec4(0);
+vec4 COLOR_HEAT = vec4(0);
 
 #define FLT_MAX  1000000
 #define PI 3.14159265359
@@ -14,7 +14,8 @@ float random(in vec2 xy, in float seed);
 bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1);
 
 // ----------- OPTIONS -----------
-#define SHOW_BOXES
+// #define SHOW_BVH_BOXES
+// #define SHOW_BVH_HEAT
 
 // ----------- SETTINGS -----------
 const float boxLineWidth = 0.02;
@@ -41,7 +42,7 @@ struct Material
 {
     vec4 color;
     vec4 properties1; // lit, diffuse coeff, specular coeff, specular degree
-    vec4 properties2; // reflection, indexID
+    vec4 properties2; // reflection, indexID, texArrayLayerIndex
 };
 
 struct Object
@@ -85,8 +86,7 @@ struct Ray
 // ----------- BUFFERS -----------
 uniform mat4x4 cameraRotMat = mat4x4(1.0);
 
-uniform int textureCount;
-uniform sampler2D[] textures;
+layout(binding = 0) uniform sampler2DArray texArray;
 
 uniform int materialCount;
 layout(std140, binding = 1) uniform Materials
@@ -107,13 +107,13 @@ layout(std140, binding = 3) uniform Objects
 };
 
 uniform int triangleCount;
-layout(std140, binding = 4) buffer Triangles
+layout(std140, binding = 4) /*buffer*/ uniform Triangles
 {
     Triangle triangles[1];
 };
 
 uniform int bvhNodeCount;
-layout(std140, binding = 5) buffer BVHNodes
+layout(std140, binding = 5) /*buffer*/ uniform BVHNodes
 {
     BVHNode nodes[1];
 };
@@ -127,7 +127,6 @@ Material getMaterial(int index)
     }
     return materials[0];
 }
-
 
 // **************************************************************************
 // ------------------------------ INTERSECTION ------------------------------
@@ -143,7 +142,6 @@ bool intersectTriangledObject(inout Ray ray, Object obj);
 bool intersectObj(inout Ray ray, Object obj);
 bool intersectBVHTree(inout Ray ray, bool castingShadows);
 
-
 // *************************************************************************
 // --------------------------------- LIGHT ---------------------------------
 // *************************************************************************
@@ -152,7 +150,6 @@ bool castShadowRays(Ray ray);
 void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse, inout vec4 specular);
 void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, inout vec4 specular);
 void getIllumination(Ray ray, inout vec4 diffuse, inout vec4 specular);
-
 
 // **************************************************************************
 // ---------------------------------- MAIN ----------------------------------
@@ -178,7 +175,7 @@ vec4 castRay(Ray ray)
         ray.interPoint += ray.surfaceNormal * 0.01;
 
         Material mat = getMaterial(ray.materialIndex);
-        vec4 uvColor = texture(textures[0], vec2(ray.uvPos.x, 1 - ray.uvPos.y));
+        vec4 uvColor = texture(texArray, vec3(ray.uvPos.x, 1 - ray.uvPos.y, mat.properties2.z + 0.5));
         if (mat.properties1.x == 1)
         {
             vec4 diffuse, specular;
@@ -223,5 +220,5 @@ void main()
     }
 
     color /= samplesPerPixel;
-    outColor = color + COLOR_ADD;
+    outColor = color + COLOR_HEAT;
 }

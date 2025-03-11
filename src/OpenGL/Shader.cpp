@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 
 #include "GLObject.h"
@@ -66,11 +67,6 @@ void BaseShaderMethods::setMatrix4X4(const std::string& name, glm::mat<4, 4, flo
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, false, value_ptr(mat));
 }
 
-void Shader::addTexture2D(const Texture* texture)
-{
-	textures.push_back(new GLTexture2D(texture));
-}
-
 Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id)
 {
 	std::string code = parseShader(path);
@@ -101,6 +97,10 @@ std::string Shader::parseShader(const std::string& pathStr)
 		auto includeCode = readShaderFile(SHADERS_DIR + relIncludePath) + "\n";
 		code.replace(pos, end - pos + 1, includeCode);
 	}
+
+	std::regex re = std::regex("/\\*buffer\\*/ uniform");
+	while (std::regex_search(code, re))
+		code = std::regex_replace(code, re, "buffer");
 
 	return code;
 }

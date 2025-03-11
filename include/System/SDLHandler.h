@@ -14,7 +14,7 @@ public:
 	inline static bool sceneFocused = true;
 	inline static bool isFullscreen = false;
 
-	static void initialize();
+	static void init();
 	static void initOpenGL();
 
 	static bool updateEvents();

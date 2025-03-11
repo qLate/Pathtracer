@@ -5,38 +5,30 @@
 
 #include "Color.h"
 
+class GLTexture2D;
+
 class Texture
 {
-	std::filesystem::path path;
-
-	bool readImage(std::vector<uint8_t>& image, const std::filesystem::path& filename);
+	bool readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
+	void copyImageData(const std::vector<uint8_t>& image);
 
 public:
-	static Texture* const DEFAULT_TEX;
+	inline static Texture* defaultTex = nullptr;
 
-	int indexID;
-
-	std::vector<Color> pixelColors;
+	unsigned char* data;
 	int width = 0, height = 0;
 
-	Texture();
+	int texArrayLayerIndex = -1;
+
 	Texture(const std::filesystem::path& path);
-
-	Color getColor(int x, int y) const;
-	Color getColor(float u, float v) const;
-
-	int getWidth() const { return width; }
-	int getHeight() const { return height; }
-	std::filesystem::path getPath() const { return path; }
 };
 
 
 class Material
 {
 public:
-	static Material* const DEBUG_LINE;
-	static Material* const DEFAULT_LIT;
-	static Material* const DEFAULT_UNLIT;
+	inline static Material* defaultLit = nullptr;
+	inline static Material* defaultUnlit = nullptr;
 
 	int indexID;
 
@@ -50,18 +42,7 @@ public:
 	float reflection = 0;
 
 	Material(Color color = Color::white(), bool lit = true);
-	Material(Color color,
-	         bool lit,
-	         Texture* texture,
-	         float diffuseCoeff,
-	         float specularCoeff,
-	         float specularDegree,
-	         float reflection);
+	Material(Color color, bool lit, Texture* texture, float diffuseCoeff = 1, float specularCoeff = 0, float specularDegree = 0, float reflection = 0);
 	Material(const Material& material);
 	~Material();
-
-	Color getColor(float u, float v) const
-	{
-		return texture->getColor(u, v) * color;
-	}
 };

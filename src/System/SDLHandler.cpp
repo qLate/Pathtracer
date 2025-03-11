@@ -6,9 +6,9 @@
 #include "ImGUIHandler.h"
 #include "imgui_impl_sdl2.h"
 #include "Input.h"
-#include "Pathtracer.h"
+#include "Renderer.h"
 
-void SDLHandler::initialize()
+void SDLHandler::init()
 {
 	SDL_GL_LoadLibrary(nullptr);
 
@@ -27,7 +27,7 @@ void SDLHandler::initialize()
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	initOpenGL();
-	ImGUIHandler::initialize();
+	ImGUIHandler::init();
 
 	SDL_GL_SetSwapInterval(0);
 }
@@ -45,7 +45,7 @@ void SDLHandler::initOpenGL()
 		Debug::log("OpenGL Debug Message: ", message);
 	}, nullptr);
 
-	Pathtracer::sceneViewFBO = new GLFrameBuffer(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
+	Renderer::sceneViewFBO = new GLFrameBuffer(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
 }
 
 bool SDLHandler::updateEvents()

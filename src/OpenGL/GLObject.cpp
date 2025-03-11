@@ -2,7 +2,9 @@
 
 #include <iostream>
 
+#include "Debug.h"
 #include "Material.h"
+#include "Utils.h"
 
 VAO::VAO()
 {
@@ -102,56 +104,43 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(const Texture* texture) : width(texture->width), height(texture->height)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data) : width(width), height(height)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	auto* data = new unsigned char[texture->width * texture->height * 4];
-	for (int i = 0; i < texture->width * texture->height; ++i)
-	{
-		data[i * 4 + 0] = texture->pixelColors[i].x * 255.0f;
-		data[i * 4 + 1] = texture->pixelColors[i].y * 255.0f;
-		data[i * 4 + 2] = texture->pixelColors[i].z * 255.0f;
-		data[i * 4 + 3] = texture->pixelColors[i].w * 255.0f;
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-GLTexture2D::GLTexture2D(int width, int height) : width(width), height(height)
-{
-	glBindTexture(GL_TEXTURE_2D, id);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GLTexture2D::resize(int width, int height)
+GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : width(width), height(height), layers(layers)
 {
-	if (width == this->width && height == this->height) return;
-	this->width = width;
-	this->height = height;
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
-	glBindTexture(GL_TEXTURE_2D, id);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, type, width, height, layers);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+}
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+int GLTexture2DArray::addTexture(const Texture* tex, GLenum type)
+{
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, currentFreeSpotIndex, tex->width, tex->height, 1, type, GL_UNSIGNED_BYTE, tex->data);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
+	return currentFreeSpotIndex++;
 }
 
 GLFrameBuffer::GLFrameBuffer(int width, int height)
@@ -165,24 +154,10 @@ GLFrameBuffer::GLFrameBuffer(int width, int height)
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << '\n';
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 GLFrameBuffer::~GLFrameBuffer()
 {
 	delete renderTexture;
 	glDeleteFramebuffers(1, &id);
-}
-
-void GLFrameBuffer::resize(int width, int height) const
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-
-	renderTexture->resize(width, height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete after resize!" << '\n';
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

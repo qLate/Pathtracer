@@ -2,7 +2,7 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include "Pathtracer.h"
+#include "Renderer.h"
 #include "Triangle.h"
 
 Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRadius) : Object(pos), size(size), focalDistance(focalDistance), lensRadius(lensRadius),
@@ -12,19 +12,19 @@ Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRad
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
-	Pathtracer::shaderP->setFloat3("cameraPos", pos);
-	Pathtracer::shaderP->setFloat2("screenSize", size);
-	Pathtracer::shaderP->setFloat("focalDistance", focalDistance);
-	Pathtracer::shaderP->setFloat("lensRadius", lensRadius);
+	Renderer::shaderP->setFloat3("cameraPos", pos);
+	Renderer::shaderP->setFloat2("screenSize", size);
+	Renderer::shaderP->setFloat("focalDistance", focalDistance);
+	Renderer::shaderP->setFloat("lensRadius", lensRadius);
 
-	onCameraRotate += [this] { Pathtracer::shaderP->setMatrix4X4("cameraRotMat", mat4_cast(this->rot)); };
-	onCameraMove += [this] { Pathtracer::shaderP->setFloat3("cameraPos", this->pos); };
+	onCameraRotate += [this] { Renderer::shaderP->setMatrix4X4("cameraRotMat", mat4_cast(this->rot)); };
+	onCameraMove += [this] { Renderer::shaderP->setFloat3("cameraPos", this->pos); };
 }
 
 void Camera::setBackgroundColor(Color color)
 {
 	bgColor = color;
-	Pathtracer::shaderP->setFloat4("bgColor", bgColor);
+	Renderer::shaderP->setFloat4("bgColor", bgColor);
 }
 
 void Camera::setRot(glm::quat rot)
@@ -40,7 +40,7 @@ void Camera::setPos(glm::vec3 pos)
 void Camera::setSize(glm::vec2 size)
 {
 	this->size = size;
-	Pathtracer::shaderP->setFloat2("screenSize", size);
+	Renderer::shaderP->setFloat2("screenSize", size);
 }
 
 glm::vec3 Camera::getScreenCenter() const

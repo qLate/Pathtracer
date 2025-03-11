@@ -127,7 +127,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
         tMax = min(t1, tMax);
         if (tMax <= tMin) return false;
     }
-    float boxLineWidth = boxLineWidth * (1 + tMax / 10);
+    float boxLineWidth = boxLineWidth * (1 + tMax / 15);
 
     vec2 ts = vec2(tMin, tMax);
     for (int i = 0; i < 2; i++)
@@ -154,7 +154,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
 
 bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax, bool castingShadows)
 {
-    #ifdef SHOW_BOXES
+    #ifdef SHOW_BVH_BOXES
     if (!castingShadows)
         intersectAABBForGizmo(ray, min_, max_);
     #endif
@@ -177,8 +177,8 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
             return false;
     }
 
-    #ifdef SHOW_BOXES
-    COLOR_ADD.x += pow(1 - COLOR_ADD.x, 3) * 0.05;
+    #ifdef SHOW_BVH_HEAT
+    COLOR_HEAT.x += pow(1 - COLOR_HEAT.x, 3) * 0.05;
     #endif
     return true;
 }

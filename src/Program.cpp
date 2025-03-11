@@ -10,11 +10,11 @@
 #include "MyTime.h"
 #include "SDLHandler.h"
 #include "Scene.h"
-#include "Pathtracer.h"
+#include "Renderer.h"
 
 int main(int argc, char* argv[])
 {
-	Program::initialize();
+	Program::init();
 
 	Program::loop();
 
@@ -22,12 +22,12 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void Program::initialize()
+void Program::init()
 {
-	SDLHandler::initialize();
-	Pathtracer::initTraceShader();
+	SDLHandler::init();
+	Renderer::init();
 	SceneSetup::setupScene();
-	BVHBuilder::initializeBVH();
+	BVHBuilder::initBVH();
 	BufferController::updateAllBuffers();
 }
 
@@ -45,7 +45,7 @@ void Program::loop()
 		Time::updateTime();
 		Input::updateInput();
 
-		Pathtracer::traceScene();
+		Renderer::render();
 		ImGUIHandler::update();
 
 		SDL_GL_SwapWindow(SDLHandler::window);
@@ -57,5 +57,5 @@ void Program::loop()
 void Program::quit()
 {
 	SDLHandler::quit();
-	Pathtracer::uninit();
+	Renderer::uninit();
 }

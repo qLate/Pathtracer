@@ -36,11 +36,7 @@ class Shader : public BaseShaderMethods
 	static std::string readShaderFile(const std::string& path);
 
 public:
-	std::vector<GLTexture2D*> textures {};
-
 	Shader(const std::string& path, int id, int type);
-
-	void addTexture2D(const Texture* texture);
 };
 
 template <typename FragType = Shader>

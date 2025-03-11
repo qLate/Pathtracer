@@ -12,7 +12,7 @@ class AABB;
 
 class Graphical : public Object
 {
-	Material* _sharedMaterial = Material::DEFAULT_LIT;
+	Material* _sharedMaterial = Material::defaultLit;
 	Material* _material = nullptr;
 
 protected:

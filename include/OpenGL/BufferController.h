@@ -51,7 +51,6 @@ class BufferController
 public:
 	static void updateAllBuffers();
 
-	static void updateTexturesBuffer();
 	static void updateMaterialsBuffer();
 	static void updateLightsBuffer();
 	static void updateObjectsBuffer();

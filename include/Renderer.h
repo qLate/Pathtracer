@@ -6,7 +6,7 @@
 
 class GLFrameBuffer;
 
-class Pathtracer
+class Renderer
 {
 	static constexpr int TRIANGLE_BUFFER_SIZE = 1000;
 	static constexpr int MAX_RAY_BOUNCE = 5;
@@ -14,12 +14,13 @@ class Pathtracer
 public:
 	inline static ShaderProgram<TraceShader>* shaderP;
 	inline static GLFrameBuffer* sceneViewFBO;
+	inline static GLTexture2DArray* texArray;
 
-	static void initTraceShader();
+	static void init();
+	static void uninit();
 
-	static void traceScene();
+	static void render();
+	static void bindTextures();
 
 	static void resizeView(glm::ivec2 size);
-
-	static void uninit();
 };

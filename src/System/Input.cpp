@@ -76,14 +76,6 @@ void Input::updateInput()
 	{
 		std::cout << "Player is at:" << " pos " << vec3::to_string(camera->getPos()) << " rot " << vec3::to_string(camera->getRotVec4()) << '\n';
 	}
-
-	if (keyboardState[SDL_SCANCODE_L] && !Scene::lights.empty())
-	{
-		Scene::lights[0]->setPos(camera->getPos());
-		BufferController::updateLightsBuffer();
-
-		std::cout << "Light set to position: " << vec3::to_string(Scene::lights[0]->getPos()) << '\n';
-	}
 }
 
 void Input::handleSDLEvent(const SDL_Event& event)
@@ -105,6 +97,11 @@ void Input::handleSDLEvent(const SDL_Event& event)
 				SDL_SetWindowFullscreen(SDLHandler::window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			else
 				SDL_SetWindowFullscreen(SDLHandler::window, 0);
+		}
+		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
+		{
+			Scene::lights[0]->setPos(Camera::instance->getPos());
+			BufferController::updateLightsBuffer();
 		}
 	}
 

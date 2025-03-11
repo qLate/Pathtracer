@@ -24,7 +24,7 @@ enable_testing()
 
 add_executable(${PROJECT_NAME}
         "src/Program.cpp"
-        "src/Pathtracer.cpp"
+        "src/Renderer.cpp"
 
         "src/Object/Graphical.cpp"
         "src/Object/Object.cpp"
@@ -48,7 +48,6 @@ add_executable(${PROJECT_NAME}
 
 
         "libs/imgui/src/imgui.cpp"
-        "libs/imgui/src/imgui_demo.cpp"
         "libs/imgui/src/imgui_draw.cpp"
         "libs/imgui/src/imgui_widgets.cpp"
         "libs/imgui/src/imgui_tables.cpp"

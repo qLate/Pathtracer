@@ -6,13 +6,13 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_internal.h"
 #include "Input.h"
-#include "Pathtracer.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "SDLHandler.h"
 #include "SDL_video.h"
 #include "Utils.h"
 
-void ImGUIHandler::initialize()
+void ImGUIHandler::init()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -60,7 +60,7 @@ void ImGUIHandler::update()
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 
-	if (init) initDocking();
+	if (isInit) initDocking();
 	updateDocking();
 
 	drawMenuBar();
@@ -72,7 +72,7 @@ void ImGUIHandler::update()
 
 	finalizeViewports();
 
-	if (init) init = false;
+	if (isInit) isInit = false;
 }
 void ImGUIHandler::updateDocking()
 {
@@ -138,12 +138,12 @@ void ImGUIHandler::drawScene()
 		//ImGui::SetCursorPos(cursorPos);
 
 		ImVec2 availSize = ImGui::GetContentRegionAvail();
-		ImGui::Image(Pathtracer::sceneViewFBO->renderTexture->id, availSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(Renderer::sceneViewFBO->renderTexture->id, availSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		if (availSize.x != currRenderSize.x || availSize.y != currRenderSize.y)
 		{
 			currRenderSize = {availSize.x, availSize.y};
-			Pathtracer::resizeView(currRenderSize);
+			Renderer::resizeView(currRenderSize);
 		}
 
 		drawScene_displayInfo(!node->IsHiddenTabBar());
