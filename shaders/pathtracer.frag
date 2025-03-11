@@ -159,9 +159,9 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows);
 // *************************************************************************
 /// #include "light.glsl"
 bool castShadowRays(Ray ray);
-void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse, inout vec4 specular);
-void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse, inout vec4 specular);
-void getIllumination(Ray ray, inout vec4 diffuse, inout vec4 specular);
+void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse);
+void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse);
+void getIllumination(Ray ray, inout vec4 diffuse);
 
 // **************************************************************************
 // ---------------------------------- MAIN ----------------------------------
@@ -193,10 +193,9 @@ vec4 castRay(Ray ray)
         vec4 uvColor = texture(texArray, vec3(uvLocal, mat.properties2.z));
         if (mat.properties1.x == 1)
         {
-            vec4 diffuse, specular;
-            getIllumination(ray, diffuse, specular);
+            vec4 diffuse;
+            getIllumination(ray, diffuse);
             color += colorImpact * (1 - mat.properties2.x) * uvColor * mat.color * diffuse * mat.properties1.y;
-            color += specular * mat.properties1.z;
         }
         else
             color += colorImpact * (1 - mat.properties2.x) * uvColor * mat.color;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "SDL_timer.h"
 
 class Utils
@@ -9,6 +11,14 @@ public:
 	{
 		float mult = powf(10, decimals);
 		return std::round(value * mult) / mult;
+	}
+
+	static long long measureCallTime(void (*func)())
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		func();
+		auto end = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	}
 };
 

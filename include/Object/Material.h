@@ -31,6 +31,7 @@ class Material
 public:
 	inline static Material* defaultLit = nullptr;
 	inline static Material* defaultUnlit = nullptr;
+	inline static Material* debugLine = nullptr;
 
 	int id;
 

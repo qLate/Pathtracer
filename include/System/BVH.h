@@ -16,11 +16,12 @@ class BVHBuilder
 	inline static float lineWidth = 0.1f;
 
 public:
-	inline static std::vector<std::shared_ptr<BVHNode>> nodes;
+	inline static std::vector<BVHNode*> nodes;
 
 	static void initBVH();
 
-	static void buildTree(const std::vector<Triangle*>& objects);
+	static void buildTreeBasic(std::vector<Triangle*>& triangles);
+	static void buildTreeMorton(std::vector<Triangle*>& triangles);
 };
 
 class AABB
@@ -42,7 +43,19 @@ public:
 	bool isLeaf = false;
 	int leafTrianglesStart = 0, leafTriangleCount = 0;
 	int hitNext = -1, missNext = -1;
+};
 
-	BVHNode(std::vector<std::shared_ptr<BVHNode>>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode = -1);
+class BVHNodeBasic : public BVHNode
+{
+public:
+	BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode = -1);
 	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
+};
+
+class BVHNodeMorton : public BVHNode
+{
+public:
+	BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int maxTrianglesPerBox,
+	              int nextRightNode = -1, int depth = 0);
+	static int getSplitIndex(const std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int depth);
 };

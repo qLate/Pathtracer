@@ -18,6 +18,7 @@ include_directories(libs)
 include_directories(libs/SDL2/include)
 include_directories(libs/stb_image)
 include_directories(libs/imgui/include)
+include_directories(libs/tiny_obj_loader)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
@@ -52,7 +53,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_widgets.cpp"
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
-        "libs/imgui/src/imgui_impl_opengl3.cpp")
+        "libs/imgui/src/imgui_impl_opengl3.cpp" "include/Utils/MortonCodes.h")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

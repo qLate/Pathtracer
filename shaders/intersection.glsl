@@ -141,10 +141,11 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
                     (abs(min_.z - point.z) <= boxLineWidth || abs(max_.z - point.z) <= boxLineWidth ||
                         abs(min_.x - point.x) <= boxLineWidth || abs(max_.x - point.x) <= boxLineWidth)))
         {
-            ray.surfaceNormal = vec3(0, 0, 1);
+            ray.surfaceNormal = vec3(0, 1, 0);
             ray.interPoint = point;
+            ray.uvPos = vec2(0.01);
             ray.t = t;
-            ray.materialIndex = 0;
+            ray.materialIndex = 2;
             return true;
         }
     }

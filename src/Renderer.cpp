@@ -17,12 +17,13 @@ void Renderer::init()
 	shaderP->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
 
 	texArray = new GLTexture2DArray(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
-	shaderP->setFloat2("texArrayBounds", TEX_ARRAY_BOUNDS);
+	shaderP->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
 	shaderP->setInt("texArray", 0);
 
 	Texture::defaultTex = new Texture("assets/textures/default.png");
 	Material::defaultLit = new Material(Color::white(), true);
 	Material::defaultUnlit = new Material(Color::white(), false);
+	Material::debugLine = new Material(Color::blue(), false);
 }
 void Renderer::uninit()
 {
