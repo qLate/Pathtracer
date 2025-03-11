@@ -7,11 +7,12 @@ TraceShader::TraceShader(const char* path, int id, int) : Shader(path, id, GL_FR
 	vaoScreen = new VAO();
 	setUpScreenTriangles();
 
-	uboMaterials = new UBO(MATERIAL_ALIGN, 1);
-	uboLights = new UBO(LIGHT_ALIGN, 2);
-	uboObjects = new UBO(OBJECT_ALIGN, 3);
-	ssboTriangles = new SSBO(TRIANGLE_ALIGN, 4);
-	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN, 5);
+	uboTexInfos = new UBO(TEX_INFOS_ALIGN, 1);
+	uboMaterials = new UBO(MATERIAL_ALIGN, 2);
+	uboLights = new UBO(LIGHT_ALIGN, 3);
+	uboObjects = new UBO(OBJECT_ALIGN, 4);
+	ssboTriangles = new SSBO(TRIANGLE_ALIGN, 5);
+	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN, 6);
 
 	skybox = new GLCubeMap();
 }

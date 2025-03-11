@@ -26,23 +26,23 @@ public:
 
 class Material
 {
+	inline static int nextAvailableId = 0;
+
 public:
 	inline static Material* defaultLit = nullptr;
 	inline static Material* defaultUnlit = nullptr;
 
-	int indexID;
+	int id;
 
 	bool lit;
 	Color color;
 	Texture* texture;
 
 	float diffuseCoeff = 1;
-	float specularCoeff = 0;
-	float specularDegree = 0;
 	float reflection = 0;
 
+	Material(Color color, bool lit, Texture* texture, float diffuseCoeff = 1, float reflection = 0);
 	Material(Color color = Color::white(), bool lit = true);
-	Material(Color color, bool lit, Texture* texture, float diffuseCoeff = 1, float specularCoeff = 0, float specularDegree = 0, float reflection = 0);
 	Material(const Material& material);
 	~Material();
 };

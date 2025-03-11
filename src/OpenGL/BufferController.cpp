@@ -14,6 +14,7 @@ void BufferController::updateAllBuffers()
 	updateObjectsBuffer();
 	updateTrianglesBuffer();
 	updateBVHBuffer();
+	updateTexInfosBuffer();
 }
 
 void BufferController::updateMaterialsBuffer()
@@ -23,8 +24,8 @@ void BufferController::updateMaterialsBuffer()
 	{
 		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
-		materialStruct.properties1 = glm::vec4(mat->lit, mat->diffuseCoeff, mat->specularCoeff, mat->specularDegree);
-		materialStruct.properties2 = glm::vec4(mat->reflection, mat->indexID, mat->texture->texArrayLayerIndex, 0);
+		materialStruct.properties1 = glm::vec4(mat->lit, mat->diffuseCoeff, 0, 0);
+		materialStruct.properties2 = glm::vec4(mat->reflection, mat->id, mat->texture->texArrayLayerIndex, 0);
 
 		data.push_back(materialStruct);
 	}
@@ -70,7 +71,7 @@ void BufferController::updateObjectsBuffer()
 	for (const auto& obj : Scene::graphicals)
 	{
 		ObjectStruct objectStruct {};
-		objectStruct.data.y = obj->materialNoCopy()->indexID;
+		objectStruct.data.y = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
@@ -112,7 +113,7 @@ void BufferController::updateTrianglesBuffer()
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->globalVertexPositions[k], triangle->vertices[k].uvPos.x);
 			triangleStruct.vertices[k].normalV = glm::vec4(triangle->globalVertexNormals[k], triangle->vertices[k].uvPos.y);
 		}
-		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->indexID, 0, 0, 0);
+		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->id, 0, 0, 0);
 
 		triangleStruct.rows[0] = glm::vec4(triangle->row1, triangle->row1Val);
 		triangleStruct.rows[1] = glm::vec4(triangle->row2, triangle->row2Val);
@@ -127,9 +128,8 @@ void BufferController::updateTrianglesBuffer()
 
 void BufferController::updateBVHBuffer()
 {
-	const auto& nodes = BVHBuilder::nodes;
 	std::vector<BVHNodeStruct> data {};
-	for (const auto& node : nodes)
+	for (const auto& node : BVHBuilder::nodes)
 	{
 		BVHNodeStruct bvhNodeStruct {};
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
@@ -141,4 +141,17 @@ void BufferController::updateBVHBuffer()
 
 	Renderer::shaderP->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Renderer::shaderP->setInt("bvhNodeCount", data.size());
+}
+void BufferController::updateTexInfosBuffer()
+{
+	std::vector<TexInfoStruct> data{};
+	for (const auto& tex : Scene::textures)
+	{
+		TexInfoStruct texInfoStruct{};
+		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
+		data.push_back(texInfoStruct);
+	}
+
+	Renderer::shaderP->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
+	Renderer::shaderP->setInt("texInfoCount", data.size());
 }

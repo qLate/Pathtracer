@@ -25,6 +25,7 @@ public:
 	Material* material();
 	Material* materialNoCopy() const;
 	Material* sharedMaterial() const;
+
 	void setMaterial(const Material& material);
 	void setSharedMaterial(Material* material);
 };

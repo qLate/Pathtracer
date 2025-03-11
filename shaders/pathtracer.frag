@@ -30,6 +30,11 @@ uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec4 bgColor = vec4(0, 0, 0, 1);
 
+struct TexInfo
+{
+    vec2 size;
+};
+
 struct Light
 {
     float lightType; // 0 - GlobalLight, 1 - PointLight
@@ -41,7 +46,7 @@ struct Light
 struct Material
 {
     vec4 color;
-    vec4 properties1; // lit, diffuse coeff, specular coeff, specular degree
+    vec4 properties1; // lit, diffuse coeff
     vec4 properties2; // reflection, indexID, texArrayLayerIndex
 };
 
@@ -86,34 +91,41 @@ struct Ray
 // ----------- BUFFERS -----------
 uniform mat4x4 cameraRotMat = mat4x4(1.0);
 
+uniform vec2 texArrayBounds;
 layout(binding = 0) uniform sampler2DArray texArray;
 
+uniform int texInfoCount;
+layout(std140, binding = 1) uniform TexInfos
+{
+    TexInfo texInfos[1];
+};
+
 uniform int materialCount;
-layout(std140, binding = 1) uniform Materials
+layout(std140, binding = 2) uniform Materials
 {
     Material materials[1];
 };
 
 uniform int lightCount;
-layout(std140, binding = 2) uniform Lights
+layout(std140, binding = 3) uniform Lights
 {
     Light lights[1];
 };
 
 uniform int objectCount;
-layout(std140, binding = 3) uniform Objects
+layout(std140, binding = 4) uniform Objects
 {
     Object objects[1];
 };
 
 uniform int triangleCount;
-layout(std140, binding = 4) /*buffer*/ uniform Triangles
+layout(std140, binding = 5) /*buffer*/ uniform Triangles
 {
     Triangle triangles[1];
 };
 
 uniform int bvhNodeCount;
-layout(std140, binding = 5) /*buffer*/ uniform BVHNodes
+layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 {
     BVHNode nodes[1];
 };
@@ -175,7 +187,10 @@ vec4 castRay(Ray ray)
         ray.interPoint += ray.surfaceNormal * 0.01;
 
         Material mat = getMaterial(ray.materialIndex);
-        vec4 uvColor = texture(texArray, vec3(ray.uvPos.x, 1 - ray.uvPos.y, mat.properties2.z));
+        vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
+        vec2 uvLocal = uv * texInfos[int(mat.properties2.z)].size / texArrayBounds;
+
+        vec4 uvColor = texture(texArray, vec3(uvLocal, mat.properties2.z));
         if (mat.properties1.x == 1)
         {
             vec4 diffuse, specular;

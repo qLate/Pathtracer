@@ -36,12 +36,7 @@ Material* Graphical::sharedMaterial() const
 
 void Graphical::setMaterial(const Material& material)
 {
-	if (_material)
-	{
-		delete _material;
-		_material = nullptr;
-	}
-
+	delete _material;
 	this->_material = new Material(material);
 }
 void Graphical::setSharedMaterial(Material* material)
@@ -121,9 +116,9 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 	return triangles;
 }
 
-Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radius(radius) { }
+Sphere::Sphere(glm::vec3 pos, float radius) : Graphical(pos, {}), radius(radius) {}
 
-Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal {normalize(normal)} { }
+Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal {normalize(normal)} {}
 
 
 Model::Model(const std::filesystem::path& path)
@@ -204,11 +199,11 @@ void Model::parse(const std::filesystem::path& path)
 			for (int i = 2; i < posIndexes.size(); i++)
 			{
 				auto v1 = Vertex(vertexPositions[posIndexes[0] % vertexPositions.size()], uvIndexes[0] != -1 ? vertexUVs[uvIndexes[0]] : glm::vec2(),
-					normalIndexes[0] != -1 ? vertexNormals[normalIndexes[0]] : glm::vec3(0, 0, 0));
+				                 normalIndexes[0] != -1 ? vertexNormals[normalIndexes[0]] : glm::vec3(0, 0, 0));
 				auto v2 = Vertex(vertexPositions[posIndexes[i - 1] % vertexPositions.size()], uvIndexes[i - 1] != -1 ? vertexUVs[uvIndexes[i - 1]] : glm::vec3(),
-					normalIndexes[i - 1] != -1 ? vertexNormals[normalIndexes[i - 1]] : glm::vec3(0, 0, 0));
+				                 normalIndexes[i - 1] != -1 ? vertexNormals[normalIndexes[i - 1]] : glm::vec3(0, 0, 0));
 				auto v3 = Vertex(vertexPositions[posIndexes[i] % vertexPositions.size()], uvIndexes[i] != -1 ? vertexUVs[uvIndexes[i]] : glm::vec2(),
-					normalIndexes[i - 1] != -1 ? vertexNormals[normalIndexes[i]] : glm::vec3(0, 0, 0));
+				                 normalIndexes[i - 1] != -1 ? vertexNormals[normalIndexes[i]] : glm::vec3(0, 0, 0));
 
 				triangles.emplace_back(new Triangle(nullptr, v1, v2, v3));
 			}

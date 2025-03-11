@@ -20,7 +20,7 @@ void SceneSetup::museumScene()
 
 	auto model = Model("assets/models/museum1.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
-	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
+	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight {{-5.56, -0.19, 14.79}, {255 / 255.0f, 255 / 255.0f, 255.0 / 255.0f}, 1.3f, FLT_MAX};
 }
 
@@ -32,7 +32,7 @@ void SceneSetup::churchScene()
 
 	auto model = Model("assets/models/west.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
-	obj->setMaterial({Color::white(), true, Texture::defaultTex, 1, 0.2f, 2000, 0});
+	obj->setMaterial({Color::white(), true, Texture::defaultTex});
 	auto light = new PointLight {{0.33f, 2.0f, 14.72f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
 
@@ -52,15 +52,15 @@ void SceneSetup::redGreenRoom()
 	auto cube1 = new Cube {glm::vec3 {4, -4, -6.7}, 6.6f, {{0 * DEG_TO_RAD, 0 * DEG_TO_RAD, -28 * DEG_TO_RAD}}};
 	auto sphere1 = new Sphere {{-4, 2, -5}, 5};
 
-	auto whiteWallMat = new Material(Color::white(), true, tex, 1, 0, 2000, 0);
-	plane1->setMaterial({Color::red(), true, tex, 1, 0, 2000, 0});
-	plane2->setMaterial({Color::green(), true, tex, 1, 0, 2000, 0});
+	auto whiteWallMat = new Material(Color::white(), true, tex);
+	plane1->setMaterial({Color::red(), true, tex});
+	plane2->setMaterial({Color::green(), true, tex});
 	plane3->setSharedMaterial(whiteWallMat);
 	plane4->setSharedMaterial(whiteWallMat);
 	plane5->setSharedMaterial(whiteWallMat);
 
-	sphere1->setMaterial({Color::skyblue(), true, tex, 1, 0, 2000, 0.3f});
-	cube1->setMaterial({Color::skyblue(), true, tex, 1, 0, 2000, 0.3f});
+	sphere1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
+	cube1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
 }
 
 void SceneSetup::minecraftHouseScene()
@@ -72,7 +72,7 @@ void SceneSetup::minecraftHouseScene()
 
 	auto model = Model("assets/models/minecraft.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles, {{90 * DEG_TO_RAD, 0, 0}});
-	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
+	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight {{25, 25, 15}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
 
@@ -85,7 +85,7 @@ void SceneSetup::kokuraScene()
 
 	auto model = Model("assets/models/kokura.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles, {{0, 0, 0}});
-	obj->setMaterial({Color::white(), false, tex, 1, 0.2f, 2000, 0});
+	obj->setMaterial({Color::white(), false, tex, 1});
 	auto light = new PointLight {{177.24, 173.63, 100.03}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
 
@@ -98,6 +98,6 @@ void SceneSetup::skeletonScene()
 
 	auto model = Model("assets/models/skeleton.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
-	obj->setMaterial({Color::white(), true, tex, 1, 0.2f, 2000, 0});
+	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight {{1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }

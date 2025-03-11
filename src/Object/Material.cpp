@@ -35,21 +35,15 @@ void Texture::copyImageData(const std::vector<uint8_t>& image)
 	memcpy(data, image.data(), width * height * 4);
 }
 
-Material::Material(Color color, bool lit): lit(lit), color(color), texture(Texture::defaultTex)
-{
-	this->indexID = Scene::materials.size();
-	Scene::materials.push_back(this);
-}
 
-Material::Material(Color color, bool lit, Texture* texture, float diffuseCoeff, float specularCoeff, float specularDegree,
-                   float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoeff {diffuseCoeff}, specularCoeff {specularCoeff},
-                                      specularDegree {specularDegree}, reflection {reflection}
+Material::Material(Color color, bool lit, Texture* texture, float diffuseCoeff, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoeff {diffuseCoeff},
+                                                                                                   reflection {reflection}
 {
-	this->indexID = Scene::materials.size();
+	this->id = nextAvailableId++;
 	Scene::materials.push_back(this);
 }
-Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoeff, material.specularCoeff, material.specularDegree,
-                                                        material.reflection) {}
+Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex) {}
+Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoeff, material.reflection) {}
 Material::~Material()
 {
 	std::erase(Scene::materials, this);

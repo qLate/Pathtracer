@@ -12,10 +12,12 @@ void Renderer::init()
 {
 	shaderP = new ShaderProgram<TraceShader>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
 	shaderP->use();
+
 	shaderP->setInt("maxRayBounce", MAX_RAY_BOUNCE);
 	shaderP->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
 
-	texArray = new GLTexture2DArray(1024, 512, 32, GL_RGBA8);
+	texArray = new GLTexture2DArray(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
+	shaderP->setFloat2("texArrayBounds", TEX_ARRAY_BOUNDS);
 	shaderP->setInt("texArray", 0);
 
 	Texture::defaultTex = new Texture("assets/textures/default.png");

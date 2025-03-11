@@ -6,8 +6,9 @@
 class TraceShader : public Shader
 {
 public:
-	UBO* uboLights;
+	UBO* uboTexInfos;
 	UBO* uboMaterials;
+	UBO* uboLights;
 	UBO* uboObjects;
 	SSBO* ssboTriangles;
 	SSBO* ssboBVHNodes;
@@ -16,6 +17,7 @@ public:
 
 	GLCubeMap* skybox;
 
+	static constexpr int TEX_INFOS_ALIGN = 4;
 	static constexpr int LIGHT_ALIGN = 16;
 	static constexpr int MATERIAL_ALIGN = 12;
 	static constexpr int OBJECT_ALIGN = 12;

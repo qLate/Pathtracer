@@ -1,17 +1,14 @@
 #pragma once
 
+#include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
 class BufferController
 {
-	struct LightStruct
+	struct TexInfoStruct
 	{
-		float lightType;
-		glm::vec3 _pad;
-		glm::vec4 pos;
-		glm::vec4 color;
-		glm::vec4 properties1;
+		glm::vec4 sizes;
 	};
 
 	struct MaterialStruct
@@ -19,6 +16,15 @@ class BufferController
 		glm::vec4 color;
 		glm::vec4 properties1;
 		glm::vec4 properties2;
+	};
+
+	struct LightStruct
+	{
+		float lightType;
+		glm::vec3 _pad;
+		glm::vec4 pos;
+		glm::vec4 color;
+		glm::vec4 properties1;
 	};
 
 	struct ObjectStruct
@@ -56,4 +62,5 @@ public:
 	static void updateObjectsBuffer();
 	static void updateTrianglesBuffer();
 	static void updateBVHBuffer();
+	static void updateTexInfosBuffer();
 };
