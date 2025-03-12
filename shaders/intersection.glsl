@@ -212,16 +212,16 @@ bool intersectObj(inout Ray ray, Object obj)
     return false;
 }
 
-int getHitCubeFace(vec3 dir)
-{
-    vec3 absDir = abs(dir);
-    if (absDir.x >= absDir.y && absDir.x >= absDir.z)
-        return (dir.x > 0) ? 0 : 1;
-    else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
-        return (dir.y > 0) ? 2 : 3;
-    else
-        return (dir.z > 0) ? 4 : 5;
-}
+// int getHitCubeFace(vec3 dir)
+// {
+//     vec3 absDir = abs(dir);
+//     if (absDir.x >= absDir.y && absDir.x >= absDir.z)
+//         return (dir.x > 0) ? 0 : 1;
+//     else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
+//         return (dir.y > 0) ? 2 : 3;
+//     else
+//         return (dir.z > 0) ? 4 : 5;
+// }
 
 bool intersectBVHTree(inout Ray ray, bool castingShadows)
 {

@@ -18,7 +18,7 @@ struct Link
 class BVHBuilder
 {
 public:
-	static constexpr int MAX_TRIANGLES_PER_BOX = 1;
+	static constexpr int MAX_TRIANGLES_PER_BOX = 3;
 
 	inline static std::vector<BVHNode*> nodes;
 

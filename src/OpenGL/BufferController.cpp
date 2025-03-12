@@ -15,7 +15,7 @@ void BufferController::updateAllBuffers()
 	updateObjectsBuffer();
 	updateTrianglesBuffer();
 	updateBVHNodesBuffer();
-	updateBVHLinksBuffer();
+	//updateBVHLinksBuffer();
 }
 
 void BufferController::updateTexInfosBuffer()
@@ -160,18 +160,18 @@ void BufferController::updateBVHNodesBuffer()
 	Renderer::shaderP->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Renderer::shaderP->setInt("bvhNodeCount", data.size());
 }
-void BufferController::updateBVHLinksBuffer()
-{
-	if (BVHBuilder::links6Sided[0].empty()) return;
-	std::vector<BVHLinkStruct> data {};
-	for (int i = 0; i < BVHBuilder::links6Sided.size(); i++)
-	{
-		for (int j = 0; j < BVHBuilder::links6Sided[i].size(); j++)
-		{
-			auto [hit, miss] = BVHBuilder::links6Sided[i][j];
-			data.push_back({{}, hit, miss});
-		}
-	}
-	Renderer::shaderP->fragShader->ssboBVHLinks->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("bvhLinkCount", data.size());
-}
+//void BufferController::updateBVHLinksBuffer()
+//{
+//	if (BVHBuilder::links6Sided[0].empty()) return;
+//	std::vector<BVHLinkStruct> data {};
+//	for (int i = 0; i < BVHBuilder::links6Sided.size(); i++)
+//	{
+//		for (int j = 0; j < BVHBuilder::links6Sided[i].size(); j++)
+//		{
+//			auto [hit, miss] = BVHBuilder::links6Sided[i][j];
+//			data.push_back({{}, hit, miss});
+//		}
+//	}
+//	Renderer::shaderP->fragShader->ssboBVHLinks->setData((float*)data.data(), data.size());
+//	Renderer::shaderP->setInt("bvhLinkCount", data.size());
+//}

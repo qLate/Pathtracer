@@ -67,12 +67,12 @@ class BufferController
 		glm::vec4 values;
 	};
 
-	struct BVHLinkStruct
-	{
-		glm::vec2 _pad;
-		int hit;
-		int miss;
-	};
+	//struct BVHLinkStruct
+	//{
+	//	glm::vec2 _pad;
+	//	int hit;
+	//	int miss;
+	//};
 
 public:
 	static void updateAllBuffers();
@@ -83,7 +83,7 @@ public:
 	static void updateObjectsBuffer();
 	static void updateTrianglesBuffer();
 	static void updateBVHNodesBuffer();
-	static void updateBVHLinksBuffer();
+	//static void updateBVHLinksBuffer();
 
 	friend class TraceShader;
 };
