@@ -85,4 +85,6 @@ public:
 	std::vector<Vertex> vertices;
 
 	explicit Model(const std::filesystem::path& path);
+	void parseRapidobj(const std::filesystem::path& path);
+	void parseSelfWritten(const std::filesystem::path& path);
 };

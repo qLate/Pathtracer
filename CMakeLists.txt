@@ -13,17 +13,25 @@ include_directories(include/Object)
 include_directories(include/OpenGL)
 include_directories(include/System)
 include_directories(include/Utils)
+include_directories(include/BVH)
 
 include_directories(libs)
 include_directories(libs/SDL2/include)
 include_directories(libs/stb_image)
 include_directories(libs/imgui/include)
-include_directories(libs/tiny_obj_loader)
+include_directories(libs/rapidobj)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
 
 add_executable(${PROJECT_NAME}
+        "libs/imgui/src/imgui.cpp"
+        "libs/imgui/src/imgui_draw.cpp"
+        "libs/imgui/src/imgui_widgets.cpp"
+        "libs/imgui/src/imgui_tables.cpp"
+        "libs/imgui/src/imgui_impl_sdl2.cpp"
+        "libs/imgui/src/imgui_impl_opengl3.cpp"
+
         "src/Program.cpp"
         "src/Renderer.cpp"
 
@@ -35,7 +43,6 @@ add_executable(${PROJECT_NAME}
         "src/Object/Material.cpp"
         
         "src/System/Input.cpp"
-        "src/System/BVH.cpp"
         "src/System/SDLHandler.cpp"
         "src/System/MyTime.cpp"
         "src/System/ImGUIHandler.cpp"
@@ -47,13 +54,8 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/BufferController.cpp" 
         "src/OpenGL/GLObject.cpp"
 
-
-        "libs/imgui/src/imgui.cpp"
-        "libs/imgui/src/imgui_draw.cpp"
-        "libs/imgui/src/imgui_widgets.cpp"
-        "libs/imgui/src/imgui_tables.cpp"
-        "libs/imgui/src/imgui_impl_sdl2.cpp"
-        "libs/imgui/src/imgui_impl_opengl3.cpp" "include/Utils/MortonCodes.h")
+        "src/BVH/BVH.cpp"
+        "src/BVH/MortonCodes.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

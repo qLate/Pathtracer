@@ -42,4 +42,12 @@ public:
 		if (!hasFlag(enabledLogTypes, logType)) return;
 		log<P...>(params);
 	}
+
+	template <typename... P>
+	static void logError(const P&... params)
+	{
+		std::stringstream stream;
+		(stream << ... << params);
+		std::cerr << stream.str() << '\n';
+	}
 };

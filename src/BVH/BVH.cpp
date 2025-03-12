@@ -1,7 +1,6 @@
 #include "BVH.h"
 
 #include <algorithm>
-#include <chrono>
 
 #include "Scene.h"
 #include "Triangle.h"
@@ -48,19 +47,23 @@ AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
 	return {min(box1.min_, box2.min_), max(box1.max_, box2.max_)};
 }
 
-// ReSharper disable once CppParameterMayBeConstPtrOrRef
+void BVHNode::setLeaf(const std::function<Triangle*(int)>& triangleGetter, int start, int end)
+{
+	isLeaf = true;
+	hitNext = missNext;
+	leafTrianglesStart = start;
+	leafTriangleCount = end - start + 1;
+	box = triangleGetter(start)->getBoundingBox();
+	for (int i = start + 1; i <= end; ++i)
+		box = AABB::getUnitedBox(box, triangleGetter(i)->getBoundingBox());
+}
+
 BVHNodeBasic::BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode)
 {
 	missNext = nextRightNode;
 	if (end - start < maxTrianglesPerBox)
 	{
-		isLeaf = true;
-		hitNext = missNext;
-		leafTrianglesStart = start;
-		leafTriangleCount = end - start + 1;
-		box = triangles[start]->getBoundingBox();
-		for (int i = start + 1; i <= end; ++i)
-			box = AABB::getUnitedBox(box, triangles[i]->getBoundingBox());
+		setLeaf([&triangles](int i) { return triangles[i]; }, start, end);
 		return;
 	}
 
@@ -95,9 +98,9 @@ int BVHNodeBasic::getSplitIndex(std::vector<Triangle*>& triangles, int start, in
 
 	std::sort(triangles.begin() + start, triangles.begin() + end + 1, [axis](auto a, auto b) { return a->getCenter()[axis] < b->getCenter()[axis]; });
 
-	auto splitIdx = start;
-	while (triangles[splitIdx]->getCenter()[axis] < splitPos && splitIdx < end - 1) splitIdx++;
-	return splitIdx;
+	auto split = start;
+	while (triangles[split]->getCenter()[axis] < splitPos && split < end - 1) split++;
+	return split;
 }
 
 BVHNodeMorton::BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int maxTrianglesPerBox,
@@ -106,13 +109,7 @@ BVHNodeMorton::BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair
 	missNext = nextRightNode;
 	if (end - start < maxTrianglesPerBox)
 	{
-		isLeaf = true;
-		hitNext = missNext;
-		leafTrianglesStart = start;
-		leafTriangleCount = end - start + 1;
-		box = triangles[start].second->getBoundingBox();
-		for (int i = start + 1; i <= end; ++i)
-			box = AABB::getUnitedBox(box, triangles[i].second->getBoundingBox());
+		setLeaf([&triangles](int i) { return triangles[i].second; }, start, end);
 		return;
 	}
 
@@ -124,19 +121,29 @@ BVHNodeMorton::BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair
 
 	nodes.push_back(nullptr);
 	nodes.push_back(nullptr);
-	nodes[leftInd] = new BVHNodeMorton(nodes, triangles, start, splitIdx, maxTrianglesPerBox, rightInd);
-	nodes[rightInd] = new BVHNodeMorton(nodes, triangles, splitIdx + 1, end, maxTrianglesPerBox, nextRightNode);
+	nodes[leftInd] = new BVHNodeMorton(nodes, triangles, start, splitIdx, maxTrianglesPerBox, rightInd, depth);
+	nodes[rightInd] = new BVHNodeMorton(nodes, triangles, splitIdx + 1, end, maxTrianglesPerBox, nextRightNode, depth);
 
 	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
 }
 int BVHNodeMorton::getSplitIndex(const std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int depth)
 {
-	int splitIdx = start;
-	uint32_t splitBit = 1 << depth;
-	while (splitIdx < end && (triangles[splitIdx].first & splitBit) == (triangles[splitIdx + 1].first & splitBit))
-		splitIdx++;
+	uint32_t firstCode = triangles[start].first;
+	uint32_t lastCode = triangles[end].first;
 
-	if (splitIdx == start || splitIdx == end)
-		return (start + end) / 2;
-	return splitIdx;
+	if (firstCode == lastCode) return (start + end) / 2;
+
+	int pref = MortonCodes::commonPrefixLength(firstCode, lastCode);
+	int splitBit = 30 - pref;
+
+	int split = start;
+	for (int i = start + 1; i <= end; ++i)
+	{
+		if (triangles[i].first >> splitBit != firstCode >> splitBit)
+		{
+			split = i;
+			break;
+		}
+	}
+	return split - 1;
 }

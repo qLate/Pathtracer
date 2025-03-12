@@ -15,7 +15,6 @@ protected:
 public:
 	glm::vec3 getPos() const { return pos; }
 	glm::quat getRot() const { return rot; }
-	glm::vec4 getRotVec4() const { return {rot.x, rot.y, rot.z, rot.w}; }
 
 	virtual void setPos(glm::vec3 pos);
 	virtual void setRot(glm::quat rot);

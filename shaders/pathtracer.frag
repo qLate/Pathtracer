@@ -188,7 +188,7 @@ vec4 castRay(Ray ray)
 
         Material mat = getMaterial(ray.materialIndex);
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-        vec2 uvLocal = uv * texInfos[int(mat.properties2.z)].size / texArrayBounds;
+        vec2 uvLocal = uv * texInfos[int(mat.properties2.z)].size * 0.999999 / texArrayBounds;
 
         vec4 uvColor = texture(texArray, vec3(uvLocal, mat.properties2.z));
         if (mat.properties1.x == 1)

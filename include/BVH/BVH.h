@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
 #include <glm/vec3.hpp>
@@ -43,7 +44,10 @@ public:
 	bool isLeaf = false;
 	int leafTrianglesStart = 0, leafTriangleCount = 0;
 	int hitNext = -1, missNext = -1;
+
+	void setLeaf(const std::function<Triangle*(int)>& triangleGetter, int start, int end);
 };
+
 
 class BVHNodeBasic : public BVHNode
 {

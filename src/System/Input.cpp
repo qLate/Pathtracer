@@ -70,12 +70,6 @@ void Input::updateInput()
 		camera->rotate({0, 0, KEY_ROTATION_SPEED * Time::deltaTime});
 	if (keyboardState[SDL_SCANCODE_RIGHT])
 		camera->rotate({0, 0, -KEY_ROTATION_SPEED * Time::deltaTime});
-
-	// Other
-	if (keyboardState[SDL_SCANCODE_Y])
-	{
-		std::cout << "Player is at:" << " pos " << vec3::to_string(camera->getPos()) << " rot " << vec3::to_string(camera->getRotVec4()) << '\n';
-	}
 }
 
 void Input::handleSDLEvent(const SDL_Event& event)
@@ -102,6 +96,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			Scene::lights[0]->setPos(Camera::instance->getPos());
 			BufferController::updateLightsBuffer();
+		}
+		else if (event.key.keysym.sym == SDLK_y)
+		{
+			std::cout << "Player is at:" << " pos " << to_string(Camera::instance->getPos()) << " rot " << to_string(Camera::instance->getRot()) << '\n';
 		}
 	}
 

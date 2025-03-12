@@ -9,7 +9,7 @@
 
 void SceneSetup::setupScene()
 {
-	churchScene();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()
@@ -29,11 +29,25 @@ void SceneSetup::churchScene()
 	auto camera = new Camera({0.30f, -9.57f, 3.03f});
 	camera->setRot({0.99f, 0.12f, 0, 0});
 	auto tex = new Texture("assets/textures/church.jpg");
+	//auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/west.obj");
 	auto obj = new Mesh({0, 0, 0}, model.triangles);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight {{0.33f, 2.0f, 14.72f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
+}
+
+void SceneSetup::spiderScene()
+{
+	auto camera = new Camera({-3.18f, 196.43f, -42.60f});
+	camera->setRot({0.0f, {0.0f, -0.052f, -1}});
+	camera->setBackgroundColor({0.05f, 0.05f, 0.05f});
+	auto tex = new Texture("assets/textures/spider.jpg");
+
+	auto model = Model("assets/models/spider.obj");
+	auto obj = new Mesh({0, 0, 0}, model.triangles);
+	obj->setMaterial({Color::white(), true, tex});
+	auto light = new PointLight {{-3.18f, 196.43f, -42.60f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
 
 void SceneSetup::redGreenRoom()

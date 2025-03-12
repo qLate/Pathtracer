@@ -48,7 +48,7 @@ void Triangle::recalculateCoefficients()
 	}
 }
 
-Triangle::Triangle(Mesh* mesh, Vertex v1, Vertex v2, Vertex v3) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))), vertices({v1, v2, v3})
+Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))), vertices({v1, v2, v3})
 {
 	for (auto& v : vertices)
 	{

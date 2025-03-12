@@ -20,6 +20,15 @@ public:
 		auto end = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	}
+
+	static int mod(int k, int n)
+	{
+		return (k % n + n) % n;
+	}
+	static float mod(float k, float n)
+	{
+		return fmod(fmod(k, n) + n, n);
+	}
 };
 
 class Timer

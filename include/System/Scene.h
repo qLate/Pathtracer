@@ -28,6 +28,7 @@ public:
 
 	static void museumScene();
 	static void churchScene();
+	static void spiderScene();
 	static void redGreenRoom();
 	static void minecraftHouseScene();
 	static void kokuraScene();
