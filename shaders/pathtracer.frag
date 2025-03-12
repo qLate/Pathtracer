@@ -187,7 +187,7 @@ vec4 castRay(Ray ray)
         }
         intersectBVHTree(ray, false);
 
-        if (ray.surfaceNormal == vec3(0)) break; // no hit
+        if (ray.t == FLT_MAX) break; // no hit
 
         hit = true;
         ray.interPoint += ray.surfaceNormal * 0.01;
@@ -209,9 +209,11 @@ vec4 castRay(Ray ray)
         colorImpact *= mat.reflection;
         if (colorImpact <= 1e-6) break;
 
-        vec3 dir = ray.dir - 2 * dot(ray.dir, ray.surfaceNormal) * ray.surfaceNormal;
+        // vec3 dir = ray.dir - 2 * dot(ray.dir, ray.surfaceNormal) * ray.surfaceNormal;
+        vec3 dir = reflect(ray.dir, ray.surfaceNormal);
         ray = Ray(ray.interPoint, dir, RAY_DEFAULT_ARGS);
     }
+
     color += colorImpact * bgColor;
     return hit ? color : bgColor;
 }

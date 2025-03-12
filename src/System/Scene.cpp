@@ -9,7 +9,7 @@
 
 void SceneSetup::setupScene()
 {
-	skeletonScene();
+	redGreenRoom();
 }
 
 void SceneSetup::museumScene()
