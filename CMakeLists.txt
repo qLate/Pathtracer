@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/GLObject.cpp"
 
         "src/BVH/BVH.cpp"
-        "src/BVH/MortonCodes.cpp")
+        "src/BVH/MortonCodes.cpp" "src/BVH/BVH_morton.cpp" "src/BVH/BVH_basic.cpp" "src/BVH/BVH_6sided.cpp" "src/BVH/BVH_sah.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

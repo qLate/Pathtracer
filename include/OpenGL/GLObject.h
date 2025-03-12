@@ -73,7 +73,7 @@ class GLCubeMap : public GLTexture
 public:
 	GLCubeMap();
 
-	void setFaceTexture(const unsigned char* data, int faceInd, int width, int height) const;
+	void setFaceTexture(const unsigned char* data, int faceInd, int width, int height, GLenum typeInternal = GL_RGB, GLenum type = GL_RGB, GLenum dataType = GL_RGB) const;
 };
 
 

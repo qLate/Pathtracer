@@ -12,6 +12,7 @@ public:
 	UBO* uboObjects;
 	SSBO* ssboTriangles;
 	SSBO* ssboBVHNodes;
+	SSBO* ssboBVHLinks;
 
 	VAO* vaoScreen;
 

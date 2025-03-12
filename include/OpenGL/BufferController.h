@@ -12,6 +12,7 @@ class BufferController
 	static constexpr int OBJECT_ALIGN = 12;
 	static constexpr int TRIANGLE_ALIGN = 40;
 	static constexpr int BVH_NODE_ALIGN = 12;
+	static constexpr int BVH_LINK_ALIGN = 4;
 
 	struct TexInfoStruct
 	{
@@ -66,15 +67,23 @@ class BufferController
 		glm::vec4 values;
 	};
 
+	struct BVHLinkStruct
+	{
+		glm::vec2 _pad;
+		int hit;
+		int miss;
+	};
+
 public:
 	static void updateAllBuffers();
 
+	static void updateTexInfosBuffer();
 	static void updateMaterialsBuffer();
 	static void updateLightsBuffer();
 	static void updateObjectsBuffer();
 	static void updateTrianglesBuffer();
-	static void updateBVHBuffer();
-	static void updateTexInfosBuffer();
+	static void updateBVHNodesBuffer();
+	static void updateBVHLinksBuffer();
 
 	friend class TraceShader;
 };

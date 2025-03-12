@@ -83,6 +83,12 @@ struct BVHNode
     vec4 values; // hitNext, missNext, isLeaf
 };
 
+struct BVHLink {
+    vec2 _pad;
+    int hit;
+    int miss;
+};
+
 struct Ray
 {
     vec3 pos, dir;
@@ -134,6 +140,12 @@ uniform int bvhNodeCount;
 layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 {
     BVHNode nodes[1];
+};
+
+uniform int bvhLinkCount;
+layout(std140, binding = 7) /*buffer*/ uniform BVHLinks
+{
+    BVHLink links[1];
 };
 
 Material getMaterial(int index)

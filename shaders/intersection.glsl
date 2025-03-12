@@ -212,8 +212,21 @@ bool intersectObj(inout Ray ray, Object obj)
     return false;
 }
 
+int getHitCubeFace(vec3 dir)
+{
+    vec3 absDir = abs(dir);
+    if (absDir.x >= absDir.y && absDir.x >= absDir.z)
+        return (dir.x > 0) ? 0 : 1;
+    else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
+        return (dir.y > 0) ? 2 : 3;
+    else
+        return (dir.z > 0) ? 4 : 5;
+}
+
 bool intersectBVHTree(inout Ray ray, bool castingShadows)
 {
+    // int face = getHitCubeFace(ray.dir);
+
     int curr = 0;
     while (curr != -1)
     {
@@ -225,9 +238,11 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows)
                 for (int i = int(node.min.w); i < node.min.w + node.max.w; i++) intersectTriangle(ray, triangles[i]);
             }
             curr = int(node.values.x);
+            // curr = int(links[face * bvhNodeCount + curr].hit);
         }
         else
             curr = int(node.values.y);
+            // curr = int(links[face * bvhNodeCount + curr].miss);
     }
     return ray.surfaceNormal != vec3(0);
 }

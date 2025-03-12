@@ -9,20 +9,28 @@ class Graphical;
 class Triangle;
 class BVHNode;
 
+struct Link
+{
+	int hit;
+	int miss;
+};
+
 class BVHBuilder
 {
-	static constexpr int MAX_TRIANGLES_PER_BOX = 3;
-
-	inline static bool showBoxes = false;
-	inline static float lineWidth = 0.1f;
-
 public:
+	static constexpr int MAX_TRIANGLES_PER_BOX = 1;
+
 	inline static std::vector<BVHNode*> nodes;
 
 	static void initBVH();
 
 	static void buildTreeBasic(std::vector<Triangle*>& triangles);
+	static void buildTreeSAH(std::vector<Triangle*>& triangles);
 	static void buildTreeMorton(std::vector<Triangle*>& triangles);
+
+	inline static std::vector<std::vector<Link>> links6Sided = std::vector<std::vector<Link>>(6);
+	static void buildTree6Sided(std::vector<Triangle*>& triangles);
+	static Link buildAxis(int axis, bool positive, std::vector<Link>& vector, const BVHNode* node, int nextRightNode = -1, int depth = 0);
 };
 
 class AABB
@@ -34,6 +42,7 @@ public:
 	AABB(glm::vec3 min, glm::vec3 max) : min_(min), max_(max) {}
 
 	static AABB getUnitedBox(const AABB& box1, const AABB& box2);
+	glm::vec3 getCenter() const;
 };
 
 class BVHNode
@@ -52,14 +61,20 @@ public:
 class BVHNodeBasic : public BVHNode
 {
 public:
-	BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int maxTrianglesPerBox, int nextRightNode = -1);
+	BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode = -1);
+	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
+};
+
+class BVHNodeSAH : BVHNode
+{
+public:
+	BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode = -1);
 	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
 };
 
 class BVHNodeMorton : public BVHNode
 {
 public:
-	BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int maxTrianglesPerBox,
-	              int nextRightNode = -1, int depth = 0);
-	static int getSplitIndex(const std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int depth);
+	BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int nextRightNode = -1);
+	static int getSplitIndex(const std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end);
 };

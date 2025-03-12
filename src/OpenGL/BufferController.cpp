@@ -9,14 +9,28 @@
 
 void BufferController::updateAllBuffers()
 {
+	updateTexInfosBuffer();
 	updateMaterialsBuffer();
 	updateLightsBuffer();
 	updateObjectsBuffer();
 	updateTrianglesBuffer();
-	updateBVHBuffer();
-	updateTexInfosBuffer();
+	updateBVHNodesBuffer();
+	updateBVHLinksBuffer();
 }
 
+void BufferController::updateTexInfosBuffer()
+{
+	std::vector<TexInfoStruct> data {};
+	for (const auto& tex : Scene::textures)
+	{
+		TexInfoStruct texInfoStruct {};
+		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
+		data.push_back(texInfoStruct);
+	}
+
+	Renderer::shaderP->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
+	Renderer::shaderP->setInt("texInfoCount", data.size());
+}
 void BufferController::updateMaterialsBuffer()
 {
 	std::vector<MaterialStruct> data {};
@@ -129,11 +143,12 @@ void BufferController::updateTrianglesBuffer()
 	Renderer::shaderP->setInt("triangleCount", data.size());
 }
 
-void BufferController::updateBVHBuffer()
+void BufferController::updateBVHNodesBuffer()
 {
 	std::vector<BVHNodeStruct> data {};
-	for (const auto& node : BVHBuilder::nodes)
+	for (int i = 0; i < BVHBuilder::nodes.size(); i++)
 	{
+		const auto& node = BVHBuilder::nodes[i];
 		BVHNodeStruct bvhNodeStruct {};
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
@@ -145,16 +160,18 @@ void BufferController::updateBVHBuffer()
 	Renderer::shaderP->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Renderer::shaderP->setInt("bvhNodeCount", data.size());
 }
-void BufferController::updateTexInfosBuffer()
+void BufferController::updateBVHLinksBuffer()
 {
-	std::vector<TexInfoStruct> data{};
-	for (const auto& tex : Scene::textures)
+	if (BVHBuilder::links6Sided[0].empty()) return;
+	std::vector<BVHLinkStruct> data {};
+	for (int i = 0; i < BVHBuilder::links6Sided.size(); i++)
 	{
-		TexInfoStruct texInfoStruct{};
-		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
-		data.push_back(texInfoStruct);
+		for (int j = 0; j < BVHBuilder::links6Sided[i].size(); j++)
+		{
+			auto [hit, miss] = BVHBuilder::links6Sided[i][j];
+			data.push_back({{}, hit, miss});
+		}
 	}
-
-	Renderer::shaderP->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("texInfoCount", data.size());
+	Renderer::shaderP->fragShader->ssboBVHLinks->setData((float*)data.data(), data.size());
+	Renderer::shaderP->setInt("bvhLinkCount", data.size());
 }

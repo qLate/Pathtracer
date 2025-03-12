@@ -14,6 +14,7 @@ TraceShader::TraceShader(const char* path, int id, int) : Shader(path, id, GL_FR
 	uboObjects = new UBO(BufferController::OBJECT_ALIGN, 4);
 	ssboTriangles = new SSBO(BufferController::TRIANGLE_ALIGN, 5);
 	ssboBVHNodes = new SSBO(BufferController::BVH_NODE_ALIGN, 6);
+	ssboBVHLinks = new SSBO(BufferController::BVH_LINK_ALIGN, 7);
 
 	skybox = new GLCubeMap();
 }
