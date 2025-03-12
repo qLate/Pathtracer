@@ -37,8 +37,8 @@ struct TexInfo
 
 struct Light
 {
-    float lightType; // 0 - GlobalLight, 1 - PointLight
-    vec4 pos;
+    vec3 pos;
+    int lightType; // 0 - global, 1 - point
     vec4 color;
     vec4 properties1; // intensity, [PointLight(distance) : GlobalLight(dirX, dirY, dirZ) : AreaLight(size)]
 };
@@ -46,13 +46,19 @@ struct Light
 struct Material
 {
     vec4 color;
-    vec4 properties1; // lit, diffuse coeff
-    vec4 properties2; // reflection, indexID, texArrayLayerIndex
+    bool lit;
+    float diffuseCoeff;
+    float reflection;
+    float indexID;
+    vec3 _pad;
+    int texArrayLayerIndex;
 };
 
 struct Object
 {
-    vec4 data; // objType, materialIndex
+    int objType;
+    int materialIndex;
+    vec2 _pad;
     vec4 pos; // pos
     vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
 };
@@ -72,8 +78,8 @@ struct Triangle
 
 struct BVHNode
 {
-    vec4 min; // min, trianglesStart
-    vec4 max; // max, triangleCount
+    vec4 min;
+    vec4 max;
     vec4 values; // hitNext, missNext, isLeaf
 };
 
@@ -134,7 +140,7 @@ Material getMaterial(int index)
 {
     for (int i = 0; i < materialCount; i++)
     {
-        if (materials[i].properties2.y == index)
+        if (materials[i].indexID == index)
             return materials[i];
     }
     return materials[0];
@@ -175,7 +181,7 @@ vec4 castRay(Ray ray)
     {
         for (int objInd = 0; objInd < objectCount; objInd++)
         {
-            if (objects[objInd].data.x == 0) continue;
+            if (objects[objInd].objType == 0) continue;
 
             intersectObj(ray, objects[objInd]);
         }
@@ -188,19 +194,19 @@ vec4 castRay(Ray ray)
 
         Material mat = getMaterial(ray.materialIndex);
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-        vec2 uvLocal = uv * texInfos[int(mat.properties2.z)].size * 0.999999 / texArrayBounds;
+        vec2 uvLocal = uv * texInfos[int(mat.texArrayLayerIndex)].size * 0.999999 / texArrayBounds;
 
-        vec4 uvColor = texture(texArray, vec3(uvLocal, mat.properties2.z));
-        if (mat.properties1.x == 1)
+        vec4 uvColor = texture(texArray, vec3(uvLocal, mat.texArrayLayerIndex));
+        if (mat.lit)
         {
             vec4 diffuse;
             getIllumination(ray, diffuse);
-            color += colorImpact * (1 - mat.properties2.x) * uvColor * mat.color * diffuse * mat.properties1.y;
+            color += colorImpact * (1 - mat.reflection) * uvColor * mat.color * diffuse * mat.diffuseCoeff;
         }
         else
-            color += colorImpact * (1 - mat.properties2.x) * uvColor * mat.color;
+            color += colorImpact * (1 - mat.reflection) * uvColor * mat.color;
 
-        colorImpact *= mat.properties2.x;
+        colorImpact *= mat.reflection;
         if (colorImpact <= 1e-6) break;
 
         vec3 dir = ray.dir - 2 * dot(ray.dir, ray.surfaceNormal) * ray.surfaceNormal;

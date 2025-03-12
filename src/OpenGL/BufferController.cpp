@@ -24,8 +24,11 @@ void BufferController::updateMaterialsBuffer()
 	{
 		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
-		materialStruct.properties1 = glm::vec4(mat->lit, mat->diffuseCoeff, 0, 0);
-		materialStruct.properties2 = glm::vec4(mat->reflection, mat->id, mat->texture->texArrayLayerIndex, 0);
+		materialStruct.lit = mat->lit;
+		materialStruct.diffuseCoeff = mat->diffuseCoef;
+		materialStruct.reflection = mat->reflection;
+		materialStruct.indexID = mat->id;
+		materialStruct.texArrayLayerIndex = mat->texture->texArrayLayerIndex;
 
 		data.push_back(materialStruct);
 	}
@@ -40,7 +43,7 @@ void BufferController::updateLightsBuffer()
 	for (const auto& light : Scene::lights)
 	{
 		LightStruct lightStruct {};
-		lightStruct.pos = glm::vec4(light->getPos(), 0);
+		lightStruct.pos = light->getPos();
 		lightStruct.color = light->color;
 		lightStruct.properties1.x = light->intensity;
 
@@ -71,13 +74,13 @@ void BufferController::updateObjectsBuffer()
 	for (const auto& obj : Scene::graphicals)
 	{
 		ObjectStruct objectStruct {};
-		objectStruct.data.y = obj->materialNoCopy()->id;
+		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
 		{
 			auto mesh = (Mesh*)obj;
-			objectStruct.data.x = 0;
+			objectStruct.objType = 0;
 			objectStruct.properties.x = triangleCount;
 			objectStruct.properties.y = mesh->triangles.size();
 			triangleCount += mesh->triangles.size();
@@ -85,13 +88,13 @@ void BufferController::updateObjectsBuffer()
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
 		{
 			auto sphere = (Sphere*)obj;
-			objectStruct.data.x = 1;
+			objectStruct.objType = 1;
 			objectStruct.properties.x = sphere->radius * sphere->radius;
 		}
 		else if (dynamic_cast<Plane*>(obj) != nullptr)
 		{
 			auto plane = (Plane*)obj;
-			objectStruct.data.x = 2;
+			objectStruct.objType = 2;
 			objectStruct.properties = glm::vec4(plane->normal, 0);
 		}
 
@@ -135,6 +138,9 @@ void BufferController::updateBVHBuffer()
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::vec4(node->hitNext, node->missNext, node->isLeaf, 0);
+		//bvhNodeStruct.hitNext = node->hitNext;
+		//bvhNodeStruct.missNext = node->missNext;
+		//bvhNodeStruct.isLeaf = node->isLeaf;
 
 		data.push_back(bvhNodeStruct);
 	}

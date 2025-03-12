@@ -39,10 +39,10 @@ public:
 	Color color;
 	Texture* texture;
 
-	float diffuseCoeff = 1;
+	float diffuseCoef = 1;
 	float reflection = 0;
 
-	Material(Color color, bool lit, Texture* texture, float diffuseCoeff = 1, float reflection = 0);
+	Material(Color color, bool lit, Texture* texture, float diffuseCoef = 1, float reflection = 0);
 	Material(Color color = Color::white(), bool lit = true);
 	Material(const Material& material);
 	~Material();

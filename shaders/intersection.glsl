@@ -80,7 +80,7 @@ bool intersectSphere(inout Ray ray, Object sphere)
     ray.t = x0;
     ray.interPoint = ray.pos + x0 * dir;
     ray.surfaceNormal = normalize(ray.interPoint - sphere.pos.xyz);
-    ray.materialIndex = int(sphere.data.y);
+    ray.materialIndex = int(sphere.materialIndex);
 
     vec3 n = ray.surfaceNormal;
     float u = atan(-n.x, n.y) / (2.0 * PI) + 0.5;
@@ -103,7 +103,7 @@ bool intersectPlane(inout Ray ray, Object plane)
     ray.t = t;
     ray.interPoint = ray.pos + t * ray.dir;
     ray.surfaceNormal = normal;
-    ray.materialIndex = int(plane.data.y);
+    ray.materialIndex = int(plane.materialIndex);
 
     return true;
 }
@@ -197,15 +197,15 @@ bool intersectTriangledObject(inout Ray ray, Object obj)
 
 bool intersectObj(inout Ray ray, Object obj)
 {
-    if (obj.data.x == 0)
+    if (obj.objType == 0)
     {
         if (intersectTriangledObject(ray, obj)) return true;
     }
-    else if (obj.data.x == 1)
+    else if (obj.objType == 1)
     {
         if (intersectSphere(ray, obj)) return true;
     }
-    else if (obj.data.x == 2)
+    else if (obj.objType == 2)
     {
         if (intersectPlane(ray, obj)) return true;
     }

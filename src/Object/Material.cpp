@@ -36,14 +36,14 @@ void Texture::copyImageData(const std::vector<uint8_t>& image)
 }
 
 
-Material::Material(Color color, bool lit, Texture* texture, float diffuseCoeff, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoeff {diffuseCoeff},
+Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoef {diffuseCoef},
                                                                                                    reflection {reflection}
 {
 	this->id = nextAvailableId++;
 	Scene::materials.push_back(this);
 }
 Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex) {}
-Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoeff, material.reflection) {}
+Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoef, material.reflection) {}
 Material::~Material()
 {
 	std::erase(Scene::materials, this);

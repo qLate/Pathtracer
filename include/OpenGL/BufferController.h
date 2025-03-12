@@ -6,6 +6,13 @@
 
 class BufferController
 {
+	static constexpr int TEX_INFOS_ALIGN = 4;
+	static constexpr int LIGHT_ALIGN = 12;
+	static constexpr int MATERIAL_ALIGN = 12;
+	static constexpr int OBJECT_ALIGN = 12;
+	static constexpr int TRIANGLE_ALIGN = 40;
+	static constexpr int BVH_NODE_ALIGN = 12;
+
 	struct TexInfoStruct
 	{
 		glm::vec4 sizes;
@@ -14,22 +21,27 @@ class BufferController
 	struct MaterialStruct
 	{
 		glm::vec4 color;
-		glm::vec4 properties1;
-		glm::vec4 properties2;
+		bool lit;
+		float diffuseCoeff;
+		float reflection;
+		float indexID;
+		glm::vec3 _pad;
+		int texArrayLayerIndex;
 	};
 
 	struct LightStruct
 	{
-		float lightType;
-		glm::vec3 _pad;
-		glm::vec4 pos;
+		glm::vec3 pos;
+		int lightType;
 		glm::vec4 color;
 		glm::vec4 properties1;
 	};
 
 	struct ObjectStruct
 	{
-		glm::vec4 data;
+		int objType;
+		int materialIndex;
+		glm::vec2 _pad;
 		glm::vec4 pos;
 		glm::vec4 properties;
 	};
@@ -63,4 +75,6 @@ public:
 	static void updateTrianglesBuffer();
 	static void updateBVHBuffer();
 	static void updateTexInfosBuffer();
+
+	friend class TraceShader;
 };
