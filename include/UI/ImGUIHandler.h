@@ -36,6 +36,7 @@ public:
 	// --- Core ---
 
 	static bool isWindowFocused(WindowType type);
+	static glm::vec2 getRelativeMousePos(WindowType type);
 
 	friend class ImGUIWindowDrawer;
 };

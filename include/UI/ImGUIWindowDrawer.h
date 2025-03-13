@@ -4,6 +4,7 @@
 
 class ImGUIWindowDrawer
 {
+public:
 	inline static bool showInspector = true;
 	inline static bool showStats = true;
 
@@ -14,6 +15,4 @@ class ImGUIWindowDrawer
 	static void drawScene();
 	static void drawScene_displayStats(bool barVisible);
 	static void drawInspector();
-
-	friend class ImGUIHandler;
 };

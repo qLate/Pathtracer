@@ -36,7 +36,7 @@ void Program::init()
 	SceneSetup::setupScene();
 	Debug::log("Scene setup in " + std::to_string(tm.measureFromLast()) + "ms");
 
-	BVHBuilder::initBVH();
+	BVHBuilder::buildBVH();
 	Debug::log("BVH tree built in " + std::to_string(tm.measureFromLast()) + "ms");
 
 	BufferController::updateBuffers();

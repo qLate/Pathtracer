@@ -2,6 +2,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#include "ImGUIWindowDrawer.h"
+#include "Input.h"
 #include "Renderer.h"
 #include "Triangle.h"
 
@@ -36,4 +38,16 @@ glm::vec3 Camera::getScreenCenter() const
 glm::vec3 Camera::getLeftBotCorner() const
 {
 	return getScreenCenter() - 0.5f * size.y * up() - 0.5f * size.x * right();
+}
+glm::vec3 Camera::getDir(const glm::vec2& screenPos) const
+{
+	auto lbWorld = getLeftBotCorner();
+	auto screenPosWorld = lbWorld + screenPos.x * size.x * right() + screenPos.y * size.y * up();
+	return normalize(screenPosWorld - pos);
+}
+glm::vec3 Camera::getMouseDir() const
+{
+	auto normalizedMousePos = Input::getSceneMousePos() / (glm::vec2)ImGUIWindowDrawer::currRenderSize;
+	normalizedMousePos.y = 1 - normalizedMousePos.y;
+	return getDir(normalizedMousePos);
 }

@@ -21,4 +21,6 @@ public:
 
 	glm::vec3 getScreenCenter() const;
 	glm::vec3 getLeftBotCorner() const;
+	glm::vec3 getDir(const glm::vec2& screenPos) const;
+	glm::vec3 getMouseDir() const;
 };

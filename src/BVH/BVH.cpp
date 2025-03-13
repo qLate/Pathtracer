@@ -3,9 +3,16 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-void BVHBuilder::initBVH()
+void BVHBuilder::buildBVH()
 {
 	buildTreeMorton(Scene::triangles);
+}
+void BVHBuilder::rebuildBVH()
+{
+	for (auto node : nodes)
+		delete node;
+	nodes.clear();
+	buildBVH();
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

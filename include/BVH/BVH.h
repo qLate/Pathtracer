@@ -22,7 +22,8 @@ public:
 
 	inline static std::vector<BVHNode*> nodes;
 
-	static void initBVH();
+	static void buildBVH();
+	static void rebuildBVH();
 
 	static void buildTreeBasic(std::vector<Triangle*>& triangles);
 	static void buildTreeSAH(std::vector<Triangle*>& triangles);

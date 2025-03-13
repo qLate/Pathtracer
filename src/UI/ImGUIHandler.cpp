@@ -102,6 +102,14 @@ bool ImGUIHandler::isWindowFocused(WindowType type)
 	auto window = ImGui::FindWindowByType(type);
 	return window && window->DockNode && window->DockNode->IsFocused;
 }
+glm::vec2 ImGUIHandler::getRelativeMousePos(WindowType type)
+{
+	auto window = ImGui::FindWindowByType(type);
+	if (!window) return {0, 0};
+
+	auto pos = ImGui::GetMousePos();
+	return glm::vec2(pos.x - window->Pos.x, pos.y - window->Pos.y);
+}
 const char* windowTypeToString(WindowType type)
 {
 	switch (type)

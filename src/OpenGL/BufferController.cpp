@@ -9,6 +9,8 @@
 
 void BufferController::updateBuffers()
 {
+	Renderer::renderProgram->use();
+
 	updateTexInfosBuffer();
 	updateMaterialsBuffer();
 	updateLightsBuffer();

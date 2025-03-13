@@ -5,12 +5,15 @@
 #include "BufferController.h"
 #include "Camera.h"
 #include "Debug.h"
+#include "Graphical.h"
+#include "ImGUIWindowDrawer.h"
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
 #include "MyMath.h"
 #include "MyTime.h"
 #include "Physics.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
 
@@ -67,6 +70,7 @@ void Input::updateMovement()
 
 void Input::handleSDLEvent(const SDL_Event& event)
 {
+	auto camera = Camera::instance;
 	if (event.type == SDL_KEYDOWN)
 	{
 		if (event.key.keysym.sym == SDLK_f)
@@ -79,16 +83,12 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		}
 		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
 		{
-			Scene::lights[0]->setPos(Camera::instance->getPos());
+			Scene::lights[0]->setPos(camera->getPos());
 			BufferController::updateLightsBuffer();
 		}
 		else if (event.key.keysym.sym == SDLK_y)
 		{
-			std::cout << "Player is at:" << " pos " << to_string(Camera::instance->getPos()) << " rot " << to_string(Camera::instance->getRot()) << '\n';
-		}
-		else if (event.key.keysym.sym == SDLK_u)
-		{
-			auto hit = Physics::raycast(Camera::instance->getPos(), Camera::instance->forward());
+			std::cout << "Player is at:" << " pos " << to_string(camera->getPos()) << " rot " << to_string(camera->getRot()) << '\n';
 		}
 	}
 
@@ -103,6 +103,18 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		if (event.button.button == SDL_BUTTON_LEFT)
 		{
 			mouseLeftState = true;
+
+			auto hit = Physics::raycast(camera->getPos(), camera->getMouseDir());
+			if (hit.hit)
+			{
+				hit.object->translate(glm::vec3(0, 0, 1));
+
+				BVHBuilder::rebuildBVH();
+				Renderer::renderProgram->use();
+
+				BufferController::updateTrianglesBuffer();
+				BufferController::updateBVHNodesBuffer();
+			}
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)
 		{
@@ -131,7 +143,6 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		auto& camera = Camera::instance;
 		auto rot = eulerAngles(camera->getRot()) * RAD_TO_DEG;
 
 		auto newX = glm::clamp(rot.x - dy * MOUSE_ROTATION_SPEED, -90.0f, 90.0f);
@@ -178,6 +189,10 @@ bool Input::wasMousePressed(bool left)
 bool Input::wasMouseReleased(bool left)
 {
 	return left ? _lastMouseLeftState && !mouseLeftState : _lastMouseRightState && !mouseRightState;
+}
+glm::vec2 Input::getSceneMousePos()
+{
+	return ImGUIHandler::getRelativeMousePos(WindowType::Scene);
 }
 
 float Input::getMouseWheelChange()

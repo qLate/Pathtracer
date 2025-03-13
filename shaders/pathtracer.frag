@@ -1,23 +1,14 @@
 #version 460 core
+/// #include "default/shaderBase.glsl"
+
 out vec4 outColor;
 vec4 COLOR_HEAT = vec4(0);
-
-#define FLT_MAX  1000000
-#define PI 3.14159265359
-#define PHI 1.61803398874
-
-#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-
-/// #include "default/utils.glsl"
-float random(in vec2 xy, in float seed);
 
 // ----------- OPTIONS -----------
 // #define SHOW_BVH_BOXES
 // #define SHOW_BVH_HEAT
 
 // ----------- SETTINGS -----------
-const float boxLineWidth = 0.02;
 uniform int maxRayBounce;
 uniform int samplesPerPixel = 1;
 
@@ -29,118 +20,6 @@ uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec4 bgColor = vec4(0, 0, 0, 1);
 
-struct TexInfo
-{
-    vec2 size;
-};
-
-struct Light
-{
-    vec3 pos;
-    int lightType; // 0 - global, 1 - point
-    vec4 color;
-    vec4 properties1; // intensity, [PointLight(distance) : GlobalLight(dirX, dirY, dirZ) : AreaLight(size)]
-};
-
-struct Material
-{
-    vec4 color;
-    bool lit;
-    float diffuseCoeff;
-    float reflection;
-    float indexID;
-    vec3 _pad;
-    int texArrayLayerIndex;
-};
-
-struct Object
-{
-    int objType;
-    int materialIndex;
-    vec2 _pad;
-    vec4 pos; // pos
-    vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
-};
-
-struct BVHLink {
-    vec2 _pad;
-    int hit;
-    int miss;
-};
-
-struct Ray
-{
-    vec3 pos, dir;
-    float maxDis;
-    float t;
-    int materialIndex;
-    vec3 surfaceNormal;
-    vec3 interPoint;
-    vec2 uvPos;
-};
-
-// ----------- BUFFERS -----------
-uniform mat4x4 cameraRotMat = mat4x4(1.0);
-
-uniform vec2 texArrayBounds;
-layout(binding = 0) uniform sampler2DArray texArray;
-
-uniform int texInfoCount;
-layout(std140, binding = 1) uniform TexInfos
-{
-    TexInfo texInfos[1];
-};
-
-uniform int materialCount;
-layout(std140, binding = 2) uniform Materials
-{
-    Material materials[1];
-};
-
-uniform int lightCount;
-layout(std140, binding = 3) uniform Lights
-{
-    Light lights[1];
-};
-
-uniform int objectCount;
-layout(std140, binding = 4) uniform Objects
-{
-    Object objects[1];
-};
-
-// uniform int bvhLinkCount;
-// layout(std140, binding = 7) /*buffer*/ uniform BVHLinks
-// {
-//     BVHLink links[1];
-// };
-
-Material getMaterial(int index)
-{
-    for (int i = 0; i < materialCount; i++)
-    {
-        if (materials[i].indexID == index)
-            return materials[i];
-    }
-    return materials[0];
-}
-
-// **************************************************************************
-// ------------------------------ INTERSECTION ------------------------------
-// **************************************************************************
-/// #include "intersection.glsl"
-bool intersectObj(inout Ray ray, Object obj);
-bool intersectBVHTree(inout Ray ray, bool castingShadows);
-
-// *************************************************************************
-// --------------------------------- LIGHT ---------------------------------
-// *************************************************************************
-/// #include "light.glsl"
-void getIllumination(Ray ray, inout vec4 diffuse);
-
-// **************************************************************************
-// ---------------------------------- MAIN ----------------------------------
-// **************************************************************************
 vec4 castRay(Ray ray)
 {
     vec4 color = vec4(0);
@@ -148,13 +27,7 @@ vec4 castRay(Ray ray)
     float colorImpact = 1;
     for (int bounce = 0; bounce < maxRayBounce; bounce++)
     {
-        for (int objInd = 0; objInd < objectCount; objInd++)
-        {
-            if (objects[objInd].objType == 0) continue;
-
-            intersectObj(ray, objects[objInd]);
-        }
-        intersectBVHTree(ray, false);
+        intersectWorld(ray);
 
         if (ray.t == FLT_MAX) break; // no hit
 
@@ -193,7 +66,7 @@ void main()
     vec3 forward = cameraRotMat[1].xyz;
     vec3 up = cameraRotMat[2].xyz;
 
-    vec3 lb = focalDistance * forward - 0.5 * right * screenSize.x - 0.5 * up * screenSize.y;
+    vec3 lb = focalDistance * forward - 0.5 * screenSize.x * right - 0.5 * screenSize.y * up;
     float x = gl_FragCoord.x / pixelSize.x * screenSize.x;
     float y = gl_FragCoord.y / pixelSize.y * screenSize.y;
     vec3 rayDir = lb + x * right + y * up;

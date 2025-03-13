@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL_events.h"
+#include "glm/vec2.hpp"
 
 class Input
 {
@@ -38,6 +39,7 @@ public:
 	static bool wasMousePressed(bool left);
 	static bool wasMouseReleased(bool left);
 
+	static glm::vec2 getSceneMousePos();
 	static float getMouseWheelChange();
 
 	friend class ImGUIWindowDrawer;

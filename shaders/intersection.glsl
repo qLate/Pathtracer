@@ -140,6 +140,7 @@ bool intersectPlane(inout Ray ray, Object plane)
     return true;
 }
 
+const float boxLineWidth = 0.02;
 bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
 {
     float tMin = 0, tMax = FLT_MAX;
@@ -159,19 +160,19 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
         tMax = min(t1, tMax);
         if (tMax <= tMin) return false;
     }
-    float boxLineWidth = boxLineWidth * (1 + tMax / 15);
 
     vec2 ts = vec2(tMin, tMax);
+    float width = boxLineWidth * (1 + tMax / 15);
     for (int i = 0; i < 2; i++)
     {
         float t = ts[i];
         vec3 point = ray.pos + t * ray.dir;
-        if (ray.t > t && ((abs(min_.x - point.x) <= boxLineWidth || abs(max_.x - point.x) <= boxLineWidth ||
-                    abs(min_.y - point.y) <= boxLineWidth || abs(max_.y - point.y) <= boxLineWidth) &&
-                    (abs(min_.y - point.y) <= boxLineWidth || abs(max_.y - point.y) <= boxLineWidth ||
-                        abs(min_.z - point.z) <= boxLineWidth || abs(max_.z - point.z) <= boxLineWidth) &&
-                    (abs(min_.z - point.z) <= boxLineWidth || abs(max_.z - point.z) <= boxLineWidth ||
-                        abs(min_.x - point.x) <= boxLineWidth || abs(max_.x - point.x) <= boxLineWidth)))
+        if (ray.t > t && ((abs(min_.x - point.x) <= width || abs(max_.x - point.x) <= width ||
+                    abs(min_.y - point.y) <= width || abs(max_.y - point.y) <= width) &&
+                    (abs(min_.y - point.y) <= width || abs(max_.y - point.y) <= width ||
+                        abs(min_.z - point.z) <= width || abs(max_.z - point.z) <= width) &&
+                    (abs(min_.z - point.z) <= width || abs(max_.z - point.z) <= width ||
+                        abs(min_.x - point.x) <= width || abs(max_.x - point.x) <= width)))
         {
             ray.surfaceNormal = vec3(0, 1, 0);
             ray.interPoint = point;
@@ -267,14 +268,66 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows)
         {
             if (node.values.z == 1)
             {
-                for (int i = int(node.min.w); i < node.min.w + node.max.w; i++) intersectTriangle(ray, triangles[i]);
+                for (int i = int(node.min.w); i < node.min.w + node.max.w; i++)
+                    intersectTriangle(ray, triangles[i]);
             }
             curr = int(node.values.x);
             // curr = int(links[face * bvhNodeCount + curr].hit);
         }
         else
+        {
             curr = int(node.values.y);
             // curr = int(links[face * bvhNodeCount + curr].miss);
+        }
     }
     return ray.surfaceNormal != vec3(0);
+}
+
+bool intersectBVHTreeIndexed(inout Ray ray, bool castingShadows, inout int hitTriIndex)
+{
+    int curr = 0;
+    while (curr != -1)
+    {
+        BVHNode node = nodes[curr];
+        if (intersectsAABB(ray, node.min, node.max, 0, FLT_MAX, castingShadows))
+        {
+            if (node.values.z == 1)
+            {
+                for (int i = int(node.min.w); i < node.min.w + node.max.w; i++)
+                {
+                    if (intersectTriangle(ray, triangles[i]))
+                        hitTriIndex = i;
+                }
+            }
+            curr = int(node.values.x);
+        }
+        else
+            curr = int(node.values.y);
+    }
+    return ray.surfaceNormal != vec3(0);
+}
+
+void intersectWorld(inout Ray ray)
+{
+    for (int objInd = 0; objInd < objectCount; objInd++)
+    {
+        if (objects[objInd].objType == 0) continue;
+
+        intersectObj(ray, objects[objInd]);
+    }
+
+    intersectBVHTree(ray, false);
+}
+
+void intersectWorldIndexed(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
+{
+    for (int objInd = 0; objInd < objectCount; objInd++)
+    {
+        if (objects[objInd].objType == 0) continue;
+
+        if (intersectObj(ray, objects[objInd]))
+            hitObjIndex = objInd;
+    }
+
+    intersectBVHTreeIndexed(ray, false, hitTriIndex);
 }
