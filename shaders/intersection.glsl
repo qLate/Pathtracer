@@ -1,35 +1,3 @@
-struct Vertex
-{
-    vec4 posU;
-    vec4 normalV;
-};
-
-struct Triangle
-{
-    Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, normal
-    vec4 rows[3];
-};
-
-struct BVHNode
-{
-    vec4 min;
-    vec4 max;
-    vec4 values; // hitNext, missNext, isLeaf
-};
-
-uniform int triangleCount;
-layout(std140, binding = 5) /*buffer*/ uniform Triangles
-{
-    Triangle triangles[1];
-};
-
-uniform int bvhNodeCount;
-layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
-{
-    BVHNode nodes[1];
-};
-
 vec3 getTriangleNormalAt(Triangle tri, float u, float v, bool invert)
 {
     vec3 interpolatedNormal = normalize((1 - u - v) * tri.vertices[0].normalV.xyz + u * tri.vertices[1].normalV.xyz + v * tri.vertices[2].normalV.xyz);

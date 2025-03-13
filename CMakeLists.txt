@@ -20,6 +20,7 @@ include_directories(include/Other)
 
 include_directories(libs)
 include_directories(libs/SDL2/include)
+include_directories(libs/glad)
 include_directories(libs/stb_image)
 include_directories(libs/imgui/include)
 include_directories(libs/rapidobj)
@@ -53,7 +54,7 @@ add_executable(${PROJECT_NAME}
         "src/UI/ImGUIHandler.cpp"
         "src/UI/ImGUIWindowDrawer.cpp"
          
-        "src/OpenGL/glad.c"
+        "libs/glad/glad.c"
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 

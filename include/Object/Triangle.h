@@ -30,17 +30,8 @@ public:
 
 	void updateGeometry();
 
-	// Precalculated
-	glm::vec3 row1 {};
-	glm::vec3 row2 {};
-	glm::vec3 row3 {};
-	float row1Val {};
-	float row2Val {};
-	float row3Val {};
-
 	Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh = nullptr);
 	void attachTo(Mesh* mesh);
-	void recalculateCoefficients();
 
 	AABB getBoundingBox() const;
 	glm::vec3 getCenter() const;

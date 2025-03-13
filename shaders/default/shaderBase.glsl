@@ -41,6 +41,26 @@ struct Object
     vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
 };
 
+struct Vertex
+{
+    vec4 posU;
+    vec4 normalV;
+};
+
+struct Triangle
+{
+    Vertex vertices[3];
+    vec4 materialIndex; // materialIndex, normal
+    vec4 rows[3];
+};
+
+struct BVHNode
+{
+    vec4 min;
+    vec4 max;
+    vec4 values; // hitNext, missNext, isLeaf
+};
+
 // struct BVHLink {
 //     vec2 _pad;
 //     int hit;
@@ -86,6 +106,18 @@ uniform int objectCount;
 layout(std140, binding = 4) uniform Objects
 {
     Object objects[1];
+};
+
+uniform int triangleCount;
+layout(std140, binding = 5) /*buffer*/ uniform Triangles
+{
+    Triangle triangles[1];
+};
+
+uniform int bvhNodeCount;
+layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
+{
+    BVHNode nodes[1];
 };
 
 // uniform int bvhLinkCount;

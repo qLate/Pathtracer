@@ -1,11 +1,34 @@
 #include "BufferController.h"
 
 #include "BVH.h"
+#include "Debug.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
+#include "Utils.h"
+
+
+void BufferController::init()
+{
+	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeCoefs.comp");
+
+	updateBuffers();
+}
+void BufferController::uninit()
+{
+	delete precomputeTriCoefsProgram;
+}
+
+void BufferController::precomputeTriangleCoefs()
+{
+	precomputeTriCoefsProgram->use();
+
+	int size = ceil(sqrt(Scene::triangles.size()));
+	precomputeTriCoefsProgram->setInt("clusterSize", size);
+	ComputeShaderProgram::dispatch({size, size, 1});
+}
 
 void BufferController::updateBuffers()
 {
@@ -123,6 +146,7 @@ void BufferController::updateObjectsBuffer()
 
 void BufferController::updateTrianglesBuffer()
 {
+	TimeMeasurer tm;
 	std::vector<TriangleStruct> data {};
 	for (const auto& triangle : Scene::triangles)
 	{
@@ -134,15 +158,18 @@ void BufferController::updateTrianglesBuffer()
 		}
 		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->id, 0, 0, 0);
 
-		triangleStruct.rows[0] = glm::vec4(triangle->row1, triangle->row1Val);
-		triangleStruct.rows[1] = glm::vec4(triangle->row2, triangle->row2Val);
-		triangleStruct.rows[2] = glm::vec4(triangle->row3, triangle->row3Val);
+		//triangleStruct.rows[0] = glm::vec4(triangle->row1, triangle->row1Val);
+		//triangleStruct.rows[1] = glm::vec4(triangle->row2, triangle->row2Val);
+		//triangleStruct.rows[2] = glm::vec4(triangle->row3, triangle->row3Val);
 
 		data.push_back(triangleStruct);
 	}
-
-	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
+	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
+	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size(), GL_STREAM_DRAW);
 	Renderer::renderProgram->setInt("triangleCount", data.size());
+	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
+	precomputeTriangleCoefs();
+	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
 }
 
 void BufferController::updateBVHNodesBuffer()

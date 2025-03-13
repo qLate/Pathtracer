@@ -19,20 +19,3 @@ public:
 	void setUpScreenTriangles() const;
 	TraceShader(const char* path, int id, int);
 };
-
-class TraceShader1 : public Shader
-{
-public:
-	UBO* uboTexInfos;
-	UBO* uboMaterials;
-	UBO* uboLights;
-	UBO* uboObjects;
-	SSBO* ssboTriangles;
-	SSBO* ssboBVHNodes;
-	SSBO* ssboBVHLinks;
-
-	VAO* vaoScreen;
-
-	void setUpScreenTriangles() const;
-	TraceShader1(const char* path, int id, int);
-};

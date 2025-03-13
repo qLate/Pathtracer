@@ -4,6 +4,9 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+class SSBO;
+class ComputeShaderProgram;
+
 class BufferController
 {
 	static constexpr int TEX_INFOS_ALIGN = 4;
@@ -74,7 +77,14 @@ class BufferController
 	//	int miss;
 	//};
 
+	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
+
+	static void precomputeTriangleCoefs();
+
 public:
+	static void init();
+	static void uninit();
+
 	static void updateBuffers();
 
 	static void updateTexInfosBuffer();
@@ -86,5 +96,4 @@ public:
 	//static void updateBVHLinksBuffer();
 
 	friend class TraceShader;
-	friend class TraceShader1;
 };

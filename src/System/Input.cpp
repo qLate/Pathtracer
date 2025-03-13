@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
+#include "Utils.h"
 
 void Input::update()
 {
@@ -104,16 +105,19 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			mouseLeftState = true;
 
-			auto hit = Physics::raycast(camera->getPos(), camera->getMouseDir());
-			if (hit.hit)
+			if (ImGUIHandler::isWindowFocused(WindowType::Scene))
 			{
-				hit.object->translate(glm::vec3(0, 0, 1));
+				auto hit = Physics::raycast(camera->getPos(), camera->getMouseDir());
+				if (hit.hit)
+				{
+					hit.object->translate(glm::vec3(0, 0, 1));
 
-				BVHBuilder::rebuildBVH();
-				Renderer::renderProgram->use();
+					BVHBuilder::rebuildBVH();
+					Renderer::renderProgram->use();
 
-				BufferController::updateTrianglesBuffer();
-				BufferController::updateBVHNodesBuffer();
+					BufferController::updateTrianglesBuffer();
+					BufferController::updateBVHNodesBuffer();
+				}
 			}
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)

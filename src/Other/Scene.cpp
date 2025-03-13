@@ -10,7 +10,7 @@
 
 void SceneSetup::setupScene()
 {
-	churchScene();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()

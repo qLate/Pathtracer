@@ -13,6 +13,7 @@
 
 void SDLHandler::init()
 {
+	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_LoadLibrary(nullptr);
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
