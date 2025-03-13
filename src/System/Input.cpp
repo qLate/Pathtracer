@@ -118,7 +118,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		mouseWheelChange += event.wheel.y;
 
 		if (isKeyPressed(SDL_SCANCODE_LALT))
-			moveSpeedMult += event.wheel.y * 2.0f;
+		{
+			moveSpeedMult *= 1 + event.wheel.y * 0.3f;
+			moveSpeedMult = glm::clamp(moveSpeedMult, 0.1f, 20.0f);
+		}
 	}
 }
 

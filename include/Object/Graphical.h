@@ -16,7 +16,7 @@ class Graphical : public Object
 	Material* _material = nullptr;
 
 protected:
-	Graphical(glm::vec3 pos = {}, glm::quat rot = {});
+	Graphical(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	~Graphical() override;
 
 public:
@@ -36,15 +36,19 @@ class Mesh : public Graphical
 public:
 	std::vector<Triangle*> triangles {};
 
-	Mesh(glm::vec3 pos, std::vector<Triangle*> triangles, glm::quat rot = {});
+	Mesh(std::vector<Triangle*> triangles, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	~Mesh() override;
+
+	void setPos(glm::vec3 pos) override;
+	void setRot(glm::quat rot) override;
+	void setScale(glm::vec3 scale) override;
 };
 
 
 class Square : public Mesh
 {
 public:
-	Square(glm::vec3 pos, float side, glm::quat rot = {});
+	Square(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	std::vector<Triangle*> generateTriangles(float side);
 };
 
@@ -54,7 +58,7 @@ class Cube final : public Mesh
 public:
 	float side;
 
-	Cube(glm::vec3 pos, float side, glm::quat rot);
+	Cube(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	std::vector<Triangle*> generateTriangles(float side);
 };
 
@@ -64,7 +68,7 @@ class Sphere final : public Graphical
 public:
 	float radius;
 
-	Sphere(glm::vec3 pos, float radius);
+	Sphere(glm::vec3 pos, float radius, glm::vec3 scale = {1, 1, 1});
 };
 
 
@@ -74,17 +78,4 @@ public:
 	glm::vec3 normal;
 
 	Plane(glm::vec3 pos, glm::vec3 normal);
-};
-
-class Model
-{
-	void parse(const std::filesystem::path& path);
-
-public:
-	std::vector<Triangle*> triangles;
-	std::vector<Vertex> vertices;
-
-	explicit Model(const std::filesystem::path& path);
-	void parseRapidobj(const std::filesystem::path& path);
-	void parseSelfWritten(const std::filesystem::path& path);
 };

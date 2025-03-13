@@ -8,16 +8,19 @@ class Object
 protected:
 	glm::vec3 pos;
 	glm::quat rot;
+	glm::vec3 scale;
 
 	virtual ~Object() = default;
-	Object(glm::vec3 pos, glm::quat rot = {1, 0, 0, 0});
+	Object(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 
 public:
 	glm::vec3 getPos() const { return pos; }
 	glm::quat getRot() const { return rot; }
+	glm::vec3 getScale() const { return scale; }
 
 	virtual void setPos(glm::vec3 pos);
 	virtual void setRot(glm::quat rot);
+	virtual void setScale(glm::vec3 scale);
 
 	void translate(const glm::vec3& v);
 	void rotate(const glm::vec3& degrees);

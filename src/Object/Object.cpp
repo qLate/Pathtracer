@@ -3,13 +3,14 @@
 #include "MyMath.h"
 #include "Scene.h"
 
-Object::Object(const glm::vec3 pos, glm::quat rot) : pos(pos), rot(rot)
+Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : pos(pos), rot(rot), scale(scale)
 {
 	Scene::objects.emplace_back(this);
 }
 
 void Object::setPos(glm::vec3 pos) { this->pos = pos; }
 void Object::setRot(glm::quat rot) { this->rot = rot; }
+void Object::setScale(glm::vec3 scale) { this->scale = scale; }
 void Object::translate(const glm::vec3& v)
 {
 	setPos(pos + v);
@@ -28,9 +29,9 @@ glm::vec3 Object::right() const { return rot * glm::vec3(1, 0, 0); }
 
 glm::vec3 Object::localToGlobalPos(const glm::vec3& localPos) const
 {
-	return rot * localPos + pos;
+	return pos + rot * (localPos * scale);
 }
 glm::vec3 Object::globalToLocalPos(const glm::vec3& globalPos) const
 {
-	return -rot * globalPos - pos;
+	return inverse(rot) * (globalPos - pos) / scale;
 }

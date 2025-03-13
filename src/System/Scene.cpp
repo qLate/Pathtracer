@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Graphical.h"
 #include "Light.h"
+#include "Model.h"
 #include "MyMath.h"
 #include "SDLHandler.h"
 #include "Triangle.h"
@@ -19,7 +20,7 @@ void SceneSetup::museumScene()
 	auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/museum1.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles);
+	auto obj = new Mesh(model.triangles);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight {{-5.56, -0.19, 14.79}, {255 / 255.0f, 255 / 255.0f, 255.0 / 255.0f}, 1.3f, FLT_MAX};
 }
@@ -32,7 +33,7 @@ void SceneSetup::churchScene()
 	//auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/west.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles);
+	auto obj = new Mesh(model.triangles);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight {{0.33f, 2.0f, 14.72f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
@@ -45,7 +46,7 @@ void SceneSetup::spiderScene()
 	auto tex = new Texture("assets/textures/spider.jpg");
 
 	auto model = Model("assets/models/spider.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles);
+	auto obj = new Mesh(model.triangles);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight {{-3.18f, 196.43f, -42.60f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
@@ -79,13 +80,13 @@ void SceneSetup::redGreenRoom()
 
 void SceneSetup::minecraftHouseScene()
 {
-	auto camera = new Camera({38.405102, 35.592041, 7.974061});
+	auto camera = new Camera({38.40, 35.59, 7.97});
 	camera->setRot({0.38f, {-0.04f, -0.11f, 0.91f}});
 	camera->setBackgroundColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/minecraft.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles, {{90 * DEG_TO_RAD, 0, 0}});
+	auto obj = new Mesh(model.triangles, {}, {{90 * DEG_TO_RAD, 0, 0}});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight {{25, 25, 15}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
@@ -98,20 +99,20 @@ void SceneSetup::kokuraScene()
 	auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/kokura.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles, {{0, 0, 0}});
+	auto obj = new Mesh(model.triangles);
 	obj->setMaterial({Color::white(), false, tex, 1});
 	auto light = new PointLight {{177.24, 173.63, 100.03}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }
 
 void SceneSetup::skeletonScene()
 {
-	auto camera = new Camera({-365.9f, -1406.9f, 508.46f});
+	auto camera = new Camera({-365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f});
 	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
 	camera->setBackgroundColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/skeleton.obj");
-	auto obj = new Mesh({0, 0, 0}, model.triangles);
+	auto obj = new Mesh(model.triangles, {}, {}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight {{1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }

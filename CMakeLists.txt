@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
         "src/Object/Light.cpp"
         "src/Object/Triangle.cpp"
         "src/Object/Material.cpp"
+        "src/Object/Model.cpp"
         
         "src/System/Input.cpp"
         "src/System/SDLHandler.cpp"
