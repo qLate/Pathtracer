@@ -1,14 +1,14 @@
 #pragma once
 
-#define NOMINMAX
-
-#include "Action.h"
+#include "SDL_stdinc.h"
 
 class Program
 {
+public:
 	static constexpr float FPS_LIMIT = 500;
 
-public:
+	inline static bool doQuit = false;
+
 	static void init();
 
 	static void loop();

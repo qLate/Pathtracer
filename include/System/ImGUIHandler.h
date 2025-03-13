@@ -1,7 +1,6 @@
 #pragma once
 
 #include "imgui.h"
-#include "SDL_egl.h"
 #include "glm/vec2.hpp"
 
 class ImGUIHandler
@@ -24,7 +23,7 @@ public:
 	static void init();
 	static void initDocking();
 
-	static void update();
+	static void draw();
 	static void updateDocking();
 
 	static void drawMenuBar();

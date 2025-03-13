@@ -50,3 +50,30 @@ public:
 		return false;
 	}
 };
+
+class TimeMeasurer
+{
+	std::chrono::high_resolution_clock::time_point start;
+	std::chrono::high_resolution_clock::time_point lastMeasure;
+
+public:
+	TimeMeasurer()
+	{
+		start = std::chrono::high_resolution_clock::now();
+		lastMeasure = start;
+	}
+
+	long long measure()
+	{
+		lastMeasure = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(lastMeasure - start).count();
+	}
+	long long measureFromLast()
+	{
+		auto curr = std::chrono::high_resolution_clock::now();
+		auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(curr - lastMeasure).count();
+
+		lastMeasure = curr;
+		return dur;
+	}
+};

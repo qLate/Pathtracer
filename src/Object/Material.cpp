@@ -15,7 +15,7 @@ Texture::Texture(const std::filesystem::path& path)
 
 	std::vector<uint8_t> image;
 	if (!readImage(image, path)) std::cerr << "Error loading texture: " << path << "\n";
-	copyImageData(image);
+	setImageData(image);
 
 	texArrayLayerIndex = Renderer::texArray->addTexture(this);
 }
@@ -29,7 +29,7 @@ bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::pat
 	stbi_image_free(data);
 	return data != nullptr;
 }
-void Texture::copyImageData(const std::vector<uint8_t>& image)
+void Texture::setImageData(const std::vector<uint8_t>& image)
 {
 	data = new unsigned char[width * height * 4];
 	memcpy(data, image.data(), width * height * 4);

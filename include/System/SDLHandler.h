@@ -6,6 +6,8 @@
 
 class SDLHandler
 {
+	inline static float _lastUpdateTime = 0;
+
 public:
 	inline static SDL_Window* window;
 	inline static SDL_Event event;
@@ -14,10 +16,12 @@ public:
 	inline static bool sceneFocused = true;
 	inline static bool isFullscreen = false;
 
+
 	static void init();
 	static void initOpenGL();
 
-	static bool updateEvents();
+	static void update();
+	static void updateLimitFPS();
 
 	static void quit();
 

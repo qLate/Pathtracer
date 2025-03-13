@@ -26,43 +26,33 @@ int main(int argc, char* argv[])
 
 void Program::init()
 {
-	static long long dur;
-
 	SDLHandler::init();
 	Renderer::init();
 
-	// Setup scene
-	dur = Utils::measureCallTime(SceneSetup::setupScene);
-	Debug::log("Scene setup in " + std::to_string(dur) + "ms");
+	TimeMeasurer tm {};
 
-	// Build BVH
-	dur = Utils::measureCallTime(BVHBuilder::initBVH);
-	Debug::log("BVH tree built in " + std::to_string(dur) + "ms");
+	SceneSetup::setupScene();
+	Debug::log("Scene setup in " + std::to_string(tm.measureFromLast()) + "ms");
 
-	// Update buffers
-	dur = Utils::measureCallTime(BufferController::updateAllBuffers);
-	Debug::log("Buffers updated in " + std::to_string(dur) + "ms");
+	BVHBuilder::initBVH();
+	Debug::log("BVH tree built in " + std::to_string(tm.measureFromLast()) + "ms");
+
+	BufferController::updateAllBuffers();
+	Debug::log("Buffers updated in " + std::to_string(tm.measureFromLast()) + "ms");
 }
 
 void Program::loop()
 {
-	auto lastUpdateTime = SDL_GetTicks();
-	while (true)
+	while (!doQuit)
 	{
-		// Limit FPS
-		double delta = SDL_GetTicks() - lastUpdateTime;
-		if (delta < 1000 / FPS_LIMIT) continue;
-		lastUpdateTime += delta;
-		// Limit FPS
-
-		Time::updateTime();
-		Input::updateInput();
+		Time::update();
+		Input::update();
+		SDLHandler::update();
 
 		Renderer::render();
-		ImGUIHandler::update();
+		ImGUIHandler::draw();
 
 		SDL_GL_SwapWindow(SDLHandler::window);
-		if (!SDLHandler::updateEvents()) break;
 	}
 }
 

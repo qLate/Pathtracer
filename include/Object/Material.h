@@ -10,7 +10,7 @@ class GLTexture2D;
 class Texture
 {
 	bool readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
-	void copyImageData(const std::vector<uint8_t>& image);
+	void setImageData(const std::vector<uint8_t>& image);
 
 public:
 	inline static Texture* defaultTex = nullptr;

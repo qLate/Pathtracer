@@ -17,7 +17,7 @@ class Input
 	inline static Uint8 keyboardState[SDL_NUM_SCANCODES];
 
 public:
-	static void updateInput();
+	static void update();
 	static void handleSDLEvent(const SDL_Event& event);
 
 	static bool isKeyPressed(uint8_t key);

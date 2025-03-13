@@ -12,7 +12,7 @@
 #include "MyTime.h"
 #include "Scene.h"
 
-void Input::updateInput()
+void Input::update()
 {
 	if (!SDLHandler::sceneFocused) return;
 

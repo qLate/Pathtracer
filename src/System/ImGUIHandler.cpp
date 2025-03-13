@@ -54,7 +54,7 @@ void ImGUIHandler::initDocking()
 	ImGui::DockBuilderFinish(dockSpace);
 }
 
-void ImGUIHandler::update()
+void ImGUIHandler::draw()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();

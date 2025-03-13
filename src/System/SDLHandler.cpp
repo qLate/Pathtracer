@@ -1,11 +1,14 @@
 #include "SDLHandler.h"
 
+#include <algorithm>
+
 #include "Debug.h"
 #include "glad.h"
 #include "GLObject.h"
 #include "ImGUIHandler.h"
 #include "imgui_impl_sdl2.h"
 #include "Input.h"
+#include "Program.h"
 #include "Renderer.h"
 
 void SDLHandler::init()
@@ -48,16 +51,32 @@ void SDLHandler::initOpenGL()
 	Renderer::sceneViewFBO = new GLFrameBuffer(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
 }
 
-bool SDLHandler::updateEvents()
+void SDLHandler::update()
 {
 	while (SDL_PollEvent(&event))
 	{
 		ImGui_ImplSDL2_ProcessEvent(&event);
 		Input::handleSDLEvent(event);
 
-		if (event.type == SDL_QUIT) return false;
+		if (event.type == SDL_QUIT)
+		{
+			Program::doQuit = true;
+			return;
+		}
 	}
-	return true;
+
+	updateLimitFPS();
+}
+
+void SDLHandler::updateLimitFPS()
+{
+	Uint32 delta = SDL_GetTicks() - _lastUpdateTime;
+	float targetDelta = 1000 / Program::FPS_LIMIT;
+	while (delta < targetDelta)
+		delta = SDL_GetTicks() - _lastUpdateTime;
+
+	_lastUpdateTime += delta;
+	_lastUpdateTime = std::max(_lastUpdateTime, SDL_GetTicks() - targetDelta);
 }
 
 void SDLHandler::quit()
