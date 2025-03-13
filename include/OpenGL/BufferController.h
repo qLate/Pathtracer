@@ -86,4 +86,5 @@ public:
 	//static void updateBVHLinksBuffer();
 
 	friend class TraceShader;
+	friend class TraceShader1;
 };

@@ -4,12 +4,15 @@
 
 #include "BufferController.h"
 #include "Camera.h"
+#include "Debug.h"
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
 #include "MyMath.h"
 #include "MyTime.h"
+#include "Physics.h"
 #include "Scene.h"
+#include "Triangle.h"
 
 void Input::update()
 {
@@ -18,15 +21,18 @@ void Input::update()
 }
 void Input::updateInputState()
 {
-	memcpy(lastKeyboardState, keyboardState, SDL_NUM_SCANCODES);
-	mouseWheelChange = 0;
-
+	memcpy(_lastKeyboardState, keyboardState, SDL_NUM_SCANCODES);
 	auto keyboardStatePtr = SDL_GetKeyboardState(nullptr);
 	memcpy(keyboardState, keyboardStatePtr, SDL_NUM_SCANCODES);
+
+	_lastMouseLeftState = mouseLeftState;
+	_lastMouseRightState = mouseRightState;
+
+	mouseWheelChange = 0;
 }
 void Input::updateMovement()
 {
-	if (!SDLHandler::sceneFocused) return;
+	if (!ImGUIHandler::isWindowFocused(WindowType::Scene)) return;
 
 	auto camera = Camera::instance;
 	auto finalMoveSpeed = MOVE_SPEED * moveSpeedMult;
@@ -63,15 +69,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (event.key.keysym.sym == SDLK_ESCAPE)
-		{
-			SDLHandler::sceneFocused = !SDLHandler::sceneFocused;
-			if (SDLHandler::sceneFocused)
-				SDL_SetRelativeMouseMode(SDL_TRUE);
-			else
-				SDL_SetRelativeMouseMode(SDL_FALSE);
-		}
-		else if (event.key.keysym.sym == SDLK_f)
+		if (event.key.keysym.sym == SDLK_f)
 		{
 			SDLHandler::isFullscreen = !SDLHandler::isFullscreen;
 			if (SDLHandler::isFullscreen)
@@ -88,6 +86,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			std::cout << "Player is at:" << " pos " << to_string(Camera::instance->getPos()) << " rot " << to_string(Camera::instance->getRot()) << '\n';
 		}
+		else if (event.key.keysym.sym == SDLK_u)
+		{
+			auto hit = Physics::raycast(Camera::instance->getPos(), Camera::instance->forward());
+		}
 	}
 
 	if (event.type == SDL_KEYUP)
@@ -96,8 +98,35 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			currMoveAcceleration = 1;
 	}
 
-	// Mouse rotation
-	if (event.type == SDL_MOUSEMOTION && SDLHandler::sceneFocused)
+	if (event.type == SDL_MOUSEBUTTONDOWN)
+	{
+		if (event.button.button == SDL_BUTTON_LEFT)
+		{
+			mouseLeftState = true;
+		}
+		else if (event.button.button == SDL_BUTTON_RIGHT)
+		{
+			mouseRightState = true;
+
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+			SDLHandler::mouseAttachedToScene = true;
+		}
+	}
+	else if (event.type == SDL_MOUSEBUTTONUP)
+	{
+		if (event.button.button == SDL_BUTTON_LEFT)
+		{
+			mouseLeftState = false;
+		}
+		else if (event.button.button == SDL_BUTTON_RIGHT)
+		{
+			mouseRightState = false;
+
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+			SDLHandler::mouseAttachedToScene = false;
+		}
+	}
+	if (event.type == SDL_MOUSEMOTION && ImGUIHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
 	{
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
@@ -131,9 +160,27 @@ bool Input::isKeyPressed(uint8_t key)
 }
 bool Input::wasKeyPressed(uint8_t key)
 {
-	return !lastKeyboardState[key] && keyboardState[key];
+	return !_lastKeyboardState[key] && keyboardState[key];
 }
 bool Input::wasKeyReleased(uint8_t key)
 {
-	return lastKeyboardState[key] && !keyboardState[key];
+	return _lastKeyboardState[key] && !keyboardState[key];
+}
+
+bool Input::isMouseDown(bool left)
+{
+	return left ? mouseLeftState : mouseRightState;
+}
+bool Input::wasMousePressed(bool left)
+{
+	return left ? !_lastMouseLeftState && mouseLeftState : !_lastMouseRightState && mouseRightState;
+}
+bool Input::wasMouseReleased(bool left)
+{
+	return left ? _lastMouseLeftState && !mouseLeftState : _lastMouseRightState && !mouseRightState;
+}
+
+float Input::getMouseWheelChange()
+{
+	return mouseWheelChange;
 }

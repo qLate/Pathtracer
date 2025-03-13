@@ -33,4 +33,5 @@ public:
 	static void minecraftHouseScene();
 	static void kokuraScene();
 	static void skeletonScene();
+	static void spaceStationScene();
 };

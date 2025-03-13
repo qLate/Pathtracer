@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "Debug.h"
 #include "Material.h"
 #include "Utils.h"
 
@@ -44,10 +43,10 @@ void UBO::bindBase(int index)
 {
 	glBindBufferBase(GL_UNIFORM_BUFFER, index, id);
 }
-void UBO::setData(const float* data, int count)
+void UBO::setData(const float* data, int count, GLenum type)
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, id);
-	glBufferData(GL_UNIFORM_BUFFER, count * align * sizeof(float), data, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, count * align * sizeof(float), data, type);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -63,10 +62,30 @@ void SSBO::bindBase(int index)
 {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, id);
 }
-void SSBO::setData(const float* data, int count)
+void SSBO::setData(const float* data, int count, GLenum type)
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), data, GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), data, type);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+void SSBO::setStorage(int count) const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+	glBufferStorage(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), NULL, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void* SSBO::mapBuffer() const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	return ptr;
+}
+void SSBO::unmapBuffer() const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 

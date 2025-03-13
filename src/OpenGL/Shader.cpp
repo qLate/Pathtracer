@@ -4,10 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
-#include <sstream>
 
 #include "GLObject.h"
-#include "glm/mat3x3.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 BaseShaderMethods::BaseShaderMethods(int id): id(id) {}
@@ -67,6 +65,49 @@ void BaseShaderMethods::setMatrix4X4(const std::string& name, glm::mat<4, 4, flo
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, false, value_ptr(mat));
 }
 
+bool BaseShaderMethods::getBool(const std::string& name) const
+{
+	int val;
+	glGetUniformiv(id, glGetUniformLocation(id, name.c_str()), &val);
+	return val;
+}
+int BaseShaderMethods::getInt(const std::string& name) const
+{
+	int value;
+	glGetUniformiv(id, glGetUniformLocation(id, name.c_str()), &value);
+	return value;
+}
+float BaseShaderMethods::getFloat(const std::string& name) const
+{
+	float value;
+	glGetUniformfv(id, glGetUniformLocation(id, name.c_str()), &value);
+	return value;
+}
+glm::vec2 BaseShaderMethods::getFloat2(const std::string& name) const
+{
+	glm::vec2 value;
+	glGetUniformfv(id, glGetUniformLocation(id, name.c_str()), value_ptr(value));
+	return value;
+}
+glm::vec3 BaseShaderMethods::getFloat3(const std::string& name) const
+{
+	glm::vec3 value;
+	glGetUniformfv(id, glGetUniformLocation(id, name.c_str()), value_ptr(value));
+	return value;
+}
+glm::vec4 BaseShaderMethods::getFloat4(const std::string& name) const
+{
+	glm::vec4 value;
+	glGetUniformfv(id, glGetUniformLocation(id, name.c_str()), value_ptr(value));
+	return value;
+}
+glm::mat<4, 4, float> BaseShaderMethods::getMatrix4X4(const std::string& name) const
+{
+	glm::mat<4, 4, float> value;
+	glGetUniformfv(id, glGetUniformLocation(id, name.c_str()), value_ptr(value));
+	return value;
+}
+
 Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id)
 {
 	std::string code = parseShader(path);
@@ -75,7 +116,7 @@ Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id
 	auto shader = glCreateShader(type);
 	glShaderSource(shader, 1, &shaderCode, nullptr);
 	glCompileShader(shader);
-	checkCompileErrors(shader, "FRAGMENT");
+	checkCompileErrors(shader, "SHADER");
 
 	glAttachShader(id, shader);
 

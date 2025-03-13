@@ -10,7 +10,7 @@
 
 void SceneSetup::setupScene()
 {
-	skeletonScene();
+	churchScene();
 }
 
 void SceneSetup::museumScene()
@@ -29,8 +29,10 @@ void SceneSetup::churchScene()
 {
 	auto camera = new Camera({0.30f, -9.57f, 3.03f});
 	camera->setRot({0.99f, 0.12f, 0, 0});
+	//auto camera = new Camera({ 7.494653, 8.752432, 11.397732 });
+	//camera->setRot({ 0.963874, {0.189301, -0.036111, -0.183870} });
+	camera->setBackgroundColor(Color::white());
 	auto tex = new Texture("assets/textures/church.jpg");
-	//auto tex = Texture::defaultTex;
 
 	auto model = Model("assets/models/west.obj");
 	auto obj = new Mesh(model.triangles);
@@ -115,4 +117,17 @@ void SceneSetup::skeletonScene()
 	auto obj = new Mesh(model.triangles, {}, {}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight {{1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
+}
+
+void SceneSetup::spaceStationScene()
+{
+	auto camera = new Camera({-34.931564, 44.459042, 47.477470});
+	camera->setRot({0.28f, {-0.065754, 0.213367, -0.932158}});
+	camera->setBackgroundColor({0.05f, 0.05f, 0.05f});
+	auto tex = Texture::defaultTex;
+
+	auto model = Model("assets/models/spaceStationScene/Space Station Scene.obj");
+	auto obj = new Mesh(model.triangles, {}, glm::quat({90, 0, 0}));
+	obj->setMaterial({Color::white(), true, tex, 1});
+	auto light = new PointLight {{-3.19f, 44.20f, 54.34f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
 }

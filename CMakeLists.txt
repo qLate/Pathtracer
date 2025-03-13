@@ -14,6 +14,9 @@ include_directories(include/OpenGL)
 include_directories(include/System)
 include_directories(include/Utils)
 include_directories(include/BVH)
+include_directories(include/UI)
+include_directories(include/Ray)
+include_directories(include/Other)
 
 include_directories(libs)
 include_directories(libs/SDL2/include)
@@ -33,7 +36,6 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_impl_opengl3.cpp"
 
         "src/Program.cpp"
-        "src/Renderer.cpp"
 
         "src/Object/Graphical.cpp"
         "src/Object/Object.cpp"
@@ -44,16 +46,19 @@ add_executable(${PROJECT_NAME}
         "src/Object/Model.cpp"
         
         "src/System/Input.cpp"
-        "src/System/SDLHandler.cpp"
         "src/System/MyTime.cpp"
-        "src/System/ImGUIHandler.cpp"
+        "src/System/Renderer.cpp"
+
+        "src/UI/SDLHandler.cpp"
+        "src/UI/ImGUIHandler.cpp"
+        "src/UI/ImGUIWindowDrawer.cpp"
          
-        "src/System/Scene.cpp"
         "src/OpenGL/glad.c"
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
         "src/OpenGL/GLObject.cpp"
+        "src/OpenGL/ShaderProgram.cpp"
 
         "src/BVH/BVH.cpp"
         "src/BVH/MortonCodes.cpp"
@@ -61,6 +66,13 @@ add_executable(${PROJECT_NAME}
         "src/BVH/BVH_basic.cpp"
         "src/BVH/BVH_6sided.cpp"
         "src/BVH/BVH_sah.cpp"
+
+        "src/System/Physics.cpp"
+
+        "src/Other/Scene.cpp"
+        "src/Other/Tweener.cpp"
+
+        "src/Utils/MyMath.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME} SDL2main)

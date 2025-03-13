@@ -28,8 +28,8 @@ void BufferController::updateTexInfosBuffer()
 		data.push_back(texInfoStruct);
 	}
 
-	Renderer::shaderP->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("texInfoCount", data.size());
+	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("texInfoCount", data.size());
 }
 void BufferController::updateMaterialsBuffer()
 {
@@ -47,8 +47,8 @@ void BufferController::updateMaterialsBuffer()
 		data.push_back(materialStruct);
 	}
 
-	Renderer::shaderP->fragShader->uboMaterials->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("materialCount", data.size());
+	Renderer::renderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("materialCount", data.size());
 }
 
 void BufferController::updateLightsBuffer()
@@ -77,8 +77,8 @@ void BufferController::updateLightsBuffer()
 		data.push_back(lightStruct);
 	}
 
-	Renderer::shaderP->fragShader->uboLights->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("lightCount", data.size());
+	Renderer::renderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("lightCount", data.size());
 }
 
 void BufferController::updateObjectsBuffer()
@@ -115,8 +115,8 @@ void BufferController::updateObjectsBuffer()
 		data.push_back(objectStruct);
 	}
 
-	Renderer::shaderP->fragShader->uboObjects->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("objectCount", data.size());
+	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("objectCount", data.size());
 }
 
 void BufferController::updateTrianglesBuffer()
@@ -139,8 +139,8 @@ void BufferController::updateTrianglesBuffer()
 		data.push_back(triangleStruct);
 	}
 
-	Renderer::shaderP->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("triangleCount", data.size());
+	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("triangleCount", data.size());
 }
 
 void BufferController::updateBVHNodesBuffer()
@@ -157,8 +157,8 @@ void BufferController::updateBVHNodesBuffer()
 		data.push_back(bvhNodeStruct);
 	}
 
-	Renderer::shaderP->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
-	Renderer::shaderP->setInt("bvhNodeCount", data.size());
+	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->setInt("bvhNodeCount", data.size());
 }
 //void BufferController::updateBVHLinksBuffer()
 //{

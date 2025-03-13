@@ -13,9 +13,8 @@ public:
 	inline static SDL_Event event;
 	inline static SDL_GLContext context;
 
-	inline static bool sceneFocused = true;
+	inline static bool mouseAttachedToScene = false;
 	inline static bool isFullscreen = false;
-
 
 	static void init();
 	static void initOpenGL();

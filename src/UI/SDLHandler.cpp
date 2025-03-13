@@ -27,7 +27,7 @@ void SDLHandler::init()
 	auto initialSize = ImGUIHandler::INIT_FULL_WINDOW_SIZE;
 	window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, initialSize.x, initialSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	context = SDL_GL_CreateContext(window);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	initOpenGL();
 	ImGUIHandler::init();

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include "Color.h"
 #include "glad.h"
 
 class Texture;
@@ -32,7 +29,7 @@ protected:
 	GLBuffer();
 
 	virtual void bindBase(int index) = 0;
-	virtual void setData(const float* data, int count) = 0;
+	virtual void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) = 0;
 };
 
 
@@ -44,7 +41,7 @@ public:
 	UBO(int align, int baseIndex = -1);
 
 	void bindBase(int index) override;
-	void setData(const float* data, int count) override;
+	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
 };
 
 
@@ -56,7 +53,11 @@ public:
 	SSBO(int align, int baseIndex = -1);
 
 	void bindBase(int index) override;
-	void setData(const float* data, int count) override;
+	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
+	void setStorage(int count) const;
+
+	void* mapBuffer() const;
+	void unmapBuffer() const;
 };
 
 

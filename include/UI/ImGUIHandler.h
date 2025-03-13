@@ -3,35 +3,41 @@
 #include "imgui.h"
 #include "glm/vec2.hpp"
 
+struct ImGuiWindow;
+
+enum class WindowType
+{
+	Scene = 0,
+	Inspector = 1,
+};
+
 class ImGUIHandler
 {
 	static constexpr char GLSL_VERSION[] = "#version 460";
 	static constexpr int INSPECTOR_WIDTH = 300;
 
 	inline static bool isInit = true;
+	inline static bool isAfterInit = true;
 
 public:
 	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
 	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
 
-	inline static glm::ivec2 currRenderSize = INIT_RENDER_SIZE;
-
 	inline static ImGuiIO* io;
 
-	inline static bool showInspector = true;
-	inline static bool showStats = true;
-
+	// --- Core ---
 	static void init();
 	static void initDocking();
 
 	static void draw();
 	static void updateDocking();
 
-	static void drawMenuBar();
-
-	static void drawScene();
-	static void drawScene_displayStats(bool barVisible);
-	static void drawInspector();
-
 	static void finalizeViewports();
+	// --- Core ---
+
+	static bool isWindowFocused(WindowType type);
+
+	friend class ImGUIWindowDrawer;
 };
+
+const char* windowTypeToString(WindowType type);

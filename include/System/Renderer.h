@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Shader.h"
 #include "glm/vec2.hpp"
 #include "TraceShader.h"
+#include "ShaderProgram.h"
 
 class GLFrameBuffer;
 
@@ -14,7 +14,7 @@ class Renderer
 	static constexpr glm::vec3 TEX_ARRAY_BOUNDS = {8192, 8192, 32};
 
 public:
-	inline static ShaderProgram<TraceShader>* shaderP;
+	inline static DefaultShaderProgram<TraceShader>* renderProgram;
 	inline static GLFrameBuffer* sceneViewFBO;
 	inline static GLTexture2DArray* texArray;
 
@@ -23,6 +23,7 @@ public:
 
 	static void render();
 	static void bindTextures();
+	static void updateCameraUniforms();
 
 	static void resizeView(glm::ivec2 size);
 };

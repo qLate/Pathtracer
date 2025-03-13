@@ -8,9 +8,11 @@
 #include "ImGUIHandler.h"
 #include "Input.h"
 #include "MyTime.h"
+#include "Physics.h"
 #include "SDLHandler.h"
 #include "Scene.h"
 #include "Renderer.h"
+#include "Tweener.h"
 #include "Utils.h"
 
 int main(int argc, char* argv[])
@@ -27,6 +29,7 @@ void Program::init()
 {
 	SDLHandler::init();
 	Renderer::init();
+	Physics::init();
 
 	TimeMeasurer tm {};
 
@@ -47,6 +50,7 @@ void Program::loop()
 		Time::update();
 		Input::update();
 		SDLHandler::update();
+		Tweener::update();
 
 		Renderer::render();
 		ImGUIHandler::draw();

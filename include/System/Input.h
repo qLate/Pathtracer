@@ -13,8 +13,14 @@ class Input
 	inline static float moveSpeedMult = 1;
 	inline static float currMoveAcceleration = 1;
 
-	inline static Uint8 lastKeyboardState[SDL_NUM_SCANCODES];
+	inline static Uint8 _lastKeyboardState[SDL_NUM_SCANCODES];
 	inline static Uint8 keyboardState[SDL_NUM_SCANCODES];
+
+	inline static bool _lastMouseLeftState = false;
+	inline static bool _lastMouseRightState = false;
+	inline static bool mouseLeftState = false;
+	inline static bool mouseRightState = false;
+
 	inline static Sint8 mouseWheelChange = 0;
 
 public:
@@ -28,12 +34,11 @@ public:
 	static bool wasKeyPressed(uint8_t key);
 	static bool wasKeyReleased(uint8_t key);
 
+	static bool isMouseDown(bool left);
+	static bool wasMousePressed(bool left);
+	static bool wasMouseReleased(bool left);
+
 	static float getMouseWheelChange();
 
-	friend class ImGUIHandler;
+	friend class ImGUIWindowDrawer;
 };
-
-inline float Input::getMouseWheelChange()
-{
-	return mouseWheelChange;
-}

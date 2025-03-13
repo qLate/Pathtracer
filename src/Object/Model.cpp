@@ -18,7 +18,8 @@ void Model::parse(const std::filesystem::path& path)
 void Model::parseRapidobj(const std::filesystem::path& path)
 {
 	using namespace rapidobj;
-	Result result = ParseFile(path, MaterialLibrary::Default(Load::Optional));
+	auto mtlLib = MaterialLibrary::Default(Load::Optional);
+	Result result = ParseFile(path, mtlLib);
 	if (result.error) Debug::logError("Error loading OBJ file: ", result.error.code.message());
 
 	bool success = Triangulate(result);

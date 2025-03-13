@@ -11,7 +11,6 @@ vec4 COLOR_HEAT = vec4(0);
 
 /// #include "default/utils.glsl"
 float random(in vec2 xy, in float seed);
-bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1);
 
 // ----------- OPTIONS -----------
 // #define SHOW_BVH_BOXES
@@ -63,26 +62,6 @@ struct Object
     vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
 };
 
-struct Vertex
-{
-    vec4 posU;
-    vec4 normalV;
-};
-
-struct Triangle
-{
-    Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, normal
-    vec4 rows[3];
-};
-
-struct BVHNode
-{
-    vec4 min;
-    vec4 max;
-    vec4 values; // hitNext, missNext, isLeaf
-};
-
 struct BVHLink {
     vec2 _pad;
     int hit;
@@ -130,18 +109,6 @@ layout(std140, binding = 4) uniform Objects
     Object objects[1];
 };
 
-uniform int triangleCount;
-layout(std140, binding = 5) /*buffer*/ uniform Triangles
-{
-    Triangle triangles[1];
-};
-
-uniform int bvhNodeCount;
-layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
-{
-    BVHNode nodes[1];
-};
-
 // uniform int bvhLinkCount;
 // layout(std140, binding = 7) /*buffer*/ uniform BVHLinks
 // {
@@ -162,13 +129,6 @@ Material getMaterial(int index)
 // ------------------------------ INTERSECTION ------------------------------
 // **************************************************************************
 /// #include "intersection.glsl"
-vec3 getTriangleNormalAt(Triangle tri, float u, float v, bool invert);
-bool intersectTriangle(inout Ray ray, Triangle tri);
-bool intersectSphere(inout Ray ray, Object sphere);
-bool intersectPlane(inout Ray ray, Object plane);
-bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_);
-bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax, bool castingShadows);
-bool intersectTriangledObject(inout Ray ray, Object obj);
 bool intersectObj(inout Ray ray, Object obj);
 bool intersectBVHTree(inout Ray ray, bool castingShadows);
 
@@ -176,9 +136,6 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows);
 // --------------------------------- LIGHT ---------------------------------
 // *************************************************************************
 /// #include "light.glsl"
-bool castShadowRays(Ray ray);
-void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse);
-void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse);
 void getIllumination(Ray ray, inout vec4 diffuse);
 
 // **************************************************************************
