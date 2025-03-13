@@ -75,7 +75,7 @@ class BufferController
 	//};
 
 public:
-	static void updateAllBuffers();
+	static void updateBuffers();
 
 	static void updateTexInfosBuffer();
 	static void updateMaterialsBuffer();

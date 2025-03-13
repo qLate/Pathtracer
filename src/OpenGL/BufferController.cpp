@@ -7,7 +7,7 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-void BufferController::updateAllBuffers()
+void BufferController::updateBuffers()
 {
 	updateTexInfosBuffer();
 	updateMaterialsBuffer();

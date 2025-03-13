@@ -4,7 +4,6 @@
 
 #include "BufferController.h"
 #include "Camera.h"
-#include "Debug.h"
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
@@ -14,26 +13,32 @@
 
 void Input::update()
 {
-	if (!SDLHandler::sceneFocused) return;
-
-	auto& camera = Camera::instance;
-	auto moveSpeed = MOVE_SPEED;
-	auto moveDir = vec3::ZERO;
-
+	updateInputState();
+	updateMovement();
+}
+void Input::updateInputState()
+{
 	memcpy(lastKeyboardState, keyboardState, SDL_NUM_SCANCODES);
+	mouseWheelChange = 0;
 
 	auto keyboardStatePtr = SDL_GetKeyboardState(nullptr);
 	memcpy(keyboardState, keyboardStatePtr, SDL_NUM_SCANCODES);
+}
+void Input::updateMovement()
+{
+	if (!SDLHandler::sceneFocused) return;
 
-	// Movement
+	auto camera = Camera::instance;
+	auto finalMoveSpeed = MOVE_SPEED * moveSpeedMult;
+	auto moveDir = vec3::ZERO;
+
 	if (keyboardState[SDL_SCANCODE_LSHIFT])
 	{
-		currentMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime;
-		moveSpeed *= MOVE_SPEED_BOOST * currentMoveAcceleration;
+		currMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime;
+		finalMoveSpeed *= MOVE_SPEED_BOOST * currMoveAcceleration;
 	}
 	else if (keyboardState[SDL_SCANCODE_LCTRL])
-		moveSpeed /= MOVE_SPEED_BOOST;
-
+		finalMoveSpeed /= MOVE_SPEED_BOOST;
 
 	if (keyboardState[SDL_SCANCODE_W])
 		moveDir += camera->forward();
@@ -49,27 +54,9 @@ void Input::update()
 		moveDir += camera->down();
 
 	if (moveDir != vec3::ZERO)
-		camera->translate(moveDir * moveSpeed * Time::deltaTime);
+		camera->translate(moveDir * finalMoveSpeed * Time::deltaTime);
 	else
-		currentMoveAcceleration = 1;
-
-	// Rotation
-	if (keyboardState[SDL_SCANCODE_UP])
-	{
-		auto rot = eulerAngles(camera->getRot()) * RAD_TO_DEG;
-		auto newRot = glm::vec3(glm::clamp(rot.x + KEY_ROTATION_SPEED * Time::deltaTime, -90.0f, 90.0f), rot.y, rot.z);
-		camera->setRot({newRot * DEG_TO_RAD});
-	}
-	if (keyboardState[SDL_SCANCODE_DOWN])
-	{
-		auto rot = eulerAngles(camera->getRot()) * RAD_TO_DEG;
-		auto newRot = glm::vec3(glm::clamp(rot.x - KEY_ROTATION_SPEED * Time::deltaTime, -90.0f, 90.0f), rot.y, rot.z);
-		camera->setRot({newRot * DEG_TO_RAD});
-	}
-	if (keyboardState[SDL_SCANCODE_LEFT])
-		camera->rotate({0, 0, KEY_ROTATION_SPEED * Time::deltaTime});
-	if (keyboardState[SDL_SCANCODE_RIGHT])
-		camera->rotate({0, 0, -KEY_ROTATION_SPEED * Time::deltaTime});
+		currMoveAcceleration = 1;
 }
 
 void Input::handleSDLEvent(const SDL_Event& event)
@@ -106,9 +93,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 	if (event.type == SDL_KEYUP)
 	{
 		if (event.key.keysym.sym == SDLK_LSHIFT)
-			currentMoveAcceleration = 1;
+			currMoveAcceleration = 1;
 	}
 
+	// Mouse rotation
 	if (event.type == SDL_MOUSEMOTION && SDLHandler::sceneFocused)
 	{
 		auto dx = (float)event.motion.xrel;
@@ -123,6 +111,14 @@ void Input::handleSDLEvent(const SDL_Event& event)
 
 		auto newRot = glm::vec3(newX, newY, newZ);
 		camera->setRot({newRot * DEG_TO_RAD});
+	}
+
+	if (event.type == SDL_MOUSEWHEEL)
+	{
+		mouseWheelChange += event.wheel.y;
+
+		if (isKeyPressed(SDL_SCANCODE_LALT))
+			moveSpeedMult += event.wheel.y * 2.0f;
 	}
 }
 

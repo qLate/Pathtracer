@@ -19,6 +19,7 @@ public:
 	inline static ImGuiIO* io;
 
 	inline static bool showInspector = true;
+	inline static bool showStats = true;
 
 	static void init();
 	static void initDocking();
@@ -29,7 +30,7 @@ public:
 	static void drawMenuBar();
 
 	static void drawScene();
-	static void drawScene_displayInfo(bool barVisible);
+	static void drawScene_displayStats(bool barVisible);
 	static void drawInspector();
 
 	static void finalizeViewports();

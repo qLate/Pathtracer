@@ -16,12 +16,12 @@ void ImGUIHandler::init()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
 	io = &ImGui::GetIO();
-	(void)io;
 	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	ImGui::StyleColorsDark();
+	io->ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -85,8 +85,12 @@ void ImGUIHandler::drawMenuBar()
 	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
 		showInspector = !showInspector;
 
+	if (Input::wasKeyPressed(SDL_SCANCODE_F1))
+		showStats = !showStats;
+
 	if (SDLHandler::isFullscreen) return;
 
+	ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
@@ -97,10 +101,14 @@ void ImGUIHandler::drawMenuBar()
 		{
 			if (ImGui::MenuItem("Inspector", "Tab", showInspector))
 				showInspector = !showInspector;
+			if (ImGui::MenuItem("Stats", "F1", showStats))
+				showStats = !showStats;
+
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
 	}
+	ImGui::PopItemFlag();
 }
 
 void ImGUIHandler::drawScene()
@@ -108,34 +116,14 @@ void ImGUIHandler::drawScene()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-	if (SDLHandler::sceneFocused) ImGui::SetNextWindowFocus();
-	ImGui::Begin("Scene");
+	if (Input::wasKeyPressed(SDL_SCANCODE_ESCAPE) && SDLHandler::sceneFocused)
+		ImGui::SetNextWindowFocus();
+
+	ImGui::Begin("Scene", nullptr);
 	{
 		auto node = ImGui::FindWindowByName("Scene")->DockNode;
 		if (!node->IsHiddenTabBar())
 			node->WantHiddenTabBarToggle = true;
-
-		//float imgAspect = INIT_RENDER_WIDTH / (float)INIT_RENDER_HEIGHT;
-		//float availAspect = availSize.x / availSize.y;
-		//
-		//ImVec2 drawSize;
-		//if (availAspect > imgAspect)
-		//{
-		//	// Fit height, adjust width proportionally
-		//	drawSize.y = availSize.y;
-		//	drawSize.x = availSize.y * imgAspect;
-		//}
-		//else
-		//{
-		//	// Fit width, adjust height proportionally
-		//	drawSize.x = availSize.x;
-		//	drawSize.y = availSize.x / imgAspect;
-		//}
-		//
-		//ImVec2 cursorPos = ImGui::GetCursorPos();
-		//cursorPos.x += (availSize.x - drawSize.x) * 0.5f;
-		//cursorPos.y += (availSize.y - drawSize.y) * 0.5f;
-		//ImGui::SetCursorPos(cursorPos);
 
 		ImVec2 availSize = ImGui::GetContentRegionAvail();
 		ImGui::Image(Renderer::sceneViewFBO->renderTexture->id, availSize, ImVec2(0, 1), ImVec2(1, 0));
@@ -146,15 +134,17 @@ void ImGUIHandler::drawScene()
 			Renderer::resizeView(currRenderSize);
 		}
 
-		drawScene_displayInfo(!node->IsHiddenTabBar());
+		drawScene_displayStats(!node->IsHiddenTabBar());
 	}
 	ImGui::End();
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
 }
-void ImGUIHandler::drawScene_displayInfo(bool barVisible)
+void ImGUIHandler::drawScene_displayStats(bool barVisible)
 {
+	if (!showStats) return;
+
 	static float currFPS;
 	static Timer updateTimer = Timer(100);
 
@@ -168,25 +158,20 @@ void ImGUIHandler::drawInspector()
 {
 	if (!showInspector) return;
 
-	auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	static float f = 0.0f;
-	static int counter = 0;
+	auto bgColor = Camera::instance->bgColor;
+	auto moveSpeedMult = Input::moveSpeedMult;
 
-	ImGui::Begin("Inspector");
+	ImGui::Begin("Inspector", nullptr);
 	{
-		ImGui::Text("This is some useful text.");
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+		ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+		ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
 	}
 	ImGui::End();
+
+	if (bgColor != Camera::instance->bgColor)
+		Camera::instance->setBackgroundColor(bgColor);
+
+	Input::moveSpeedMult = moveSpeedMult;
 }
 
 void ImGUIHandler::finalizeViewports()

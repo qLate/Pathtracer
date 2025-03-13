@@ -5,7 +5,6 @@
 #include "BufferController.h"
 #include "BVH.h"
 #include "Debug.h"
-#include "Graphical.h"
 #include "ImGUIHandler.h"
 #include "Input.h"
 #include "MyTime.h"
@@ -37,7 +36,7 @@ void Program::init()
 	BVHBuilder::initBVH();
 	Debug::log("BVH tree built in " + std::to_string(tm.measureFromLast()) + "ms");
 
-	BufferController::updateAllBuffers();
+	BufferController::updateBuffers();
 	Debug::log("Buffers updated in " + std::to_string(tm.measureFromLast()) + "ms");
 }
 
