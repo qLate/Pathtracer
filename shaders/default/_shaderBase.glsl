@@ -8,6 +8,7 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
+
 struct TexInfo
 {
     vec2 size;
@@ -37,7 +38,8 @@ struct Object
     int objType;
     int materialIndex;
     vec2 _pad;
-    vec4 pos; // pos
+    vec4 pos;
+    mat4x4 transform;
     vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
 };
 
@@ -50,7 +52,7 @@ struct Vertex
 struct Triangle
 {
     Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, normal
+    vec4 materialIndex; // materialIndex, meshIndex
     vec4 rows[3];
 };
 
@@ -126,6 +128,7 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 //     BVHLink links[1];
 // };
 
+
 Material getMaterial(int index)
 {
     for (int i = 0; i < materialCount; i++)
@@ -135,6 +138,12 @@ Material getMaterial(int index)
     }
     return materials[0];
 }
+
+vec3 localToGlobal(vec3 pos, Object obj)
+{
+    return (obj.transform * vec4(pos, 1.0f)).xyz;
+}
+
 
 /// #include "default/utils.glsl"
 /// #include "intersection.glsl"

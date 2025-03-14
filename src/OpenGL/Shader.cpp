@@ -143,6 +143,8 @@ std::string Shader::parseShader(const std::string& pathStr)
 	while (std::regex_search(code, re))
 		code = std::regex_replace(code, re, "buffer");
 
+	writeOutShader(code, pathStr);
+
 	return code;
 }
 std::string Shader::readShaderFile(const std::string& path)
@@ -167,4 +169,14 @@ std::string Shader::readShaderFile(const std::string& path)
 	}
 
 	return text;
+}
+
+void Shader::writeOutShader(const std::string& code, const std::string& path)
+{
+	std::filesystem::path p(path);
+
+	std::ofstream file;
+	file.open("shaders/out/out_" + p.filename().string());
+	file << code;
+	file.close();
 }

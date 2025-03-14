@@ -5,7 +5,6 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "Triangle.h"
-#include "Debug.h"
 
 #include "rapidobj.hpp"
 #include "Utils.h"

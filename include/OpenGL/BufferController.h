@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glm/mat4x4.hpp"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
@@ -12,7 +13,7 @@ class BufferController
 	static constexpr int TEX_INFOS_ALIGN = 4;
 	static constexpr int LIGHT_ALIGN = 12;
 	static constexpr int MATERIAL_ALIGN = 12;
-	static constexpr int OBJECT_ALIGN = 12;
+	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 40;
 	static constexpr int BVH_NODE_ALIGN = 12;
 	static constexpr int BVH_LINK_ALIGN = 4;
@@ -47,6 +48,7 @@ class BufferController
 		int materialIndex;
 		glm::vec2 _pad;
 		glm::vec4 pos;
+		glm::mat4x4 transform;
 		glm::vec4 properties;
 	};
 
@@ -79,7 +81,7 @@ class BufferController
 
 	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
 
-	static void precomputeTriangleCoefs();
+	static void recalculateTriangleCoefs();
 
 public:
 	static void init();

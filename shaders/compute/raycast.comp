@@ -1,5 +1,5 @@
 #version 460 core
-/// #include "default/shaderBase.glsl"
+/// #include "default/_shaderBase.glsl"
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -25,7 +25,7 @@ void main()
     Ray ray = Ray(rayPos, rayDir, rayMaxDis, RAY_DEFAULT_ARGS_WO_DIST);
 
     int hitTriIndex = -1, hitObjIndex = -1;
-    intersectWorldIndexed(ray, hitTriIndex, hitObjIndex);
+    intersectWorld(ray, hitTriIndex, hitObjIndex);
 
     hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uvPos, hitObjIndex, hitTriIndex);
 }

@@ -2,7 +2,7 @@ bool castShadowRays(Ray ray)
 {
     for (int objInd = 0; objInd < objectCount; objInd++)
     {
-        if (objects[objInd].objType != 0 && intersectObj(ray, objects[objInd])) return true;
+        if (objects[objInd].objType != 0 && intersectDefaultObj(ray, objects[objInd])) return true;
     }
     return intersectBVHTree(ray, true);
 }

@@ -185,24 +185,9 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
     return true;
 }
 
-bool intersectTriangledObject(inout Ray ray, Object obj)
+bool intersectDefaultObj(inout Ray ray, Object obj)
 {
-    bool hit = false;
-    for (int j = int(obj.properties.x); j < obj.properties.x + obj.properties.y; j++)
-    {
-        if (intersectTriangle(ray, triangles[j]))
-            hit = true;
-    }
-    return hit;
-}
-
-bool intersectObj(inout Ray ray, Object obj)
-{
-    if (obj.objType == 0)
-    {
-        if (intersectTriangledObject(ray, obj)) return true;
-    }
-    else if (obj.objType == 1)
+    if (obj.objType == 1)
     {
         if (intersectSphere(ray, obj)) return true;
     }
@@ -224,34 +209,7 @@ bool intersectObj(inout Ray ray, Object obj)
 //         return (dir.z > 0) ? 4 : 5;
 // }
 
-bool intersectBVHTree(inout Ray ray, bool castingShadows)
-{
-    // int face = getHitCubeFace(ray.dir);
-
-    int curr = 0;
-    while (curr != -1)
-    {
-        BVHNode node = nodes[curr];
-        if (intersectsAABB(ray, node.min, node.max, 0, FLT_MAX, castingShadows))
-        {
-            if (node.values.z == 1)
-            {
-                for (int i = int(node.min.w); i < node.min.w + node.max.w; i++)
-                    intersectTriangle(ray, triangles[i]);
-            }
-            curr = int(node.values.x);
-            // curr = int(links[face * bvhNodeCount + curr].hit);
-        }
-        else
-        {
-            curr = int(node.values.y);
-            // curr = int(links[face * bvhNodeCount + curr].miss);
-        }
-    }
-    return ray.surfaceNormal != vec3(0);
-}
-
-bool intersectBVHTreeIndexed(inout Ray ray, bool castingShadows, inout int hitTriIndex)
+bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
 {
     int curr = 0;
     while (curr != -1)
@@ -274,28 +232,27 @@ bool intersectBVHTreeIndexed(inout Ray ray, bool castingShadows, inout int hitTr
     }
     return ray.surfaceNormal != vec3(0);
 }
-
-void intersectWorld(inout Ray ray)
+bool intersectBVHTree(inout Ray ray, bool castingShadows)
 {
-    for (int objInd = 0; objInd < objectCount; objInd++)
-    {
-        if (objects[objInd].objType == 0) continue;
-
-        intersectObj(ray, objects[objInd]);
-    }
-
-    intersectBVHTree(ray, false);
+    int hitTriIndex = -1;
+    return intersectBVHTree(ray, castingShadows, hitTriIndex);
 }
 
-void intersectWorldIndexed(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
+void intersectWorld(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
 {
     for (int objInd = 0; objInd < objectCount; objInd++)
     {
         if (objects[objInd].objType == 0) continue;
 
-        if (intersectObj(ray, objects[objInd]))
+        if (intersectDefaultObj(ray, objects[objInd]))
             hitObjIndex = objInd;
     }
 
-    intersectBVHTreeIndexed(ray, false, hitTriIndex);
+    intersectBVHTree(ray, false, hitTriIndex);
+}
+void intersectWorld(inout Ray ray)
+{
+    int hitTriIndex = -1;
+    int hitObjIndex = -1;
+    intersectWorld(ray, hitTriIndex, hitObjIndex);
 }

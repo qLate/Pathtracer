@@ -115,7 +115,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 					BVHBuilder::rebuildBVH();
 					Renderer::renderProgram->use();
 
-					BufferController::updateTrianglesBuffer();
+					BufferController::updateObjectsBuffer();
 					BufferController::updateBVHNodesBuffer();
 				}
 			}

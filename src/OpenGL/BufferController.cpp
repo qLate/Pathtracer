@@ -12,7 +12,7 @@
 
 void BufferController::init()
 {
-	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeCoefs.comp");
+	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeTriCoefs.comp");
 
 	updateBuffers();
 }
@@ -21,12 +21,13 @@ void BufferController::uninit()
 	delete precomputeTriCoefsProgram;
 }
 
-void BufferController::precomputeTriangleCoefs()
+void BufferController::recalculateTriangleCoefs()
 {
 	precomputeTriCoefsProgram->use();
 
 	int size = ceil(sqrt(Scene::triangles.size()));
 	precomputeTriCoefsProgram->setInt("clusterSize", size);
+	precomputeTriCoefsProgram->setInt("triangleCount", Scene::triangles.size());
 	ComputeShaderProgram::dispatch({size, size, 1});
 }
 
@@ -37,8 +38,8 @@ void BufferController::updateBuffers()
 	updateTexInfosBuffer();
 	updateMaterialsBuffer();
 	updateLightsBuffer();
-	updateObjectsBuffer();
 	updateTrianglesBuffer();
+	updateObjectsBuffer();
 	updateBVHNodesBuffer();
 	//updateBVHLinksBuffer();
 }
@@ -56,6 +57,7 @@ void BufferController::updateTexInfosBuffer()
 	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("texInfoCount", data.size());
 }
+
 void BufferController::updateMaterialsBuffer()
 {
 	std::vector<MaterialStruct> data {};
@@ -115,6 +117,7 @@ void BufferController::updateObjectsBuffer()
 		ObjectStruct objectStruct {};
 		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
+		objectStruct.transform = translate(glm::mat4(1.0f), obj->getPos()) * mat4_cast(obj->getRot()) * scale(glm::mat4(1.0f), obj->getScale());
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
 		{
@@ -142,6 +145,8 @@ void BufferController::updateObjectsBuffer()
 
 	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("objectCount", data.size());
+
+	recalculateTriangleCoefs();
 }
 
 void BufferController::updateTrianglesBuffer()
@@ -153,23 +158,15 @@ void BufferController::updateTrianglesBuffer()
 		TriangleStruct triangleStruct {};
 		for (int k = 0; k < 3; ++k)
 		{
-			triangleStruct.vertices[k].posU = glm::vec4(triangle->globalVertexPositions[k], triangle->vertices[k].uvPos.x);
-			triangleStruct.vertices[k].normalV = glm::vec4(triangle->globalVertexNormals[k], triangle->vertices[k].uvPos.y);
+			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices[k].pos, triangle->vertices[k].uvPos.x);
+			triangleStruct.vertices[k].normalV = glm::vec4(triangle->vertices[k].normal, triangle->vertices[k].uvPos.y);
 		}
-		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->id, 0, 0, 0);
-
-		//triangleStruct.rows[0] = glm::vec4(triangle->row1, triangle->row1Val);
-		//triangleStruct.rows[1] = glm::vec4(triangle->row2, triangle->row2Val);
-		//triangleStruct.rows[2] = glm::vec4(triangle->row3, triangle->row3Val);
+		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->id, triangle->mesh->indexID, 0, 0);
 
 		data.push_back(triangleStruct);
 	}
-	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
 	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size(), GL_STREAM_DRAW);
 	Renderer::renderProgram->setInt("triangleCount", data.size());
-	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
-	precomputeTriangleCoefs();
-	Debug::log("Triangle buffer update time: ", tm.measureFromLast(), "ms");
 }
 
 void BufferController::updateBVHNodesBuffer()
@@ -189,6 +186,7 @@ void BufferController::updateBVHNodesBuffer()
 	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("bvhNodeCount", data.size());
 }
+
 //void BufferController::updateBVHLinksBuffer()
 //{
 //	if (BVHBuilder::links6Sided[0].empty()) return;

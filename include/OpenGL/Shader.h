@@ -40,6 +40,7 @@ class Shader : public BaseShaderMethods
 {
 	static std::string parseShader(const std::string& pathStr);
 	static std::string readShaderFile(const std::string& path);
+	static void writeOutShader(const std::string& code, const std::string& path);
 
 public:
 	Shader(const std::string& path, int id, int type);
