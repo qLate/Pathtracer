@@ -62,11 +62,11 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/ShaderProgram.cpp"
 
         "src/BVH/BVH.cpp"
-        "src/BVH/MortonCodes.cpp"
-        "src/BVH/BVH_morton.cpp"
-        "src/BVH/BVH_basic.cpp"
-        "src/BVH/BVH_6sided.cpp"
-        "src/BVH/BVH_sah.cpp"
+        
+        "src/BVH/BVHMortonBuilder.cpp"
+        "src/BVH/BVHBasicBuilder.cpp"
+        "src/BVH/BVH6SidedBuilder.cpp"
+        "src/BVH/BVHSAHBuilder.cpp"
 
         "src/System/Physics.cpp"
 
@@ -74,7 +74,7 @@ add_executable(${PROJECT_NAME}
         "src/Other/Tweener.cpp"
 
         "src/Utils/MyMath.cpp"
-)
+ "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

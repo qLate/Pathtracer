@@ -36,4 +36,6 @@ public:
 	static void uninit();
 
 	static RaycastHit raycast(glm::vec3 pos, glm::vec3 dir, float maxDis = std::numeric_limits<float>::max());
+
+	friend class BufferController;
 };

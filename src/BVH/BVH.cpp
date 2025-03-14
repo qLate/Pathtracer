@@ -1,18 +1,24 @@
 #include "BVH.h"
 
+#include "BVHMortonBuilder.h"
+#include "Debug.h"
 #include "Scene.h"
 #include "Triangle.h"
+#include "Utils.h"
 
-void BVHBuilder::buildBVH()
+void BVH::buildBVH()
 {
-	buildTreeMorton(Scene::triangles);
+	BVHMortonBuilder::build(Scene::triangles);
 }
-void BVHBuilder::rebuildBVH()
+void BVH::rebuildBVH()
 {
+	TimeMeasurer tm {};
 	for (auto node : nodes)
 		delete node;
 	nodes.clear();
+
 	buildBVH();
+	Debug::log("BVH rebuilt in " + std::to_string(tm.measureFromLast()) + "ms");
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

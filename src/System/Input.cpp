@@ -112,7 +112,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 				{
 					hit.object->translate(glm::vec3(0, 0, 1));
 
-					BVHBuilder::rebuildBVH();
+					BVH::rebuildBVH();
 					Renderer::renderProgram->use();
 
 					BufferController::updateObjectsBuffer();

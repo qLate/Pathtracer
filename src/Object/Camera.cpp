@@ -13,7 +13,6 @@ Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRad
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
-	Renderer::renderProgram->setFloat3("cameraPos", pos);
 	Renderer::renderProgram->setFloat2("screenSize", size);
 	Renderer::renderProgram->setFloat("focalDistance", focalDistance);
 	Renderer::renderProgram->setFloat("lensRadius", lensRadius);

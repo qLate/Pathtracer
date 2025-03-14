@@ -10,7 +10,7 @@
 
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()
@@ -56,6 +56,7 @@ void SceneSetup::spiderScene()
 void SceneSetup::redGreenRoom()
 {
 	auto camera = new Camera({0, -30, 0});
+	camera->setBackgroundColor(Color::white());
 	auto tex = new Texture("assets/textures/marble.jpg");
 
 	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35};

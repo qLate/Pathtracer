@@ -51,29 +51,53 @@ public:
 	}
 };
 
+template <typename T = std::chrono::milliseconds>
 class TimeMeasurer
 {
-	std::chrono::high_resolution_clock::time_point start;
-	std::chrono::high_resolution_clock::time_point lastMeasure;
+	std::chrono::high_resolution_clock::time_point _start;
+	std::chrono::high_resolution_clock::time_point _lastMeasure;
+	long long timeSum = 0;
 
 public:
 	TimeMeasurer()
 	{
-		start = std::chrono::high_resolution_clock::now();
-		lastMeasure = start;
+		_start = std::chrono::high_resolution_clock::now();
+		_lastMeasure = _start;
+	}
+
+	void start()
+	{
+		_start = std::chrono::high_resolution_clock::now();
+	}
+	void stop()
+	{
+		auto curr = std::chrono::high_resolution_clock::now();
+		timeSum += std::chrono::duration_cast<T>(curr - _start).count();
+	}
+	void reset()
+	{
+		timeSum = 0;
 	}
 
 	long long measure()
 	{
-		lastMeasure = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration_cast<std::chrono::milliseconds>(lastMeasure - start).count();
+		_lastMeasure = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<T>(_lastMeasure - _start).count();
 	}
 	long long measureFromLast()
 	{
 		auto curr = std::chrono::high_resolution_clock::now();
-		auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(curr - lastMeasure).count();
+		auto dur = std::chrono::duration_cast<T>(curr - _lastMeasure).count();
 
-		lastMeasure = curr;
+		_lastMeasure = curr;
 		return dur;
+	}
+	long long measureSum()
+	{
+		auto curr = std::chrono::high_resolution_clock::now();
+		timeSum += std::chrono::duration_cast<T>(curr - _lastMeasure).count();
+		_lastMeasure = curr;
+
+		return timeSum;
 	}
 };

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <utility>
 #include <vector>
 
-#include "glm/gtx/optimum_pow.hpp"
+#include "glm/vec3.hpp"
 
 class MortonCodes
 {

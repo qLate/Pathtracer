@@ -3,6 +3,7 @@
 #include "BVH.h"
 #include "Graphical.h"
 #include "Light.h"
+#include "Physics.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
@@ -34,15 +35,12 @@ void BufferController::recalculateTriangleCoefs()
 
 void BufferController::updateBuffers()
 {
-	Renderer::renderProgram->use();
-
 	updateTexInfosBuffer();
 	updateMaterialsBuffer();
 	updateLightsBuffer();
 	updateTrianglesBuffer();
 	updateObjectsBuffer();
 	updateBVHNodesBuffer();
-	//updateBVHLinksBuffer();
 }
 
 void BufferController::updateTexInfosBuffer()
@@ -146,13 +144,13 @@ void BufferController::updateObjectsBuffer()
 
 	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("objectCount", data.size());
+	Physics::raycastProgram->setInt("objectCount", data.size());
 
 	recalculateTriangleCoefs();
 }
 
 void BufferController::updateTrianglesBuffer()
 {
-	TimeMeasurer tm;
 	std::vector<TriangleStruct> data {};
 	for (const auto& triangle : Scene::triangles)
 	{
@@ -166,16 +164,16 @@ void BufferController::updateTrianglesBuffer()
 
 		data.push_back(triangleStruct);
 	}
-	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size(), GL_STREAM_DRAW);
+	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("triangleCount", data.size());
 }
 
 void BufferController::updateBVHNodesBuffer()
 {
 	std::vector<BVHNodeStruct> data {};
-	for (int i = 0; i < BVHBuilder::nodes.size(); i++)
+	for (int i = 0; i < BVH::nodes.size(); i++)
 	{
-		const auto& node = BVHBuilder::nodes[i];
+		const auto& node = BVH::nodes[i];
 		BVHNodeStruct bvhNodeStruct {};
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
@@ -186,20 +184,14 @@ void BufferController::updateBVHNodesBuffer()
 
 	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("bvhNodeCount", data.size());
-}
 
-//void BufferController::updateBVHLinksBuffer()
-//{
-//	if (BVHBuilder::links6Sided[0].empty()) return;
-//	std::vector<BVHLinkStruct> data {};
-//	for (int i = 0; i < BVHBuilder::links6Sided.size(); i++)
-//	{
-//		for (int j = 0; j < BVHBuilder::links6Sided[i].size(); j++)
-//		{
-//			auto [hit, miss] = BVHBuilder::links6Sided[i][j];
-//			data.push_back({{}, hit, miss});
-//		}
-//	}
-//	Renderer::shaderP->fragShader->ssboBVHLinks->setData((float*)data.data(), data.size());
-//	Renderer::shaderP->setInt("bvhLinkCount", data.size());
-//}
+	updateBVHTriangleIndices();
+}
+void BufferController::updateBVHTriangleIndices()
+{
+	std::vector<float> data {};
+	for (int i = 0; i < BVH::originalTriIndices.size(); i++)
+		data.push_back(BVH::originalTriIndices[i]);
+
+	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData((float*)data.data(), data.size());
+}

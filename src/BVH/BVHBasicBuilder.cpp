@@ -1,28 +1,24 @@
+#include "BVHBasicBuilder.h"
+
 #include <algorithm>
 
-#include "BVH.h"
 #include "Triangle.h"
 #include "glm/common.hpp"
 
-void BVHBuilder::buildTreeBasic(std::vector<Triangle*>& triangles)
+static auto& nodes = BVH::nodes;
+
+void BVHBasicBuilder::buildTreeBasic(std::vector<Triangle*>& triangles)
 {
 	nodes.clear();
 	nodes.push_back(nullptr);
 
 	nodes[0] = new BVHNodeBasic(nodes, triangles, 0, (int)triangles.size() - 1);
 }
-void BVHBuilder::buildTreeSAH(std::vector<Triangle*>& triangles)
-{
-	nodes.clear();
-	nodes.push_back(nullptr);
 
-	nodes[0] = (BVHNode*)new BVHNodeSAH(nodes, triangles, 0, (int)triangles.size() - 1);
-}
-
-BVHNodeBasic::BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode)
+BVHBasicBuilder::BVHNodeBasic::BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode)
 {
 	missNext = nextRightNode;
-	if (end - start < BVHBuilder::MAX_TRIANGLES_PER_BOX)
+	if (end - start < BVH::MAX_TRIANGLES_PER_BOX)
 	{
 		setLeaf([&triangles](int i) { return triangles[i]; }, start, end);
 		return;
@@ -30,8 +26,8 @@ BVHNodeBasic::BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>&
 
 	int splitIdx = getSplitIndex(triangles, start, end);
 
-	leftInd = (int)BVHBuilder::nodes.size();
-	rightInd = (int)BVHBuilder::nodes.size() + 1;
+	leftInd = (int)BVH::nodes.size();
+	rightInd = (int)BVH::nodes.size() + 1;
 	hitNext = leftInd;
 
 	nodes.push_back(nullptr);
@@ -41,7 +37,9 @@ BVHNodeBasic::BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>&
 
 	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
 }
-int BVHNodeBasic::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
+
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+int BVHBasicBuilder::BVHNodeBasic::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {
 	glm::vec3 min {FLT_MAX}, max {-FLT_MAX};
 	for (int i = start; i <= end; i++)

@@ -15,23 +15,16 @@ struct Link
 	int miss;
 };
 
-class BVHBuilder
+class BVH
 {
 public:
-	static constexpr int MAX_TRIANGLES_PER_BOX = 3;
+	static constexpr int MAX_TRIANGLES_PER_BOX = 1;
 
 	inline static std::vector<BVHNode*> nodes;
+	inline static std::vector<int> originalTriIndices;
 
 	static void buildBVH();
 	static void rebuildBVH();
-
-	static void buildTreeBasic(std::vector<Triangle*>& triangles);
-	static void buildTreeSAH(std::vector<Triangle*>& triangles);
-	static void buildTreeMorton(std::vector<Triangle*>& triangles);
-
-	inline static std::vector<std::vector<Link>> links6Sided = std::vector<std::vector<Link>>(6);
-	static void buildTree6Sided(std::vector<Triangle*>& triangles);
-	static Link buildAxis(int axis, bool positive, std::vector<Link>& vector, const BVHNode* node, int nextRightNode = -1, int depth = 0);
 };
 
 class AABB
@@ -49,33 +42,12 @@ public:
 class BVHNode
 {
 public:
-	AABB box;
-	int leftInd, rightInd;
+	int leftInd = -1, rightInd = -1;
 	bool isLeaf = false;
-	int leafTrianglesStart = 0, leafTriangleCount = 0;
+	int leafTrianglesStart = -1, leafTriangleCount = -1;
 	int hitNext = -1, missNext = -1;
 
+	AABB box;
+
 	void setLeaf(const std::function<Triangle*(int)>& triangleGetter, int start, int end);
-};
-
-
-class BVHNodeBasic : public BVHNode
-{
-public:
-	BVHNodeBasic(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode = -1);
-	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
-};
-
-class BVHNodeSAH : BVHNode
-{
-public:
-	BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode = -1);
-	static int getSplitIndex(std::vector<Triangle*>& triangles, int start, int end);
-};
-
-class BVHNodeMorton : public BVHNode
-{
-public:
-	BVHNodeMorton(std::vector<BVHNode*>& nodes, std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end, int nextRightNode = -1);
-	static int getSplitIndex(const std::vector<std::pair<uint32_t, Triangle*>>& triangles, int start, int end);
 };

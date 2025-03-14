@@ -1,11 +1,13 @@
-#include "BVH.h"
+#include "BVH6SidedBuilder.h"
+#include "BVHMortonBuilder.h"
 #include "Debug.h"
 #include "Triangle.h"
 
-static int maxDepth = 0;
-void BVHBuilder::buildTree6Sided(std::vector<Triangle*>& triangles)
+static auto& nodes = BVH::nodes;
+
+void BVH6SidedBuilder::buildTree6Sided(const std::vector<Triangle*>& triangles)
 {
-	buildTreeMorton(triangles);
+	BVHMortonBuilder::build(triangles);
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -13,12 +15,9 @@ void BVHBuilder::buildTree6Sided(std::vector<Triangle*>& triangles)
 		links6Sided[i].resize(nodes.size());
 		links6Sided[i][0] = buildAxis(i / 2, i % 2 == 1, links6Sided[i], nodes[0]);
 	}
-
-	Debug::log("Max depth: ", maxDepth);
 }
-Link BVHBuilder::buildAxis(int axis, bool positive, std::vector<Link>& vector, const BVHNode* node, int nextRightNode, int depth)
+Link BVH6SidedBuilder::buildAxis(int axis, bool positive, std::vector<Link>& vector, const BVHNode* node, int nextRightNode, int depth)
 {
-	maxDepth = std::max(maxDepth, depth);
 	if (node->isLeaf) return {nextRightNode, nextRightNode};
 
 	auto bound1 = positive ? nodes[node->leftInd]->box.min_ : nodes[node->leftInd]->box.max_;

@@ -16,7 +16,7 @@ class BufferController
 	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 40;
 	static constexpr int BVH_NODE_ALIGN = 12;
-	static constexpr int BVH_LINK_ALIGN = 4;
+	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
 	struct TexInfoStruct
 	{
@@ -95,7 +95,7 @@ public:
 	static void updateObjectsBuffer();
 	static void updateTrianglesBuffer();
 	static void updateBVHNodesBuffer();
-	//static void updateBVHLinksBuffer();
+	static void updateBVHTriangleIndices();
 
 	friend class TraceShader;
 };

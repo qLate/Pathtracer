@@ -1,5 +1,8 @@
 #include "MortonCodes.h"
 
+#include "glm/common.hpp"
+#include <bit>
+
 std::pair<glm::vec3, glm::vec3> MortonCodes::computeBounds(const std::vector<glm::vec3>& points)
 {
 	glm::vec3 minBound = glm::vec3(std::numeric_limits<float>::max());
@@ -41,14 +44,8 @@ std::vector<uint32_t> MortonCodes::generateMortonCodes(const std::vector<glm::ve
 
 	return mortonCodes;
 }
+
 int MortonCodes::commonPrefixLength(uint32_t a, uint32_t b)
 {
-	int diff = a ^ b;
-	int pref = 31;
-	while (diff != 0)
-	{
-		diff >>= 1;
-		pref--;
-	}
-	return pref;
+	return std::countl_zero(a ^ b) - 1;
 }

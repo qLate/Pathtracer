@@ -52,7 +52,7 @@ struct Vertex
 struct Triangle
 {
     Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, meshIndex
+    vec4 materialIndex; // materialIndex, meshIndex, triIndex
     vec4 rows[3];
 };
 
@@ -60,14 +60,8 @@ struct BVHNode
 {
     vec4 min;
     vec4 max;
-    vec4 values; // hitNext, missNext, isLeaf
+    vec3 values; // hitNext, missNext, isLeaf
 };
-
-// struct BVHLink {
-//     vec2 _pad;
-//     int hit;
-//     int miss;
-// };
 
 struct Ray
 {
@@ -122,12 +116,10 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
     BVHNode nodes[1];
 };
 
-// uniform int bvhLinkCount;
-// layout(std140, binding = 7) /*buffer*/ uniform BVHLinks
-// {
-//     BVHLink links[1];
-// };
-
+layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
+{
+    float triIndices[1];
+};
 
 Material getMaterial(int index)
 {

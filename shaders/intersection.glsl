@@ -1,7 +1,10 @@
 vec3 getTriangleNormalAt(Triangle tri, float u, float v)
 {
     Object obj = objects[int(tri.materialIndex.y)];
-    return normalize((1 - u - v) * localToGlobalDir(tri.vertices[0].normalV.xyz, obj) + u * localToGlobalDir(tri.vertices[1].normalV.xyz, obj) + v * localToGlobalDir(tri.vertices[2].normalV.xyz, obj));
+    vec3 norm1 = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
+    vec3 norm2 = localToGlobalDir(tri.vertices[1].normalV.xyz, obj);
+    vec3 norm3 = localToGlobalDir(tri.vertices[2].normalV.xyz, obj);
+    return normalize((1 - u - v) * norm1 + u * norm2 + v * norm3);
 }
 
 bool intersectTriangle(inout Ray ray, Triangle tri)
@@ -198,17 +201,6 @@ bool intersectDefaultObj(inout Ray ray, Object obj)
     return false;
 }
 
-// int getHitCubeFace(vec3 dir)
-// {
-//     vec3 absDir = abs(dir);
-//     if (absDir.x >= absDir.y && absDir.x >= absDir.z)
-//         return (dir.x > 0) ? 0 : 1;
-//     else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
-//         return (dir.y > 0) ? 2 : 3;
-//     else
-//         return (dir.z > 0) ? 4 : 5;
-// }
-
 bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
 {
     int curr = 0;
@@ -221,8 +213,8 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
             {
                 for (int i = int(node.min.w); i < node.min.w + node.max.w; i++)
                 {
-                    if (intersectTriangle(ray, triangles[i]))
-                        hitTriIndex = i;
+                    if (intersectTriangle(ray, triangles[int(triIndices[i])]))
+                        hitTriIndex = int(triIndices[i]);
                 }
             }
             curr = int(node.values.x);

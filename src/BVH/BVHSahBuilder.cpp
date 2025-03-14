@@ -1,15 +1,24 @@
+#include "BVHSahBuilder.h"
+
 #include <algorithm>
 
-#include "BVH.h"
 #include "Triangle.h"
 #include "glm/common.hpp"
 
+static auto& nodes = BVH::nodes;
 
+void BVHSahBuilder::buildTreeSAH(std::vector<Triangle*>& triangles)
+{
+	nodes.clear();
+	nodes.push_back(nullptr);
 
-BVHNodeSAH::BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode)
+	nodes[0] = (BVHNode*)new BVHNodeSAH(nodes, triangles, 0, (int)triangles.size() - 1);
+}
+
+BVHSahBuilder::BVHNodeSAH::BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& triangles, int start, int end, int nextRightNode)
 {
 	missNext = nextRightNode;
-	if (end - start < BVHBuilder::MAX_TRIANGLES_PER_BOX)
+	if (end - start < BVH::MAX_TRIANGLES_PER_BOX)
 	{
 		setLeaf([&triangles](int i) { return triangles[i]; }, start, end);
 		return;
@@ -17,8 +26,8 @@ BVHNodeSAH::BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& tri
 
 	int splitIdx = getSplitIndex(triangles, start, end);
 
-	leftInd = (int)BVHBuilder::nodes.size();
-	rightInd = (int)BVHBuilder::nodes.size() + 1;
+	leftInd = (int)BVH::nodes.size();
+	rightInd = (int)BVH::nodes.size() + 1;
 	hitNext = leftInd;
 
 	nodes.push_back(nullptr);
@@ -28,7 +37,7 @@ BVHNodeSAH::BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<Triangle*>& tri
 
 	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
 }
-int BVHNodeSAH::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
+int BVHSahBuilder::BVHNodeSAH::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {
 	glm::vec3 min {FLT_MAX}, max {-FLT_MAX};
 	for (int i = start; i <= end; i++)
