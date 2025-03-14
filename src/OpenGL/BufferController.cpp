@@ -1,7 +1,6 @@
 #include "BufferController.h"
 
 #include "BVH.h"
-#include "Debug.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Renderer.h"
@@ -28,7 +27,9 @@ void BufferController::recalculateTriangleCoefs()
 	int size = ceil(sqrt(Scene::triangles.size()));
 	precomputeTriCoefsProgram->setInt("clusterSize", size);
 	precomputeTriCoefsProgram->setInt("triangleCount", Scene::triangles.size());
+
 	ComputeShaderProgram::dispatch({size, size, 1});
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void BufferController::updateBuffers()
@@ -117,7 +118,7 @@ void BufferController::updateObjectsBuffer()
 		ObjectStruct objectStruct {};
 		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
-		objectStruct.transform = translate(glm::mat4(1.0f), obj->getPos()) * mat4_cast(obj->getRot()) * scale(glm::mat4(1.0f), obj->getScale());
+		objectStruct.transform = translate(glm::mat4(1), obj->getPos()) * mat4_cast(obj->getRot()) * scale(glm::mat4(1), obj->getScale());
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
 		{

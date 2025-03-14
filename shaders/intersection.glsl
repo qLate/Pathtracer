@@ -1,7 +1,7 @@
-vec3 getTriangleNormalAt(Triangle tri, float u, float v, bool invert)
+vec3 getTriangleNormalAt(Triangle tri, float u, float v)
 {
-    vec3 interpolatedNormal = normalize((1 - u - v) * tri.vertices[0].normalV.xyz + u * tri.vertices[1].normalV.xyz + v * tri.vertices[2].normalV.xyz);
-    return invert ? -interpolatedNormal : interpolatedNormal;
+    Object obj = objects[int(tri.materialIndex.y)];
+    return normalize((1 - u - v) * localToGlobalDir(tri.vertices[0].normalV.xyz, obj) + u * localToGlobalDir(tri.vertices[1].normalV.xyz, obj) + v * localToGlobalDir(tri.vertices[2].normalV.xyz, obj));
 }
 
 bool intersectTriangle(inout Ray ray, Triangle tri)
@@ -22,7 +22,7 @@ bool intersectTriangle(inout Ray ray, Triangle tri)
 
     ray.t = t;
     ray.materialIndex = int(tri.materialIndex.x);
-    ray.surfaceNormal = getTriangleNormalAt(tri, u, v, false);
+    ray.surfaceNormal = getTriangleNormalAt(tri, u, v);
     ray.interPoint = hitPos;
 
     vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
@@ -57,7 +57,7 @@ bool intersectTriangle(inout Ray ray, Triangle tri)
 //     if (all(greaterThanEqual(uvt, vec4(0.0))) && (uvt.z < ray.t)) {
 //         ray.t = uvt.z;
 //         ray.materialIndex = int(tri.materialIndex.x);
-//         ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y, false);
+//         ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y);
 //         ray.interPoint = ray.pos + ray.dir * uvt.z;
 //         ray.uvPos = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w) + uvt.x * tri.texVec.xy + uvt.y * tri.texVec.zw;
 //         return true;

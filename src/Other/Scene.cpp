@@ -56,7 +56,7 @@ void SceneSetup::spiderScene()
 void SceneSetup::redGreenRoom()
 {
 	auto camera = new Camera({0, -30, 0});
-	auto tex = Texture::defaultTex;
+	auto tex = new Texture("assets/textures/marble.jpg");
 
 	auto light = new PointLight {{0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35};
 	auto square = new Square {{0, 0, 9.995f}, 5, {{-90 * DEG_TO_RAD, 0, 0}}};

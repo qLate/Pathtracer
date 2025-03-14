@@ -143,7 +143,10 @@ vec3 localToGlobal(vec3 pos, Object obj)
 {
     return (obj.transform * vec4(pos, 1.0f)).xyz;
 }
-
+vec3 localToGlobalDir(vec3 normal, Object obj)
+{
+    return normalize((obj.transform * vec4(normal, 0.0f)).xyz);
+}
 
 /// #include "default/utils.glsl"
 /// #include "intersection.glsl"
