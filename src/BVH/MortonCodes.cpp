@@ -35,12 +35,12 @@ uint32_t MortonCodes::expandBits(uint32_t x)
 
 std::vector<uint32_t> MortonCodes::generateMortonCodes(const std::vector<glm::vec3>& centers)
 {
-	std::vector<uint32_t> mortonCodes;
-	mortonCodes.reserve(centers.size());
+	std::vector<uint32_t> mortonCodes(centers.size());
 
 	auto [minBound, maxBound] = computeBounds(centers);
-	for (const auto& center : centers)
-		mortonCodes.push_back(computeMortonCode(center, minBound, maxBound));
+#pragma omp parallel for
+	for (int i = 0; i < centers.size(); i++)
+		mortonCodes[i] = computeMortonCode(centers[i], minBound, maxBound);
 
 	return mortonCodes;
 }

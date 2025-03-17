@@ -34,13 +34,13 @@ void Program::init()
 	TimeMeasurer tm {};
 
 	SceneSetup::setupScene();
-	Debug::log("Scene setup in " + std::to_string(tm.measureFromLast()) + "ms");
+	Debug::log("Scene setup in " + std::to_string(tm.elapsedFromLast()) + "ms");
 
 	BVH::buildBVH();
-	Debug::log("BVH tree built in " + std::to_string(tm.measureFromLast()) + "ms");
+	Debug::log("BVH tree built in " + std::to_string(tm.elapsedFromLast()) + "ms");
 
 	BufferController::init();
-	Debug::log("Buffers updated in " + std::to_string(tm.measureFromLast()) + "ms");
+	Debug::log("Buffers updated in " + std::to_string(tm.elapsedFromLast()) + "ms");
 }
 
 void Program::loop()

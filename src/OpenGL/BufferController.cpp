@@ -14,6 +14,7 @@
 void BufferController::init()
 {
 	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeTriCoefs.comp");
+	buildBVHProgram = new ComputeShaderProgram("shaders/compute/buildBVH.comp");
 
 	updateBuffers();
 }
@@ -26,11 +27,8 @@ void BufferController::recalculateTriangleCoefs()
 {
 	precomputeTriCoefsProgram->use();
 
-	int size = ceil(sqrt(Scene::triangles.size()));
-	precomputeTriCoefsProgram->setInt("clusterSize", size);
-	precomputeTriCoefsProgram->setInt("triangleCount", Scene::triangles.size());
-
-	ComputeShaderProgram::dispatch({ceil(size / 8.0f), ceil(size / 4.0f), 1});
+	int triCount = Scene::triangles.size();
+	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
@@ -59,7 +57,6 @@ void BufferController::updateTexInfosBuffer()
 	}
 
 	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("texInfoCount", data.size());
 }
 
 void BufferController::updateMaterialsBuffer()
@@ -83,7 +80,6 @@ void BufferController::updateMaterialsBuffer()
 	}
 
 	Renderer::renderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("materialCount", data.size());
 }
 
 void BufferController::updateLightsBuffer()
@@ -117,7 +113,6 @@ void BufferController::updateLightsBuffer()
 	}
 
 	Renderer::renderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("lightCount", data.size());
 }
 
 void BufferController::updateObjectsBuffer()
@@ -160,8 +155,6 @@ void BufferController::updateObjectsBuffer()
 	}
 
 	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("objectCount", data.size());
-	Physics::raycastProgram->setInt("objectCount", data.size());
 
 	recalculateTriangleCoefs();
 }
@@ -185,7 +178,6 @@ void BufferController::updateTrianglesBuffer()
 		data[i] = triangleStruct;
 	}
 	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("triangleCount", data.size());
 }
 
 void BufferController::updateBVHNodesBuffer()
@@ -205,7 +197,6 @@ void BufferController::updateBVHNodesBuffer()
 	}
 
 	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
-	Renderer::renderProgram->setInt("bvhNodeCount", data.size());
 
 	updateBVHTriangleIndices();
 }

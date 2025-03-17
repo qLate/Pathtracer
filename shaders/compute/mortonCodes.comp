@@ -1,0 +1,42 @@
+layout(std430, binding = 8) /*buffer*/ uniform TriangleCenters
+{
+    vec3 centers[];
+};
+
+void computeBounds(const vec3 points[], int numPoints, out vec3 minBound, out vec3 maxBound) {
+    minBound = vec3(3.402823466e+38); // FLT_MAX
+    maxBound = vec3(-3.402823466e+38); // FLT_MIN
+
+    for (int i = 0; i < numPoints; i++) {
+        minBound = min(minBound, points[i]);
+        maxBound = max(maxBound, points[i]);
+    }
+}
+
+uint expandBits(uint x) {
+    x = (x | x << 16) & 0x030000FF;
+    x = (x | x << 8) & 0x0300F00F;
+    x = (x | x << 4) & 0x030C30C3;
+    x = (x | x << 2) & 0x09249249;
+    return x;
+}
+
+uint computeMortonCode(vec3 point, vec3 minBound, vec3 maxBound) {
+    vec3 normalized = (point - minBound) / (maxBound - minBound);
+    ivec3 grid = ivec3(normalized * float(GRID_RESOLUTION));
+
+    return expandBits(grid.x) | (expandBits(grid.y) << 1) | (expandBits(grid.z) << 2);
+}
+
+int commonPrefixLength(uint a, uint b) {
+    return int(31 - findLSB(a ^ b));
+}
+
+void generateMortonCodes(int n)
+{
+    vec3 minBound, maxBound;
+    computeBounds(centers, n, minBound, maxBound);
+
+    for (int i = 0; i < n; i++)
+        mortonCodes[i] = computeMortonCode(centers[i], minBound, maxBound);
+}

@@ -1,7 +1,5 @@
 #include "GLObject.h"
 
-#include <iostream>
-
 #include "Material.h"
 #include "Utils.h"
 
@@ -166,7 +164,7 @@ GLFrameBuffer::GLFrameBuffer(int width, int height)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << '\n';
+		Debug::logError("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

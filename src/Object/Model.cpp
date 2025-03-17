@@ -5,7 +5,6 @@
 #include "Debug.h"
 #include "rapidobj.hpp"
 #include "Utils.h"
-#include "omp.h"
 
 Model::Model(const std::filesystem::path& path)
 {

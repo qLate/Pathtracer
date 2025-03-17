@@ -1,12 +1,9 @@
 #include "BVHMortonBuilder.h"
 
-#include <algorithm>
-#include <bit>
-
+#include "Debug.h"
 #include "MortonCodes.h"
 #include "Triangle.h"
 #include "Utils.h"
-#include "omp.h"
 
 static auto& nodes = BVH::nodes;
 static auto& originalTriIndices = BVH::originalTriIndices;
@@ -19,18 +16,19 @@ void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 	recordOriginalTriIndices(triangles, sortedCodes);
 
 	buildStacked(triangles, sortedCodes);
-	//calculateBoxes();
 }
 
 std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMorton(const std::vector<Triangle*>& triangles)
 {
 	auto centers = std::vector<glm::vec3>(triangles.size());
+#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 		centers[i] = triangles[i]->getCenter();
 
 	auto mortonCodes = MortonCodes::generateMortonCodes(centers);
 
 	auto sortedCodes = std::vector<std::pair<uint32_t, int>>(triangles.size());
+#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 		sortedCodes[i] = {mortonCodes[i], i};
 
@@ -41,6 +39,7 @@ std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMort
 void BVHMortonBuilder::recordOriginalTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes)
 {
 	originalTriIndices.resize(triangles.size());
+#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 		originalTriIndices[i] = sortedCodes[i].second;
 }
@@ -161,19 +160,6 @@ void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std
 	calcNodeBoxesParallel(n);
 }
 
-AABB BVHMortonBuilder::calcNodeBoxes(int node)
-{
-	auto node_ = nodes[node];
-	if (node_->isLeaf)
-		return node_->box;
-
-	auto leftBox = calcNodeBoxes(node_->left);
-	auto rightBox = calcNodeBoxes(node_->right);
-	auto box = AABB::getUnitedBox(leftBox, rightBox);
-	node_->box = box;
-	return box;
-}
-
 void BVHMortonBuilder::calcBoxBottomUpForNode(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
 {
 	if (calculated[nodeInd]->fetch_add(1) == 0) return;
@@ -189,6 +175,7 @@ void BVHMortonBuilder::calcBoxBottomUpForNode(int nodeInd, const std::vector<std
 void BVHMortonBuilder::calcNodeBoxesParallel(int n)
 {
 	std::vector<std::unique_ptr<std::atomic<int>>> calculated(n - 1);
+#pragma omp parallel for
 	for (int i = 0; i < n - 1; i++)
 		calculated[i] = std::make_unique<std::atomic<int>>(0);
 
@@ -197,7 +184,7 @@ void BVHMortonBuilder::calcNodeBoxesParallel(int n)
 		calcBoxBottomUpForNode(nodes[i + n - 1]->parent, calculated);
 }
 
-int BVHMortonBuilder::getSplitIndex(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end)
+int BVHMortonBuilder::getSplitIndex_old(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end)
 {
 	uint32_t firstCode = sortedIndices[start].first;
 	uint32_t lastCode = sortedIndices[end].first;

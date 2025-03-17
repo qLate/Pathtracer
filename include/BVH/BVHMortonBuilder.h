@@ -8,10 +8,10 @@ class BVHMortonBuilder
 	static void recordOriginalTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes);
 
 	static void buildStacked(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
-	static int getSplitIndex(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end);
-	static AABB calcNodeBoxes(int node);
 	static void calcBoxBottomUpForNode(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated);
 	static void calcNodeBoxesParallel(int n);
+
+	static int getSplitIndex_old(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end);
 
 public:
 	static void build(const std::vector<Triangle*>& triangles);

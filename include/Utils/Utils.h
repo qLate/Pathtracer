@@ -2,8 +2,10 @@
 
 #include <chrono>
 
+#undef APIENTRY
 #include "rapidobj.hpp"
 #include "SDL_timer.h"
+#include "Debug.h"
 
 class Utils
 {
@@ -92,12 +94,12 @@ public:
 		timeSum = 0;
 	}
 
-	long long measure()
+	long long elapsed()
 	{
 		_lastMeasure = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration_cast<T>(_lastMeasure - _start).count();
 	}
-	long long measureFromLast()
+	long long elapsedFromLast()
 	{
 		auto curr = std::chrono::high_resolution_clock::now();
 		auto dur = std::chrono::duration_cast<T>(curr - _lastMeasure).count();
@@ -112,5 +114,20 @@ public:
 		_lastMeasure = curr;
 
 		return timeSum;
+	}
+
+	static std::string::const_pointer getUnitStr()
+	{
+		return typeid(T) == typeid(std::chrono::milliseconds)
+			       ? "ms"
+			       : typeid(T) == typeid(std::chrono::microseconds)
+			       ? "us"
+			       : typeid(T) == typeid(std::chrono::nanoseconds)
+			       ? "ns"
+			       : "s";
+	}
+	void printElapsed(const std::string& msg = "")
+	{
+		Debug::log(msg, std::to_string(elapsed()), getUnitStr());
 	}
 };

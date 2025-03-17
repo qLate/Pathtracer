@@ -1,10 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-#include <iostream>
 #include <stb_image.h>
 
 #include "Material.h"
-
 #include "Renderer.h"
 #include "Scene.h"
 #include "Utils.h"
@@ -14,7 +12,7 @@ Texture::Texture(const std::filesystem::path& path)
 	Scene::textures.push_back(this);
 
 	std::vector<uint8_t> image;
-	if (!readImage(image, path)) std::cerr << "Error loading texture: " << path << "\n";
+	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
 	setImageData(image);
 
 	texArrayLayerIndex = Renderer::texArray->addTexture(this);
@@ -37,7 +35,7 @@ void Texture::setImageData(const std::vector<uint8_t>& image)
 
 
 Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoef {diffuseCoef},
-                                                                                                   reflection {reflection}
+                                                                                                  reflection {reflection}
 {
 	this->id = nextAvailableId++;
 	Scene::materials.push_back(this);

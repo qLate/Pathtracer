@@ -1,6 +1,6 @@
 bool castShadowRays(Ray ray)
 {
-    for (int objInd = 0; objInd < objectCount; objInd++)
+    for (int objInd = 0; objInd < objects.length(); objInd++)
     {
         if (objects[objInd].objType != 0 && intersectDefaultObj(ray, objects[objInd])) return true;
     }
@@ -33,7 +33,7 @@ void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse)
 void getIllumination(Ray ray, inout vec4 diffuse)
 {
     diffuse = vec4(0);
-    for (int i = 0; i < lightCount; i++)
+    for (int i = 0; i < lights.length(); i++)
     {
         if (lights[i].lightType == 0)
             getDirectionalLightIllumination(ray, lights[i], diffuse);

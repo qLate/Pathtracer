@@ -18,7 +18,7 @@ void BVH::rebuildBVH()
 	nodes.clear();
 
 	buildBVH();
-	Debug::log("BVH rebuilt in " + std::to_string(tm.measureFromLast()) + "ms");
+	Debug::log("BVH rebuilt in " + std::to_string(tm.elapsedFromLast()) + "ms");
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

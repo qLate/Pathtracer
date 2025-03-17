@@ -80,6 +80,7 @@ class BufferController
 	//};
 
 	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
+	inline static ComputeShaderProgram* buildBVHProgram;
 
 	static void recalculateTriangleCoefs();
 

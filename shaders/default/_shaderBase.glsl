@@ -8,7 +8,6 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
-
 struct TexInfo
 {
     vec2 size;
@@ -80,50 +79,44 @@ uniform mat4x4 cameraRotMat = mat4x4(1.0);
 uniform vec2 texArrayBounds;
 layout(binding = 0) uniform sampler2DArray texArray;
 
-uniform int texInfoCount;
 layout(std140, binding = 1) uniform TexInfos
 {
     TexInfo texInfos[1];
 };
 
-uniform int materialCount;
 layout(std140, binding = 2) uniform Materials
 {
     Material materials[1];
 };
 
-uniform int lightCount;
 layout(std140, binding = 3) uniform Lights
 {
     Light lights[1];
 };
 
-uniform int objectCount;
 layout(std140, binding = 4) uniform Objects
 {
     Object objects[1];
 };
 
-uniform int triangleCount;
 layout(std140, binding = 5) /*buffer*/ uniform Triangles
 {
-    Triangle triangles[1];
+    Triangle triangles[];
 };
 
-uniform int bvhNodeCount;
 layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 {
-    BVHNode nodes[1];
+    BVHNode nodes[];
 };
 
 layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 {
-    float triIndices[1];
+    float triIndices[];
 };
 
 Material getMaterial(int index)
 {
-    for (int i = 0; i < materialCount; i++)
+    for (int i = 0; i < materials.length(); i++)
     {
         if (materials[i].indexID == index)
             return materials[i];
@@ -138,6 +131,14 @@ vec3 localToGlobal(vec3 pos, Object obj)
 vec3 localToGlobalDir(vec3 normal, Object obj)
 {
     return normalize((obj.transform * vec4(normal, 0.0f)).xyz);
+}
+
+vec3 calcTriangleCenter(Triangle tri)
+{
+    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.materialIndex.y)]);
+    return (p0 + p1 + p2) * 0.33333333f;
 }
 
 /// #include "default/utils.glsl"

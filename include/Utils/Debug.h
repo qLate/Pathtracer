@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <sstream>
 
@@ -6,7 +7,6 @@ enum class LogType : std::uint8_t
 {
 	Default = 1,
 	Input = 2,
-	FunctionCalls = 4,
 };
 
 inline LogType operator|(LogType a, LogType b)
