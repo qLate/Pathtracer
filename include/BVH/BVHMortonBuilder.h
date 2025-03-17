@@ -9,7 +9,9 @@ class BVHMortonBuilder
 
 	static void buildStacked(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
 	static int getSplitIndex(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end);
-	static void calculateBoxes();
+	static AABB calcNodeBoxes(int node);
+	static void calcBoxBottomUpForNode(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated);
+	static void calcNodeBoxesParallel(int n);
 
 public:
 	static void build(const std::vector<Triangle*>& triangles);

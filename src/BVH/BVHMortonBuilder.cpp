@@ -157,20 +157,44 @@ void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std
 		if (right >= n - 1) nodes[right]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, right - (n - 1), right - (n - 1));
 	}
 
-	calcNodeBoxes(0);
+	//calcNodeBoxes(0);
+	calcNodeBoxesParallel(n);
 }
 
-void BVHMortonBuilder::calculateBoxes()
+AABB BVHMortonBuilder::calcNodeBoxes(int node)
 {
-	for (int i = nodes.size() - 1; i >= 0; i--)
-	{
-		auto node = nodes[i];
-		if (node->isLeaf) continue;
+	auto node_ = nodes[node];
+	if (node_->isLeaf)
+		return node_->box;
 
-		auto left = nodes[node->left];
-		auto right = nodes[node->right];
-		node->box = AABB::getUnitedBox(left->box, right->box);
-	}
+	auto leftBox = calcNodeBoxes(node_->left);
+	auto rightBox = calcNodeBoxes(node_->right);
+	auto box = AABB::getUnitedBox(leftBox, rightBox);
+	node_->box = box;
+	return box;
+}
+
+void BVHMortonBuilder::calcBoxBottomUpForNode(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
+{
+	if (calculated[nodeInd]->fetch_add(1) == 0) return;
+
+	auto node = nodes[nodeInd];
+	auto left = nodes[node->left];
+	auto right = nodes[node->right];
+	node->box = AABB::getUnitedBox(left->box, right->box);
+
+	if (node->parent != -1)
+		calcBoxBottomUpForNode(node->parent, calculated);
+}
+void BVHMortonBuilder::calcNodeBoxesParallel(int n)
+{
+	std::vector<std::unique_ptr<std::atomic<int>>> calculated(n - 1);
+	for (int i = 0; i < n - 1; i++)
+		calculated[i] = std::make_unique<std::atomic<int>>(0);
+
+#pragma omp parallel for
+	for (int i = 0; i < n; i++)
+		calcBoxBottomUpForNode(nodes[i + n - 1]->parent, calculated);
 }
 
 int BVHMortonBuilder::getSplitIndex(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end)

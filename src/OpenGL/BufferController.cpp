@@ -46,12 +46,16 @@ void BufferController::updateBuffers()
 
 void BufferController::updateTexInfosBuffer()
 {
-	std::vector<TexInfoStruct> data {};
-	for (const auto& tex : Scene::textures)
+	auto textures = Scene::textures;
+	std::vector<TexInfoStruct> data(textures.size());
+#pragma omp parallel for
+	for (int i = 0; i < textures.size(); i++)
 	{
-		TexInfoStruct texInfoStruct {};
+		auto tex = textures[i];
+
+		TexInfoStruct texInfoStruct;
 		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
-		data.push_back(texInfoStruct);
+		data[i] = texInfoStruct;
 	}
 
 	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
@@ -60,9 +64,13 @@ void BufferController::updateTexInfosBuffer()
 
 void BufferController::updateMaterialsBuffer()
 {
-	std::vector<MaterialStruct> data {};
-	for (const auto& mat : Scene::materials)
+	auto materials = Scene::materials;
+	std::vector<MaterialStruct> data(materials.size());
+#pragma omp parallel for
+	for (int i = 0; i < materials.size(); i++)
 	{
+		auto mat = materials[i];
+
 		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
 		materialStruct.lit = mat->lit;
@@ -71,7 +79,7 @@ void BufferController::updateMaterialsBuffer()
 		materialStruct.indexID = mat->id;
 		materialStruct.texArrayLayerIndex = mat->texture->texArrayLayerIndex;
 
-		data.push_back(materialStruct);
+		data[i] = materialStruct;
 	}
 
 	Renderer::renderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
@@ -80,9 +88,13 @@ void BufferController::updateMaterialsBuffer()
 
 void BufferController::updateLightsBuffer()
 {
-	std::vector<LightStruct> data {};
-	for (const auto& light : Scene::lights)
+	auto lights = Scene::lights;
+	std::vector<LightStruct> data(lights.size());
+#pragma omp parallel for
+	for (int i = 0; i < lights.size(); i++)
 	{
+		auto light = lights[i];
+
 		LightStruct lightStruct {};
 		lightStruct.pos = light->getPos();
 		lightStruct.color = light->color;
@@ -101,7 +113,7 @@ void BufferController::updateLightsBuffer()
 			lightStruct.properties1.y = pointLight->dis;
 		}
 
-		data.push_back(lightStruct);
+		data[i] = lightStruct;
 	}
 
 	Renderer::renderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
@@ -111,9 +123,13 @@ void BufferController::updateLightsBuffer()
 void BufferController::updateObjectsBuffer()
 {
 	auto triangleCount = 0;
-	std::vector<ObjectStruct> data {};
-	for (const auto& obj : Scene::graphicals)
+	auto graphicals = Scene::graphicals;
+	std::vector<ObjectStruct> data(graphicals.size());
+#pragma omp parallel for
+	for (int i = 0; i < graphicals.size(); i++)
 	{
+		auto obj = graphicals[i];
+
 		ObjectStruct objectStruct {};
 		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
@@ -140,7 +156,7 @@ void BufferController::updateObjectsBuffer()
 			objectStruct.properties = glm::vec4(plane->normal, 0);
 		}
 
-		data.push_back(objectStruct);
+		data[i] = objectStruct;
 	}
 
 	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
@@ -152,9 +168,12 @@ void BufferController::updateObjectsBuffer()
 
 void BufferController::updateTrianglesBuffer()
 {
-	std::vector<TriangleStruct> data {};
-	for (const auto& triangle : Scene::triangles)
+	auto triangles = Scene::triangles;
+	std::vector<TriangleStruct> data(triangles.size());
+#pragma omp parallel for
+	for (int i = 0; i < triangles.size(); i++)
 	{
+		auto triangle = triangles[i];
 		TriangleStruct triangleStruct {};
 		for (int k = 0; k < 3; ++k)
 		{
@@ -163,7 +182,7 @@ void BufferController::updateTrianglesBuffer()
 		}
 		triangleStruct.materialIndex = glm::vec4(triangle->mesh->materialNoCopy()->id, triangle->mesh->indexID, 0, 0);
 
-		data.push_back(triangleStruct);
+		data[i] = triangleStruct;
 	}
 	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
 	Renderer::renderProgram->setInt("triangleCount", data.size());
@@ -171,16 +190,18 @@ void BufferController::updateTrianglesBuffer()
 
 void BufferController::updateBVHNodesBuffer()
 {
-	std::vector<BVHNodeStruct> data {};
-	for (int i = 0; i < BVH::nodes.size(); i++)
+	auto nodes = BVH::nodes;
+	std::vector<BVHNodeStruct> data(nodes.size());
+#pragma omp parallel for
+	for (int i = 0; i < nodes.size(); i++)
 	{
-		const auto& node = BVH::nodes[i];
-		BVHNodeStruct bvhNodeStruct {};
+		const auto& node = nodes[i];
+		BVHNodeStruct bvhNodeStruct;
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::vec4(node->hitNext, node->missNext, node->isLeaf, 0);
 
-		data.push_back(bvhNodeStruct);
+		data[i] = bvhNodeStruct;
 	}
 
 	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
@@ -190,9 +211,11 @@ void BufferController::updateBVHNodesBuffer()
 }
 void BufferController::updateBVHTriangleIndices()
 {
-	std::vector<float> data {};
-	for (int i = 0; i < BVH::originalTriIndices.size(); i++)
-		data.push_back(BVH::originalTriIndices[i]);
+	auto indices = BVH::originalTriIndices;
+	std::vector<float> data(indices.size());
+#pragma omp parallel for
+	for (int i = 0; i < indices.size(); i++)
+		data[i] = indices[i];
 
-	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData(data.data(), data.size());
 }
