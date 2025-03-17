@@ -1,6 +1,7 @@
 #include "BufferController.h"
 
 #include "BVH.h"
+#include "Debug.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Physics.h"
@@ -29,7 +30,7 @@ void BufferController::recalculateTriangleCoefs()
 	precomputeTriCoefsProgram->setInt("clusterSize", size);
 	precomputeTriCoefsProgram->setInt("triangleCount", Scene::triangles.size());
 
-	ComputeShaderProgram::dispatch({size, size, 1});
+	ComputeShaderProgram::dispatch({ceil(size / 8.0f), ceil(size / 4.0f), 1});
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 

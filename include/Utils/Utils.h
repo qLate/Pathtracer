@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "rapidobj.hpp"
 #include "SDL_timer.h"
 
 class Utils
@@ -28,6 +29,18 @@ public:
 	static float mod(float k, float n)
 	{
 		return fmod(fmod(k, n) + n, n);
+	}
+
+	static std::string toBinary(int n, int bits = -1)
+	{
+		std::string r;
+		while (n != 0 || bits > 0)
+		{
+			r.insert(0, n % 2 == 0 ? "0" : "1");
+			n /= 2;
+			bits--;
+		}
+		return r;
 	}
 };
 

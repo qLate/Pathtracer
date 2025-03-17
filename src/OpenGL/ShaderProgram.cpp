@@ -19,5 +19,4 @@ void ComputeShaderProgram::use() const
 void ComputeShaderProgram::dispatch(glm::ivec3 numGroups)
 {
 	glDispatchCompute(numGroups.x, numGroups.y, numGroups.z);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }

@@ -5,6 +5,7 @@
 #include "Debug.h"
 #include "rapidobj.hpp"
 #include "Utils.h"
+#include "omp.h"
 
 Model::Model(const std::filesystem::path& path)
 {
@@ -25,20 +26,21 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 	bool success = Triangulate(result);
 	if (!success) Debug::logError("Triangulation failed!");
 
-	std::vector<Vertex> vertices(3);
 	for (const auto& shape : result.shapes)
 	{
 		const auto& mesh = shape.mesh;
 		const auto& attributes = result.attributes;
 
-		size_t indexOffset = 0;
-		for (size_t f = 0; f < mesh.num_face_vertices.size(); f++)
+		triangles.resize(triangles.size() + mesh.num_face_vertices.size());
+#pragma omp parallel for
+		for (int f = 0; f < mesh.num_face_vertices.size(); f++)
 		{
-			if (mesh.num_face_vertices[f] != 3) continue; // Skip non-triangles (should be triangulated)
+			if (mesh.num_face_vertices[f] != 3) throw std::runtime_error("Non triangle found after triangulation.");
 
-			for (size_t v = 0; v < 3; v++)
+			std::vector<Vertex> vertices(3);
+			for (int v = 0; v < 3; v++)
 			{
-				const auto& [posIdx, uvIdx, normalIdx] = mesh.indices[indexOffset + v];
+				const auto& [posIdx, uvIdx, normalIdx] = mesh.indices[f * 3 + v];
 
 				vertices[v] = Vertex();
 
@@ -60,8 +62,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 				}
 			}
 
-			triangles.push_back(new Triangle(vertices[0], vertices[1], vertices[2]));
-			indexOffset += 3;
+			triangles[f] = (new Triangle(vertices[0], vertices[1], vertices[2]));
 		}
 	}
 }

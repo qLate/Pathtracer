@@ -79,6 +79,13 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
 
+find_package(OpenMP REQUIRED)
+
+if(OpenMP_CXX_FOUND)
+    target_compile_options(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_FLAGS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_LIBRARIES})
+endif()
+
 if (CMAKE_VERSION VERSION_GREATER 3.12)
     set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 endif ()

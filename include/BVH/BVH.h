@@ -37,12 +37,15 @@ public:
 
 	static AABB getUnitedBox(const AABB& box1, const AABB& box2);
 	glm::vec3 getCenter() const;
+
+	bool isZero() const { return min_ == glm::vec3(0) && max_ == glm::vec3(0); }
 };
 
 class BVHNode
 {
 public:
-	int leftInd = -1, rightInd = -1;
+	int parent = -1;
+	int left = -1, right = -1;
 	bool isLeaf = false;
 	int leafTrianglesStart = -1, leafTriangleCount = -1;
 	int hitNext = -1, missNext = -1;

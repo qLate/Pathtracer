@@ -26,16 +26,16 @@ BVHSahBuilder::BVHNodeSAH::BVHNodeSAH(std::vector<BVHNode*>& nodes, std::vector<
 
 	int splitIdx = getSplitIndex(triangles, start, end);
 
-	leftInd = (int)BVH::nodes.size();
-	rightInd = (int)BVH::nodes.size() + 1;
-	hitNext = leftInd;
+	left = (int)BVH::nodes.size();
+	right = (int)BVH::nodes.size() + 1;
+	hitNext = left;
 
 	nodes.push_back(nullptr);
 	nodes.push_back(nullptr);
-	nodes[leftInd] = new BVHNodeSAH(nodes, triangles, start, splitIdx, rightInd);
-	nodes[rightInd] = new BVHNodeSAH(nodes, triangles, splitIdx + 1, end, nextRightNode);
+	nodes[left] = new BVHNodeSAH(nodes, triangles, start, splitIdx, right);
+	nodes[right] = new BVHNodeSAH(nodes, triangles, splitIdx + 1, end, nextRightNode);
 
-	box = AABB::getUnitedBox(nodes[leftInd]->box, nodes[rightInd]->box);
+	box = AABB::getUnitedBox(nodes[left]->box, nodes[right]->box);
 }
 int BVHSahBuilder::BVHNodeSAH::getSplitIndex(std::vector<Triangle*>& triangles, int start, int end)
 {

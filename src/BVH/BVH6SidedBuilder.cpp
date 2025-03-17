@@ -20,18 +20,18 @@ Link BVH6SidedBuilder::buildAxis(int axis, bool positive, std::vector<Link>& vec
 {
 	if (node->isLeaf) return {nextRightNode, nextRightNode};
 
-	auto bound1 = positive ? nodes[node->leftInd]->box.min_ : nodes[node->leftInd]->box.max_;
-	auto bound2 = positive ? nodes[node->rightInd]->box.min_ : nodes[node->rightInd]->box.max_;
+	auto bound1 = positive ? nodes[node->left]->box.min_ : nodes[node->left]->box.max_;
+	auto bound2 = positive ? nodes[node->right]->box.min_ : nodes[node->right]->box.max_;
 	if (bound1[axis] < bound2[axis])
 	{
-		vector[node->leftInd] = buildAxis(axis, positive, vector, nodes[node->leftInd], node->rightInd, depth + 1);
-		vector[node->rightInd] = buildAxis(axis, positive, vector, nodes[node->rightInd], nextRightNode, depth + 1);
-		return {node->leftInd, nextRightNode};
+		vector[node->left] = buildAxis(axis, positive, vector, nodes[node->left], node->right, depth + 1);
+		vector[node->right] = buildAxis(axis, positive, vector, nodes[node->right], nextRightNode, depth + 1);
+		return {node->left, nextRightNode};
 	}
 	else
 	{
-		vector[node->rightInd] = buildAxis(axis, positive, vector, nodes[node->rightInd], node->leftInd, depth + 1);
-		vector[node->leftInd] = buildAxis(axis, positive, vector, nodes[node->leftInd], nextRightNode, depth + 1);
-		return {node->rightInd, nextRightNode};
+		vector[node->right] = buildAxis(axis, positive, vector, nodes[node->right], node->left, depth + 1);
+		vector[node->left] = buildAxis(axis, positive, vector, nodes[node->left], nextRightNode, depth + 1);
+		return {node->right, nextRightNode};
 	}
 }
