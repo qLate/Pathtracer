@@ -20,9 +20,14 @@ std::pair<glm::vec3, glm::vec3> MortonCodes::computeBounds(const std::vector<glm
 uint32_t MortonCodes::computeMortonCode(const glm::vec3& point, const glm::vec3& minBound, const glm::vec3& maxBound)
 {
 	auto normalized = (point - minBound) / (maxBound - minBound);
-	auto grid = glm::ivec3(normalized * GRID_RESOLUTION); // 10-bit grid
+	auto grid = glm::ivec3(normalized * GRID_RESOLUTION);
 
-	return expandBits(grid.x) | expandBits(grid.y) << 1 | expandBits(grid.z) << 2;
+	uint32_t b1 = expandBits(grid.x);
+	uint32_t b2 = expandBits(grid.y) << 1;
+	uint32_t b = expandBits(grid.z) << 2;
+	uint32_t x1 = b1 | b2;
+	uint32_t x2 = x1 | b;
+	return x2;
 }
 uint32_t MortonCodes::expandBits(uint32_t x)
 {
@@ -38,7 +43,7 @@ std::vector<uint32_t> MortonCodes::generateMortonCodes(const std::vector<glm::ve
 	std::vector<uint32_t> mortonCodes(centers.size());
 
 	auto [minBound, maxBound] = computeBounds(centers);
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < centers.size(); i++)
 		mortonCodes[i] = computeMortonCode(centers[i], minBound, maxBound);
 

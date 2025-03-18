@@ -1,7 +1,4 @@
-#define FLT_MAX  3.402823466e+38
-#define FLT_MIN  -3.402823466e+38
-#define PI 3.14159265359
-#define PHI 1.61803398874
+/// #include "default/utils.glsl"
 
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
@@ -58,9 +55,10 @@ struct Triangle
 
 struct BVHNode
 {
-    vec4 min;
-    vec4 max;
-    vec3 values; // hitNext, missNext, isLeaf
+    vec4 min; // min, trianglesStart
+    vec4 max; // max, triangleCount
+    ivec4 values; // left, right, isLeaf, parent
+    ivec4 links; // hit, miss, boxCalculated
 };
 
 struct Ray
@@ -105,16 +103,6 @@ layout(std140, binding = 5) /*buffer*/ uniform Triangles
     Triangle triangles[];
 };
 
-layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
-{
-    BVHNode nodes[];
-};
-
-layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
-{
-    uint triIndices[];
-};
-
 Material getMaterial(int index)
 {
     for (int i = 0; i < materials.length(); i++)
@@ -142,6 +130,11 @@ vec3 getTriangleCenter(Triangle tri)
     return (p0 + p1 + p2) * 0.33333333f;
 }
 
-/// #include "default/utils.glsl"
-/// #include "intersection.glsl"
-/// #include "light.glsl"
+void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound) {
+    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.materialIndex.y)]);
+
+    minBound = min(min(p0, p1), p2) - vec3(0.0001);
+    maxBound = max(max(p0, p1), p2) + vec3(0.0001);
+}

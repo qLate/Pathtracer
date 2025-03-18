@@ -12,7 +12,7 @@ public:
 	~ComputeShaderProgram();
 
 	void use() const;
-	static void dispatch(glm::ivec3 numGroups);
+	static void dispatch(glm::ivec3 numGroups, GLenum sync = -1);
 };
 
 template <typename FragType = Shader>

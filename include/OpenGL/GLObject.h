@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "glad.h"
 
 class Texture;
@@ -33,8 +35,6 @@ protected:
 	virtual void bind(int index) = 0;
 	void setDefaultBind(int index);
 
-	virtual void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) = 0;
-
 public:
 	void bindDefault();
 };
@@ -48,7 +48,7 @@ public:
 	UBO(int align, int baseIndex = -1);
 
 	void bind(int index) override;
-	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
+	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
 };
 
 
@@ -60,11 +60,37 @@ public:
 	SSBO(int align, int baseIndex = -1);
 
 	void bind(int index) override;
-	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
+	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
 	void setStorage(int count) const;
+	void clear() const;
 
 	void* mapBuffer() const;
 	void unmapBuffer() const;
+
+	template <typename T>
+	std::vector<T> readData(int count) const;
+};
+
+template <typename T>
+std::vector<T> SSBO::readData(int count) const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+
+	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+	auto data = std::vector<T>(count);
+	memcpy(data.data(), ptr, count * align * sizeof(float));
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	return data;
+}
+
+class AtomicCounterBuffer : public GLBuffer
+{
+public:
+	AtomicCounterBuffer(int baseIndex = -1, int initValue = 0);
+
+	void bind(int index) override;
 };
 
 

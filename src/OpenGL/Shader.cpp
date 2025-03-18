@@ -157,6 +157,10 @@ std::string Shader::parseShader(const std::string& pathStr)
 	while (std::regex_search(code, re))
 		code = std::regex_replace(code, re, "buffer");
 
+	std::regex re2 = std::regex("/\\*shared\\*/");
+	while (std::regex_search(code, re2))
+		code = std::regex_replace(code, re2, "shared");
+
 	writeOutShader(code, pathStr);
 
 	return code;

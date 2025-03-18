@@ -1,6 +1,7 @@
 #include "BufferController.h"
 
 #include "BVH.h"
+#include "BVHMortonBuilder.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Renderer.h"
@@ -27,6 +28,7 @@ void BufferController::recalculateTriangleCoefs()
 
 void BufferController::updateBuffers()
 {
+	Renderer::renderProgram->use();
 	bindBuffers();
 
 	updateTexInfosBuffer();
@@ -183,22 +185,25 @@ void BufferController::updateTrianglesBuffer()
 
 void BufferController::updateBVHNodesBuffer()
 {
-	auto nodes = BVH::nodes;
-	std::vector<BVHNodeStruct> data(nodes.size());
-#pragma omp parallel for
-	for (int i = 0; i < nodes.size(); i++)
-	{
-		const auto& node = nodes[i];
-		BVHNodeStruct bvhNodeStruct;
-		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
-		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
-		bvhNodeStruct.values = glm::vec4(node->hitNext, node->missNext, node->isLeaf, 0);
-
-		data[i] = bvhNodeStruct;
-	}
-	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
-
-	updateBVHTriangleIndices();
+	BVHMortonBuilder::ssboBVHNodes->bind(6);
+	BVHMortonBuilder::ssboTriIndices->bind(7);
+//	auto nodes = BVH::nodes;
+//	std::vector<BVHNodeStruct> data(nodes.size());
+//#pragma omp parallel for
+//	for (int i = 0; i < nodes.size(); i++)
+//	{
+//		const auto& node = nodes[i];
+//		BVHNodeStruct bvhNodeStruct {};
+//		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
+//		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
+//		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);
+//		bvhNodeStruct.links = glm::ivec4(node->hitNext, node->missNext, 0, 0);
+//
+//		data[i] = bvhNodeStruct;
+//	}
+//	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
+//
+//	updateBVHTriangleIndices();
 }
 void BufferController::updateBVHTriangleIndices()
 {

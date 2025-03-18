@@ -2,6 +2,7 @@
 
 #include "BufferController.h"
 #include "glad.h"
+#include "Renderer.h"
 
 TraceShader::TraceShader(const char* path, int id, int) : Shader(path, id, GL_FRAGMENT_SHADER)
 {

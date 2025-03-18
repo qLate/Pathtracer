@@ -16,7 +16,9 @@ void ComputeShaderProgram::use() const
 {
 	glUseProgram(id);
 }
-void ComputeShaderProgram::dispatch(glm::ivec3 numGroups)
+void ComputeShaderProgram::dispatch(glm::ivec3 numGroups, GLenum sync)
 {
 	glDispatchCompute(numGroups.x, numGroups.y, numGroups.z);
+	if (sync != -1)
+		glMemoryBarrier(sync);
 }

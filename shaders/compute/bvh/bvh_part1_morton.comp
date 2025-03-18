@@ -1,0 +1,103 @@
+#version 460 core
+layout(local_size_x = 256) in;
+/// #include "default/_shaderBase.glsl"
+
+const float GRID_RESOLUTION = 1023;
+
+layout(std140, binding = 6) /*buffer*/ uniform TriangleCenters
+{
+    vec3 centers[];
+};
+
+layout(std140, binding = 7) /*buffer*/ uniform MinMax {
+    ivec3 globalMinInt;
+    ivec3 globalMaxInt;
+};
+
+layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
+{
+    uint mortonCodes[];
+};
+
+layout(std430, binding = 9) /*buffer*/ uniform BVHTriIndices
+{
+    uint triIndices[];
+};
+
+/*shared*/ vec3 localMin[256];
+/*shared*/ vec3 localMax[256];
+
+void computeBounds(uint gid, vec3 value) {
+    uint lid = gl_LocalInvocationID.x;
+    uint groupSize = gl_WorkGroupSize.x;
+
+    localMin[lid] = value;
+    localMax[lid] = value;
+
+    barrier();
+
+    for (uint s = groupSize / 2; s > 0; s >>= 1)
+    {
+        if (lid < s)
+        {
+            localMin[lid] = min(localMin[lid], localMin[lid + s]);
+            localMax[lid] = max(localMax[lid], localMax[lid + s]);
+        }
+        barrier();
+    }
+    barrier();
+
+    if (lid == 0) {
+        atomicMin(globalMinInt.x, floatToOrderedInt(localMin[0].x));
+        atomicMin(globalMinInt.y, floatToOrderedInt(localMin[0].y));
+        atomicMin(globalMinInt.z, floatToOrderedInt(localMin[0].z));
+
+        atomicMax(globalMaxInt.x, floatToOrderedInt(localMax[0].x));
+        atomicMax(globalMaxInt.y, floatToOrderedInt(localMax[0].y));
+        atomicMax(globalMaxInt.z, floatToOrderedInt(localMax[0].z));
+    }
+}
+
+uint expandBits(uint x) {
+    x = (x | x << 16) & 0x030000FF;
+    x = (x | x << 8) & 0x0300F00F;
+    x = (x | x << 4) & 0x030C30C3;
+    x = (x | x << 2) & 0x09249249;
+    return x;
+}
+
+uint computeMortonCode(vec3 point, vec3 minBound, vec3 maxBound) {
+    vec3 normalized = (point - minBound) / (maxBound - minBound);
+    ivec3 grid = ivec3(normalized * GRID_RESOLUTION);
+
+    return expandBits(grid.x) | (expandBits(grid.y) << 1) | (expandBits(grid.z) << 2);
+}
+
+void generateMortonCode(uint gid)
+{
+    barrier();
+    vec3 boundMin = orderedIntToFloatVec3(globalMinInt);
+    vec3 boundMax = orderedIntToFloatVec3(globalMaxInt);
+
+    mortonCodes[gid] = computeMortonCode(centers[gid], boundMin, boundMax);
+}
+
+uniform int n = -1;
+
+uniform int pass = -1;
+void main()
+{
+    uint gid = gl_GlobalInvocationID.x;
+    if (gid >= n) return;
+
+    if (pass == 0)
+    {
+        centers[gid] = getTriangleCenter(triangles[gid]);
+        computeBounds(gid, centers[gid]);
+    }
+    else if (pass == 1)
+    {
+        generateMortonCode(gid);
+        triIndices[gid] = gid;
+    }
+}

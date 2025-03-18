@@ -28,11 +28,11 @@ GLBuffer::GLBuffer()
 {
 	glGenBuffers(1, &id);
 }
-void GLBuffer::setDefaultBind(int index) 
+void GLBuffer::setDefaultBind(int index)
 {
 	currBase = index;
 }
-void GLBuffer::bindDefault() 
+void GLBuffer::bindDefault()
 {
 	bind(currBase);
 }
@@ -41,17 +41,18 @@ UBO::UBO(int align, int baseIndex) : align(align)
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, id);
 	if (baseIndex != -1)
+	{
 		glBindBufferBase(GL_UNIFORM_BUFFER, baseIndex, id);
+		setDefaultBind(baseIndex);
+	}
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	setDefaultBind(baseIndex);
 }
 
 void UBO::bind(int index)
 {
 	glBindBufferBase(GL_UNIFORM_BUFFER, index, id);
 }
-void UBO::setData(const float* data, int count, GLenum type)
+void UBO::setData(const float* data, int count, GLenum type) const
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, id);
 	glBufferData(GL_UNIFORM_BUFFER, count * align * sizeof(float), data, type);
@@ -62,17 +63,18 @@ SSBO::SSBO(int align, int baseIndex) : align(align)
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 	if (baseIndex != -1)
+	{
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, baseIndex, id);
+		setDefaultBind(baseIndex);
+	}
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	setDefaultBind(baseIndex);
 }
 
 void SSBO::bind(int index)
 {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, id);
 }
-void SSBO::setData(const float* data, int count, GLenum type)
+void SSBO::setData(const float* data, int count, GLenum type) const
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), data, type);
@@ -82,6 +84,12 @@ void SSBO::setStorage(int count) const
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 	glBufferStorage(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), NULL, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+void SSBO::clear() const
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, NULL);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
@@ -97,6 +105,20 @@ void SSBO::unmapBuffer() const
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+AtomicCounterBuffer::AtomicCounterBuffer(int baseIndex, int initValue)
+{
+	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, id);
+	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, id);
+
+	glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), &initValue);
+
+	setDefaultBind(baseIndex);
+}
+void AtomicCounterBuffer::bind(int index)
+{
+	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, id);
 }
 
 GLTexture::GLTexture()

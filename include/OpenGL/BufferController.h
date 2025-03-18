@@ -15,7 +15,7 @@ class BufferController
 	static constexpr int MATERIAL_ALIGN = 12;
 	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 40;
-	static constexpr int BVH_NODE_ALIGN = 12;
+	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
 	struct TexInfoStruct
@@ -69,7 +69,8 @@ class BufferController
 	{
 		glm::vec4 min;
 		glm::vec4 max;
-		glm::vec4 values;
+		glm::ivec4 values;
+		glm::ivec4 links;
 	};
 
 	//struct BVHLinkStruct

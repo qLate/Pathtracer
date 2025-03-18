@@ -6,6 +6,7 @@
 #include "GLObject.h"
 #include "MortonCodes.h"
 #include "RadixSort.hpp"
+#include "Renderer.h"
 #include "Scene.h"
 #include "ShaderProgram.h"
 #include "Triangle.h"
@@ -28,59 +29,105 @@ void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 
 void BVHMortonBuilder::init()
 {
-	bvh_part1_morton = new ComputeShaderProgram("shaders/compute/bvh/bvh_part1morton.comp");
-	bvh_part2_build = new ComputeShaderProgram("shaders/compute/bvh/bvh_part2build.comp");
+	bvh_part1_morton = new ComputeShaderProgram("shaders/compute/bvh/bvh_part1_morton.comp");
+	bvh_part2_build = new ComputeShaderProgram("shaders/compute/bvh/bvh_part2_build.comp");
 
-	ssboTriCenters = new SSBO(TRI_CENTER_ALIGN, 8);
-	ssboMortonCodes = new SSBO(MORTON_ALIGN, 9);
-	ssboMinMaxBound = new SSBO(MIN_MAX_BOUND_ALIGN, 10);
-	ssboMinMaxFloatBound = new SSBO(MIN_MAX_BOUND_ALIGN, 11);
+	ssboTriCenters = new SSBO(TRI_CENTER_ALIGN);
+	ssboMinMaxBound = new SSBO(MIN_MAX_BOUND_ALIGN);
+	ssboMortonCodes = new SSBO(MORTON_ALIGN);
+	ssboTriIndices = new SSBO(TRI_INDICES_ALIGN);
+	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN);
 
 	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
-	ssboMinMaxFloatBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
-}
-void BVHMortonBuilder::buildGPU()
-{
-	auto n = Scene::triangles.size();
-
-	ssboTriCenters->bindDefault();
-	ssboMortonCodes->bindDefault();
-	ssboMinMaxBound->bindDefault();
-	ssboMinMaxFloatBound->bindDefault();
-
-	ssboTriCenters->setData(nullptr, n);
-	ssboMortonCodes->setData(nullptr, n);
-	BufferController::updateTrianglesBuffer();
-	BufferController::updateObjectsBuffer();
-
-	bvh_part1_morton->use();
-	int triCount = n;
-	ComputeShaderProgram::dispatch({triCount / 256 + 1, 1, 1});
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-	auto data1 = ssboTriCenters->mapBuffer();
-	auto data_centers = std::vector<glm::vec4>(n);
-	memcpy(data_centers.data(), data1, sizeof(float) * n * TRI_CENTER_ALIGN);
-
-	auto data2 = ssboMortonCodes->mapBuffer();
-	auto data_codes = std::vector<uint32_t>(n);
-	memcpy(data_codes.data(), data2, sizeof(float) * n * MORTON_ALIGN);
-
-	auto data3 = ssboMinMaxFloatBound->mapBuffer();
-	auto data_bounds = std::vector<glm::vec4>(2);
-	memcpy(data_bounds.data(), data3, sizeof(float) * MIN_MAX_BOUND_ALIGN);
-
-	glu::RadixSort radix_sort;
-	radix_sort(ssboMortonCodes->id, ssboTriCenters->id, triCount);
-
-	bvh_part2_build->use();
-	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 void BVHMortonBuilder::uninit()
 {
 	delete bvh_part1_morton;
 	delete bvh_part2_build;
+
+	delete ssboTriCenters;
+	delete ssboMinMaxBound;
+	delete ssboMortonCodes;
+	delete ssboTriIndices;
+	delete ssboBVHNodes;
+}
+
+void BVHMortonBuilder::buildGPU()
+{
+	int n = Scene::triangles.size();
+
+	buildGPU_morton(n);
+	buildGPU_buildTree(n);
+}
+void BVHMortonBuilder::buildGPU_morton(int n)
+{
+	ssboTriCenters->bind(6);
+	ssboMinMaxBound->bind(7);
+	ssboMortonCodes->bind(8);
+	ssboTriIndices->bind(9);
+
+	ssboTriCenters->setData(nullptr, n);
+	ssboMinMaxBound->clear();
+	ssboMortonCodes->setData(nullptr, n);
+	ssboTriIndices->setData(nullptr, n);
+
+	BufferController::updateTrianglesBuffer();
+	BufferController::updateObjectsBuffer();
+
+	bvh_part1_morton->use();
+	bvh_part2_build->setInt("n", n);
+
+	bvh_part1_morton->setInt("pass", 0);
+	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	bvh_part1_morton->setInt("pass", 1);
+	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	glu::RadixSort radix_sort;
+	radix_sort(ssboMortonCodes->id, ssboTriIndices->id, n);
+}
+void BVHMortonBuilder::buildGPU_buildTree(int n)
+{
+	ssboBVHNodes->bind(6);
+	ssboTriIndices->bind(7);
+	ssboMortonCodes->bind(8);
+	Renderer::renderProgram->fragShader->ssboTriangles->bindDefault();
+
+	ssboBVHNodes->setData(nullptr, 2 * n - 1);
+
+	bvh_part2_build->use();
+	bvh_part2_build->setInt("n", n);
+
+	bvh_part2_build->setInt("pass", 0);
+	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	bvh_part2_build->setInt("pass", 1);
+	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	bvh_part2_build->setInt("pass", 2);
+	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	bvh_part2_build->setInt("pass", 3);
+	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	//auto nodes = ssboBVHNodes->readData<BVHNodeStruct>(2 * n - 1);
+	//for (int i = 0; i < 2 * n - 1; ++i)
+	//{
+	//	auto node1Struct = nodes[i];
+	//	auto node1 = BVHNode();
+	//	node1.left = node1Struct.values.x;
+	//	node1.right = node1Struct.values.y;
+	//	node1.box = AABB(glm::vec3(node1Struct.min), glm::vec3(node1Struct.max));
+	//	node1.isLeaf = node1Struct.values.z == 1;
+	//	node1.parent = node1Struct.values.w;
+	//	node1.hitNext = node1Struct.links.x;
+	//	node1.missNext = node1Struct.links.y;
+	//	node1.leafTrianglesStart = node1Struct.min.w;
+	//	node1.leafTriangleCount = node1Struct.max.w;
+
+	//	auto node2 = BVH::nodes[i];
+	//	int x = -1;
+	//}
 }
 
 std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMorton(const std::vector<Triangle*>& triangles)
@@ -144,10 +191,8 @@ void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std
 
 		// Handle duplicate codes
 		if (dir == 0)
-		{
 			while (lcp(i, j) == lcp(i, j + 1))
 				j++;
-		}
 
 		int split;
 		if (sortedCodes[i].first == sortedCodes[j].first)

@@ -116,7 +116,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 					Renderer::renderProgram->use();
 
 					BufferController::updateObjectsBuffer();
-					BufferController::updateBVHNodesBuffer();
+					//BufferController::updateBVHNodesBuffer();
 				}
 			}
 		}

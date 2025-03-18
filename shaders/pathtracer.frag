@@ -1,5 +1,19 @@
 #version 460 core
 /// #include "default/_shaderBase.glsl"
+vec4 COLOR_DEBUG = vec4(0.2, 0, 0, 0);
+
+layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
+{
+    BVHNode nodes[];
+};
+
+layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
+{
+    uint triIndices[];
+};
+
+/// #include "intersection.glsl"
+/// #include "light.glsl"
 
 out vec4 outColor;
 vec4 COLOR_HEAT = vec4(0);
