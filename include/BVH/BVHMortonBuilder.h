@@ -1,9 +1,8 @@
 #pragma once
 
 #include "BVH.h"
-
-class SSBO;
-class ComputeShaderProgram;
+#include "GLObject.h"
+#include "ShaderProgram.h"
 
 class BVHMortonBuilder : public BVHBuilder
 {
@@ -11,12 +10,12 @@ class BVHMortonBuilder : public BVHBuilder
 	static constexpr int MORTON_ALIGN = 1;
 	static constexpr int MIN_MAX_BOUND_ALIGN = 8;
 
-	inline static ComputeShaderProgram* bvh_part1_morton;
-	inline static ComputeShaderProgram* bvh_part2_build;
+	inline static UPtr<ComputeShaderProgram> bvh_part1_morton;
+	inline static UPtr<ComputeShaderProgram> bvh_part2_build;
 
-	inline static SSBO* ssboTriCenters;
-	inline static SSBO* ssboMinMaxBound;
-	inline static SSBO* ssboMortonCodes;
+	inline static UPtr<SSBO> ssboTriCenters;
+	inline static UPtr<SSBO> ssboMinMaxBound;
+	inline static UPtr<SSBO> ssboMortonCodes;
 
 	static void buildGPU(const std::vector<Triangle*>& triangles);
 	static void buildGPU_morton(int n);
@@ -31,7 +30,6 @@ class BVHMortonBuilder : public BVHBuilder
 
 public:
 	BVHMortonBuilder();
-	~BVHMortonBuilder() override;
 
 	void build(const std::vector<Triangle*>& triangles) override;
 };

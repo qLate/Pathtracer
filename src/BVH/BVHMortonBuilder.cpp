@@ -12,23 +12,14 @@
 
 BVHMortonBuilder::BVHMortonBuilder()
 {
-	bvh_part1_morton = new ComputeShaderProgram("shaders/compute/bvh/bvh_part1_morton.comp");
-	bvh_part2_build = new ComputeShaderProgram("shaders/compute/bvh/bvh_part2_build.comp");
+	bvh_part1_morton = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part1_morton.comp");
+	bvh_part2_build = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part2_build.comp");
 
-	ssboTriCenters = new SSBO(TRI_CENTER_ALIGN);
-	ssboMinMaxBound = new SSBO(MIN_MAX_BOUND_ALIGN);
-	ssboMortonCodes = new SSBO(MORTON_ALIGN);
+	ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
+	ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
+	ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
 
 	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
-}
-BVHMortonBuilder::~BVHMortonBuilder()
-{
-	delete bvh_part1_morton;
-	delete bvh_part2_build;
-
-	delete ssboTriCenters;
-	delete ssboMinMaxBound;
-	delete ssboMortonCodes;
 }
 
 void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)

@@ -4,7 +4,6 @@
 
 #include "BufferController.h"
 #include "BVH.h"
-#include "Debug.h"
 #include "ImGUIHandler.h"
 #include "Input.h"
 #include "MyTime.h"
@@ -63,9 +62,5 @@ void Program::loop()
 
 void Program::quit()
 {
-	BVH::uninit();
-	BufferController::uninit();
-	Physics::uninit();
-	Renderer::uninit();
 	SDLHandler::quit();
 }

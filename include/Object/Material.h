@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Color.h"
+#include "Utils.h"
 
 class GLTexture2D;
 
@@ -13,7 +14,7 @@ class Texture
 	void setImageData(const std::vector<uint8_t>& image);
 
 public:
-	inline static Texture* defaultTex = nullptr;
+	static Texture* defaultTex();
 
 	unsigned char* data;
 	int width = 0, height = 0;
@@ -29,9 +30,9 @@ class Material
 	inline static int nextAvailableId = 0;
 
 public:
-	inline static Material* defaultLit = nullptr;
-	inline static Material* defaultUnlit = nullptr;
-	inline static Material* debugLine = nullptr;
+	static Material* defaultLit();
+	static Material* defaultUnlit();
+	static Material* debugLine();
 
 	int id;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Utils.h"
 #include "glm/mat4x4.hpp"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
@@ -19,21 +20,20 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
-	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
+	inline static UPtr<ComputeShaderProgram> precomputeTriCoefsProgram;
 
 	static void recalculateTriangleCoefs();
 
 public:
-	inline static UBO* uboTexInfos;
-	inline static UBO* uboMaterials;
-	inline static UBO* uboLights;
-	inline static UBO* uboObjects;
-	inline static SSBO* ssboTriangles;
-	inline static SSBO* ssboBVHNodes;
-	inline static SSBO* ssboBVHTriIndices;
+	inline static UPtr<UBO> uboTexInfos;
+	inline static UPtr<UBO> uboMaterials;
+	inline static UPtr<UBO> uboLights;
+	inline static UPtr<UBO> uboObjects;
+	inline static UPtr<SSBO> ssboTriangles;
+	inline static UPtr<SSBO> ssboBVHNodes;
+	inline static UPtr<SSBO> ssboBVHTriIndices;
 
 	static void init();
-	static void uninit();
 
 	static void writeBuffers();
 	static void bindBuffers();

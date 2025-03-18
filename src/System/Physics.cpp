@@ -1,6 +1,5 @@
 #include "Physics.h"
 
-#include "Debug.h"
 #include "GLObject.h"
 #include "Graphical.h"
 #include "Object.h"
@@ -10,14 +9,9 @@
 
 void Physics::init()
 {
-	raycastProgram = new ComputeShaderProgram("shaders/compute/raycast.comp");
-	resultSSBO = new SSBO(sizeof(RaycastHitStruct), 20);
+	raycastProgram = make_unique<ComputeShaderProgram>("shaders/compute/raycast.comp");
+	resultSSBO = make_unique<SSBO>(sizeof(RaycastHitStruct), 20);
 	resultSSBO->setStorage(1);
-}
-void Physics::uninit()
-{
-	delete raycastProgram;
-	delete resultSSBO;
 }
 
 RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)

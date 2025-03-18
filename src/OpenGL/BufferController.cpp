@@ -1,7 +1,6 @@
 #include "BufferController.h"
 
 #include "BVH.h"
-#include "BVHMortonBuilder.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Renderer.h"
@@ -10,19 +9,15 @@
 
 void BufferController::init()
 {
-	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeTriCoefs.comp");
+	precomputeTriCoefsProgram = make_unique<ComputeShaderProgram>("shaders/compute/precomputeTriCoefs.comp");
 
-	uboTexInfos = new UBO(TEX_INFOS_ALIGN, 1);
-	uboMaterials = new UBO(MATERIAL_ALIGN, 2);
-	uboLights = new UBO(LIGHT_ALIGN, 3);
-	uboObjects = new UBO(OBJECT_ALIGN, 4);
-	ssboTriangles = new SSBO(TRIANGLE_ALIGN, 5);
-	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN, 6);
-	ssboBVHTriIndices = new SSBO(BVH_TRI_INDICES_ALIGN, 7);
-}
-void BufferController::uninit()
-{
-	delete precomputeTriCoefsProgram;
+	uboTexInfos = make_unique<UBO>(TEX_INFOS_ALIGN, 1);
+	uboMaterials = make_unique<UBO>(MATERIAL_ALIGN, 2);
+	uboLights = make_unique<UBO>(LIGHT_ALIGN, 3);
+	uboObjects = make_unique<UBO>(OBJECT_ALIGN, 4);
+	ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
+	ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
+	ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
 }
 
 void BufferController::recalculateTriangleCoefs()
@@ -81,7 +76,7 @@ void BufferController::writeMaterials()
 	{
 		auto mat = materials[i];
 
-		MaterialStruct materialStruct {};
+		MaterialStruct materialStruct{};
 		materialStruct.color = mat->color;
 		materialStruct.lit = mat->lit;
 		materialStruct.diffuseCoeff = mat->diffuseCoef;
@@ -104,7 +99,7 @@ void BufferController::writeLights()
 	{
 		auto light = lights[i];
 
-		LightStruct lightStruct {};
+		LightStruct lightStruct{};
 		lightStruct.pos = light->getPos();
 		lightStruct.color = light->color;
 		lightStruct.properties1.x = light->intensity;
@@ -138,7 +133,7 @@ void BufferController::writeObjects()
 	{
 		auto obj = graphicals[i];
 
-		ObjectStruct objectStruct {};
+		ObjectStruct objectStruct{};
 		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
 		objectStruct.transform = translate(glm::mat4(1), obj->getPos()) * mat4_cast(obj->getRot()) * scale(glm::mat4(1), obj->getScale());
@@ -180,7 +175,7 @@ void BufferController::writeTriangles()
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];
-		TriangleStruct triangleStruct {};
+		TriangleStruct triangleStruct{};
 		for (int k = 0; k < 3; ++k)
 		{
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices[k].pos, triangle->vertices[k].uvPos.x);
@@ -201,7 +196,7 @@ void BufferController::writeBVHNodes()
 	for (int i = 0; i < nodes.size(); i++)
 	{
 		const auto& node = nodes[i];
-		BVHNodeStruct bvhNodeStruct {};
+		BVHNodeStruct bvhNodeStruct{};
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);

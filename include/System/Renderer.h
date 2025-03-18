@@ -3,6 +3,7 @@
 #include "glm/vec2.hpp"
 #include "TraceShader.h"
 #include "ShaderProgram.h"
+#include "Utils.h"
 
 class GLFrameBuffer;
 
@@ -14,12 +15,11 @@ class Renderer
 	static constexpr glm::vec3 TEX_ARRAY_BOUNDS = {8192, 8192, 32};
 
 public:
-	inline static DefaultShaderProgram<TraceShader>* renderProgram;
-	inline static GLFrameBuffer* sceneViewFBO;
-	inline static GLTexture2DArray* texArray;
+	inline static UPtr<DefaultShaderProgram<TraceShader>> renderProgram;
+	inline static UPtr<GLFrameBuffer> sceneViewFBO;
+	inline static UPtr<GLTexture2DArray> texArray;
 
 	static void init();
-	static void uninit();
 
 	static void render();
 	static void bindTextures();

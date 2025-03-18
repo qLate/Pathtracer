@@ -17,6 +17,29 @@ Texture::Texture(const std::filesystem::path& path)
 
 	texArrayLayerIndex = Renderer::texArray->addTexture(this);
 }
+
+Texture* Texture::defaultTex()
+{
+	static Texture instance("assets/textures/default.png");
+	return &instance;
+}
+
+Material* Material::defaultLit()
+{
+	static Material instance(Color::white(), true);
+	return &instance;
+}
+Material* Material::defaultUnlit()
+{
+	static Material instance(Color::white(), false);
+	return &instance;
+}
+Material* Material::debugLine()
+{
+	static Material instance(Color::red(), false);
+	return &instance;
+}
+
 bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
 {
 	int n;
@@ -33,14 +56,13 @@ void Texture::setImageData(const std::vector<uint8_t>& image)
 	memcpy(data, image.data(), width * height * 4);
 }
 
-
 Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoef {diffuseCoef},
                                                                                                   reflection {reflection}
 {
 	this->id = nextAvailableId++;
 	Scene::materials.push_back(this);
 }
-Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex) {}
+Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex()) {}
 Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoef, material.reflection) {}
 Material::~Material()
 {

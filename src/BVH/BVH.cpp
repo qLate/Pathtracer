@@ -1,18 +1,13 @@
 #include "BVH.h"
 
 #include "BVHMortonBuilder.h"
-#include "Debug.h"
 #include "Scene.h"
 #include "Triangle.h"
 #include "Utils.h"
 
 void BVH::init()
 {
-	builder = new BVHMortonBuilder();
-}
-void BVH::uninit()
-{
-	delete builder;
+	builder = make_unique<BVHMortonBuilder>();
 }
 
 void BVH::buildBVH()

@@ -5,9 +5,9 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
-class BVHMortonBuilder;
-class SSBO;
-class Graphical;
+#include "Utils.h"
+
+class BVHBuilder;
 class Triangle;
 class BVHNode;
 
@@ -25,10 +25,9 @@ public:
 	inline static std::vector<BVHNode*> nodes;
 	inline static std::vector<int> originalTriIndices;
 
-	inline static BVHMortonBuilder* builder;
+	inline static UPtr<BVHBuilder> builder;
 
 	static void init();
-	static void uninit();
 
 	static void buildBVH();
 	static void rebuildBVH();
@@ -64,10 +63,9 @@ public:
 
 class BVHBuilder
 {
-protected:
+public:
 	virtual ~BVHBuilder() = default;
 
-public:
 	virtual void build(const std::vector<Triangle*>& triangles) = 0;
 	virtual void rebuild(const std::vector<Triangle*>& triangles) { build(triangles); }
 };

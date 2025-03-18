@@ -49,7 +49,7 @@ void SDLHandler::initOpenGL()
 		Debug::log("OpenGL Debug Message: ", message);
 	}, nullptr);
 
-	Renderer::sceneViewFBO = new GLFrameBuffer(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
+	Renderer::sceneViewFBO = make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
 }
 
 void SDLHandler::update()

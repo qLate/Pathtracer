@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderProgram.h"
+#include "Utils.h"
 
 class Object;
 class SSBO;
@@ -17,6 +18,17 @@ struct RaycastHit
 
 class Physics
 {
+	inline static UPtr<ComputeShaderProgram> raycastProgram;
+	inline static UPtr<SSBO> resultSSBO;
+
+public:
+	static void init();
+
+	static RaycastHit raycast(glm::vec3 pos, glm::vec3 dir, float maxDis = std::numeric_limits<float>::max());
+
+	friend class BufferController;
+
+private:
 	struct RaycastHitStruct
 	{
 		glm::vec3 pos;
@@ -27,15 +39,4 @@ class Physics
 		int objIndex;
 		int triIndex;
 	};
-
-	inline static ComputeShaderProgram* raycastProgram;
-	inline static SSBO* resultSSBO;
-
-public:
-	static void init();
-	static void uninit();
-
-	static RaycastHit raycast(glm::vec3 pos, glm::vec3 dir, float maxDis = std::numeric_limits<float>::max());
-
-	friend class BufferController;
 };
