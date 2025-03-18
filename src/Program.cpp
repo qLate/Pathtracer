@@ -30,6 +30,8 @@ void Program::init()
 	SDLHandler::init();
 	Renderer::init();
 	Physics::init();
+	BufferController::init();
+	BVH::init();
 
 	TimeMeasurer tm {};
 
@@ -39,7 +41,7 @@ void Program::init()
 	BVH::buildBVH();
 	Debug::log("BVH tree built in " + std::to_string(tm.elapsedFromLast()) + "ms");
 
-	BufferController::init();
+	BufferController::updateBuffers();
 	Debug::log("Buffers updated in " + std::to_string(tm.elapsedFromLast()) + "ms");
 }
 
@@ -61,6 +63,7 @@ void Program::loop()
 
 void Program::quit()
 {
+	BVH::uninit();
 	BufferController::uninit();
 	Physics::uninit();
 	Renderer::uninit();

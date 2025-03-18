@@ -24,3 +24,4 @@ bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1)
     }
     return true;
 }
+

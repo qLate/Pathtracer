@@ -6,19 +6,25 @@
 #include "Triangle.h"
 #include "Utils.h"
 
+void BVH::init()
+{
+	BVHMortonBuilder::init();
+}
+void BVH::uninit()
+{
+	BVHMortonBuilder::uninit();
+}
+
 void BVH::buildBVH()
 {
 	BVHMortonBuilder::build(Scene::triangles);
+	//BVHMortonBuilder::buildGPU();
 }
 void BVH::rebuildBVH()
 {
-	TimeMeasurer tm {};
-	for (auto node : nodes)
-		delete node;
-	nodes.clear();
-
+	TimeMeasurer measurer;
 	buildBVH();
-	Debug::log("BVH rebuilt in " + std::to_string(tm.elapsedFromLast()) + "ms");
+	measurer.printElapsed("BVH rebuild time: ");
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

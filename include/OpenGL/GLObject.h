@@ -25,11 +25,18 @@ public:
 
 class GLBuffer : public GLObject
 {
+	int currBase = -1;
+
 protected:
 	GLBuffer();
 
-	virtual void bindBase(int index) = 0;
+	virtual void bind(int index) = 0;
+	void setDefaultBind(int index);
+
 	virtual void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) = 0;
+
+public:
+	void bindDefault();
 };
 
 
@@ -40,7 +47,7 @@ public:
 
 	UBO(int align, int baseIndex = -1);
 
-	void bindBase(int index) override;
+	void bind(int index) override;
 	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
 };
 
@@ -52,7 +59,7 @@ public:
 
 	SSBO(int align, int baseIndex = -1);
 
-	void bindBase(int index) override;
+	void bind(int index) override;
 	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) override;
 	void setStorage(int count) const;
 

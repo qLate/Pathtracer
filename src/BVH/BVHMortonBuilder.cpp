@@ -1,7 +1,13 @@
 #include "BVHMortonBuilder.h"
 
-#include "Debug.h"
+#include <execution>
+
+#include "BufferController.h"
+#include "GLObject.h"
 #include "MortonCodes.h"
+#include "RadixSort.hpp"
+#include "Scene.h"
+#include "ShaderProgram.h"
 #include "Triangle.h"
 #include "Utils.h"
 
@@ -16,6 +22,65 @@ void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 	recordOriginalTriIndices(triangles, sortedCodes);
 
 	buildStacked(triangles, sortedCodes);
+
+	buildGPU();
+}
+
+void BVHMortonBuilder::init()
+{
+	bvh_part1_morton = new ComputeShaderProgram("shaders/compute/bvh/bvh_part1morton.comp");
+	bvh_part2_build = new ComputeShaderProgram("shaders/compute/bvh/bvh_part2build.comp");
+
+	ssboTriCenters = new SSBO(TRI_CENTER_ALIGN, 8);
+	ssboMortonCodes = new SSBO(MORTON_ALIGN, 9);
+	ssboMinMaxBound = new SSBO(MIN_MAX_BOUND_ALIGN, 10);
+	ssboMinMaxFloatBound = new SSBO(MIN_MAX_BOUND_ALIGN, 11);
+
+	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
+	ssboMinMaxFloatBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
+}
+void BVHMortonBuilder::buildGPU()
+{
+	auto n = Scene::triangles.size();
+
+	ssboTriCenters->bindDefault();
+	ssboMortonCodes->bindDefault();
+	ssboMinMaxBound->bindDefault();
+	ssboMinMaxFloatBound->bindDefault();
+
+	ssboTriCenters->setData(nullptr, n);
+	ssboMortonCodes->setData(nullptr, n);
+	BufferController::updateTrianglesBuffer();
+	BufferController::updateObjectsBuffer();
+
+	bvh_part1_morton->use();
+	int triCount = n;
+	ComputeShaderProgram::dispatch({triCount / 256 + 1, 1, 1});
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	auto data1 = ssboTriCenters->mapBuffer();
+	auto data_centers = std::vector<glm::vec4>(n);
+	memcpy(data_centers.data(), data1, sizeof(float) * n * TRI_CENTER_ALIGN);
+
+	auto data2 = ssboMortonCodes->mapBuffer();
+	auto data_codes = std::vector<uint32_t>(n);
+	memcpy(data_codes.data(), data2, sizeof(float) * n * MORTON_ALIGN);
+
+	auto data3 = ssboMinMaxFloatBound->mapBuffer();
+	auto data_bounds = std::vector<glm::vec4>(2);
+	memcpy(data_bounds.data(), data3, sizeof(float) * MIN_MAX_BOUND_ALIGN);
+
+	glu::RadixSort radix_sort;
+	radix_sort(ssboMortonCodes->id, ssboTriCenters->id, triCount);
+
+	bvh_part2_build->use();
+	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+void BVHMortonBuilder::uninit()
+{
+	delete bvh_part1_morton;
+	delete bvh_part2_build;
 }
 
 std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMorton(const std::vector<Triangle*>& triangles)
@@ -32,7 +97,7 @@ std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMort
 	for (int i = 0; i < triangles.size(); i++)
 		sortedCodes[i] = {mortonCodes[i], i};
 
-	std::ranges::sort(sortedCodes, [](auto a, auto b) { return a.first < b.first; });
+	std::sort(std::execution::par_unseq, sortedCodes.begin(), sortedCodes.end(), [](auto a, auto b) { return a.first < b.first; });
 	return sortedCodes;
 }
 
@@ -44,30 +109,13 @@ void BVHMortonBuilder::recordOriginalTriIndices(const std::vector<Triangle*>& tr
 		originalTriIndices[i] = sortedCodes[i].second;
 }
 
-AABB calcNodeBoxes(int node)
-{
-	auto node_ = nodes[node];
-	if (node_->isLeaf)
-		return node_->box;
-
-	auto leftBox = calcNodeBoxes(node_->left);
-	auto rightBox = calcNodeBoxes(node_->right);
-	auto box = AABB::getUnitedBox(leftBox, rightBox);
-	node_->box = box;
-	return box;
-}
-
-bool compareCodes(const std::pair<uint32_t, int>& a, const std::pair<uint32_t, int>& b)
-{
-	return a.first < b.first;
-}
-
 void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
 {
 	int n = sortedCodes.size();
+	auto prevSize = nodes.size();
 	nodes.resize(2 * n - 1);
 #pragma omp parallel for
-	for (int i = 0; i < 2 * n - 1; i++)
+	for (int i = prevSize; i < 2 * n - 1; i++)
 		nodes[i] = new BVHNode();
 
 	auto lcp = [&sortedCodes, &n](int i, int j)
@@ -156,7 +204,6 @@ void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std
 		if (right >= n - 1) nodes[right]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, right - (n - 1), right - (n - 1));
 	}
 
-	//calcNodeBoxes(0);
 	calcNodeBoxesParallel(n);
 }
 

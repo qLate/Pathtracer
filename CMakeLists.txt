@@ -24,6 +24,7 @@ include_directories(libs/glad)
 include_directories(libs/stb_image)
 include_directories(libs/imgui/include)
 include_directories(libs/rapidobj)
+include_directories(libs/gl-radix-sort)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()

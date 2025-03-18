@@ -28,6 +28,14 @@ GLBuffer::GLBuffer()
 {
 	glGenBuffers(1, &id);
 }
+void GLBuffer::setDefaultBind(int index) 
+{
+	currBase = index;
+}
+void GLBuffer::bindDefault() 
+{
+	bind(currBase);
+}
 
 UBO::UBO(int align, int baseIndex) : align(align)
 {
@@ -35,9 +43,11 @@ UBO::UBO(int align, int baseIndex) : align(align)
 	if (baseIndex != -1)
 		glBindBufferBase(GL_UNIFORM_BUFFER, baseIndex, id);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	setDefaultBind(baseIndex);
 }
 
-void UBO::bindBase(int index)
+void UBO::bind(int index)
 {
 	glBindBufferBase(GL_UNIFORM_BUFFER, index, id);
 }
@@ -54,9 +64,11 @@ SSBO::SSBO(int align, int baseIndex) : align(align)
 	if (baseIndex != -1)
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, baseIndex, id);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	setDefaultBind(baseIndex);
 }
 
-void SSBO::bindBase(int index)
+void SSBO::bind(int index)
 {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, id);
 }

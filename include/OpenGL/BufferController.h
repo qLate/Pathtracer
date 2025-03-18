@@ -80,7 +80,6 @@ class BufferController
 	//};
 
 	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
-	inline static ComputeShaderProgram* buildBVHProgram;
 
 	static void recalculateTriangleCoefs();
 
@@ -89,6 +88,7 @@ public:
 	static void uninit();
 
 	static void updateBuffers();
+	static void bindBuffers();
 
 	static void updateTexInfosBuffer();
 	static void updateMaterialsBuffer();

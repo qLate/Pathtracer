@@ -1,22 +1,15 @@
 #include "BufferController.h"
 
 #include "BVH.h"
-#include "Debug.h"
 #include "Graphical.h"
 #include "Light.h"
-#include "Physics.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
-#include "Utils.h"
-
 
 void BufferController::init()
 {
 	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeTriCoefs.comp");
-	buildBVHProgram = new ComputeShaderProgram("shaders/compute/buildBVH.comp");
-
-	updateBuffers();
 }
 void BufferController::uninit()
 {
@@ -34,12 +27,24 @@ void BufferController::recalculateTriangleCoefs()
 
 void BufferController::updateBuffers()
 {
+	bindBuffers();
+
 	updateTexInfosBuffer();
 	updateMaterialsBuffer();
 	updateLightsBuffer();
 	updateTrianglesBuffer();
 	updateObjectsBuffer();
 	updateBVHNodesBuffer();
+}
+void BufferController::bindBuffers()
+{
+	Renderer::renderProgram->fragShader->uboTexInfos->bindDefault();
+	Renderer::renderProgram->fragShader->uboMaterials->bindDefault();
+	Renderer::renderProgram->fragShader->uboLights->bindDefault();
+	Renderer::renderProgram->fragShader->uboObjects->bindDefault();
+	Renderer::renderProgram->fragShader->ssboTriangles->bindDefault();
+	Renderer::renderProgram->fragShader->ssboBVHNodes->bindDefault();
+	Renderer::renderProgram->fragShader->ssboBVHTriIndices->bindDefault();
 }
 
 void BufferController::updateTexInfosBuffer()
@@ -55,7 +60,6 @@ void BufferController::updateTexInfosBuffer()
 		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
 		data[i] = texInfoStruct;
 	}
-
 	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
 }
 
@@ -78,7 +82,6 @@ void BufferController::updateMaterialsBuffer()
 
 		data[i] = materialStruct;
 	}
-
 	Renderer::renderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
 }
 
@@ -111,7 +114,6 @@ void BufferController::updateLightsBuffer()
 
 		data[i] = lightStruct;
 	}
-
 	Renderer::renderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
 }
 
@@ -153,7 +155,6 @@ void BufferController::updateObjectsBuffer()
 
 		data[i] = objectStruct;
 	}
-
 	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
 
 	recalculateTriangleCoefs();
@@ -195,7 +196,6 @@ void BufferController::updateBVHNodesBuffer()
 
 		data[i] = bvhNodeStruct;
 	}
-
 	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
 
 	updateBVHTriangleIndices();
@@ -203,10 +203,9 @@ void BufferController::updateBVHNodesBuffer()
 void BufferController::updateBVHTriangleIndices()
 {
 	auto indices = BVH::originalTriIndices;
-	std::vector<float> data(indices.size());
+	std::vector<uint32_t> data(indices.size());
 #pragma omp parallel for
 	for (int i = 0; i < indices.size(); i++)
 		data[i] = indices[i];
-
-	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData(data.data(), data.size());
+	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData((float*)data.data(), data.size());
 }

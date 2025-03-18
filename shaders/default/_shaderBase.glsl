@@ -1,4 +1,5 @@
-#define FLT_MAX  1000000
+#define FLT_MAX  3.402823466e+38
+#define FLT_MIN  -3.402823466e+38
 #define PI 3.14159265359
 #define PHI 1.61803398874
 
@@ -111,7 +112,7 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 
 layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 {
-    float triIndices[];
+    uint triIndices[];
 };
 
 Material getMaterial(int index)
@@ -133,7 +134,7 @@ vec3 localToGlobalDir(vec3 normal, Object obj)
     return normalize((obj.transform * vec4(normal, 0.0f)).xyz);
 }
 
-vec3 calcTriangleCenter(Triangle tri)
+vec3 getTriangleCenter(Triangle tri)
 {
     vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
     vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.materialIndex.y)]);

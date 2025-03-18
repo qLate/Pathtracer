@@ -23,6 +23,9 @@ public:
 	inline static std::vector<BVHNode*> nodes;
 	inline static std::vector<int> originalTriIndices;
 
+	static void init();
+	static void uninit();
+
 	static void buildBVH();
 	static void rebuildBVH();
 };
