@@ -130,4 +130,8 @@ public:
 	{
 		Debug::log(msg, std::to_string(elapsed()), getUnitStr());
 	}
+	void printElapsedFromLast(const std::string& msg = "")
+	{
+		Debug::log(msg, std::to_string(elapsedFromLast()), getUnitStr());
+	}
 };

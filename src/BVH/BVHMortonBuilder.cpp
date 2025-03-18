@@ -6,7 +6,6 @@
 #include "GLObject.h"
 #include "MortonCodes.h"
 #include "RadixSort.hpp"
-#include "Renderer.h"
 #include "Scene.h"
 #include "ShaderProgram.h"
 #include "Triangle.h"
@@ -17,12 +16,12 @@ static auto& originalTriIndices = BVH::originalTriIndices;
 
 void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 {
-	nodes.clear();
+	//nodes.clear();
 
-	auto sortedCodes = getSortedTrianglesByMorton(triangles);
-	recordOriginalTriIndices(triangles, sortedCodes);
+	//auto sortedCodes = getSortedTrianglesByMorton(triangles);
+	//recordOriginalTriIndices(triangles, sortedCodes);
 
-	buildStacked(triangles, sortedCodes);
+	//buildStacked(triangles, sortedCodes);
 
 	buildGPU();
 }
@@ -35,8 +34,6 @@ void BVHMortonBuilder::init()
 	ssboTriCenters = new SSBO(TRI_CENTER_ALIGN);
 	ssboMinMaxBound = new SSBO(MIN_MAX_BOUND_ALIGN);
 	ssboMortonCodes = new SSBO(MORTON_ALIGN);
-	ssboTriIndices = new SSBO(TRI_INDICES_ALIGN);
-	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN);
 
 	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
 }
@@ -48,8 +45,6 @@ void BVHMortonBuilder::uninit()
 	delete ssboTriCenters;
 	delete ssboMinMaxBound;
 	delete ssboMortonCodes;
-	delete ssboTriIndices;
-	delete ssboBVHNodes;
 }
 
 void BVHMortonBuilder::buildGPU()
@@ -61,39 +56,43 @@ void BVHMortonBuilder::buildGPU()
 }
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
+	TimeMeasurer measurer{};
+
 	ssboTriCenters->bind(6);
 	ssboMinMaxBound->bind(7);
 	ssboMortonCodes->bind(8);
-	ssboTriIndices->bind(9);
+	BufferController::ssboBVHTriIndices->bind(9);
 
 	ssboTriCenters->setData(nullptr, n);
 	ssboMinMaxBound->clear();
 	ssboMortonCodes->setData(nullptr, n);
-	ssboTriIndices->setData(nullptr, n);
-
-	BufferController::updateTrianglesBuffer();
-	BufferController::updateObjectsBuffer();
+	BufferController::ssboBVHTriIndices->setData(nullptr, n);
+	measurer.printElapsedFromLast("Part 1:");
 
 	bvh_part1_morton->use();
 	bvh_part2_build->setInt("n", n);
+	measurer.printElapsedFromLast("Part 2:");
 
 	bvh_part1_morton->setInt("pass", 0);
 	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	measurer.printElapsedFromLast("Part 3:");
 
 	bvh_part1_morton->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	measurer.printElapsedFromLast("Part 4:");
 
 	glu::RadixSort radix_sort;
-	radix_sort(ssboMortonCodes->id, ssboTriIndices->id, n);
+	radix_sort(ssboMortonCodes->id, BufferController::ssboBVHTriIndices->id, n);
+	measurer.printElapsedFromLast("Part 5:");
 }
 void BVHMortonBuilder::buildGPU_buildTree(int n)
 {
-	ssboBVHNodes->bind(6);
-	ssboTriIndices->bind(7);
+	BufferController::ssboBVHNodes->bind(6);
+	BufferController::ssboBVHTriIndices->bind(7);
 	ssboMortonCodes->bind(8);
-	Renderer::renderProgram->fragShader->ssboTriangles->bindDefault();
+	BufferController::ssboTriangles->bindDefault();
 
-	ssboBVHNodes->setData(nullptr, 2 * n - 1);
+	BufferController::ssboBVHNodes->setData(nullptr, 2 * n - 1);
 
 	bvh_part2_build->use();
 	bvh_part2_build->setInt("n", n);
@@ -109,25 +108,6 @@ void BVHMortonBuilder::buildGPU_buildTree(int n)
 
 	bvh_part2_build->setInt("pass", 3);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-	//auto nodes = ssboBVHNodes->readData<BVHNodeStruct>(2 * n - 1);
-	//for (int i = 0; i < 2 * n - 1; ++i)
-	//{
-	//	auto node1Struct = nodes[i];
-	//	auto node1 = BVHNode();
-	//	node1.left = node1Struct.values.x;
-	//	node1.right = node1Struct.values.y;
-	//	node1.box = AABB(glm::vec3(node1Struct.min), glm::vec3(node1Struct.max));
-	//	node1.isLeaf = node1Struct.values.z == 1;
-	//	node1.parent = node1Struct.values.w;
-	//	node1.hitNext = node1Struct.links.x;
-	//	node1.missNext = node1Struct.links.y;
-	//	node1.leafTrianglesStart = node1Struct.min.w;
-	//	node1.leafTriangleCount = node1Struct.max.w;
-
-	//	auto node2 = BVH::nodes[i];
-	//	int x = -1;
-	//}
 }
 
 std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMorton(const std::vector<Triangle*>& triangles)

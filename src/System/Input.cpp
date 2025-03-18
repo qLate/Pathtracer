@@ -85,7 +85,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
 		{
 			Scene::lights[0]->setPos(camera->getPos());
-			BufferController::updateLightsBuffer();
+			BufferController::rebuildLightsBuffer();
 		}
 		else if (event.key.keysym.sym == SDLK_y)
 		{
@@ -115,7 +115,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 					BVH::rebuildBVH();
 					Renderer::renderProgram->use();
 
-					BufferController::updateObjectsBuffer();
+					BufferController::rebuildObjectsBuffer();
 					//BufferController::updateBVHNodesBuffer();
 				}
 			}

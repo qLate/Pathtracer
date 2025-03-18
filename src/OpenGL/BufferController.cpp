@@ -11,6 +11,14 @@
 void BufferController::init()
 {
 	precomputeTriCoefsProgram = new ComputeShaderProgram("shaders/compute/precomputeTriCoefs.comp");
+
+	uboTexInfos = new UBO(TEX_INFOS_ALIGN, 1);
+	uboMaterials = new UBO(MATERIAL_ALIGN, 2);
+	uboLights = new UBO(LIGHT_ALIGN, 3);
+	uboObjects = new UBO(OBJECT_ALIGN, 4);
+	ssboTriangles = new SSBO(TRIANGLE_ALIGN, 5);
+	ssboBVHNodes = new SSBO(BVH_NODE_ALIGN, 6);
+	ssboBVHTriIndices = new SSBO(BVH_TRI_INDICES_ALIGN, 7);
 }
 void BufferController::uninit()
 {
@@ -26,30 +34,29 @@ void BufferController::recalculateTriangleCoefs()
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-void BufferController::updateBuffers()
+void BufferController::rebuildBuffers()
 {
-	Renderer::renderProgram->use();
 	bindBuffers();
 
-	updateTexInfosBuffer();
-	updateMaterialsBuffer();
-	updateLightsBuffer();
-	updateTrianglesBuffer();
-	updateObjectsBuffer();
-	updateBVHNodesBuffer();
+	rebuildTexInfosBuffer();
+	rebuildMaterialsBuffer();
+	rebuildLightsBuffer();
+	rebuildTrianglesBuffer();
+	rebuildObjectsBuffer();
+	//updateBVHNodesBuffer();
 }
 void BufferController::bindBuffers()
 {
-	Renderer::renderProgram->fragShader->uboTexInfos->bindDefault();
-	Renderer::renderProgram->fragShader->uboMaterials->bindDefault();
-	Renderer::renderProgram->fragShader->uboLights->bindDefault();
-	Renderer::renderProgram->fragShader->uboObjects->bindDefault();
-	Renderer::renderProgram->fragShader->ssboTriangles->bindDefault();
-	Renderer::renderProgram->fragShader->ssboBVHNodes->bindDefault();
-	Renderer::renderProgram->fragShader->ssboBVHTriIndices->bindDefault();
+	uboTexInfos->bindDefault();
+	uboMaterials->bindDefault();
+	uboLights->bindDefault();
+	uboObjects->bindDefault();
+	ssboTriangles->bindDefault();
+	ssboBVHNodes->bindDefault();
+	ssboBVHTriIndices->bindDefault();
 }
 
-void BufferController::updateTexInfosBuffer()
+void BufferController::rebuildTexInfosBuffer()
 {
 	auto textures = Scene::textures;
 	std::vector<TexInfoStruct> data(textures.size());
@@ -62,10 +69,10 @@ void BufferController::updateTexInfosBuffer()
 		texInfoStruct.sizes = glm::vec4(tex->width, tex->height, 0, 0);
 		data[i] = texInfoStruct;
 	}
-	Renderer::renderProgram->fragShader->uboTexInfos->setData((float*)data.data(), data.size());
+	uboTexInfos->setData((float*)data.data(), data.size());
 }
 
-void BufferController::updateMaterialsBuffer()
+void BufferController::rebuildMaterialsBuffer()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
@@ -84,10 +91,11 @@ void BufferController::updateMaterialsBuffer()
 
 		data[i] = materialStruct;
 	}
-	Renderer::renderProgram->fragShader->uboMaterials->setData((float*)data.data(), data.size());
+	uboMaterials->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->fragShader->setInt("materialCount", materials.size());
 }
 
-void BufferController::updateLightsBuffer()
+void BufferController::rebuildLightsBuffer()
 {
 	auto lights = Scene::lights;
 	std::vector<LightStruct> data(lights.size());
@@ -116,10 +124,11 @@ void BufferController::updateLightsBuffer()
 
 		data[i] = lightStruct;
 	}
-	Renderer::renderProgram->fragShader->uboLights->setData((float*)data.data(), data.size());
+	uboLights->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->fragShader->setInt("lightCount", lights.size());
 }
 
-void BufferController::updateObjectsBuffer()
+void BufferController::rebuildObjectsBuffer()
 {
 	auto triangleCount = 0;
 	auto graphicals = Scene::graphicals;
@@ -157,12 +166,13 @@ void BufferController::updateObjectsBuffer()
 
 		data[i] = objectStruct;
 	}
-	Renderer::renderProgram->fragShader->uboObjects->setData((float*)data.data(), data.size());
+	uboObjects->setData((float*)data.data(), data.size());
+	Renderer::renderProgram->fragShader->setInt("objectCount", graphicals.size());
 
 	recalculateTriangleCoefs();
 }
 
-void BufferController::updateTrianglesBuffer()
+void BufferController::rebuildTrianglesBuffer()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
@@ -180,37 +190,35 @@ void BufferController::updateTrianglesBuffer()
 
 		data[i] = triangleStruct;
 	}
-	Renderer::renderProgram->fragShader->ssboTriangles->setData((float*)data.data(), data.size());
+	ssboTriangles->setData((float*)data.data(), data.size());
 }
 
-void BufferController::updateBVHNodesBuffer()
+void BufferController::rebuildBVHNodesBuffer()
 {
-	BVHMortonBuilder::ssboBVHNodes->bind(6);
-	BVHMortonBuilder::ssboTriIndices->bind(7);
-//	auto nodes = BVH::nodes;
-//	std::vector<BVHNodeStruct> data(nodes.size());
-//#pragma omp parallel for
-//	for (int i = 0; i < nodes.size(); i++)
-//	{
-//		const auto& node = nodes[i];
-//		BVHNodeStruct bvhNodeStruct {};
-//		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
-//		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
-//		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);
-//		bvhNodeStruct.links = glm::ivec4(node->hitNext, node->missNext, 0, 0);
-//
-//		data[i] = bvhNodeStruct;
-//	}
-//	Renderer::renderProgram->fragShader->ssboBVHNodes->setData((float*)data.data(), data.size());
-//
-//	updateBVHTriangleIndices();
+	auto nodes = BVH::nodes;
+	std::vector<BVHNodeStruct> data(nodes.size());
+#pragma omp parallel for
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		const auto& node = nodes[i];
+		BVHNodeStruct bvhNodeStruct {};
+		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
+		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
+		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);
+		bvhNodeStruct.links = glm::ivec4(node->hitNext, node->missNext, 0, 0);
+
+		data[i] = bvhNodeStruct;
+	}
+	ssboBVHNodes->setData((float*)data.data(), data.size());
+
+	rebuildBVHTriangleIndices();
 }
-void BufferController::updateBVHTriangleIndices()
+void BufferController::rebuildBVHTriangleIndices()
 {
 	auto indices = BVH::originalTriIndices;
 	std::vector<uint32_t> data(indices.size());
 #pragma omp parallel for
 	for (int i = 0; i < indices.size(); i++)
 		data[i] = indices[i];
-	Renderer::renderProgram->fragShader->ssboBVHTriIndices->setData((float*)data.data(), data.size());
+	ssboBVHTriIndices->setData((float*)data.data(), data.size());
 }

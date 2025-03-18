@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
+class SSBO;
 class Graphical;
 class Triangle;
 class BVHNode;

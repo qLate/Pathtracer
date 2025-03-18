@@ -18,7 +18,6 @@ void BVH::uninit()
 void BVH::buildBVH()
 {
 	BVHMortonBuilder::build(Scene::triangles);
-	//BVHMortonBuilder::buildGPU();
 }
 void BVH::rebuildBVH()
 {

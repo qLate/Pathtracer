@@ -5,6 +5,7 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+class UBO;
 class SSBO;
 class ComputeShaderProgram;
 
@@ -18,6 +19,36 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
+	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
+
+	static void recalculateTriangleCoefs();
+
+public:
+	inline static UBO* uboTexInfos;
+	inline static UBO* uboMaterials;
+	inline static UBO* uboLights;
+	inline static UBO* uboObjects;
+	inline static SSBO* ssboTriangles;
+	inline static SSBO* ssboBVHNodes;
+	inline static SSBO* ssboBVHTriIndices;
+
+	static void init();
+	static void uninit();
+
+	static void rebuildBuffers();
+	static void bindBuffers();
+
+	static void rebuildTexInfosBuffer();
+	static void rebuildMaterialsBuffer();
+	static void rebuildLightsBuffer();
+	static void rebuildObjectsBuffer();
+	static void rebuildTrianglesBuffer();
+	static void rebuildBVHNodesBuffer();
+	static void rebuildBVHTriangleIndices();
+
+	friend class TraceShader;
+
+private:
 	struct TexInfoStruct
 	{
 		glm::vec4 sizes;
@@ -72,32 +103,4 @@ class BufferController
 		glm::ivec4 values;
 		glm::ivec4 links;
 	};
-
-	//struct BVHLinkStruct
-	//{
-	//	glm::vec2 _pad;
-	//	int hit;
-	//	int miss;
-	//};
-
-	inline static ComputeShaderProgram* precomputeTriCoefsProgram;
-
-	static void recalculateTriangleCoefs();
-
-public:
-	static void init();
-	static void uninit();
-
-	static void updateBuffers();
-	static void bindBuffers();
-
-	static void updateTexInfosBuffer();
-	static void updateMaterialsBuffer();
-	static void updateLightsBuffer();
-	static void updateObjectsBuffer();
-	static void updateTrianglesBuffer();
-	static void updateBVHNodesBuffer();
-	static void updateBVHTriangleIndices();
-
-	friend class TraceShader;
 };

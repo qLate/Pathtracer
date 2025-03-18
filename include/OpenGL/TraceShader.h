@@ -6,14 +6,6 @@
 class TraceShader : public Shader
 {
 public:
-	UBO* uboTexInfos;
-	UBO* uboMaterials;
-	UBO* uboLights;
-	UBO* uboObjects;
-	SSBO* ssboTriangles;
-	SSBO* ssboBVHNodes;
-	SSBO* ssboBVHTriIndices;
-
 	VAO* vaoScreen;
 
 	void setUpScreenTriangles() const;

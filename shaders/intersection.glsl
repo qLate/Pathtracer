@@ -232,7 +232,7 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows)
 
 void intersectWorld(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
 {
-    for (int objInd = 0; objInd < objects.length(); objInd++)
+    for (int objInd = 0; objInd < objectCount; objInd++)
     {
         if (objects[objInd].objType == 0) continue;
 

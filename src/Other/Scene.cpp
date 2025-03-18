@@ -11,7 +11,7 @@
 
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()

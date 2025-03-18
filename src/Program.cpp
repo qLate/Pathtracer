@@ -38,11 +38,11 @@ void Program::init()
 	SceneSetup::setupScene();
 	Debug::log("Scene setup in " + std::to_string(tm.elapsedFromLast()) + "ms");
 
+	BufferController::rebuildBuffers();
+	Debug::log("Buffers updated in " + std::to_string(tm.elapsedFromLast()) + "ms");
+
 	BVH::buildBVH();
 	Debug::log("BVH tree built in " + std::to_string(tm.elapsedFromLast()) + "ms");
-
-	BufferController::updateBuffers();
-	Debug::log("Buffers updated in " + std::to_string(tm.elapsedFromLast()) + "ms");
 }
 
 void Program::loop()

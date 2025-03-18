@@ -83,16 +83,19 @@ layout(std140, binding = 1) uniform TexInfos
     TexInfo texInfos[1];
 };
 
+uniform int materialCount;
 layout(std140, binding = 2) uniform Materials
 {
     Material materials[1];
 };
 
+uniform int lightCount;
 layout(std140, binding = 3) uniform Lights
 {
     Light lights[1];
 };
 
+uniform int objectCount;
 layout(std140, binding = 4) uniform Objects
 {
     Object objects[1];
@@ -105,7 +108,7 @@ layout(std140, binding = 5) /*buffer*/ uniform Triangles
 
 Material getMaterial(int index)
 {
-    for (int i = 0; i < materials.length(); i++)
+    for (int i = 0; i < materialCount; i++)
     {
         if (materials[i].indexID == index)
             return materials[i];
