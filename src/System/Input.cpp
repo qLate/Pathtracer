@@ -85,7 +85,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
 		{
 			Scene::lights[0]->setPos(camera->getPos());
-			BufferController::rebuildLightsBuffer();
+			BufferController::writeLights();
 		}
 		else if (event.key.keysym.sym == SDLK_y)
 		{
@@ -112,11 +112,13 @@ void Input::handleSDLEvent(const SDL_Event& event)
 				{
 					hit.object->translate(glm::vec3(0, 0, 1));
 
-					BVH::rebuildBVH();
-					Renderer::renderProgram->use();
+					BufferController::writeObjects();
 
-					BufferController::rebuildObjectsBuffer();
-					//BufferController::updateBVHNodesBuffer();
+					TimeMeasurer measurer;
+					BVH::rebuildBVH();
+					measurer.printElapsed("BVH rebuild time: ");
+
+					Renderer::renderProgram->use();
 				}
 			}
 		}

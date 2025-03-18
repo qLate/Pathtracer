@@ -34,15 +34,15 @@ void BufferController::recalculateTriangleCoefs()
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-void BufferController::rebuildBuffers()
+void BufferController::writeBuffers()
 {
 	bindBuffers();
 
-	rebuildTexInfosBuffer();
-	rebuildMaterialsBuffer();
-	rebuildLightsBuffer();
-	rebuildTrianglesBuffer();
-	rebuildObjectsBuffer();
+	writeTexInfos();
+	writeMaterials();
+	writeLights();
+	writeTriangles();
+	writeObjects();
 	//updateBVHNodesBuffer();
 }
 void BufferController::bindBuffers()
@@ -56,7 +56,7 @@ void BufferController::bindBuffers()
 	ssboBVHTriIndices->bindDefault();
 }
 
-void BufferController::rebuildTexInfosBuffer()
+void BufferController::writeTexInfos()
 {
 	auto textures = Scene::textures;
 	std::vector<TexInfoStruct> data(textures.size());
@@ -72,7 +72,7 @@ void BufferController::rebuildTexInfosBuffer()
 	uboTexInfos->setData((float*)data.data(), data.size());
 }
 
-void BufferController::rebuildMaterialsBuffer()
+void BufferController::writeMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
@@ -95,7 +95,7 @@ void BufferController::rebuildMaterialsBuffer()
 	Renderer::renderProgram->fragShader->setInt("materialCount", materials.size());
 }
 
-void BufferController::rebuildLightsBuffer()
+void BufferController::writeLights()
 {
 	auto lights = Scene::lights;
 	std::vector<LightStruct> data(lights.size());
@@ -128,7 +128,7 @@ void BufferController::rebuildLightsBuffer()
 	Renderer::renderProgram->fragShader->setInt("lightCount", lights.size());
 }
 
-void BufferController::rebuildObjectsBuffer()
+void BufferController::writeObjects()
 {
 	auto triangleCount = 0;
 	auto graphicals = Scene::graphicals;
@@ -172,7 +172,7 @@ void BufferController::rebuildObjectsBuffer()
 	recalculateTriangleCoefs();
 }
 
-void BufferController::rebuildTrianglesBuffer()
+void BufferController::writeTriangles()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
@@ -193,7 +193,7 @@ void BufferController::rebuildTrianglesBuffer()
 	ssboTriangles->setData((float*)data.data(), data.size());
 }
 
-void BufferController::rebuildBVHNodesBuffer()
+void BufferController::writeBVHNodes()
 {
 	auto nodes = BVH::nodes;
 	std::vector<BVHNodeStruct> data(nodes.size());
@@ -211,9 +211,9 @@ void BufferController::rebuildBVHNodesBuffer()
 	}
 	ssboBVHNodes->setData((float*)data.data(), data.size());
 
-	rebuildBVHTriangleIndices();
+	writeBVHTriIndices();
 }
-void BufferController::rebuildBVHTriangleIndices()
+void BufferController::writeBVHTriIndices()
 {
 	auto indices = BVH::originalTriIndices;
 	std::vector<uint32_t> data(indices.size());

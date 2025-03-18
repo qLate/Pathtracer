@@ -35,16 +35,16 @@ public:
 	static void init();
 	static void uninit();
 
-	static void rebuildBuffers();
+	static void writeBuffers();
 	static void bindBuffers();
 
-	static void rebuildTexInfosBuffer();
-	static void rebuildMaterialsBuffer();
-	static void rebuildLightsBuffer();
-	static void rebuildObjectsBuffer();
-	static void rebuildTrianglesBuffer();
-	static void rebuildBVHNodesBuffer();
-	static void rebuildBVHTriangleIndices();
+	static void writeTexInfos();
+	static void writeMaterials();
+	static void writeLights();
+	static void writeObjects();
+	static void writeTriangles();
+	static void writeBVHNodes();
+	static void writeBVHTriIndices();
 
 	friend class TraceShader;
 

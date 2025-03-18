@@ -7,7 +7,7 @@ static auto& nodes = BVH::nodes;
 
 void BVH6SidedBuilder::buildTree6Sided(const std::vector<Triangle*>& triangles)
 {
-	BVHMortonBuilder::build(triangles);
+	//BVHMortonBuilder::build(triangles);
 
 	for (int i = 0; i < 6; i++)
 	{

@@ -6,27 +6,11 @@
 #include "GLObject.h"
 #include "MortonCodes.h"
 #include "RadixSort.hpp"
-#include "Scene.h"
 #include "ShaderProgram.h"
 #include "Triangle.h"
 #include "Utils.h"
 
-static auto& nodes = BVH::nodes;
-static auto& originalTriIndices = BVH::originalTriIndices;
-
-void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
-{
-	//nodes.clear();
-
-	//auto sortedCodes = getSortedTrianglesByMorton(triangles);
-	//recordOriginalTriIndices(triangles, sortedCodes);
-
-	//buildStacked(triangles, sortedCodes);
-
-	buildGPU();
-}
-
-void BVHMortonBuilder::init()
+BVHMortonBuilder::BVHMortonBuilder()
 {
 	bvh_part1_morton = new ComputeShaderProgram("shaders/compute/bvh/bvh_part1_morton.comp");
 	bvh_part2_build = new ComputeShaderProgram("shaders/compute/bvh/bvh_part2_build.comp");
@@ -37,7 +21,7 @@ void BVHMortonBuilder::init()
 
 	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
 }
-void BVHMortonBuilder::uninit()
+BVHMortonBuilder::~BVHMortonBuilder()
 {
 	delete bvh_part1_morton;
 	delete bvh_part2_build;
@@ -47,17 +31,20 @@ void BVHMortonBuilder::uninit()
 	delete ssboMortonCodes;
 }
 
-void BVHMortonBuilder::buildGPU()
+void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 {
-	int n = Scene::triangles.size();
+	buildGPU(triangles);
+}
+
+void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
+{
+	int n = triangles.size();
 
 	buildGPU_morton(n);
 	buildGPU_buildTree(n);
 }
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
-	TimeMeasurer measurer{};
-
 	ssboTriCenters->bind(6);
 	ssboMinMaxBound->bind(7);
 	ssboMortonCodes->bind(8);
@@ -67,23 +54,18 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	ssboMinMaxBound->clear();
 	ssboMortonCodes->setData(nullptr, n);
 	BufferController::ssboBVHTriIndices->setData(nullptr, n);
-	measurer.printElapsedFromLast("Part 1:");
 
 	bvh_part1_morton->use();
 	bvh_part2_build->setInt("n", n);
-	measurer.printElapsedFromLast("Part 2:");
 
 	bvh_part1_morton->setInt("pass", 0);
 	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	measurer.printElapsedFromLast("Part 3:");
 
 	bvh_part1_morton->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n / 256 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	measurer.printElapsedFromLast("Part 4:");
 
 	glu::RadixSort radix_sort;
 	radix_sort(ssboMortonCodes->id, BufferController::ssboBVHTriIndices->id, n);
-	measurer.printElapsedFromLast("Part 5:");
 }
 void BVHMortonBuilder::buildGPU_buildTree(int n)
 {
@@ -110,7 +92,21 @@ void BVHMortonBuilder::buildGPU_buildTree(int n)
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMorton(const std::vector<Triangle*>& triangles)
+
+static auto& nodes = BVH::nodes;
+static auto& originalTriIndices = BVH::originalTriIndices;
+
+void BVHMortonBuilder::buildCPU(const std::vector<Triangle*>& triangles)
+{
+	nodes.clear();
+
+	std::vector<std::pair<uint32_t, int>> sortedCodes;
+	buildCPU_morton(triangles, sortedCodes);
+	buildCPU_recordTriIndices(triangles, sortedCodes);
+
+	buildCPU_buildInternal(triangles, sortedCodes);
+}
+void BVHMortonBuilder::buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
 {
 	auto centers = std::vector<glm::vec3>(triangles.size());
 #pragma omp parallel for
@@ -119,16 +115,15 @@ std::vector<std::pair<uint32_t, int>> BVHMortonBuilder::getSortedTrianglesByMort
 
 	auto mortonCodes = MortonCodes::generateMortonCodes(centers);
 
-	auto sortedCodes = std::vector<std::pair<uint32_t, int>>(triangles.size());
+	sortedCodes = std::vector<std::pair<uint32_t, int>>(triangles.size());
 #pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 		sortedCodes[i] = {mortonCodes[i], i};
 
 	std::sort(std::execution::par_unseq, sortedCodes.begin(), sortedCodes.end(), [](auto a, auto b) { return a.first < b.first; });
-	return sortedCodes;
 }
 
-void BVHMortonBuilder::recordOriginalTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes)
+void BVHMortonBuilder::buildCPU_recordTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes)
 {
 	originalTriIndices.resize(triangles.size());
 #pragma omp parallel for
@@ -136,7 +131,7 @@ void BVHMortonBuilder::recordOriginalTriIndices(const std::vector<Triangle*>& tr
 		originalTriIndices[i] = sortedCodes[i].second;
 }
 
-void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
+void BVHMortonBuilder::buildCPU_buildInternal(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
 {
 	int n = sortedCodes.size();
 	auto prevSize = nodes.size();
@@ -229,10 +224,10 @@ void BVHMortonBuilder::buildStacked(const std::vector<Triangle*>& triangles, std
 		if (right >= n - 1) nodes[right]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, right - (n - 1), right - (n - 1));
 	}
 
-	calcNodeBoxesParallel(n);
+	buildCPU_calcBoxesBottomUp(n);
 }
 
-void BVHMortonBuilder::calcBoxBottomUpForNode(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
+void BVHMortonBuilder::buildCPU_buildLeavesAndLinks(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
 {
 	if (calculated[nodeInd]->fetch_add(1) == 0) return;
 
@@ -242,9 +237,9 @@ void BVHMortonBuilder::calcBoxBottomUpForNode(int nodeInd, const std::vector<std
 	node->box = AABB::getUnitedBox(left->box, right->box);
 
 	if (node->parent != -1)
-		calcBoxBottomUpForNode(node->parent, calculated);
+		buildCPU_buildLeavesAndLinks(node->parent, calculated);
 }
-void BVHMortonBuilder::calcNodeBoxesParallel(int n)
+void BVHMortonBuilder::buildCPU_calcBoxesBottomUp(int n)
 {
 	std::vector<std::unique_ptr<std::atomic<int>>> calculated(n - 1);
 #pragma omp parallel for
@@ -253,32 +248,5 @@ void BVHMortonBuilder::calcNodeBoxesParallel(int n)
 
 #pragma omp parallel for
 	for (int i = 0; i < n; i++)
-		calcBoxBottomUpForNode(nodes[i + n - 1]->parent, calculated);
-}
-
-int BVHMortonBuilder::getSplitIndex_old(const std::vector<std::pair<uint32_t, int>>& sortedIndices, int start, int end)
-{
-	uint32_t firstCode = sortedIndices[start].first;
-	uint32_t lastCode = sortedIndices[end].first;
-	if (firstCode == lastCode) return (start + end) / 2;
-
-	int commonPref = MortonCodes::commonPrefixLength(firstCode, lastCode);
-
-	int split = start;
-	int step = end - start;
-	do
-	{
-		step = (step + 1) >> 1;
-		int newSplit = split + step;
-
-		if (newSplit < end)
-		{
-			unsigned int splitCode = sortedIndices[newSplit].first;
-			int splitPrefix = std::countl_zero(firstCode ^ splitCode) - 1;
-			if (splitPrefix > commonPref)
-				split = newSplit;
-		}
-	}
-	while (step > 1);
-	return split;
+		buildCPU_buildLeavesAndLinks(nodes[i + n - 1]->parent, calculated);
 }

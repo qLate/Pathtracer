@@ -8,22 +8,20 @@
 
 void BVH::init()
 {
-	BVHMortonBuilder::init();
+	builder = new BVHMortonBuilder();
 }
 void BVH::uninit()
 {
-	BVHMortonBuilder::uninit();
+	delete builder;
 }
 
 void BVH::buildBVH()
 {
-	BVHMortonBuilder::build(Scene::triangles);
+	builder->build(Scene::triangles);
 }
 void BVH::rebuildBVH()
 {
-	TimeMeasurer measurer;
-	buildBVH();
-	measurer.printElapsed("BVH rebuild time: ");
+	builder->rebuild(Scene::triangles);
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

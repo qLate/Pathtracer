@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
+class BVHMortonBuilder;
 class SSBO;
 class Graphical;
 class Triangle;
@@ -23,6 +24,8 @@ public:
 
 	inline static std::vector<BVHNode*> nodes;
 	inline static std::vector<int> originalTriIndices;
+
+	inline static BVHMortonBuilder* builder;
 
 	static void init();
 	static void uninit();
@@ -57,4 +60,14 @@ public:
 	AABB box;
 
 	void setLeaf(const std::function<Triangle*(int)>& triangleGetter, int start, int end);
+};
+
+class BVHBuilder
+{
+protected:
+	virtual ~BVHBuilder() = default;
+
+public:
+	virtual void build(const std::vector<Triangle*>& triangles) = 0;
+	virtual void rebuild(const std::vector<Triangle*>& triangles) { build(triangles); }
 };
