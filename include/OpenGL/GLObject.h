@@ -42,52 +42,53 @@ public:
 	void bindDefault();
 };
 
-
-class UBO : public GLBuffer
+class GLBufferObject : public GLBuffer
 {
+	GLenum _type;
 	int _align = -1;
 
-public:
-	UBO(int align, int baseIndex = -1);
-
-	void bind(int index) override;
-	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
-};
-
-
-class SSBO : public GLBuffer
-{
-	int _align = -1;
+protected:
+	GLBufferObject(GLenum type, int align, int baseIndex = -1);
 
 public:
-	SSBO(int align, int baseIndex = -1);
-
 	void bind(int index) override;
 	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
-	void setStorage(int count) const;
+	void setSubData(const float* data, int count, int offset = 0) const;
+	void setStorage(int count, GLenum flags = NULL, const void* data = nullptr) const;
 
 	void clear(const void* data = nullptr) const;
-
-	void* mapBuffer() const;
-	void unmapBuffer() const;
 
 	template <typename T>
 	std::vector<T> readData(int count) const;
 };
 
 template <typename T>
-std::vector<T> SSBO::readData(int count) const
+std::vector<T> GLBufferObject::readData(int count) const
 {
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
+	glBindBuffer(_type, _id);
 
-	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+	auto ptr = glMapBuffer(_type, GL_READ_ONLY);
 	auto data = std::vector<T>(count);
 	memcpy(data.data(), ptr, count * _align * sizeof(float));
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glUnmapBuffer(_type);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	glBindBuffer(_type, 0);
 	return data;
 }
+
+
+class UBO : public GLBufferObject
+{
+public:
+	UBO(int align, int baseIndex = -1);
+};
+
+
+class SSBO : public GLBufferObject
+{
+public:
+	SSBO(int align, int baseIndex = -1);
+};
 
 class AtomicCounterBuffer : public GLBuffer
 {

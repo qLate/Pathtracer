@@ -1,7 +1,5 @@
 #include "Camera.h"
 
-#include <glm/gtx/quaternion.hpp>
-
 #include "ImGUIWindowDrawer.h"
 #include "Input.h"
 #include "Renderer.h"
@@ -16,6 +14,19 @@ Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRad
 	Renderer::renderProgram()->setFloat2("screenSize", size);
 	Renderer::renderProgram()->setFloat("focalDistance", focalDistance);
 	Renderer::renderProgram()->setFloat("lensRadius", lensRadius);
+}
+
+void Camera::setPos(glm::vec3 pos, bool notify)
+{
+	Object::setPos(pos, notify);
+}
+void Camera::setRot(glm::quat rot, bool notify)
+{
+	Object::setRot(rot, notify);
+}
+void Camera::setScale(glm::vec3 scale, bool notify)
+{
+	Object::setScale(scale, notify);
 }
 
 void Camera::setSize(glm::vec2 size)

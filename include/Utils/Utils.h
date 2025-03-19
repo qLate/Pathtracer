@@ -27,7 +27,16 @@ public:
 	static std::string toString(float f, int decimals = 2);
 
 	static long long measureCallTime(void (*func)());
+
+	template <typename T>
+	static bool hasFlag(T flags, T flag);
 };
+
+template <typename T>
+bool Utils::hasFlag(T flags, T flag)
+{
+	return ((int)flags & (int)flag) != 0;
+}
 
 class Timer
 {

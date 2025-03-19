@@ -81,7 +81,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
 		{
 			Scene::lights[0]->setPos(camera->pos());
-			BufferController::writeLights();
+			BufferController::updateLights();
 		}
 		else if (event.key.keysym.sym == SDLK_y)
 		{
@@ -105,12 +105,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			{
 				auto hit = Physics::raycast(camera->pos(), camera->getMouseDir());
 				if (hit.hit)
-				{
 					hit.object->translate(glm::vec3(0, 0, 1));
-
-					BufferController::writeObjects();
-					BVH::rebuildBVH();
-				}
 			}
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)

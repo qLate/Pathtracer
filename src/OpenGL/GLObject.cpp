@@ -37,75 +37,50 @@ void GLBuffer::bindDefault()
 	bind(_currBase);
 }
 
-UBO::UBO(int align, int baseIndex) : _align(align)
+GLBufferObject::GLBufferObject(GLenum type, int align, int baseIndex) : _type(type), _align(align)
 {
-	glBindBuffer(GL_UNIFORM_BUFFER, _id);
+	glBindBuffer(_type, _id);
 	if (baseIndex != -1)
 	{
-		glBindBufferBase(GL_UNIFORM_BUFFER, baseIndex, _id);
+		glBindBufferBase(_type, baseIndex, _id);
 		setDefaultBind(baseIndex);
 	}
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBuffer(_type, 0);
+}
+void GLBufferObject::bind(int index)
+{
+	glBindBufferBase(_type, index, _id);
+}
+void GLBufferObject::setData(const float* data, int count, GLenum type) const
+{
+	glBindBuffer(_type, _id);
+	glBufferData(_type, count * _align * sizeof(float), data, type);
+	glBindBuffer(_type, 0);
+}
+void GLBufferObject::setSubData(const float* data, int count, int offset) const
+{
+	glBindBuffer(_type, _id);
+	glBufferSubData(_type, offset * _align * sizeof(float), count * _align * sizeof(float), data);
+	glBindBuffer(_type, 0);
+}
+void GLBufferObject::setStorage(int count, GLenum flags, const void* data) const
+{
+	glBindBuffer(_type, _id);
+	glBufferStorage(_type, count * _align * sizeof(float), data, flags);
+	glBindBuffer(_type, 0);
 }
 
-void UBO::bind(int index)
+void GLBufferObject::clear(const void* data) const
 {
-	glBindBufferBase(GL_UNIFORM_BUFFER, index, _id);
-}
-void UBO::setData(const float* data, int count, GLenum type) const
-{
-	glBindBuffer(GL_UNIFORM_BUFFER, _id);
-	glBufferData(GL_UNIFORM_BUFFER, count * _align * sizeof(float), data, type);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBuffer(_type, _id);
+	glClearBufferData(_type, GL_R32I, GL_RED, GL_INT, data);
+	glBindBuffer(_type, 0);
 }
 
-SSBO::SSBO(int align, int baseIndex) : _align(align)
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	if (baseIndex != -1)
-	{
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, baseIndex, _id);
-		setDefaultBind(baseIndex);
-	}
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
+UBO::UBO(int align, int baseIndex) : GLBufferObject(GL_UNIFORM_BUFFER, align, baseIndex) {}
 
-void SSBO::bind(int index)
-{
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, _id);
-}
-void SSBO::setData(const float* data, int count, GLenum type) const
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, count * _align * sizeof(float), data, type);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
-void SSBO::setStorage(int count) const
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	glBufferStorage(GL_SHADER_STORAGE_BUFFER, count * _align * sizeof(float), NULL, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
-void SSBO::clear(const void* data) const
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED, GL_INT, data);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
+SSBO::SSBO(int align, int baseIndex) : GLBufferObject(GL_SHADER_STORAGE_BUFFER, align, baseIndex) {}
 
-void* SSBO::mapBuffer() const
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-	return ptr;
-}
-void SSBO::unmapBuffer() const
-{
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
 AtomicCounterBuffer::AtomicCounterBuffer(int baseIndex, int initValue)
 {
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _id);

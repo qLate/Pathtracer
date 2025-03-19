@@ -18,29 +18,43 @@ void BufferController::init()
 	_ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
 	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
+
+	_uboTexInfos->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 }
 
-void BufferController::recalculateTriangleCoefs()
+void BufferController::checkIfBufferUpdateRequired()
 {
-	_precomputeTriCoefsProgram->use();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::TexInfos))
+		updateTexInfos();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Materials))
+		updateMaterials();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Lights))
+		updateLights();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Objects))
+		updateObjects();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles))
+		updateTriangles();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::BVHNodes))
+		updateBVHNodes();
 
-	int triCount = Scene::triangles.size();
-	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles | BufferType::Objects))
+	{
+		precomputeTriCoefs();
+		BVH::rebuildBVH();
+	}
+
+	_buffersForUpdate = BufferType::None;
 }
 
-void BufferController::writeBuffers()
+void BufferController::markBufferForUpdate(BufferType bufferType)
 {
-	bindBuffers();
-
-	writeTexInfos();
-	writeMaterials();
-	writeLights();
-	writeTriangles();
-	writeObjects();
-	//updateBVHNodesBuffer();
+	_buffersForUpdate |= bufferType;
 }
-void BufferController::bindBuffers()
+
+void BufferController::initBuffers()
 {
 	_uboTexInfos->bindDefault();
 	_uboMaterials->bindDefault();
@@ -49,9 +63,19 @@ void BufferController::bindBuffers()
 	_ssboTriangles->bindDefault();
 	_ssboBVHNodes->bindDefault();
 	_ssboBVHTriIndices->bindDefault();
+
+	updateTexInfos();
+	updateMaterials();
+	updateLights();
+	updateTriangles();
+	updateObjects();
+
+	precomputeTriCoefs();
+
+	_buffersForUpdate = BufferType::None;
 }
 
-void BufferController::writeTexInfos()
+void BufferController::updateTexInfos()
 {
 	auto textures = Scene::textures;
 	std::vector<TexInfoStruct> data(textures.size());
@@ -62,12 +86,13 @@ void BufferController::writeTexInfos()
 
 		TexInfoStruct texInfoStruct;
 		texInfoStruct.sizes = glm::vec4(tex->width(), tex->height(), 0, 0);
+
 		data[i] = texInfoStruct;
 	}
-	_uboTexInfos->setData((float*)data.data(), data.size());
+	_uboTexInfos->setSubData((float*)data.data(), data.size());
 }
 
-void BufferController::writeMaterials()
+void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
@@ -86,11 +111,11 @@ void BufferController::writeMaterials()
 
 		data[i] = materialStruct;
 	}
-	_uboMaterials->setData((float*)data.data(), data.size());
+	_uboMaterials->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("materialCount", materials.size());
 }
 
-void BufferController::writeLights()
+void BufferController::updateLights()
 {
 	auto lights = Scene::lights;
 	std::vector<LightStruct> data(lights.size());
@@ -119,11 +144,11 @@ void BufferController::writeLights()
 
 		data[i] = lightStruct;
 	}
-	_uboLights->setData((float*)data.data(), data.size());
+	_uboLights->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("lightCount", lights.size());
 }
 
-void BufferController::writeObjects()
+void BufferController::updateObjects()
 {
 	auto triangleCount = 0;
 	auto graphicals = Scene::graphicals;
@@ -161,13 +186,11 @@ void BufferController::writeObjects()
 
 		data[i] = objectStruct;
 	}
-	_uboObjects->setData((float*)data.data(), data.size());
+	_uboObjects->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("objectCount", graphicals.size());
-
-	recalculateTriangleCoefs();
 }
 
-void BufferController::writeTriangles()
+void BufferController::updateTriangles()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
@@ -188,10 +211,10 @@ void BufferController::writeTriangles()
 	_ssboTriangles->setData((float*)data.data(), data.size());
 }
 
-void BufferController::writeBVHNodes()
+void BufferController::updateBVHNodes()
 {
 	auto nodes = BVH::nodes;
-	std::vector<BVHNodeStruct> data(nodes.size());
+	std::vector<BVHNodeStruct> data1(nodes.size());
 #pragma omp parallel for
 	for (int i = 0; i < nodes.size(); i++)
 	{
@@ -202,18 +225,24 @@ void BufferController::writeBVHNodes()
 		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);
 		bvhNodeStruct.links = glm::ivec4(node->hitNext, node->missNext, 0, 0);
 
-		data[i] = bvhNodeStruct;
+		data1[i] = bvhNodeStruct;
 	}
-	_ssboBVHNodes->setData((float*)data.data(), data.size());
+	_ssboBVHNodes->setData((float*)data1.data(), data1.size());
 
-	writeBVHTriIndices();
-}
-void BufferController::writeBVHTriIndices()
-{
+	// Update triangle indices
 	auto indices = BVH::originalTriIndices;
-	std::vector<uint32_t> data(indices.size());
+	std::vector<uint32_t> data2(indices.size());
 #pragma omp parallel for
 	for (int i = 0; i < indices.size(); i++)
-		data[i] = indices[i];
-	_ssboBVHTriIndices->setData((float*)data.data(), data.size());
+		data2[i] = indices[i];
+	_ssboBVHTriIndices->setData((float*)data2.data(), data2.size());
+}
+
+void BufferController::precomputeTriCoefs()
+{
+	_precomputeTriCoefsProgram->use();
+
+	int triCount = Scene::triangles.size();
+	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }

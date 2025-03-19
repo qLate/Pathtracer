@@ -8,6 +8,17 @@
 #include "GLObject.h"
 #include "ShaderProgram.h"
 
+enum class BufferType
+{
+	None,
+	TexInfos = 1,
+	Materials = 2,
+	Lights = 4,
+	Objects = 8,
+	Triangles = 16,
+	BVHNodes = 32,
+};
+
 class BufferController
 {
 	static constexpr int TEX_INFOS_ALIGN = 4;
@@ -28,11 +39,17 @@ class BufferController
 
 	inline static UPtr<ComputeShaderProgram> _precomputeTriCoefsProgram;
 
-	static void recalculateTriangleCoefs();
+	inline static BufferType _buffersForUpdate;
 
 	static void init();
 
+	static void checkIfBufferUpdateRequired();
+
 public:
+	static void initBuffers();
+
+	static void markBufferForUpdate(BufferType bufferType);
+
 	static UPtr<UBO>& uboTexInfos() { return _uboTexInfos; }
 	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
 	static UPtr<UBO>& uboLights() { return _uboLights; }
@@ -41,16 +58,14 @@ public:
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
 	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
 
-	static void writeBuffers();
-	static void bindBuffers();
+	static void updateTexInfos();
+	static void updateMaterials();
+	static void updateLights();
+	static void updateObjects();
+	static void updateTriangles();
+	static void updateBVHNodes();
 
-	static void writeTexInfos();
-	static void writeMaterials();
-	static void writeLights();
-	static void writeObjects();
-	static void writeTriangles();
-	static void writeBVHNodes();
-	static void writeBVHTriIndices();
+	static void precomputeTriCoefs();
 
 	friend class TraceShader;
 	friend class Program;
@@ -111,3 +126,12 @@ private:
 		glm::ivec4 links;
 	};
 };
+
+inline BufferType operator|(BufferType a, BufferType b)
+{
+	return (BufferType)((int)a | (int)b);
+}
+inline void operator|=(BufferType& a, BufferType b)
+{
+	a = a | b;
+}

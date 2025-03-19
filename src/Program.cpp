@@ -47,8 +47,8 @@ void Program::init()
 	SceneSetup::setupScene();
 	tm.printElapsedFromLast("Scene setup in ");
 
-	BufferController::writeBuffers();
-	tm.printElapsedFromLast("Buffers written in ");
+	BufferController::initBuffers();
+	tm.printElapsedFromLast("Buffers init in ");
 
 	BVH::buildBVH();
 	tm.printElapsedFromLast("BVH tree built in ");
@@ -62,6 +62,8 @@ void Program::loop()
 		Input::update();
 		SDLHandler::update();
 		Tweener::update();
+
+		BufferController::checkIfBufferUpdateRequired();
 
 		Renderer::render();
 		ImGUIHandler::draw();

@@ -39,7 +39,6 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_ssboMinMaxBound->bind(7);
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboBVHTriIndices()->bind(9);
-	BufferController::ssboBVHNodes()->bind(10);
 
 	_ssboTriCenters->setData(nullptr, n);
 	_ssboMinMaxBound->clear();
@@ -64,8 +63,6 @@ void BVHMortonBuilder::buildGPU_buildTree(int n)
 	BufferController::ssboBVHTriIndices()->bind(7);
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboTriangles()->bindDefault();
-
-	BufferController::ssboBVHNodes()->setData(nullptr, 2 * n - 1);
 
 	_bvhBuild->use();
 	_bvhBuild->setInt("n", n);

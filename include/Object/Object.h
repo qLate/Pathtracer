@@ -5,8 +5,6 @@
 
 class Object
 {
-	bool _isDirty = false;
-
 protected:
 	glm::vec3 _pos;
 	glm::quat _rot;
@@ -20,11 +18,9 @@ public:
 	glm::quat rot() const { return _rot; }
 	glm::vec3 scale() const { return _scale; }
 
-	bool isDirty() const { return _isDirty; }
-
-	virtual void setPos(glm::vec3 pos);
-	virtual void setRot(glm::quat rot);
-	virtual void setScale(glm::vec3 scale);
+	virtual void setPos(glm::vec3 pos, bool notify = true);
+	virtual void setRot(glm::quat rot, bool notify = true);
+	virtual void setScale(glm::vec3 scale, bool notify = true);
 
 	void translate(const glm::vec3& v);
 	void rotate(const glm::vec3& degrees);

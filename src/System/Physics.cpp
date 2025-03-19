@@ -12,7 +12,7 @@ void Physics::init()
 {
 	_raycastProgram = make_unique<ComputeShaderProgram>("shaders/compute/raycast.comp");
 	_resultSSBO = make_unique<SSBO>((int)sizeof(RaycastHitStruct) / 4, 20);
-	_resultSSBO->setStorage(1);
+	_resultSSBO->setStorage(1, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
 }
 
 RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
@@ -23,12 +23,11 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 	_raycastProgram->setFloat("rayMaxDis", maxDis);
 
 	ComputeShaderProgram::dispatch({1, 1, 1});
-	RaycastHitStruct* result = (RaycastHitStruct*)_resultSSBO->mapBuffer();
+	RaycastHitStruct result = _resultSSBO->readData<RaycastHitStruct>(1)[0];
 
-	auto triangle = result->triIndex != -1 ? Scene::triangles[result->triIndex] : nullptr;
-	auto obj = result->objIndex != -1 ? Scene::graphicals[result->objIndex] : triangle ? (Graphical*)triangle->mesh() : nullptr;
-	RaycastHit hit = {result->normal != glm::vec3(0), result->pos, result->normal, result->uv, obj, triangle};
+	auto triangle = result.triIndex != -1 ? Scene::triangles[result.triIndex] : nullptr;
+	auto obj = result.objIndex != -1 ? Scene::graphicals[result.objIndex] : triangle ? (Graphical*)triangle->mesh() : nullptr;
+	RaycastHit hit = {result.normal != glm::vec3(0), result.pos, result.normal, result.uv, obj, triangle};
 
-	_resultSSBO->unmapBuffer();
 	return hit;
 }

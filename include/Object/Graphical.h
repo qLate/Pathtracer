@@ -45,9 +45,9 @@ public:
 
 	std::vector<Triangle*> triangles() const { return _triangles; }
 
-	void setPos(glm::vec3 pos) override;
-	void setRot(glm::quat rot) override;
-	void setScale(glm::vec3 scale) override;
+	void setPos(glm::vec3 pos, bool notify = true) override;
+	void setRot(glm::quat rot, bool notify = true) override;
+	void setScale(glm::vec3 scale, bool notify = true) override;
 };
 
 

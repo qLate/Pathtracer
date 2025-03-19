@@ -1,5 +1,6 @@
 #include "Object.h"
 
+#include "BufferController.h"
 #include "MyMath.h"
 #include "Scene.h"
 
@@ -8,9 +9,24 @@ Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : _pos(pos),
 	Scene::objects.emplace_back(this);
 }
 
-void Object::setPos(glm::vec3 pos) { this->_pos = pos; }
-void Object::setRot(glm::quat rot) { this->_rot = rot; }
-void Object::setScale(glm::vec3 scale) { this->_scale = scale; }
+void Object::setPos(glm::vec3 pos, bool notify)
+{
+	this->_pos = pos;
+
+	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
+}
+void Object::setRot(glm::quat rot, bool notify)
+{
+	this->_rot = rot;
+
+	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
+}
+void Object::setScale(glm::vec3 scale, bool notify)
+{
+	this->_scale = scale;
+
+	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
+}
 void Object::translate(const glm::vec3& v)
 {
 	setPos(_pos + v);

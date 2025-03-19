@@ -1,5 +1,6 @@
 #include "Graphical.h"
 
+#include "BufferController.h"
 #include "Camera.h"
 #include "Scene.h"
 #include "Triangle.h"
@@ -59,26 +60,32 @@ Mesh::Mesh(std::vector<Triangle*> triangles, glm::vec3 pos, glm::quat rot, glm::
 		t->attachTo(this);
 		Scene::triangles.push_back(t);
 	}
+
+	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
 Mesh::Mesh(const Model& model, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Mesh(model.triangles(), pos, rot, scale) {}
+
 Mesh::~Mesh()
 {
 	for (const auto& triangle : _triangles)
 		delete triangle;
+
+	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
-void Mesh::setPos(glm::vec3 pos)
+
+void Mesh::setPos(glm::vec3 pos, bool notify)
 {
 	Graphical::setPos(pos);
 	for (auto& t : _triangles)
 		t->updateGeometry();
 }
-void Mesh::setRot(glm::quat rot)
+void Mesh::setRot(glm::quat rot, bool notify)
 {
 	Graphical::setRot(rot);
 	for (auto& t : _triangles)
 		t->updateGeometry();
 }
-void Mesh::setScale(glm::vec3 scale)
+void Mesh::setScale(glm::vec3 scale, bool notify)
 {
 	Graphical::setScale(scale);
 	for (auto& t : _triangles)
