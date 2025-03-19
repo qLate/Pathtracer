@@ -5,7 +5,6 @@
 #include "BufferController.h"
 #include "GLObject.h"
 #include "MortonCodes.h"
-#include "RadixSort.hpp"
 #include "ShaderProgram.h"
 #include "Triangle.h"
 #include "Utils.h"
@@ -14,6 +13,7 @@ BVHMortonBuilder::BVHMortonBuilder()
 {
 	_bvhMorton = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part1_morton.comp");
 	_bvhBuild = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part2_build.comp");
+	radixSort = make_unique<glu::RadixSort>();
 
 	_ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
 	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
@@ -51,13 +51,12 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_bvhMorton->setInt("n", n);
 
 	_bvhMorton->setInt("pass", 0);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhMorton->setInt("pass", 1);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	glu::RadixSort radix_sort;
-	radix_sort(_ssboMortonCodes->id(), BufferController::ssboBVHTriIndices()->id(), n);
+	radixSort->operator()(_ssboMortonCodes->id(), BufferController::ssboBVHTriIndices()->id(), n);
 }
 void BVHMortonBuilder::buildGPU_buildTree(int n)
 {
@@ -72,16 +71,16 @@ void BVHMortonBuilder::buildGPU_buildTree(int n)
 	_bvhBuild->setInt("n", n);
 
 	_bvhBuild->setInt("pass", 0);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 1);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 2);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 3);
-	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 

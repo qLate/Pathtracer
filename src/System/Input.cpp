@@ -43,7 +43,7 @@ void Input::updateMovement()
 		_currMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime();
 		finalMoveSpeed *= MOVE_SPEED_BOOST * _currMoveAcceleration;
 
-		TimeMeasurer tm;
+		TimeMeasurerGL tm;
 		BVH::rebuildBVH();
 		tm.printElapsedFromLast("BVH rebuild time: ");
 	}

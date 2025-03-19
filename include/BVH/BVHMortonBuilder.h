@@ -2,16 +2,20 @@
 
 #include "BVH.h"
 #include "GLObject.h"
+#include "RadixSort.hpp"
 #include "ShaderProgram.h"
 
 class BVHMortonBuilder : public BVHBuilder
 {
+	static constexpr int SHADER_GROUP_SIZE = 32;
+
 	static constexpr int TRI_CENTER_ALIGN = 4;
 	static constexpr int MORTON_ALIGN = 1;
 	static constexpr int MIN_MAX_BOUND_ALIGN = 8;
 
 	inline static UPtr<ComputeShaderProgram> _bvhMorton;
 	inline static UPtr<ComputeShaderProgram> _bvhBuild;
+	inline static UPtr<glu::RadixSort> radixSort;
 
 	inline static UPtr<SSBO> _ssboTriCenters;
 	inline static UPtr<SSBO> _ssboMinMaxBound;

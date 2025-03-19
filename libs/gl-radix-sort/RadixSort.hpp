@@ -199,12 +199,11 @@ void main()
         ShaderStorageBuffer m_key_scratch_buffer;
         ShaderStorageBuffer m_val_scratch_buffer;
 
-        const size_t m_num_threads;
+        static const size_t m_num_threads = 32;
 
     public:
         explicit RadixSort() :
-            m_blelloch_scan(DataType_Uint),
-            m_num_threads(1024)
+            m_blelloch_scan(DataType_Uint)
         {
             GLU_CHECK_ARGUMENT(is_power_of_2(m_num_threads), "Num threads must be a power of 2");
 
@@ -280,7 +279,7 @@ void main()
 
             prepare_internal_buffers(count);
 
-            size_t num_blocks = div_ceil(count, size_t(1024));
+            size_t num_blocks = div_ceil(count, size_t(m_num_threads));
             size_t num_blocks_power_of_2 = next_power_of_2(num_blocks); // Required by BlellochScan
 
             GLuint key_buffers[]{key_buffer, m_key_scratch_buffer.handle()};
@@ -336,7 +335,7 @@ void main()
     private:
         [[nodiscard]] static size_t required_block_count_buffer_size(size_t count)
         {
-            size_t num_blocks = div_ceil(count, size_t(1024));
+            size_t num_blocks = div_ceil(count, size_t(m_num_threads));
             size_t num_blocks_power_of_2 = next_power_of_2(num_blocks); // Required by BlellochScan
 
             return next_power_of_2(16 * num_blocks_power_of_2) * sizeof(GLuint);
