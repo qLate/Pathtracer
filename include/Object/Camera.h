@@ -16,9 +16,9 @@ public:
 
 	Camera(glm::vec3 pos, glm::vec2 size = {ImGUIHandler::INIT_RENDER_SIZE.x / (float)ImGUIHandler::INIT_RENDER_SIZE.y, 1}, float focalDistance = 1, float lensRadius = 0);
 
-	void setPos(glm::vec3 pos, bool notify = false) override;
-	void setRot(glm::quat rot, bool notify = false) override;
-	void setScale(glm::vec3 scale, bool notify = false) override;
+	void setPos(glm::vec3 pos, bool notify = true) override;
+	void setRot(glm::quat rot, bool notify = true) override;
+	void setScale(glm::vec3 scale, bool notify = true) override;
 
 	glm::vec2 size() const { return _size; }
 	float focalDistance() const { return _focalDis; }

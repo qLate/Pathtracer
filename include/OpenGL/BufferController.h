@@ -29,6 +29,8 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
+	static constexpr glm::ivec3 TEX_ARRAY_BOUNDS = {4096, 4096, 12};
+
 	inline static UPtr<UBO> _uboTexInfos;
 	inline static UPtr<UBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;
@@ -36,6 +38,7 @@ class BufferController
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
+	inline static UPtr<GLTexture2DArray> _texArray;
 
 	inline static UPtr<ComputeShaderProgram> _precomputeTriCoefsProgram;
 
@@ -57,6 +60,7 @@ public:
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
 	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
+	static UPtr<GLTexture2DArray>& texArray() { return _texArray; }
 
 	static void updateTexInfos();
 	static void updateMaterials();

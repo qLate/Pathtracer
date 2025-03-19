@@ -118,23 +118,24 @@ public:
 
 class GLTexture2D : public GLTexture
 {
-public:
-	int width, height;
+	int _width, _height;
 
+public:
 	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA);
 };
 
 
 class GLTexture2DArray : public GLTexture
 {
-	int currentFreeSpotIndex = 0;
+	int _width, _height, _layers;
+	int _currentFreeSpotIndex = 0;
 
 public:
-	int width, height, layers;
-
 	GLTexture2DArray(int width, int height, int layers, GLenum type = GL_RGBA8);
 
 	int addTexture(const Texture* tex, GLenum type = GL_RGBA);
+
+	void resize(int width, int height, int layers);
 };
 
 

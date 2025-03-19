@@ -23,6 +23,10 @@ void BufferController::init()
 	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+
+	_texArray = make_unique<GLTexture2DArray>(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
+	Renderer::renderProgram()->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
+	Renderer::renderProgram()->setInt("texArray", 0);
 }
 
 void BufferController::checkIfBufferUpdateRequired()

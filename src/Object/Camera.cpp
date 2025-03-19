@@ -18,15 +18,15 @@ Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRad
 
 void Camera::setPos(glm::vec3 pos, bool notify)
 {
-	Object::setPos(pos, notify);
+	Object::setPos(pos, false);
 }
 void Camera::setRot(glm::quat rot, bool notify)
 {
-	Object::setRot(rot, notify);
+	Object::setRot(rot, false);
 }
 void Camera::setScale(glm::vec3 scale, bool notify)
 {
-	Object::setScale(scale, notify);
+	Object::setScale(scale, false);
 }
 
 void Camera::setSize(glm::vec2 size)

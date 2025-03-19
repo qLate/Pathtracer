@@ -127,7 +127,7 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type) : width(width), height(height)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type) : _width(width), _height(height)
 {
 	glBindTexture(GL_TEXTURE_2D, _id);
 
@@ -141,7 +141,7 @@ GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenu
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : width(width), height(height), layers(layers)
+GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : _width(width), _height(height), _layers(layers)
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, _id);
 
@@ -158,10 +158,10 @@ GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum typ
 int GLTexture2DArray::addTexture(const Texture* tex, GLenum type)
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, _id);
-	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, currentFreeSpotIndex, tex->width(), tex->height(), 1, type, GL_UNSIGNED_BYTE, tex->data());
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, _currentFreeSpotIndex, tex->width(), tex->height(), 1, type, GL_UNSIGNED_BYTE, tex->data());
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
-	return currentFreeSpotIndex++;
+	return _currentFreeSpotIndex++;
 }
 
 GLFrameBuffer::GLFrameBuffer(glm::ivec2 size)

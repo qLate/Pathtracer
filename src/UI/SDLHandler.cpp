@@ -37,7 +37,7 @@ void SDLHandler::init()
 }
 void SDLHandler::initOpenGL()
 {
-	gladLoadGLLoader(SDL_GL_GetProcAddress);
+	gladLoaderLoadGL();
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);

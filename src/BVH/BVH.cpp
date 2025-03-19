@@ -16,7 +16,7 @@ void BVH::buildBVH()
 }
 void BVH::rebuildBVH()
 {
-	builder->rebuild(Scene::triangles);
+ 	builder->rebuild(Scene::triangles);
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

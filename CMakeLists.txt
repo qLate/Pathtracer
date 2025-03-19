@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}
         "src/UI/ImGUIHandler.cpp"
         "src/UI/ImGUIWindowDrawer.cpp"
          
-        "libs/glad/glad.c"
+       "libs/glad/glad.c"
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 

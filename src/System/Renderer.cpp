@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include "BufferController.h"
 #include "Camera.h"
 #include "GLObject.h"
 #include "ImGUIHandler.h"
@@ -12,10 +13,6 @@ void Renderer::init()
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
 	_renderProgram->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
-
-	_texArray = make_unique<GLTexture2DArray>(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
-	_renderProgram->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
-	_renderProgram->setInt("texArray", 0);
 }
 
 void Renderer::render()
@@ -35,7 +32,7 @@ void Renderer::render()
 }
 void Renderer::bindTextures()
 {
-	glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray->id());
+	glBindTexture(GL_TEXTURE_2D_ARRAY, BufferController::texArray()->id());
 }
 void Renderer::updateCameraUniforms()
 {

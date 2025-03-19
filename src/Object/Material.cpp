@@ -3,9 +3,7 @@
 #include <stb_image.h>
 
 #include "Material.h"
-
 #include "BufferController.h"
-#include "Renderer.h"
 #include "Scene.h"
 #include "Utils.h"
 
@@ -17,7 +15,7 @@ Texture::Texture(const std::filesystem::path& path)
 	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
 	setImageData(image);
 
-	_texArrayLayerIndex = Renderer::texArray()->addTexture(this);
+	_texArrayLayerIndex = BufferController::texArray()->addTexture(this);
 
 	BufferController::markBufferForUpdate(BufferType::TexInfos);
 }
