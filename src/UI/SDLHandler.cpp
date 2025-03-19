@@ -35,6 +35,7 @@ void SDLHandler::init()
 
 	SDL_GL_SetSwapInterval(0);
 }
+
 void SDLHandler::initOpenGL()
 {
 	gladLoaderLoadGL();
@@ -43,10 +44,10 @@ void SDLHandler::initOpenGL()
 	glDisable(GL_CULL_FACE);
 
 	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	glad_glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
-		Debug::log("OpenGL Debug Message: ", message);
+		Debug::log("OpenGL msg: ", message);
 	}, nullptr);
 
 	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE));

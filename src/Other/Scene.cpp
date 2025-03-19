@@ -10,7 +10,7 @@
 
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
+	skeletonScene();
 }
 
 void SceneSetup::museumScene()
@@ -31,7 +31,7 @@ void SceneSetup::churchScene()
 	camera->setRot({0.99f, 0.12f, 0, 0});
 	//auto camera = new Camera({ 7.494653, 8.752432, 11.397732 });
 	//camera->setRot({ 0.963874, {0.189301, -0.036111, -0.183870} });
-	camera->setBgColor(Color::white());
+	//camera->setBgColor(Color::white());
 	auto tex = new Texture("assets/textures/church.jpg");
 
 	auto model = Model("assets/models/west.obj");

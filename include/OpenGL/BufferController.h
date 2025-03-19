@@ -11,7 +11,7 @@
 enum class BufferType
 {
 	None,
-	TexInfos = 1,
+	Textures = 1,
 	Materials = 2,
 	Lights = 4,
 	Objects = 8,
@@ -21,7 +21,7 @@ enum class BufferType
 
 class BufferController
 {
-	static constexpr int TEX_INFOS_ALIGN = 4;
+	static constexpr int TEXTURE_ALIGN = 4;
 	static constexpr int LIGHT_ALIGN = 12;
 	static constexpr int MATERIAL_ALIGN = 12;
 	static constexpr int OBJECT_ALIGN = 28;
@@ -31,14 +31,13 @@ class BufferController
 
 	static constexpr glm::ivec3 TEX_ARRAY_BOUNDS = {4096, 4096, 12};
 
-	inline static UPtr<UBO> _uboTexInfos;
+	inline static UPtr<UBO> _uboTextures;
 	inline static UPtr<UBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;
 	inline static UPtr<UBO> _uboObjects;
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
-	inline static UPtr<GLTexture2DArray> _texArray;
 
 	inline static UPtr<ComputeShaderProgram> _precomputeTriCoefsProgram;
 
@@ -53,14 +52,13 @@ public:
 
 	static void markBufferForUpdate(BufferType bufferType);
 
-	static UPtr<UBO>& uboTexInfos() { return _uboTexInfos; }
+	static UPtr<UBO>& uboTexInfos() { return _uboTextures; }
 	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
 	static UPtr<UBO>& uboLights() { return _uboLights; }
 	static UPtr<UBO>& uboObjects() { return _uboObjects; }
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
 	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
-	static UPtr<GLTexture2DArray>& texArray() { return _texArray; }
 
 	static void updateTexInfos();
 	static void updateMaterials();
@@ -75,9 +73,10 @@ public:
 	friend class Program;
 
 private:
-	struct TexInfoStruct
+	struct TextureStruct
 	{
-		glm::vec4 sizes;
+		uint64_t handle;
+		glm::uvec2 _pad;
 	};
 
 	struct MaterialStruct
@@ -88,7 +87,7 @@ private:
 		float reflection;
 		float id;
 		glm::vec3 _pad;
-		int texArrayLayerIndex;
+		int textureIndex;
 	};
 
 	struct LightStruct

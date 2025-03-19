@@ -1,3 +1,4 @@
+#extension GL_ARB_bindless_texture : enable
 /// #include "default/utils.glsl"
 
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
@@ -7,11 +8,6 @@
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
 vec4 COLOR_DEBUG = vec4(0.2, 0, 0, 0);
-
-struct TexInfo
-{
-    vec2 size;
-};
 
 struct Light
 {
@@ -29,7 +25,7 @@ struct Material
     float reflection;
     float indexID;
     vec3 _pad;
-    int texArrayLayerIndex;
+    int textureIndex;
 };
 
 struct Object
@@ -77,12 +73,9 @@ struct Ray
 // ----------- BUFFERS -----------
 uniform mat4x4 cameraRotMat = mat4x4(1.0);
 
-uniform vec2 texArrayBounds;
-layout(binding = 0) uniform sampler2DArray texArray;
-
-layout(std140, binding = 1) uniform TexInfos
+layout(std140, binding = 1) uniform Textures
 {
-    TexInfo texInfos[1];
+    sampler2D textures[1];
 };
 
 uniform int materialCount;

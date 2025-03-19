@@ -49,9 +49,8 @@ vec4 castRay(Ray ray)
 
         Material mat = getMaterial(ray.materialIndex);
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-        vec2 uvLocal = uv * texInfos[int(mat.texArrayLayerIndex)].size * 0.999999 / texArrayBounds;
 
-        vec4 uvColor = texture(texArray, vec3(uvLocal, mat.texArrayLayerIndex));
+        vec4 uvColor = texture(textures[int(mat.textureIndex)], uv);
         if (mat.lit)
         {
             vec4 diffuse;

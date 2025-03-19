@@ -122,6 +122,8 @@ class GLTexture2D : public GLTexture
 
 public:
 	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA);
+
+	uint64_t getHandle() const;
 };
 
 
@@ -134,8 +136,6 @@ public:
 	GLTexture2DArray(int width, int height, int layers, GLenum type = GL_RGBA8);
 
 	int addTexture(const Texture* tex, GLenum type = GL_RGBA);
-
-	void resize(int width, int height, int layers);
 };
 
 

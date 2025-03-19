@@ -10,9 +10,13 @@ class GLTexture2D;
 
 class Texture
 {
+	inline static int _nextAvailableId = 0;
+
+	int _id;
 	unsigned char* _data;
 	int _width = 0, _height = 0;
-	int _texArrayLayerIndex = -1;
+
+	UPtr<GLTexture2D> _glTex;
 
 	bool readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
 	void setImageData(const std::vector<uint8_t>& image);
@@ -20,12 +24,13 @@ class Texture
 public:
 	static Texture* defaultTex();
 
+	Texture(const std::filesystem::path& path);
+
+	int id() const { return _id; }
 	unsigned char* data() const { return _data; }
 	int width() const { return _width; }
 	int height() const { return _height; }
-	int texArrayLayerIndex() const { return _texArrayLayerIndex; }
-
-	Texture(const std::filesystem::path& path);
+	UPtr<GLTexture2D>& glTex() { return _glTex; }
 };
 
 

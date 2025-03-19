@@ -7,7 +7,7 @@
 #include "Scene.h"
 #include "Utils.h"
 
-Texture::Texture(const std::filesystem::path& path)
+Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++)
 {
 	Scene::textures.push_back(this);
 
@@ -15,9 +15,9 @@ Texture::Texture(const std::filesystem::path& path)
 	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
 	setImageData(image);
 
-	_texArrayLayerIndex = BufferController::texArray()->addTexture(this);
+	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
 
-	BufferController::markBufferForUpdate(BufferType::TexInfos);
+	BufferController::markBufferForUpdate(BufferType::Textures);
 }
 
 Texture* Texture::defaultTex()
@@ -58,10 +58,9 @@ Material* Material::debugLine()
 	return &instance;
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): _lit {lit}, _color {color}, _texture {texture}, _diffuseCoef {diffuseCoef},
-                                                                                                  _reflection {reflection}
+Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): _id(_nextAvailableId++), _lit {lit}, _color {color}, _texture {texture},
+                                                                                                  _diffuseCoef {diffuseCoef}, _reflection {reflection}
 {
-	this->_id = _nextAvailableId++;
 	Scene::materials.push_back(this);
 
 	BufferController::markBufferForUpdate(BufferType::Materials);

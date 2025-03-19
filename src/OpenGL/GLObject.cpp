@@ -140,6 +140,12 @@ GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenu
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+uint64_t GLTexture2D::getHandle() const
+{
+	GLuint64 handle = glGetTextureHandleARB(_id);
+	glMakeTextureHandleResidentARB(handle);
+	return handle;
+}
 
 GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : _width(width), _height(height), _layers(layers)
 {

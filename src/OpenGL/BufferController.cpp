@@ -11,7 +11,7 @@ void BufferController::init()
 {
 	_precomputeTriCoefsProgram = make_unique<ComputeShaderProgram>("shaders/compute/precomputeTriCoefs.comp");
 
-	_uboTexInfos = make_unique<UBO>(TEX_INFOS_ALIGN, 1);
+	_uboTextures = make_unique<UBO>(TEXTURE_ALIGN, 1);
 	_uboMaterials = make_unique<UBO>(MATERIAL_ALIGN, 2);
 	_uboLights = make_unique<UBO>(LIGHT_ALIGN, 3);
 	_uboObjects = make_unique<UBO>(OBJECT_ALIGN, 4);
@@ -19,19 +19,15 @@ void BufferController::init()
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
 	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
 
-	_uboTexInfos->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-
-	_texArray = make_unique<GLTexture2DArray>(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
-	Renderer::renderProgram()->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
-	Renderer::renderProgram()->setInt("texArray", 0);
 }
 
 void BufferController::checkIfBufferUpdateRequired()
 {
-	if (Utils::hasFlag(_buffersForUpdate, BufferType::TexInfos))
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Textures))
 		updateTexInfos();
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Materials))
 		updateMaterials();
@@ -60,7 +56,7 @@ void BufferController::markBufferForUpdate(BufferType bufferType)
 
 void BufferController::initBuffers()
 {
-	_uboTexInfos->bindDefault();
+	_uboTextures->bindDefault();
 	_uboMaterials->bindDefault();
 	_uboLights->bindDefault();
 	_uboObjects->bindDefault();
@@ -82,25 +78,24 @@ void BufferController::initBuffers()
 void BufferController::updateTexInfos()
 {
 	auto textures = Scene::textures;
-	std::vector<TexInfoStruct> data(textures.size());
-#pragma omp parallel for
+	std::vector<TextureStruct> data(textures.size());
+	//#pragma omp parallel for
 	for (int i = 0; i < textures.size(); i++)
 	{
 		auto tex = textures[i];
 
-		TexInfoStruct texInfoStruct;
-		texInfoStruct.sizes = glm::vec4(tex->width(), tex->height(), 0, 0);
+		TextureStruct texInfoStruct {};
+		texInfoStruct.handle = tex->glTex()->getHandle();
 
 		data[i] = texInfoStruct;
 	}
-	_uboTexInfos->setSubData((float*)data.data(), data.size());
+	_uboTextures->setSubData((float*)data.data(), data.size());
 }
 
 void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
-#pragma omp parallel for
 	for (int i = 0; i < materials.size(); i++)
 	{
 		auto mat = materials[i];
@@ -111,7 +106,7 @@ void BufferController::updateMaterials()
 		materialStruct.diffuseCoeff = mat->diffuseCoef();
 		materialStruct.reflection = mat->reflection();
 		materialStruct.id = mat->id();
-		materialStruct.texArrayLayerIndex = mat->texture()->texArrayLayerIndex();
+		materialStruct.textureIndex = mat->texture()->id();
 
 		data[i] = materialStruct;
 	}

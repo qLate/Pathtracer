@@ -19,7 +19,6 @@ void Renderer::render()
 {
 	_renderProgram->use();
 
-	bindTextures();
 	updateCameraUniforms();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
@@ -29,10 +28,6 @@ void Renderer::render()
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-void Renderer::bindTextures()
-{
-	glBindTexture(GL_TEXTURE_2D_ARRAY, BufferController::texArray()->id());
 }
 void Renderer::updateCameraUniforms()
 {
