@@ -219,8 +219,9 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
             }
             curr = int(node.links.x);
         }
-        else
+        else {
             curr = int(node.links.y);
+        }
     }
     return ray.surfaceNormal != vec3(0);
 }

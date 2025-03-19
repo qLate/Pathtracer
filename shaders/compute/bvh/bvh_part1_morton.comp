@@ -1,5 +1,5 @@
 #version 460 core
-layout(local_size_x = 256) in;
+layout(local_size_x = 32) in;
 /// #include "default/_shaderBase.glsl"
 
 const float GRID_RESOLUTION = 1023;
@@ -45,7 +45,7 @@ void computeBounds(uint gid, vec3 value) {
         }
         barrier();
     }
-    barrier();
+    // barrier();
 
     if (lid == 0) {
         atomicMin(globalMinInt.x, floatToOrderedInt(localMin[0].x));

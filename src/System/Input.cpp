@@ -46,6 +46,10 @@ void Input::updateMovement()
 	{
 		currMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime;
 		finalMoveSpeed *= MOVE_SPEED_BOOST * currMoveAcceleration;
+
+		TimeMeasurer<std::chrono::microseconds> measurer;
+		BVH::rebuildBVH();
+		measurer.printElapsed("BVH rebuild time: ");
 	}
 	else if (keyboardState[SDL_SCANCODE_LCTRL])
 		finalMoveSpeed /= MOVE_SPEED_BOOST;
@@ -108,17 +112,17 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			if (ImGUIHandler::isWindowFocused(WindowType::Scene))
 			{
 				auto hit = Physics::raycast(camera->getPos(), camera->getMouseDir());
-				if (hit.hit)
+				//if (hit.hit)
 				{
-					hit.object->translate(glm::vec3(0, 0, 1));
+					//hit.object->translate(glm::vec3(0, 0, 1));
 
-					BufferController::writeObjects();
+					//BufferController::writeObjects();
 
-					TimeMeasurer measurer;
+					TimeMeasurer<std::chrono::microseconds> measurer;
 					BVH::rebuildBVH();
 					measurer.printElapsed("BVH rebuild time: ");
 
-					Renderer::renderProgram->use();
+					//Renderer::renderProgram->use();
 				}
 			}
 		}

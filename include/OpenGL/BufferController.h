@@ -48,7 +48,6 @@ public:
 
 	friend class TraceShader;
 
-private:
 	struct TexInfoStruct
 	{
 		glm::vec4 sizes;

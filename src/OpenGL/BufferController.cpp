@@ -76,7 +76,7 @@ void BufferController::writeMaterials()
 	{
 		auto mat = materials[i];
 
-		MaterialStruct materialStruct{};
+		MaterialStruct materialStruct {};
 		materialStruct.color = mat->color;
 		materialStruct.lit = mat->lit;
 		materialStruct.diffuseCoeff = mat->diffuseCoef;
@@ -99,7 +99,7 @@ void BufferController::writeLights()
 	{
 		auto light = lights[i];
 
-		LightStruct lightStruct{};
+		LightStruct lightStruct {};
 		lightStruct.pos = light->getPos();
 		lightStruct.color = light->color;
 		lightStruct.properties1.x = light->intensity;
@@ -133,7 +133,7 @@ void BufferController::writeObjects()
 	{
 		auto obj = graphicals[i];
 
-		ObjectStruct objectStruct{};
+		ObjectStruct objectStruct {};
 		objectStruct.materialIndex = obj->materialNoCopy()->id;
 		objectStruct.pos = glm::vec4(obj->getPos(), 0);
 		objectStruct.transform = translate(glm::mat4(1), obj->getPos()) * mat4_cast(obj->getRot()) * scale(glm::mat4(1), obj->getScale());
@@ -175,7 +175,7 @@ void BufferController::writeTriangles()
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];
-		TriangleStruct triangleStruct{};
+		TriangleStruct triangleStruct {};
 		for (int k = 0; k < 3; ++k)
 		{
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices[k].pos, triangle->vertices[k].uvPos.x);
@@ -196,7 +196,7 @@ void BufferController::writeBVHNodes()
 	for (int i = 0; i < nodes.size(); i++)
 	{
 		const auto& node = nodes[i];
-		BVHNodeStruct bvhNodeStruct{};
+		BVHNodeStruct bvhNodeStruct {};
 		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
 		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
 		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);

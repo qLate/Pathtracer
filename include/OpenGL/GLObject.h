@@ -62,7 +62,8 @@ public:
 	void bind(int index) override;
 	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
 	void setStorage(int count) const;
-	void clear() const;
+
+	void clear(const void* data = nullptr) const;
 
 	void* mapBuffer() const;
 	void unmapBuffer() const;

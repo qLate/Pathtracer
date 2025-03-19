@@ -17,6 +17,4 @@ class MortonCodes
 public:
 	static std::vector<uint32_t> generateMortonCodes(const std::vector<glm::vec3>& centers);
 	static int commonPrefixLength(uint32_t a, uint32_t b);
-
-	friend class BVHNodeMorton;
 };

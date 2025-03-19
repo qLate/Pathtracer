@@ -6,6 +6,8 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
+vec4 COLOR_DEBUG = vec4(0.2, 0, 0, 0);
+
 struct TexInfo
 {
     vec2 size;

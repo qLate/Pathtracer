@@ -1,6 +1,5 @@
 #version 460 core
 /// #include "default/_shaderBase.glsl"
-vec4 COLOR_DEBUG = vec4(0.2, 0, 0, 0);
 
 layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 {
@@ -11,9 +10,6 @@ layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 {
     uint triIndices[];
 };
-
-/// #include "intersection.glsl"
-/// #include "light.glsl"
 
 out vec4 outColor;
 vec4 COLOR_HEAT = vec4(0);
@@ -33,6 +29,9 @@ uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec4 bgColor = vec4(0, 0, 0, 1);
+
+/// #include "intersection.glsl"
+/// #include "light.glsl"
 
 vec4 castRay(Ray ray)
 {

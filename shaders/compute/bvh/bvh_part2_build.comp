@@ -17,7 +17,6 @@ layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
     uint mortonCodes[];
 };
 
-
 uniform int n = -1;
 
 int lcp(uint i, uint j)
@@ -29,6 +28,7 @@ int lcp(uint i, uint j)
 void buildInnerNodes(int i)
 {
     if (i >= n - 1) return;
+    if (i == 0) nodes[i].values.w = -1;
 
     int dir = int(sign(lcp(i, i + 1) - lcp(i, i - 1)));
     int minPrefix = lcp(i, i - dir);
@@ -134,8 +134,6 @@ void main()
     if (pass == 0)
     {
         // Initialize nodes
-        nodes[gid].min = nodes[gid].max = ivec4(-1, -1, -1, -1);
-        nodes[gid].values = ivec4(-1, -1, 0, -1);
         nodes[gid].links.xy = ivec2(-1, -1);
     }
     else if (pass == 1)

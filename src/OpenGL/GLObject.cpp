@@ -86,10 +86,10 @@ void SSBO::setStorage(int count) const
 	glBufferStorage(GL_SHADER_STORAGE_BUFFER, count * align * sizeof(float), NULL, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
-void SSBO::clear() const
+void SSBO::clear(const void* data) const
 {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
-	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, NULL);
+	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED, GL_INT, data);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
