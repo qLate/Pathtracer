@@ -1,10 +1,7 @@
 #include "Input.h"
 
-#include <iostream>
-
 #include "BufferController.h"
 #include "Camera.h"
-#include "Debug.h"
 #include "Graphical.h"
 #include "ImGUIWindowDrawer.h"
 #include "Light.h"
@@ -13,7 +10,6 @@
 #include "MyMath.h"
 #include "MyTime.h"
 #include "Physics.h"
-#include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
 #include "Utils.h"
@@ -25,52 +21,52 @@ void Input::update()
 }
 void Input::updateInputState()
 {
-	memcpy(_lastKeyboardState, keyboardState, SDL_NUM_SCANCODES);
+	memcpy(_lastKeyboardState, _keyboardState, SDL_NUM_SCANCODES);
 	auto keyboardStatePtr = SDL_GetKeyboardState(nullptr);
-	memcpy(keyboardState, keyboardStatePtr, SDL_NUM_SCANCODES);
+	memcpy(_keyboardState, keyboardStatePtr, SDL_NUM_SCANCODES);
 
-	_lastMouseLeftState = mouseLeftState;
-	_lastMouseRightState = mouseRightState;
+	_lastMouseLeftState = _mouseLeftState;
+	_lastMouseRightState = _mouseRightState;
 
-	mouseWheelChange = 0;
+	_mouseWheelChange = 0;
 }
 void Input::updateMovement()
 {
 	if (!ImGUIHandler::isWindowFocused(WindowType::Scene)) return;
 
 	auto camera = Camera::instance;
-	auto finalMoveSpeed = MOVE_SPEED * moveSpeedMult;
+	auto finalMoveSpeed = MOVE_SPEED * _moveSpeedMult;
 	auto moveDir = vec3::ZERO;
 
-	if (keyboardState[SDL_SCANCODE_LSHIFT])
+	if (_keyboardState[SDL_SCANCODE_LSHIFT])
 	{
-		currMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime;
-		finalMoveSpeed *= MOVE_SPEED_BOOST * currMoveAcceleration;
+		_currMoveAcceleration *= 1 + MOVE_ACCELERATION * Time::deltaTime();
+		finalMoveSpeed *= MOVE_SPEED_BOOST * _currMoveAcceleration;
 
-		TimeMeasurer<std::chrono::microseconds> measurer;
+		TimeMeasurer tm;
 		BVH::rebuildBVH();
-		measurer.printElapsed("BVH rebuild time: ");
+		tm.printElapsedFromLast("BVH rebuild time: ");
 	}
-	else if (keyboardState[SDL_SCANCODE_LCTRL])
+	else if (_keyboardState[SDL_SCANCODE_LCTRL])
 		finalMoveSpeed /= MOVE_SPEED_BOOST;
 
-	if (keyboardState[SDL_SCANCODE_W])
+	if (_keyboardState[SDL_SCANCODE_W])
 		moveDir += camera->forward();
-	if (keyboardState[SDL_SCANCODE_S])
+	if (_keyboardState[SDL_SCANCODE_S])
 		moveDir += camera->backward();
-	if (keyboardState[SDL_SCANCODE_A])
+	if (_keyboardState[SDL_SCANCODE_A])
 		moveDir += camera->left();
-	if (keyboardState[SDL_SCANCODE_D])
+	if (_keyboardState[SDL_SCANCODE_D])
 		moveDir += camera->right();
-	if (keyboardState[SDL_SCANCODE_SPACE])
+	if (_keyboardState[SDL_SCANCODE_SPACE])
 		moveDir += camera->up();
-	if (keyboardState[SDL_SCANCODE_R])
+	if (_keyboardState[SDL_SCANCODE_R])
 		moveDir += camera->down();
 
 	if (moveDir != vec3::ZERO)
-		camera->translate(moveDir * finalMoveSpeed * Time::deltaTime);
+		camera->translate(moveDir * finalMoveSpeed * Time::deltaTime());
 	else
-		currMoveAcceleration = 1;
+		_currMoveAcceleration = 1;
 }
 
 void Input::handleSDLEvent(const SDL_Event& event)
@@ -80,72 +76,63 @@ void Input::handleSDLEvent(const SDL_Event& event)
 	{
 		if (event.key.keysym.sym == SDLK_f)
 		{
-			SDLHandler::isFullscreen = !SDLHandler::isFullscreen;
-			if (SDLHandler::isFullscreen)
-				SDL_SetWindowFullscreen(SDLHandler::window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			else
-				SDL_SetWindowFullscreen(SDLHandler::window, 0);
+			SDLHandler::setFullscreen(!SDLHandler::isFullscreen());
 		}
 		else if (event.key.keysym.sym == SDLK_l && !Scene::lights.empty())
 		{
-			Scene::lights[0]->setPos(camera->getPos());
+			Scene::lights[0]->setPos(camera->pos());
 			BufferController::writeLights();
 		}
 		else if (event.key.keysym.sym == SDLK_y)
 		{
-			std::cout << "Player is at:" << " pos " << to_string(camera->getPos()) << " rot " << to_string(camera->getRot()) << '\n';
+			Debug::log("Player is at: pos ", to_string(camera->pos()), " rot ", to_string(camera->rot()));
 		}
 	}
 
 	if (event.type == SDL_KEYUP)
 	{
 		if (event.key.keysym.sym == SDLK_LSHIFT)
-			currMoveAcceleration = 1;
+			_currMoveAcceleration = 1;
 	}
 
 	if (event.type == SDL_MOUSEBUTTONDOWN)
 	{
 		if (event.button.button == SDL_BUTTON_LEFT)
 		{
-			mouseLeftState = true;
+			_mouseLeftState = true;
 
 			if (ImGUIHandler::isWindowFocused(WindowType::Scene))
 			{
-				auto hit = Physics::raycast(camera->getPos(), camera->getMouseDir());
-				//if (hit.hit)
+				auto hit = Physics::raycast(camera->pos(), camera->getMouseDir());
+				if (hit.hit)
 				{
-					//hit.object->translate(glm::vec3(0, 0, 1));
+					hit.object->translate(glm::vec3(0, 0, 1));
 
-					//BufferController::writeObjects();
-
-					TimeMeasurer<std::chrono::microseconds> measurer;
+					BufferController::writeObjects();
 					BVH::rebuildBVH();
-					measurer.printElapsed("BVH rebuild time: ");
-
-					//Renderer::renderProgram->use();
 				}
 			}
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)
 		{
-			mouseRightState = true;
+			_mouseRightState = true;
 
 			SDL_SetRelativeMouseMode(SDL_TRUE);
-			SDLHandler::mouseAttachedToScene = true;
+			SDLHandler::setAttachMouseToScene(true);
 		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONUP)
 	{
 		if (event.button.button == SDL_BUTTON_LEFT)
 		{
-			mouseLeftState = false;
+			_mouseLeftState = false;
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)
 		{
-			mouseRightState = false;
+			_mouseRightState = false;
 
 			SDL_SetRelativeMouseMode(SDL_FALSE);
-			SDLHandler::mouseAttachedToScene = false;
+			SDLHandler::setAttachMouseToScene(false);
 		}
 	}
 	if (event.type == SDL_MOUSEMOTION && ImGUIHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
@@ -153,7 +140,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		auto rot = eulerAngles(camera->getRot()) * RAD_TO_DEG;
+		auto rot = eulerAngles(camera->rot()) * RAD_TO_DEG;
 
 		auto newX = glm::clamp(rot.x - dy * MOUSE_ROTATION_SPEED, -90.0f, 90.0f);
 		auto newY = rot.y;
@@ -165,40 +152,40 @@ void Input::handleSDLEvent(const SDL_Event& event)
 
 	if (event.type == SDL_MOUSEWHEEL)
 	{
-		mouseWheelChange += event.wheel.y;
+		_mouseWheelChange += event.wheel.y;
 
 		if (isKeyPressed(SDL_SCANCODE_LALT))
 		{
-			moveSpeedMult *= 1 + event.wheel.y * 0.3f;
-			moveSpeedMult = glm::clamp(moveSpeedMult, 0.1f, 20.0f);
+			_moveSpeedMult *= 1 + event.wheel.y * 0.3f;
+			_moveSpeedMult = glm::clamp(_moveSpeedMult, 0.1f, 20.0f);
 		}
 	}
 }
 
 bool Input::isKeyPressed(uint8_t key)
 {
-	return keyboardState[key];
+	return _keyboardState[key];
 }
 bool Input::wasKeyPressed(uint8_t key)
 {
-	return !_lastKeyboardState[key] && keyboardState[key];
+	return !_lastKeyboardState[key] && _keyboardState[key];
 }
 bool Input::wasKeyReleased(uint8_t key)
 {
-	return _lastKeyboardState[key] && !keyboardState[key];
+	return _lastKeyboardState[key] && !_keyboardState[key];
 }
 
 bool Input::isMouseDown(bool left)
 {
-	return left ? mouseLeftState : mouseRightState;
+	return left ? _mouseLeftState : _mouseRightState;
 }
 bool Input::wasMousePressed(bool left)
 {
-	return left ? !_lastMouseLeftState && mouseLeftState : !_lastMouseRightState && mouseRightState;
+	return left ? !_lastMouseLeftState && _mouseLeftState : !_lastMouseRightState && _mouseRightState;
 }
 bool Input::wasMouseReleased(bool left)
 {
-	return left ? _lastMouseLeftState && !mouseLeftState : _lastMouseRightState && !mouseRightState;
+	return left ? _lastMouseLeftState && !_mouseLeftState : _lastMouseRightState && !_mouseRightState;
 }
 glm::vec2 Input::getSceneMousePos()
 {
@@ -207,5 +194,5 @@ glm::vec2 Input::getSceneMousePos()
 
 float Input::getMouseWheelChange()
 {
-	return mouseWheelChange;
+	return _mouseWheelChange;
 }

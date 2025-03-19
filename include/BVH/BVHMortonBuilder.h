@@ -10,12 +10,12 @@ class BVHMortonBuilder : public BVHBuilder
 	static constexpr int MORTON_ALIGN = 1;
 	static constexpr int MIN_MAX_BOUND_ALIGN = 8;
 
-	inline static UPtr<ComputeShaderProgram> bvh_part1_morton;
-	inline static UPtr<ComputeShaderProgram> bvh_part2_build;
+	inline static UPtr<ComputeShaderProgram> _bvhMorton;
+	inline static UPtr<ComputeShaderProgram> _bvhBuild;
 
-	inline static UPtr<SSBO> ssboTriCenters;
-	inline static UPtr<SSBO> ssboMinMaxBound;
-	inline static UPtr<SSBO> ssboMortonCodes;
+	inline static UPtr<SSBO> _ssboTriCenters;
+	inline static UPtr<SSBO> _ssboMinMaxBound;
+	inline static UPtr<SSBO> _ssboMortonCodes;
 
 	static void buildGPU(const std::vector<Triangle*>& triangles);
 	static void buildGPU_morton(int n);

@@ -16,16 +16,11 @@ class ImGUIHandler
 	static constexpr char GLSL_VERSION[] = "#version 460";
 	static constexpr int INSPECTOR_WIDTH = 300;
 
-	inline static bool isInit = true;
-	inline static bool isAfterInit = true;
+	inline static bool _isInit = true;
+	inline static bool _isAfterInit = true;
 
-public:
-	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
-	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
+	inline static ImGuiIO* _io;
 
-	inline static ImGuiIO* io;
-
-	// --- Core ---
 	static void init();
 	static void initDocking();
 
@@ -33,12 +28,17 @@ public:
 	static void updateDocking();
 
 	static void finalizeViewports();
-	// --- Core ---
+
+public:
+	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
+	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
 
 	static bool isWindowFocused(WindowType type);
 	static glm::vec2 getRelativeMousePos(WindowType type);
 
+	friend class Program;
 	friend class ImGUIWindowDrawer;
+	friend class SDLHandler;
 };
 
 const char* windowTypeToString(WindowType type);

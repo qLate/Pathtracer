@@ -6,7 +6,7 @@ void Tweener::update()
 {
 	_tweens.apply_changes();
 	for (int i = 0; i < _tweens.size(); i++)
-		_tweens[i]->update(Time::deltaTime);
+		_tweens[i]->update(Time::deltaTime());
 }
 
 Tween* Tweener::delayedCall(const std::function<void()>& function, float delay)

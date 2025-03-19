@@ -6,18 +6,24 @@
 
 class Camera : public Object
 {
+	glm::vec2 _size;
+	float _focalDis, _lensRadius;
+	Color _bgColor = Color::black();
+
 public:
 	inline static Camera* instance = nullptr;
 
-	glm::vec2 size;
-	float focalDistance, lensRadius;
-	Color bgColor = Color::black();
-
 	Camera(glm::vec3 pos, glm::vec2 size = {ImGUIHandler::INIT_RENDER_SIZE.x / (float)ImGUIHandler::INIT_RENDER_SIZE.y, 1}, float focalDistance = 1, float lensRadius = 0);
 
-	void setBackgroundColor(Color color);
+	glm::vec2 size() const { return _size; }
+	float focalDistance() const { return _focalDis; }
+	float lensRadius() const { return _lensRadius; }
+	Color bgColor() const { return _bgColor; }
 
 	void setSize(glm::vec2 size);
+	void setFocalDistance(float focalDistance);
+	void setLensRadius(float lensRadius);
+	void setBgColor(Color color);
 
 	glm::vec3 getScreenCenter() const;
 	glm::vec3 getLeftBotCorner() const;

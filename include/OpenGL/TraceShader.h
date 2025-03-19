@@ -5,9 +5,11 @@
 
 class TraceShader : public Shader
 {
-public:
-	VAO* vaoScreen;
+	VAO* _vaoScreen;
 
-	void setUpScreenTriangles() const;
+public:
 	TraceShader(const char* path, int id, int);
+	void setUpScreenTriangles() const;
+
+	VAO* vaoScreen() const { return _vaoScreen; }
 };

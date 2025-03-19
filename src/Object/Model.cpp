@@ -30,7 +30,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 		const auto& mesh = shape.mesh;
 		const auto& attributes = result.attributes;
 
-		triangles.resize(triangles.size() + mesh.num_face_vertices.size());
+		_triangles.resize(_triangles.size() + mesh.num_face_vertices.size());
 #ifndef NDEBUG
 		std::vector<Vertex> vertices(3);
 #else
@@ -66,7 +66,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 				}
 			}
 
-			triangles[f] = new Triangle(vertices[0], vertices[1], vertices[2]);
+			_triangles[f] = new Triangle(vertices[0], vertices[1], vertices[2]);
 		}
 	}
 }
@@ -164,7 +164,7 @@ void Model::parseSelfWritten(const std::filesystem::path& path)
 					v3.normal = vertexNormals[normalIndexes[i]];
 				}
 
-				triangles.emplace_back(new Triangle(v1, v2, v3));
+				_triangles.emplace_back(new Triangle(v1, v2, v3));
 			}
 		}
 	}

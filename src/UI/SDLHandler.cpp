@@ -26,8 +26,8 @@ void SDLHandler::init()
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	auto initialSize = ImGUIHandler::INIT_FULL_WINDOW_SIZE;
-	window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, initialSize.x, initialSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	context = SDL_GL_CreateContext(window);
+	_window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, initialSize.x, initialSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	_context = SDL_GL_CreateContext(_window);
 	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	initOpenGL();
@@ -49,17 +49,17 @@ void SDLHandler::initOpenGL()
 		Debug::log("OpenGL Debug Message: ", message);
 	}, nullptr);
 
-	Renderer::sceneViewFBO = make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE.x, ImGUIHandler::INIT_RENDER_SIZE.y);
+	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE));
 }
 
 void SDLHandler::update()
 {
-	while (SDL_PollEvent(&event))
+	while (SDL_PollEvent(&_event))
 	{
-		ImGui_ImplSDL2_ProcessEvent(&event);
-		Input::handleSDLEvent(event);
+		ImGui_ImplSDL2_ProcessEvent(&_event);
+		Input::handleSDLEvent(_event);
 
-		if (event.type == SDL_QUIT)
+		if (_event.type == SDL_QUIT)
 		{
 			Program::doQuit = true;
 			return;
@@ -82,11 +82,22 @@ void SDLHandler::updateLimitFPS()
 
 void SDLHandler::quit()
 {
-	SDL_DestroyWindow(window);
+	SDL_DestroyWindow(_window);
 	SDL_Quit();
 }
 
+void SDLHandler::setFullscreen(bool fullscreen)
+{
+	_isFullscreen = fullscreen;
+
+	if (_isFullscreen)
+		SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	else
+		SDL_SetWindowFullscreen(_window, 0);
+}
+void SDLHandler::setAttachMouseToScene(bool attached) { _isMouseAttachedToScene = attached; }
+
 void SDLHandler::setWindowSize(glm::ivec2 size)
 {
-	SDL_SetWindowSize(window, size.x, size.y);
+	SDL_SetWindowSize(_window, size.x, size.y);
 }

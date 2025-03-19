@@ -5,10 +5,8 @@
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
-
-class UBO;
-class SSBO;
-class ComputeShaderProgram;
+#include "GLObject.h"
+#include "ShaderProgram.h"
 
 class BufferController
 {
@@ -20,20 +18,28 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
-	inline static UPtr<ComputeShaderProgram> precomputeTriCoefsProgram;
+	inline static UPtr<UBO> _uboTexInfos;
+	inline static UPtr<UBO> _uboMaterials;
+	inline static UPtr<UBO> _uboLights;
+	inline static UPtr<UBO> _uboObjects;
+	inline static UPtr<SSBO> _ssboTriangles;
+	inline static UPtr<SSBO> _ssboBVHNodes;
+	inline static UPtr<SSBO> _ssboBVHTriIndices;
+
+	inline static UPtr<ComputeShaderProgram> _precomputeTriCoefsProgram;
 
 	static void recalculateTriangleCoefs();
 
-public:
-	inline static UPtr<UBO> uboTexInfos;
-	inline static UPtr<UBO> uboMaterials;
-	inline static UPtr<UBO> uboLights;
-	inline static UPtr<UBO> uboObjects;
-	inline static UPtr<SSBO> ssboTriangles;
-	inline static UPtr<SSBO> ssboBVHNodes;
-	inline static UPtr<SSBO> ssboBVHTriIndices;
-
 	static void init();
+
+public:
+	static UPtr<UBO>& uboTexInfos() { return _uboTexInfos; }
+	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
+	static UPtr<UBO>& uboLights() { return _uboLights; }
+	static UPtr<UBO>& uboObjects() { return _uboObjects; }
+	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
+	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
+	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
 
 	static void writeBuffers();
 	static void bindBuffers();
@@ -47,7 +53,9 @@ public:
 	static void writeBVHTriIndices();
 
 	friend class TraceShader;
+	friend class Program;
 
+private:
 	struct TexInfoStruct
 	{
 		glm::vec4 sizes;
@@ -59,7 +67,7 @@ public:
 		bool lit;
 		float diffuseCoeff;
 		float reflection;
-		float indexID;
+		float id;
 		glm::vec3 _pad;
 		int texArrayLayerIndex;
 	};

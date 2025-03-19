@@ -11,26 +11,26 @@ class Input
 
 	static constexpr float MOUSE_ROTATION_SPEED = 0.3f;
 
-	inline static float moveSpeedMult = 1;
-	inline static float currMoveAcceleration = 1;
+	inline static float _moveSpeedMult = 1;
+	inline static float _currMoveAcceleration = 1;
 
 	inline static Uint8 _lastKeyboardState[SDL_NUM_SCANCODES];
-	inline static Uint8 keyboardState[SDL_NUM_SCANCODES];
+	inline static Uint8 _keyboardState[SDL_NUM_SCANCODES];
 
 	inline static bool _lastMouseLeftState = false;
 	inline static bool _lastMouseRightState = false;
-	inline static bool mouseLeftState = false;
-	inline static bool mouseRightState = false;
+	inline static bool _mouseLeftState = false;
+	inline static bool _mouseRightState = false;
 
-	inline static Sint8 mouseWheelChange = 0;
+	inline static Sint8 _mouseWheelChange = 0;
 
-public:
 	static void update();
 	static void updateInputState();
 	static void updateMovement();
 
 	static void handleSDLEvent(const SDL_Event& event);
 
+public:
 	static bool isKeyPressed(uint8_t key);
 	static bool wasKeyPressed(uint8_t key);
 	static bool wasKeyReleased(uint8_t key);
@@ -43,4 +43,6 @@ public:
 	static float getMouseWheelChange();
 
 	friend class ImGUIWindowDrawer;
+	friend class Program;
+	friend class SDLHandler;
 };

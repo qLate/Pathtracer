@@ -8,26 +8,26 @@
 
 void Renderer::init()
 {
-	renderProgram = make_unique<DefaultShaderProgram<TraceShader>>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
-	renderProgram->use();
-	renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	renderProgram->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
+	_renderProgram = make_unique<DefaultShaderProgram<TraceShader>>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	_renderProgram->use();
+	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	_renderProgram->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
 
-	texArray = make_unique<GLTexture2DArray>(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
-	renderProgram->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
-	renderProgram->setInt("texArray", 0);
+	_texArray = make_unique<GLTexture2DArray>(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y, TEX_ARRAY_BOUNDS.z, GL_RGBA8);
+	_renderProgram->setFloat2("texArrayBounds", glm::vec2(TEX_ARRAY_BOUNDS.x, TEX_ARRAY_BOUNDS.y));
+	_renderProgram->setInt("texArray", 0);
 }
 
 void Renderer::render()
 {
-	renderProgram->use();
+	_renderProgram->use();
 
 	bindTextures();
 	updateCameraUniforms();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, sceneViewFBO->id);
+	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 
-	glBindVertexArray(renderProgram->fragShader->vaoScreen->id);
+	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 
@@ -35,20 +35,25 @@ void Renderer::render()
 }
 void Renderer::bindTextures()
 {
-	glBindTexture(GL_TEXTURE_2D_ARRAY, texArray->id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray->id());
 }
 void Renderer::updateCameraUniforms()
 {
-	renderProgram->setFloat3("cameraPos", Camera::instance->getPos());
-	renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->getRot()));
+	_renderProgram->setFloat3("cameraPos", Camera::instance->pos());
+	_renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->rot()));
 }
 
 void Renderer::resizeView(glm::ivec2 size)
 {
-	sceneViewFBO.reset();
-	sceneViewFBO = make_unique<GLFrameBuffer>(size.x, size.y);
+	_viewFBO.reset();
+	_viewFBO = make_unique<GLFrameBuffer>(size);
 
-	renderProgram->setFloat2("pixelSize", size);
+	_renderProgram->setFloat2("pixelSize", size);
 	Camera::instance->setSize({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
+}
+
+void Renderer::setViewFBO(std::unique_ptr<GLFrameBuffer> fbo)
+{
+	_viewFBO = std::move(fbo);
 }

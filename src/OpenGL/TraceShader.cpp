@@ -6,7 +6,7 @@
 
 TraceShader::TraceShader(const char* path, int id, int) : Shader(path, id, GL_FRAGMENT_SHADER)
 {
-	vaoScreen = new VAO();
+	_vaoScreen = new VAO();
 	setUpScreenTriangles();
 }
 
@@ -16,9 +16,9 @@ void TraceShader::setUpScreenTriangles() const
 		-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
 		-1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 	};
-	vaoScreen->setVertices(screenVertices, 18);
+	_vaoScreen->setVertices(screenVertices, 18);
 
-	glBindVertexArray(vaoScreen->id);
+	glBindVertexArray(_vaoScreen->id());
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 }

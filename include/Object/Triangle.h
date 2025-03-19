@@ -18,20 +18,24 @@ struct Vertex
 
 class Triangle
 {
-	glm::vec3 localNormal;
+	Mesh* _mesh = nullptr;
+	std::vector<Vertex> _vertices {};
+	std::vector<glm::vec3> _globalVertPositions {};
+	std::vector<glm::vec3> _globalVertNormals {};
+
+	glm::vec3 _localNormal;
+	glm::vec3 _globalNormal {};
 
 public:
-	Mesh* mesh = nullptr;
-
-	std::vector<Vertex> vertices {};
-	std::vector<glm::vec3> globalVertexPositions {};
-	std::vector<glm::vec3> globalVertexNormals {};
-	glm::vec3 globalNormal {};
-
 	void updateGeometry();
 
 	Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh = nullptr);
 	void attachTo(Mesh* mesh);
+
+	Mesh* mesh() const { return _mesh; }
+	std::vector<Vertex>& vertices() { return _vertices; }
+	std::vector<glm::vec3>& globalVertPositions() { return _globalVertPositions; }
+	std::vector<glm::vec3>& globalVertNormals() { return _globalVertNormals; }
 
 	AABB getBoundingBox() const;
 	glm::vec3 getCenter() const;

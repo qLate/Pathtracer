@@ -75,7 +75,7 @@ add_executable(${PROJECT_NAME}
         "src/Other/Tweener.cpp"
 
         "src/Utils/MyMath.cpp"
- "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp")
+ "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp" "src/Utils/Utils.cpp")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

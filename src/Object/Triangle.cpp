@@ -3,12 +3,12 @@
 #include "BVH.h"
 #include "Graphical.h"
 
-Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh) : localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))), vertices({v1, v2, v3})
+Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh) : _localNormal(normalize(cross(v2.pos - v1.pos, v3.pos - v2.pos))), _vertices({v1, v2, v3})
 {
-	for (auto& v : vertices)
+	for (auto& v : _vertices)
 	{
 		if (v.normal == glm::vec3(0, 0, 0))
-			v.normal = localNormal;
+			v.normal = _localNormal;
 	}
 
 	if (mesh != nullptr)
@@ -16,7 +16,7 @@ Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh) : localNormal(no
 }
 void Triangle::attachTo(Mesh* mesh)
 {
-	this->mesh = mesh;
+	this->_mesh = mesh;
 
 	updateGeometry();
 }
@@ -27,7 +27,7 @@ AABB Triangle::getBoundingBox() const
 	float y_min = FLT_MAX, y_max = -FLT_MAX;
 	float z_min = FLT_MAX, z_max = -FLT_MAX;
 
-	for (const auto& pos : globalVertexPositions)
+	for (const auto& pos : _globalVertPositions)
 	{
 		x_min = std::min(x_min, pos.x);
 		x_max = std::max(x_max, pos.x);
@@ -41,22 +41,23 @@ AABB Triangle::getBoundingBox() const
 
 glm::vec3 Triangle::getCenter() const
 {
-	return (globalVertexPositions[0] + globalVertexPositions[1] + globalVertexPositions[2]) * 0.33333f;
+	return (_globalVertPositions[0] + _globalVertPositions[1] + _globalVertPositions[2]) * 0.33333f;
 }
 
 void Triangle::updateGeometry()
 {
-	globalVertexPositions = {
-		mesh->localToGlobalPos(vertices[0].pos),
-		mesh->localToGlobalPos(vertices[1].pos),
-		mesh->localToGlobalPos(vertices[2].pos)
+	return;
+	_globalVertPositions = {
+		_mesh->localToGlobalPos(_vertices[0].pos),
+		_mesh->localToGlobalPos(_vertices[1].pos),
+		_mesh->localToGlobalPos(_vertices[2].pos)
 	};
 
-	globalNormal = mesh->getRot() * localNormal;
+	_globalNormal = _mesh->rot() * _localNormal;
 
-	globalVertexNormals = {
-		mesh->getRot() * vertices[0].normal,
-		mesh->getRot() * vertices[1].normal,
-		mesh->getRot() * vertices[2].normal
+	_globalVertNormals = {
+		_mesh->rot() * _vertices[0].normal,
+		_mesh->rot() * _vertices[1].normal,
+		_mesh->rot() * _vertices[2].normal
 	};
 }

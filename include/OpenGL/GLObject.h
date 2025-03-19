@@ -3,16 +3,19 @@
 #include <vector>
 
 #include "glad.h"
+#include "glm/vec2.hpp"
 
 class Texture;
 
 class GLObject
 {
 protected:
+	GLuint _id = -1;
+
 	virtual ~GLObject() = default;
 
 public:
-	GLuint id = -1;
+	GLuint id() const { return _id; }
 };
 
 
@@ -27,7 +30,7 @@ public:
 
 class GLBuffer : public GLObject
 {
-	int currBase = -1;
+	int _currBase = -1;
 
 protected:
 	GLBuffer();
@@ -42,9 +45,9 @@ public:
 
 class UBO : public GLBuffer
 {
-public:
-	int align = -1;
+	int _align = -1;
 
+public:
 	UBO(int align, int baseIndex = -1);
 
 	void bind(int index) override;
@@ -54,9 +57,9 @@ public:
 
 class SSBO : public GLBuffer
 {
-public:
-	int align = -1;
+	int _align = -1;
 
+public:
 	SSBO(int align, int baseIndex = -1);
 
 	void bind(int index) override;
@@ -75,11 +78,11 @@ public:
 template <typename T>
 std::vector<T> SSBO::readData(int count) const
 {
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, _id);
 
 	auto ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
 	auto data = std::vector<T>(count);
-	memcpy(data.data(), ptr, count * align * sizeof(float));
+	memcpy(data.data(), ptr, count * _align * sizeof(float));
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -139,6 +142,6 @@ class GLFrameBuffer : public GLObject
 public:
 	GLTexture2D* renderTexture = nullptr;
 
-	GLFrameBuffer(int width, int height);
+	GLFrameBuffer(glm::ivec2 size);
 	~GLFrameBuffer() override;
 };

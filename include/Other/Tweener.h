@@ -46,7 +46,6 @@ protected:
 	virtual ~Tween() = default;
 
 	virtual void update(float deltaTime);
-
 	virtual void finish();
 
 public:
@@ -105,9 +104,6 @@ ValueTo<T>::ValueTo(T startValue, T endValue, float time, const std::function<vo
 template <typename T>
 void ValueTo<T>::update(float deltaTime)
 {
-	Color c1;
-	Color c2;
-	auto c = c1 + (c2 - c1) * 0.5f;
 	_setter(_startValue + (_endValue - _startValue) * Math::evaluateEase(_ease, _elapsed / _time));
 	Tween::update(deltaTime);
 }

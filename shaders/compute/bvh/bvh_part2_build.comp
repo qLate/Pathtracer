@@ -33,9 +33,9 @@ void buildInnerNodes(int i)
     int dir = int(sign(lcp(i, i + 1) - lcp(i, i - 1)));
     int minPrefix = lcp(i, i - dir);
 
-    int l_max = 2;
+    int l_max = 128;
     while (lcp(i, i + l_max * dir) > minPrefix)
-        l_max *= 2;
+        l_max *= 4;
 
     int l = 0;
     for (int step = l_max / 2; step > 0; step /= 2) {
@@ -133,13 +133,14 @@ void main()
     int gid = int(gl_GlobalInvocationID.x);
     if (pass == 0)
     {
-        // Initialize nodes
-        nodes[gid].links.xy = ivec2(-1, -1);
+        if (gid >= n) return;
+        nodes[gid].links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)
         buildInnerNodes(gid);
     else if (pass == 2)
         buildLinksAndLeafs(gid);
-    else if (pass == 3)
+    else if (pass == 3) {
         calcBoxes(gid);
+    }
 }

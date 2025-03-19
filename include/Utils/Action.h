@@ -4,17 +4,17 @@
 
 template <typename... Ts> class Action
 {
-	std::vector<std::function<void(Ts...)>> callbacks {};
+	std::vector<std::function<void(Ts...)>> _callbacks {};
 
 public:
 	int subscribe(const std::function<void(Ts...)>& func)
 	{
-		callbacks.emplace_back(func);
-		return callbacks.size() - 1;
+		_callbacks.emplace_back(func);
+		return _callbacks.size() - 1;
 	}
 	void unsubscribe(int id)
 	{
-		callbacks.erase(id);
+		_callbacks.erase(id);
 	}
 
 	void operator+=(const std::function<void(Ts...)>& func)
@@ -24,7 +24,7 @@ public:
 
 	void operator()(Ts... args) const
 	{
-		for (auto& func : callbacks)
+		for (auto& func : _callbacks)
 			func(args...);
 	}
 };

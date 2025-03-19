@@ -9,9 +9,12 @@
 
 class BVHNode;
 class AABB;
+class Model;
 
 class Graphical : public Object
 {
+	int _indexId;
+
 	Material* _sharedMaterial = Material::defaultLit();
 	Material* _material = nullptr;
 
@@ -20,7 +23,7 @@ protected:
 	~Graphical() override;
 
 public:
-	int indexID;
+	int indexID() const { return _indexId; }
 
 	Material* material();
 	Material* materialNoCopy() const;
@@ -33,11 +36,14 @@ public:
 
 class Mesh : public Graphical
 {
-public:
-	std::vector<Triangle*> triangles {};
+	std::vector<Triangle*> _triangles {};
 
+public:
 	Mesh(std::vector<Triangle*> triangles, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Mesh(const Model& model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = { 1, 1, 1 });
 	~Mesh() override;
+
+	std::vector<Triangle*> triangles() const { return _triangles; }
 
 	void setPos(glm::vec3 pos) override;
 	void setRot(glm::quat rot) override;
@@ -55,27 +61,35 @@ public:
 
 class Cube final : public Mesh
 {
-public:
-	float side;
+	float _side;
 
+public:
 	Cube(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	std::vector<Triangle*> generateTriangles(float side);
+
+	float side() const { return _side; }
 };
 
 
 class Sphere final : public Graphical
 {
-public:
-	float radius;
+	float _radius;
 
+public:
 	Sphere(glm::vec3 pos, float radius, glm::vec3 scale = {1, 1, 1});
+
+	float radius() const { return _radius; }
+	void setRadius(float radius) { _radius = radius; }
 };
 
 
 class Plane final : public Graphical
 {
-public:
-	glm::vec3 normal;
+	glm::vec3 _normal;
 
+public:
 	Plane(glm::vec3 pos, glm::vec3 normal);
+
+	glm::vec3 normal() const { return _normal; }
+	void setNormal(glm::vec3 normal) { _normal = normal; }
 };

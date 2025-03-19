@@ -5,18 +5,22 @@
 
 class Object
 {
+	bool _isDirty = false;
+
 protected:
-	glm::vec3 pos;
-	glm::quat rot;
-	glm::vec3 scale;
+	glm::vec3 _pos;
+	glm::quat _rot;
+	glm::vec3 _scale;
 
 	virtual ~Object() = default;
 	Object(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 
 public:
-	glm::vec3 getPos() const { return pos; }
-	glm::quat getRot() const { return rot; }
-	glm::vec3 getScale() const { return scale; }
+	glm::vec3 pos() const { return _pos; }
+	glm::quat rot() const { return _rot; }
+	glm::vec3 scale() const { return _scale; }
+
+	bool isDirty() const { return _isDirty; }
 
 	virtual void setPos(glm::vec3 pos);
 	virtual void setRot(glm::quat rot);

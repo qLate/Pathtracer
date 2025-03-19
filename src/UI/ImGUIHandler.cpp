@@ -17,23 +17,23 @@ void ImGUIHandler::init()
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 
-	io = &ImGui::GetIO();
-	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	io->ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+	_io = &ImGui::GetIO();
+	_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	_io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	_io->ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
 
 	ImGuiStyle& style = ImGui::GetStyle();
-	if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		style.WindowRounding = 0.0f;
 		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		style.FrameBorderSize = 0;
 	}
 
-	ImGui_ImplSDL2_InitForOpenGL(SDLHandler::window, SDLHandler::context);
+	ImGui_ImplSDL2_InitForOpenGL(SDLHandler::window(), SDLHandler::context());
 	ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 
-	io->Fonts->AddFontFromFileTTF("assets/fonts/Cousine-Regular.ttf", 15.0f);
+	_io->Fonts->AddFontFromFileTTF("assets/fonts/Cousine-Regular.ttf", 15.0f);
 }
 
 void ImGUIHandler::initDocking()
@@ -59,7 +59,7 @@ void ImGUIHandler::draw()
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 
-	if (isInit) initDocking();
+	if (_isInit) initDocking();
 	updateDocking();
 
 	ImGUIWindowDrawer::drawMenuBar();
@@ -71,13 +71,13 @@ void ImGUIHandler::draw()
 
 	finalizeViewports();
 
-	if (isInit)
+	if (_isInit)
 	{
-		isInit = false;
-		isAfterInit = true;
+		_isInit = false;
+		_isAfterInit = true;
 	}
-	else if (isAfterInit)
-		isAfterInit = false;
+	else if (_isAfterInit)
+		_isAfterInit = false;
 }
 void ImGUIHandler::updateDocking()
 {
@@ -87,7 +87,7 @@ void ImGUIHandler::updateDocking()
 
 void ImGUIHandler::finalizeViewports()
 {
-	if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
 		SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();

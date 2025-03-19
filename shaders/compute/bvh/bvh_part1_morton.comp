@@ -87,7 +87,7 @@ uniform int n = -1;
 uniform int pass = -1;
 void main()
 {
-    uint gid = gl_GlobalInvocationID.x;
+    int gid = int(gl_GlobalInvocationID.x);
     if (gid >= n) return;
 
     if (pass == 0)

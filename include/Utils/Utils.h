@@ -19,128 +19,57 @@ using std::make_shared;
 class Utils
 {
 public:
-	static float round(float value, int decimals)
-	{
-		float mult = powf(10, decimals);
-		return std::round(value * mult) / mult;
-	}
+	static float round(float value, int decimals);
+	static int mod(int k, int n);
+	static float mod(float k, float n);
 
-	static long long measureCallTime(void (*func)())
-	{
-		auto start = std::chrono::high_resolution_clock::now();
-		func();
-		auto end = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	}
+	static std::string toBinary(int n, int bits = -1);
+	static std::string toString(float f, int decimals = 2);
 
-	static int mod(int k, int n)
-	{
-		return (k % n + n) % n;
-	}
-	static float mod(float k, float n)
-	{
-		return fmod(fmod(k, n) + n, n);
-	}
-
-	static std::string toBinary(int n, int bits = -1)
-	{
-		std::string r;
-		while (n != 0 || bits > 0)
-		{
-			r.insert(0, n % 2 == 0 ? "0" : "1");
-			n /= 2;
-			bits--;
-		}
-		return r;
-	}
+	static long long measureCallTime(void (*func)());
 };
 
 class Timer
 {
-	float delay;
-	float lastTriggerTime = 0.0f;
+	float _delay;
+	float _lastTriggerTime = 0.0f;
 
 public:
-	Timer(float delay) : delay(delay) {}
+	Timer(float delay) : _delay(delay) {}
 
-	bool trigger()
-	{
-		float currTime = SDL_GetTicks();
-		if (currTime >= lastTriggerTime + delay)
-		{
-			lastTriggerTime = currTime;
-			return true;
-		}
-		return false;
-	}
+	bool trigger();
 };
 
-template <typename T = std::chrono::milliseconds>
 class TimeMeasurer
 {
+	int _decimals;
+
 	std::chrono::high_resolution_clock::time_point _start;
 	std::chrono::high_resolution_clock::time_point _lastMeasure;
 	long long timeSum = 0;
 
 public:
-	TimeMeasurer()
-	{
-		_start = std::chrono::high_resolution_clock::now();
-		_lastMeasure = _start;
-	}
+	TimeMeasurer(int decimals = 1);
 
-	void start()
-	{
-		_start = std::chrono::high_resolution_clock::now();
-	}
-	void stop()
-	{
-		auto curr = std::chrono::high_resolution_clock::now();
-		timeSum += std::chrono::duration_cast<T>(curr - _start).count();
-	}
-	void reset()
-	{
-		timeSum = 0;
-	}
+	void reset();
 
-	long long elapsed()
-	{
-		_lastMeasure = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration_cast<T>(_lastMeasure - _start).count();
-	}
-	long long elapsedFromLast()
-	{
-		auto curr = std::chrono::high_resolution_clock::now();
-		auto dur = std::chrono::duration_cast<T>(curr - _lastMeasure).count();
+	long long elapsed();
+	long long elapsedFromLast();
+	long long measureSum();
 
-		_lastMeasure = curr;
-		return dur;
-	}
-	long long measureSum()
-	{
-		auto curr = std::chrono::high_resolution_clock::now();
-		timeSum += std::chrono::duration_cast<T>(curr - _lastMeasure).count();
-		_lastMeasure = curr;
+	void printElapsed(const std::string& msg = "");
+	void printElapsedFromLast(const std::string& msg = "");
+};
 
-		return timeSum;
-	}
+class TimeMeasurerGL
+{
+	TimeMeasurer tm;
 
-	static std::string::const_pointer getUnitStr()
-	{
-		return typeid(T) == typeid(std::chrono::milliseconds)
-			       ? "ms"
-			       : typeid(T) == typeid(std::chrono::microseconds)
-			       ? "us"
-			       : typeid(T) == typeid(std::chrono::nanoseconds)
-			       ? "ns"
-			       : "s";
-	}
-	void printElapsed(const std::string& msg = "")
-	{
-		Debug::log(msg, std::to_string(elapsed()), getUnitStr());
-	}
-	void printElapsedFromLast(const std::string& msg = "")
-	{
-		Debug::log(msg, std::to_string(elapsedFromLast()), getUnitStr());
-	}
+public:
+	TimeMeasurerGL(int decimals = 1, bool doFinish = true);
+
+	void reset();
+
+	void printElapsed(const std::string& msg = "");
+	void printElapsedFromLast(const std::string& msg = "");
 };

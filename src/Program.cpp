@@ -26,14 +26,24 @@ int main(int argc, char* argv[])
 
 void Program::init()
 {
+	TimeMeasurerGL tm(0, false);
+
 	SDLHandler::init();
+	tm.printElapsedFromLast("SDL init in ");
+
 	Renderer::init();
+	tm.printElapsedFromLast("Renderer init in ");
+
 	Physics::init();
+	tm.printElapsedFromLast("Physics init in ");
+
 	BufferController::init();
+	tm.printElapsedFromLast("BufferController init in ");
+
 	BVH::init();
+	tm.printElapsedFromLast("BVH init in ");
 
-	TimeMeasurer tm {};
-
+	Debug::log("--------------------------------");
 	SceneSetup::setupScene();
 	tm.printElapsedFromLast("Scene setup in ");
 
@@ -56,7 +66,7 @@ void Program::loop()
 		Renderer::render();
 		ImGUIHandler::draw();
 
-		SDL_GL_SwapWindow(SDLHandler::window);
+		SDL_GL_SwapWindow(SDLHandler::window());
 	}
 }
 

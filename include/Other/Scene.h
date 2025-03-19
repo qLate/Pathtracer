@@ -23,7 +23,6 @@ public:
 
 class SceneSetup
 {
-public:
 	static void setupScene();
 
 	static void museumScene();
@@ -34,4 +33,6 @@ public:
 	static void kokuraScene();
 	static void skeletonScene();
 	static void spaceStationScene();
+
+	friend class Program;
 };

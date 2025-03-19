@@ -3,35 +3,35 @@
 #include "MyMath.h"
 #include "Scene.h"
 
-Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : pos(pos), rot(rot), scale(scale)
+Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : _pos(pos), _rot(rot), _scale(scale)
 {
 	Scene::objects.emplace_back(this);
 }
 
-void Object::setPos(glm::vec3 pos) { this->pos = pos; }
-void Object::setRot(glm::quat rot) { this->rot = rot; }
-void Object::setScale(glm::vec3 scale) { this->scale = scale; }
+void Object::setPos(glm::vec3 pos) { this->_pos = pos; }
+void Object::setRot(glm::quat rot) { this->_rot = rot; }
+void Object::setScale(glm::vec3 scale) { this->_scale = scale; }
 void Object::translate(const glm::vec3& v)
 {
-	setPos(pos + v);
+	setPos(_pos + v);
 }
 void Object::rotate(const glm::vec3& degrees)
 {
-	setRot(glm::quat(eulerAngles(rot) + degrees * DEG_TO_RAD));
+	setRot(glm::quat(eulerAngles(_rot) + degrees * DEG_TO_RAD));
 }
 
-glm::vec3 Object::forward() const { return rot * glm::vec3(0, 1, 0); }
-glm::vec3 Object::backward() const { return rot * glm::vec3(0, -1, 0); }
-glm::vec3 Object::up() const { return rot * glm::vec3(0, 0, 1); }
-glm::vec3 Object::down() const { return rot * glm::vec3(0, 0, -1); }
-glm::vec3 Object::left() const { return rot * glm::vec3(-1, 0, 0); }
-glm::vec3 Object::right() const { return rot * glm::vec3(1, 0, 0); }
+glm::vec3 Object::forward() const { return _rot * glm::vec3(0, 1, 0); }
+glm::vec3 Object::backward() const { return _rot * glm::vec3(0, -1, 0); }
+glm::vec3 Object::up() const { return _rot * glm::vec3(0, 0, 1); }
+glm::vec3 Object::down() const { return _rot * glm::vec3(0, 0, -1); }
+glm::vec3 Object::left() const { return _rot * glm::vec3(-1, 0, 0); }
+glm::vec3 Object::right() const { return _rot * glm::vec3(1, 0, 0); }
 
 glm::vec3 Object::localToGlobalPos(const glm::vec3& localPos) const
 {
-	return pos + rot * (localPos * scale);
+	return _pos + _rot * (localPos * _scale);
 }
 glm::vec3 Object::globalToLocalPos(const glm::vec3& globalPos) const
 {
-	return inverse(rot) * (globalPos - pos) / scale;
+	return inverse(_rot) * (globalPos - _pos) / _scale;
 }

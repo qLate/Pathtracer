@@ -15,7 +15,7 @@ Texture::Texture(const std::filesystem::path& path)
 	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
 	setImageData(image);
 
-	texArrayLayerIndex = Renderer::texArray->addTexture(this);
+	_texArrayLayerIndex = Renderer::texArray()->addTexture(this);
 }
 
 Texture* Texture::defaultTex()
@@ -43,27 +43,27 @@ Material* Material::debugLine()
 bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
 {
 	int n;
-	unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &n, 4);
+	unsigned char* data = stbi_load(path.string().c_str(), &_width, &_height, &n, 4);
 	if (data != nullptr)
-		data_v = std::vector(data, data + width * height * 4);
+		data_v = std::vector(data, data + _width * _height * 4);
 
 	stbi_image_free(data);
 	return data != nullptr;
 }
 void Texture::setImageData(const std::vector<uint8_t>& image)
 {
-	data = new unsigned char[width * height * 4];
-	memcpy(data, image.data(), width * height * 4);
+	_data = new unsigned char[_width * _height * 4];
+	memcpy(_data, image.data(), _width * _height * 4);
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): lit {lit}, color {color}, texture {texture}, diffuseCoef {diffuseCoef},
-                                                                                                  reflection {reflection}
+Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): _lit {lit}, _color {color}, _texture {texture}, _diffuseCoef {diffuseCoef},
+                                                                                                  _reflection {reflection}
 {
-	this->id = nextAvailableId++;
+	this->_id = _nextAvailableId++;
 	Scene::materials.push_back(this);
 }
 Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex()) {}
-Material::Material(const Material& material) : Material(material.color, material.lit, material.texture, material.diffuseCoef, material.reflection) {}
+Material::Material(const Material& material) : Material(material._color, material._lit, material._texture, material._diffuseCoef, material._reflection) {}
 Material::~Material()
 {
 	std::erase(Scene::materials, this);

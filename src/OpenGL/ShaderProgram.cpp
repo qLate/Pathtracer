@@ -2,13 +2,13 @@
 
 ComputeShaderProgram::ComputeShaderProgram(const char* path) : BaseShaderMethods(glCreateProgram())
 {
-	computeShader = new Shader(path, id, GL_COMPUTE_SHADER);
+	_computeShader = new Shader(path, id, GL_COMPUTE_SHADER);
 	glLinkProgram(id);
 	checkCompileErrors(id, "PROGRAM");
 }
 ComputeShaderProgram::~ComputeShaderProgram()
 {
-	delete computeShader;
+	delete _computeShader;
 	glDeleteProgram(id);
 }
 

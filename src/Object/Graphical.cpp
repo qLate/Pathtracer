@@ -1,18 +1,17 @@
 #include "Graphical.h"
 
-#include <fstream>
-
 #include "Camera.h"
 #include "Scene.h"
 #include "Triangle.h"
 
 #include "rapidobj.hpp"
 #include "Utils.h"
+#include "Model.h"
 
 
 Graphical::Graphical(glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Object(pos, rot, scale)
 {
-	this->indexID = Scene::graphicals.size();
+	this->_indexId = Scene::graphicals.size();
 	Scene::graphicals.emplace_back(this);
 }
 Graphical::~Graphical()
@@ -53,35 +52,36 @@ void Graphical::setSharedMaterial(Material* material)
 	_sharedMaterial = material;
 }
 
-Mesh::Mesh(std::vector<Triangle*> triangles, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Graphical(pos, rot, scale), triangles(std::move(triangles))
+Mesh::Mesh(std::vector<Triangle*> triangles, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Graphical(pos, rot, scale), _triangles(std::move(triangles))
 {
-	for (auto& t : this->triangles)
+	for (auto& t : this->_triangles)
 	{
 		t->attachTo(this);
 		Scene::triangles.push_back(t);
 	}
 }
+Mesh::Mesh(const Model& model, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Mesh(model.triangles(), pos, rot, scale) {}
 Mesh::~Mesh()
 {
-	for (const auto& triangle : triangles)
+	for (const auto& triangle : _triangles)
 		delete triangle;
 }
 void Mesh::setPos(glm::vec3 pos)
 {
 	Graphical::setPos(pos);
-	for (auto& t : triangles)
+	for (auto& t : _triangles)
 		t->updateGeometry();
 }
 void Mesh::setRot(glm::quat rot)
 {
 	Graphical::setRot(rot);
-	for (auto& t : triangles)
+	for (auto& t : _triangles)
 		t->updateGeometry();
 }
 void Mesh::setScale(glm::vec3 scale)
 {
 	Graphical::setScale(scale);
-	for (auto& t : triangles)
+	for (auto& t : _triangles)
 		t->updateGeometry();
 }
 
@@ -104,7 +104,7 @@ std::vector<Triangle*> Square::generateTriangles(float side)
 	return triangles;
 }
 
-Cube::Cube(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(generateTriangles(side), pos, rot, scale), side(side) {}
+Cube::Cube(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(generateTriangles(side), pos, rot, scale), _side(side) {}
 std::vector<Triangle*> Cube::generateTriangles(float side)
 {
 	auto p1 = glm::vec3(-side / 2, -side / 2, -side / 2);
@@ -135,6 +135,6 @@ std::vector<Triangle*> Cube::generateTriangles(float side)
 	return triangles;
 }
 
-Sphere::Sphere(glm::vec3 pos, float radius, glm::vec3 scale) : Graphical(pos, {}, scale), radius(radius) {}
+Sphere::Sphere(glm::vec3 pos, float radius, glm::vec3 scale) : Graphical(pos, {}, scale), _radius(radius) {}
 
-Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), normal {normalize(normal)} {}
+Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), _normal {normalize(normal)} {}

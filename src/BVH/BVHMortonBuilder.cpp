@@ -12,14 +12,14 @@
 
 BVHMortonBuilder::BVHMortonBuilder()
 {
-	bvh_part1_morton = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part1_morton.comp");
-	bvh_part2_build = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part2_build.comp");
+	_bvhMorton = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part1_morton.comp");
+	_bvhBuild = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part2_build.comp");
 
-	ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
-	ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
-	ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
+	_ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
+	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
+	_ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
 
-	ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
+	_ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
 }
 
 void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
@@ -30,79 +30,58 @@ void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
 void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
 {
 	int n = triangles.size();
-
 	buildGPU_morton(n);
 	buildGPU_buildTree(n);
 }
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
-	TimeMeasurer tm {};
-	ssboTriCenters->bind(6);
-	ssboMinMaxBound->bind(7);
-	ssboMortonCodes->bind(8);
-	BufferController::ssboBVHTriIndices->bind(9);
+	_ssboTriCenters->bind(6);
+	_ssboMinMaxBound->bind(7);
+	_ssboMortonCodes->bind(8);
+	BufferController::ssboBVHTriIndices()->bind(9);
+	BufferController::ssboBVHNodes()->bind(10);
 
-	ssboTriCenters->setData(nullptr, n);
-	ssboMinMaxBound->clear();
-	ssboMortonCodes->setData(nullptr, n);
-	BufferController::ssboBVHTriIndices->setData(nullptr, n);
-	tm.printElapsedFromLast();
+	_ssboTriCenters->setData(nullptr, n);
+	_ssboMinMaxBound->clear();
+	_ssboMortonCodes->setData(nullptr, n);
+	BufferController::ssboBVHTriIndices()->setData(nullptr, n);
+	BufferController::ssboBVHNodes()->setData(nullptr, 2 * n - 1);
 
-	bvh_part1_morton->use();
-	bvh_part2_build->setInt("n", n);
+	_bvhMorton->use();
+	_bvhMorton->setInt("n", n);
 
-	bvh_part1_morton->setInt("pass", 0);
+	_bvhMorton->setInt("pass", 0);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 0: ");
 
-	bvh_part1_morton->setInt("pass", 1);
+	_bvhMorton->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 1: ");
 
 	glu::RadixSort radix_sort;
-	radix_sort(ssboMortonCodes->id, BufferController::ssboBVHTriIndices->id, n);
-	glFinish();
-
-	tm.printElapsedFromLast("Sort: ");
+	radix_sort(_ssboMortonCodes->id(), BufferController::ssboBVHTriIndices()->id(), n);
 }
 void BVHMortonBuilder::buildGPU_buildTree(int n)
 {
-	TimeMeasurer tm {};
+	BufferController::ssboBVHNodes()->bind(6);
+	BufferController::ssboBVHTriIndices()->bind(7);
+	_ssboMortonCodes->bind(8);
+	BufferController::ssboTriangles()->bindDefault();
 
-	BufferController::ssboBVHNodes->bind(6);
-	BufferController::ssboBVHTriIndices->bind(7);
-	ssboMortonCodes->bind(8);
-	BufferController::ssboTriangles->bindDefault();
+	BufferController::ssboBVHNodes()->setData(nullptr, 2 * n - 1);
 
-	BufferController::ssboBVHNodes->setData(nullptr, 2 * n - 1);
+	_bvhBuild->use();
+	_bvhBuild->setInt("n", n);
 
-	bvh_part2_build->use();
-	bvh_part2_build->setInt("n", n);
-	tm.printElapsedFromLast();
-
-	bvh_part2_build->setInt("pass", 0);
+	_bvhBuild->setInt("pass", 0);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 0: ");
 
-	bvh_part2_build->setInt("pass", 1);
+	_bvhBuild->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 1: ");
 
-	bvh_part2_build->setInt("pass", 2);
+	_bvhBuild->setInt("pass", 2);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 2: ");
 
-	bvh_part2_build->setInt("pass", 3);
+	_bvhBuild->setInt("pass", 3);
 	ComputeShaderProgram::dispatch({n / 32 + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-	glFinish();
-	tm.printElapsedFromLast("Pass 3: ");
-
-	auto nodes = BufferController::ssboBVHNodes->readData<BufferController::BVHNodeStruct>(2 * n - 1);
 }
 
 

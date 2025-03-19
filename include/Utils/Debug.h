@@ -20,13 +20,13 @@ inline bool hasFlag(LogType flags, LogType flag)
 
 class Debug
 {
-public:
-	inline static bool loggingEnabled = true;
-	inline static auto enabledLogTypes = LogType::Default;
+	inline static int _depth = 0;
+	inline static std::string _last;
 
-	inline static int depth = 0;
+public:
+	inline static bool enableLogging = true;
+	inline static auto enabledLogTypes = LogType::Default;
 	inline static bool preventSpam = true;
-	inline static std::string last;
 
 	template <typename... P>
 	static void log(const P&... params)

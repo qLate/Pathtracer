@@ -12,12 +12,12 @@
 void ImGUIWindowDrawer::drawMenuBar()
 {
 	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
-		showInspector = !showInspector;
+		_showInspector = !_showInspector;
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_F1))
-		showStats = !showStats;
+		_showStats = !_showStats;
 
-	if (SDLHandler::isFullscreen) return;
+	if (SDLHandler::isFullscreen()) return;
 
 	ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
 	if (ImGui::BeginMainMenuBar())
@@ -28,10 +28,10 @@ void ImGUIWindowDrawer::drawMenuBar()
 		}
 		if (ImGui::BeginMenu("View"))
 		{
-			if (ImGui::MenuItem(windowTypeToString(WindowType::Inspector), "Tab", showInspector))
-				showInspector = !showInspector;
-			if (ImGui::MenuItem("Stats", "F1", showStats))
-				showStats = !showStats;
+			if (ImGui::MenuItem(windowTypeToString(WindowType::Inspector), "Tab", _showInspector))
+				_showInspector = !_showInspector;
+			if (ImGui::MenuItem("Stats", "F1", _showStats))
+				_showStats = !_showStats;
 
 			ImGui::EndMenu();
 		}
@@ -45,7 +45,7 @@ void ImGUIWindowDrawer::drawScene()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-	if (ImGUIHandler::isAfterInit || SDLHandler::mouseAttachedToScene)
+	if (ImGUIHandler::_isAfterInit || SDLHandler::isMouseAttachedToScene())
 		ImGui::SetNextWindowFocus();
 
 	ImGui::Begin("Scene", nullptr);
@@ -55,12 +55,12 @@ void ImGUIWindowDrawer::drawScene()
 			node->WantHiddenTabBarToggle = true;
 
 		ImVec2 availSize = ImGui::GetContentRegionAvail();
-		ImGui::Image(Renderer::sceneViewFBO->renderTexture->id, availSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(Renderer::sceneViewFBO()->renderTexture->id(), availSize, ImVec2(0, 1), ImVec2(1, 0));
 
-		if (availSize.x != currRenderSize.x || availSize.y != currRenderSize.y)
+		if (availSize.x != _currRenderSize.x || availSize.y != _currRenderSize.y)
 		{
-			currRenderSize = {availSize.x, availSize.y};
-			Renderer::resizeView(currRenderSize);
+			_currRenderSize = {availSize.x, availSize.y};
+			Renderer::resizeView(_currRenderSize);
 		}
 
 		drawScene_displayStats(!node->IsHiddenTabBar());
@@ -73,13 +73,13 @@ void ImGUIWindowDrawer::drawScene()
 
 void ImGUIWindowDrawer::drawScene_displayStats(bool barVisible)
 {
-	if (!showStats) return;
+	if (!_showStats) return;
 
 	static float currFPS;
 	static Timer updateTimer = Timer(100);
 
 	if (updateTimer.trigger())
-		currFPS = ImGUIHandler::io->Framerate;
+		currFPS = ImGUIHandler::_io->Framerate;
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3f ms)\n%zu Triangles", currFPS, 1000.0f / currFPS, Scene::triangles.size());
@@ -87,10 +87,10 @@ void ImGUIWindowDrawer::drawScene_displayStats(bool barVisible)
 
 void ImGUIWindowDrawer::drawInspector()
 {
-	if (!showInspector) return;
+	if (!_showInspector) return;
 
-	auto moveSpeedMult = Input::moveSpeedMult;
-	auto bgColor = Camera::instance->bgColor;
+	auto moveSpeedMult = Input::_moveSpeedMult;
+	auto bgColor = Camera::instance->bgColor();
 
 	ImGui::Begin("Inspector", nullptr);
 	{
@@ -99,6 +99,6 @@ void ImGUIWindowDrawer::drawInspector()
 	}
 	ImGui::End();
 
-	Input::moveSpeedMult = moveSpeedMult;
-	if (bgColor != Camera::instance->bgColor) Camera::instance->setBackgroundColor(bgColor);
+	Input::_moveSpeedMult = moveSpeedMult;
+	if (bgColor != Camera::instance->bgColor()) Camera::instance->setBgColor(bgColor);
 }
