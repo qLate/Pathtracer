@@ -21,13 +21,15 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 	_raycastProgram->setFloat3("rayPos", pos);
 	_raycastProgram->setFloat3("rayDir", dir);
 	_raycastProgram->setFloat("rayMaxDis", maxDis);
+	_raycastProgram->setInt("objectCount", Scene::graphicals.size());
 
 	ComputeShaderProgram::dispatch({1, 1, 1});
 	RaycastHitStruct result = _resultSSBO->readData<RaycastHitStruct>(1)[0];
 
+	bool hit = result.normal != glm::vec3(0);
 	auto triangle = result.triIndex != -1 ? Scene::triangles[result.triIndex] : nullptr;
 	auto obj = result.objIndex != -1 ? Scene::graphicals[result.objIndex] : triangle ? (Graphical*)triangle->mesh() : nullptr;
-	RaycastHit hit = {result.normal != glm::vec3(0), result.pos, result.normal, result.uv, obj, triangle};
+	RaycastHit raycastHit = {hit, result.pos, result.normal, result.uv, obj, triangle};
 
-	return hit;
+	return raycastHit;
 }

@@ -33,7 +33,6 @@ void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
 	buildGPU_morton(n);
 	buildGPU_buildTree(n);
 }
-static bool init = false;
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
 	_ssboTriCenters->bind(6);
