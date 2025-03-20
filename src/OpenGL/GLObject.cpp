@@ -51,8 +51,10 @@ void GLBufferObject::bind(int index)
 {
 	glBindBufferBase(_type, index, _id);
 }
-void GLBufferObject::setData(const float* data, int count, GLenum type) const
+void GLBufferObject::setData(const float* data, int count, GLenum type)
 {
+	_capacity = count;
+
 	glBindBuffer(_type, _id);
 	glBufferData(_type, count * _align * sizeof(float), data, type);
 	glBindBuffer(_type, 0);
@@ -63,11 +65,28 @@ void GLBufferObject::setSubData(const float* data, int count, int offset) const
 	glBufferSubData(_type, offset * _align * sizeof(float), count * _align * sizeof(float), data);
 	glBindBuffer(_type, 0);
 }
-void GLBufferObject::setStorage(int count, GLenum flags, const void* data) const
+void GLBufferObject::setStorage(int count, GLenum flags, const void* data)
 {
+	if (_capacity != -1) throw std::runtime_error("Cannot set storage again on a fixed size storage buffer.");
+	_capacity = count;
+
 	glBindBuffer(_type, _id);
 	glBufferStorage(_type, count * _align * sizeof(float), data, flags);
 	glBindBuffer(_type, 0);
+}
+void GLBufferObject::setDataCapacity(int capacity, GLenum type)
+{
+	_capacity = capacity;
+
+	glBindBuffer(_type, _id);
+	glBufferData(_type, capacity * _align * sizeof(float), NULL, type);
+	glBindBuffer(_type, 0);
+}
+void GLBufferObject::ensureDataCapacity(int capacity, GLenum type)
+{
+	static constexpr int CAPACITY_MULT = 2;
+	if (_capacity >= capacity) return;
+	setDataCapacity(capacity * CAPACITY_MULT, type);
 }
 
 void GLBufferObject::clear(const void* data) const

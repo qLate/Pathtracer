@@ -29,8 +29,6 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
-	static constexpr glm::ivec3 TEX_ARRAY_BOUNDS = {4096, 4096, 12};
-
 	inline static UPtr<UBO> _uboTextures;
 	inline static UPtr<UBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;

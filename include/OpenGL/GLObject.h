@@ -46,15 +46,19 @@ class GLBufferObject : public GLBuffer
 {
 	GLenum _type;
 	int _align = -1;
+	int _capacity = -1;
 
 protected:
 	GLBufferObject(GLenum type, int align, int baseIndex = -1);
 
 public:
 	void bind(int index) override;
-	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW) const;
+	void setData(const float* data, int count, GLenum type = GL_STATIC_DRAW);
 	void setSubData(const float* data, int count, int offset = 0) const;
-	void setStorage(int count, GLenum flags = NULL, const void* data = nullptr) const;
+	void setStorage(int count, GLenum flags = NULL, const void* data = nullptr);
+
+	void setDataCapacity(int capacity, GLenum type = GL_STATIC_DRAW);
+	void ensureDataCapacity(int capacity, GLenum type = GL_STATIC_DRAW);
 
 	void clear(const void* data = nullptr) const;
 

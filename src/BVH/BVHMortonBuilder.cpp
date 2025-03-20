@@ -19,7 +19,7 @@ BVHMortonBuilder::BVHMortonBuilder()
 	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
 	_ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
 
-	_ssboMinMaxBound->setData(nullptr, 1 * MIN_MAX_BOUND_ALIGN);
+	_ssboMinMaxBound->setDataCapacity(1);
 }
 
 void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
@@ -33,6 +33,7 @@ void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
 	buildGPU_morton(n);
 	buildGPU_buildTree(n);
 }
+static bool init = false;
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
 	_ssboTriCenters->bind(6);
@@ -40,11 +41,11 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboBVHTriIndices()->bind(9);
 
-	_ssboTriCenters->setData(nullptr, n);
+	_ssboTriCenters->ensureDataCapacity(n);
+	_ssboMortonCodes->ensureDataCapacity(n);
 	_ssboMinMaxBound->clear();
-	_ssboMortonCodes->setData(nullptr, n);
-	BufferController::ssboBVHTriIndices()->setData(nullptr, n);
-	BufferController::ssboBVHNodes()->setData(nullptr, 2 * n - 1);
+	BufferController::ssboBVHTriIndices()->ensureDataCapacity(n);
+	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - 1);
 
 	_bvhMorton->use();
 	_bvhMorton->setInt("n", n);

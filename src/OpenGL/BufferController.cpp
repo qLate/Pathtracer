@@ -207,7 +207,8 @@ void BufferController::updateTriangles()
 
 		data[i] = triangleStruct;
 	}
-	_ssboTriangles->setData((float*)data.data(), data.size());
+	_ssboTriangles->ensureDataCapacity(triangles.size());
+	_ssboTriangles->setSubData((float*)data.data(), data.size());
 }
 
 void BufferController::updateBVHNodes()
@@ -234,7 +235,8 @@ void BufferController::updateBVHNodes()
 #pragma omp parallel for
 	for (int i = 0; i < indices.size(); i++)
 		data2[i] = indices[i];
-	_ssboBVHTriIndices->setData((float*)data2.data(), data2.size());
+	_ssboBVHTriIndices->ensureDataCapacity(indices.size());
+	_ssboBVHTriIndices->setSubData((float*)data2.data(), data2.size());
 }
 
 void BufferController::precomputeTriCoefs()
