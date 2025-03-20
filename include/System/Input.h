@@ -42,7 +42,7 @@ public:
 	static glm::vec2 getSceneMousePos();
 	static float getMouseWheelChange();
 
-	friend class ImGUIWindowDrawer;
+	friend class WindowDrawer;
 	friend class Program;
 	friend class SDLHandler;
 };

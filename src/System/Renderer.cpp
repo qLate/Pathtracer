@@ -41,7 +41,7 @@ void Renderer::resizeView(glm::ivec2 size)
 	_viewFBO = make_unique<GLFrameBuffer>(size);
 
 	_renderProgram->setFloat2("pixelSize", size);
-	Camera::instance->setSize({size.x / (float)size.y, 1});
+	Camera::instance->setRatio({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 }
 

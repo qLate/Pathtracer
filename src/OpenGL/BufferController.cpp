@@ -160,7 +160,7 @@ void BufferController::updateObjects()
 		ObjectStruct objectStruct {};
 		objectStruct.materialIndex = obj->materialNoCopy()->id();
 		objectStruct.pos = glm::vec4(obj->pos(), 0);
-		objectStruct.transform = translate(glm::mat4(1), obj->pos()) * mat4_cast(obj->rot()) * scale(glm::mat4(1), obj->scale());
+		objectStruct.transform = obj->getTransform();
 
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
 		{

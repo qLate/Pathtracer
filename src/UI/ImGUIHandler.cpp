@@ -10,7 +10,8 @@
 #include "SDL_video.h"
 #include "Utils.h"
 #include "ImGuiExtensions.h"
-#include "ImGUIWindowDrawer.h"
+#include "ObjectManipulator.h"
+#include "WindowDrawer.h"
 
 void ImGuiHandler::init()
 {
@@ -86,55 +87,19 @@ void ImGuiHandler::draw()
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::BeginFrame();
+
 	if (_isInit) initDocking();
 	updateDocking();
 
-	ImGUIWindowDrawer::drawMenuBar();
-	ImGUIWindowDrawer::drawScene();
-	ImGUIWindowDrawer::drawInspector();
-
-	ImGui::Begin("Control Panel");
-	if (ImGui::Button("Open file"))
-		ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Open a shader", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*", true);
-	if (ImGui::Button("Open directory"))
-		ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
-	if (ImGui::Button("Save file"))
-		ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
-	ImGui::End();
-
-	// file dialogs
-	if (ifd::FileDialog::Instance().IsDone("ShaderOpenDialog"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-		{
-			const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-			for (const auto& r : res) // ShaderOpenDialog supports multiselection
-				printf("OPEN[%s]\n", r.u8string().c_str());
-		}
-		ifd::FileDialog::Instance().Close();
-	}
-	if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-		{
-			std::string res = ifd::FileDialog::Instance().GetResult().string();
-			printf("DIRECTORY[%s]\n", res.c_str());
-		}
-		ifd::FileDialog::Instance().Close();
-	}
-	if (ifd::FileDialog::Instance().IsDone("ShaderSaveDialog"))
-	{
-		if (ifd::FileDialog::Instance().HasResult())
-		{
-			std::string res = ifd::FileDialog::Instance().GetResult().string();
-			printf("SAVE[%s]\n", res.c_str());
-		}
-		ifd::FileDialog::Instance().Close();
-	}
+	WindowDrawer::drawMenuBar();
+	WindowDrawer::drawScene();
+	WindowDrawer::drawInspector();
+	ObjectManipulator::update();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 	finalizeViewports();
 
 	if (_isInit)
@@ -168,6 +133,29 @@ bool ImGuiHandler::isWindowFocused(WindowType type)
 	auto window = ImGui::FindWindowByType(type);
 	return window && window->DockNode && window->DockNode->IsFocused;
 }
+bool ImGuiHandler::isWindowHovered(WindowType type)
+{
+	ImGuiWindow* window;
+	ImGui::FindHoveredWindowEx(ImGui::GetMousePos(), true, &window, nullptr);
+	return getWindow(type) == window;
+}
+
+ImGuiWindow* ImGuiHandler::getWindow(WindowType type)
+{
+	return ImGui::FindWindowByType(type);
+}
+glm::vec2 ImGuiHandler::getWindowPos(WindowType type)
+{
+	auto window = ImGui::FindWindowByType(type);
+	if (!window) return {0, 0};
+	return {window->Pos.x, window->Pos.y};
+}
+glm::vec2 ImGuiHandler::getWindowSize(WindowType type)
+{
+	auto window = ImGui::FindWindowByType(type);
+	if (!window) return {0, 0};
+	return {window->Size.x, window->Size.y};
+}
 glm::vec2 ImGuiHandler::getRelativeMousePos(WindowType type)
 {
 	auto window = ImGui::FindWindowByType(type);
@@ -176,6 +164,14 @@ glm::vec2 ImGuiHandler::getRelativeMousePos(WindowType type)
 	auto pos = ImGui::GetMousePos();
 	return glm::vec2(pos.x - window->Pos.x, pos.y - window->Pos.y);
 }
+
+void ImGuiHandler::drawDebugBox(const glm::vec2& pos, const glm::vec2& size)
+{
+	ImGui::Begin("Debug");
+	ImGui::GetForegroundDrawList()->AddRect(ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(255, 0, 0, 255));
+	ImGui::End();
+}
+
 const char* windowTypeToString(WindowType type)
 {
 	switch (type)

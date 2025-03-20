@@ -22,8 +22,12 @@ public:
 	virtual void setRot(glm::quat rot, bool notify = true);
 	virtual void setScale(glm::vec3 scale, bool notify = true);
 
+	glm::mat4 getTransform() const;
+	void setTransform(const glm::mat4& transform, bool notify = true);
+
 	void translate(const glm::vec3& v);
 	void rotate(const glm::vec3& degrees);
+
 
 	glm::vec3 forward() const;
 	glm::vec3 backward() const;

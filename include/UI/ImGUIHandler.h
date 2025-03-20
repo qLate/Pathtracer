@@ -35,11 +35,20 @@ public:
 	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
 	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
 
+	static ImGuiIO& io() { return *_io; }
+
 	static bool isWindowFocused(WindowType type);
+	static bool isWindowHovered(WindowType type);
+
+	static ImGuiWindow* getWindow(WindowType type);
+	static glm::vec2 getWindowPos(WindowType type);
+	static glm::vec2 getWindowSize(WindowType type);
 	static glm::vec2 getRelativeMousePos(WindowType type);
 
+	static void drawDebugBox(const glm::vec2& pos, const glm::vec2& size);
+
 	friend class Program;
-	friend class ImGUIWindowDrawer;
+	friend class WindowDrawer;
 	friend class SDLHandler;
 };
 

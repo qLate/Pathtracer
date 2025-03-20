@@ -1,17 +1,17 @@
 #include "Camera.h"
 
-#include "ImGUIWindowDrawer.h"
+#include "WindowDrawer.h"
 #include "Input.h"
 #include "Renderer.h"
 #include "Triangle.h"
 
-Camera::Camera(glm::vec3 pos, glm::vec2 size, float focalDistance, float lensRadius) : Object(pos), _size(size), _focalDis(focalDistance), _lensRadius(lensRadius)
+Camera::Camera(glm::vec3 pos, glm::vec2 ratio, float focalDistance, float lensRadius) : Object(pos), _ratio(ratio), _focalDis(focalDistance), _lensRadius(lensRadius)
 {
 	if (instance != nullptr)
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
-	Renderer::renderProgram()->setFloat2("screenSize", size);
+	Renderer::renderProgram()->setFloat2("screenSize", ratio);
 	Renderer::renderProgram()->setFloat("focalDistance", focalDistance);
 	Renderer::renderProgram()->setFloat("lensRadius", lensRadius);
 }
@@ -29,10 +29,10 @@ void Camera::setScale(glm::vec3 scale, bool notify)
 	Object::setScale(scale, false);
 }
 
-void Camera::setSize(glm::vec2 size)
+void Camera::setRatio(glm::vec2 ratio)
 {
-	this->_size = size;
-	Renderer::renderProgram()->setFloat2("screenSize", size);
+	this->_ratio = ratio;
+	Renderer::renderProgram()->setFloat2("screenSize", ratio);
 }
 void Camera::setFocalDistance(float focalDistance) { _focalDis = focalDistance; }
 void Camera::setLensRadius(float lensRadius) { _lensRadius = lensRadius; }
@@ -48,17 +48,30 @@ glm::vec3 Camera::getScreenCenter() const
 }
 glm::vec3 Camera::getLeftBotCorner() const
 {
-	return getScreenCenter() - 0.5f * _size.y * up() - 0.5f * _size.x * right();
+	return getScreenCenter() - 0.5f * _ratio.y * up() - 0.5f * _ratio.x * right();
 }
 glm::vec3 Camera::getDir(const glm::vec2& screenPos) const
 {
 	auto lbWorld = getLeftBotCorner();
-	auto screenPosWorld = lbWorld + screenPos.x * _size.x * right() + screenPos.y * _size.y * up();
+	auto screenPosWorld = lbWorld + screenPos.x * _ratio.x * right() + screenPos.y * _ratio.y * up();
 	return normalize(screenPosWorld - _pos);
 }
 glm::vec3 Camera::getMouseDir() const
 {
-	auto normalizedMousePos = Input::getSceneMousePos() / (glm::vec2)ImGUIWindowDrawer::currRenderSize();
+	auto normalizedMousePos = Input::getSceneMousePos() / (glm::vec2)WindowDrawer::currRenderSize();
 	normalizedMousePos.y = 1 - normalizedMousePos.y;
 	return getDir(normalizedMousePos);
+}
+
+glm::mat4 Camera::getViewMatrix() const
+{
+	return lookAt(_pos, _pos + forward(), up());
+}
+glm::mat4 Camera::getProjectionMatrix() const
+{
+	float fov = 2.0f * glm::degrees(glm::atan(_ratio.y * 0.5f / _focalDis));
+	float nearPlane = 0.1f;
+	float farPlane = 100.0f;
+
+	return glm::perspective(glm::radians(fov), _ratio.x, nearPlane, farPlane);
 }

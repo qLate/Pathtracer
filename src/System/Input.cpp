@@ -3,12 +3,13 @@
 #include "BufferController.h"
 #include "Camera.h"
 #include "Graphical.h"
-#include "ImGUIWindowDrawer.h"
+#include "WindowDrawer.h"
 #include "Light.h"
 #include "SDLHandler.h"
 #include "glm/gtx/string_cast.hpp"
 #include "MyMath.h"
 #include "MyTime.h"
+#include "ObjectManipulator.h"
 #include "Physics.h"
 #include "Scene.h"
 #include "Utils.h"
@@ -96,11 +97,13 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			_mouseLeftState = true;
 
-			if (ImGuiHandler::isWindowFocused(WindowType::Scene))
+			if (ImGuiHandler::isWindowHovered(WindowType::Scene))
 			{
 				auto hit = Physics::raycast(camera->pos(), camera->getMouseDir());
 				if (hit.hit)
-					hit.object->translate(glm::vec3(0, 0, 1));
+					ObjectManipulator::selectObject(hit.object);
+				else
+					ObjectManipulator::deselectObject();
 			}
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT)

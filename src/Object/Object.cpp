@@ -1,5 +1,7 @@
 #include "Object.h"
 
+#include <glm/gtx/matrix_decompose.hpp>
+
 #include "BufferController.h"
 #include "MyMath.h"
 #include "Scene.h"
@@ -27,6 +29,20 @@ void Object::setScale(glm::vec3 scale, bool notify)
 
 	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
 }
+
+glm::mat4 Object::getTransform() const
+{
+	return glm::translate(glm::mat4(1), _pos) * mat4_cast(_rot) * glm::scale(glm::mat4(1), _scale);
+}
+void Object::setTransform(const glm::mat4& transform, bool notify)
+{
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	decompose(transform, _scale, _rot, _pos, skew, perspective);
+
+	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
+}
+
 void Object::translate(const glm::vec3& v)
 {
 	setPos(_pos + v);
@@ -51,3 +67,4 @@ glm::vec3 Object::globalToLocalPos(const glm::vec3& globalPos) const
 {
 	return inverse(_rot) * (globalPos - _pos) / _scale;
 }
+

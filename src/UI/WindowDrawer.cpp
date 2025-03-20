@@ -1,4 +1,4 @@
-#include "ImGUIWindowDrawer.h"
+#include "WindowDrawer.h"
 
 #include "Camera.h"
 #include "ImGuiExtensions.h"
@@ -9,7 +9,7 @@
 #include "Tweener.h"
 #include "Utils.h"
 
-void ImGUIWindowDrawer::drawMenuBar()
+void WindowDrawer::drawMenuBar()
 {
 	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
 		_showInspector = !_showInspector;
@@ -40,7 +40,7 @@ void ImGUIWindowDrawer::drawMenuBar()
 	ImGui::PopItemFlag();
 }
 
-void ImGUIWindowDrawer::drawScene()
+void WindowDrawer::drawScene()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
@@ -71,7 +71,7 @@ void ImGUIWindowDrawer::drawScene()
 	ImGui::PopStyleVar();
 }
 
-void ImGUIWindowDrawer::drawScene_displayStats(bool barVisible)
+void WindowDrawer::drawScene_displayStats(bool barVisible)
 {
 	if (!_showStats) return;
 
@@ -85,7 +85,7 @@ void ImGUIWindowDrawer::drawScene_displayStats(bool barVisible)
 	ImGui::Text("%.1f FPS (%.3f ms)\n%zu Triangles", currFPS, 1000.0f / currFPS, Scene::triangles.size());
 }
 
-void ImGUIWindowDrawer::drawInspector()
+void WindowDrawer::drawInspector()
 {
 	if (!_showInspector) return;
 

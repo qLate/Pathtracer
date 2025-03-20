@@ -37,6 +37,8 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
         "libs/imgui/src/ImFileDialog.cpp"
+        "include/UI/ImGuizmo.cpp"
+        "libs/glad/glad.c"
 
         "src/Program.cpp"
 
@@ -51,12 +53,14 @@ add_executable(${PROJECT_NAME}
         "src/System/Input.cpp"
         "src/System/MyTime.cpp"
         "src/System/Renderer.cpp"
+        "src/System/Physics.cpp"
 
         "src/UI/SDLHandler.cpp"
         "src/UI/ImGuiHandler.cpp"
-        "src/UI/ImGUIWindowDrawer.cpp"
-         
-       "libs/glad/glad.c"
+        "src/UI/WindowDrawer.cpp"
+        "src/UI/ObjectManipulator.cpp"
+        
+
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
@@ -64,19 +68,18 @@ add_executable(${PROJECT_NAME}
         "src/OpenGL/ShaderProgram.cpp"
 
         "src/BVH/BVH.cpp"
-        
         "src/BVH/BVHMortonBuilder.cpp"
         "src/BVH/BVHBasicBuilder.cpp"
         "src/BVH/BVH6SidedBuilder.cpp"
         "src/BVH/BVHSAHBuilder.cpp"
-
-        "src/System/Physics.cpp"
+        "src/BVH/MortonCodes.cpp" 
 
         "src/Other/Scene.cpp"
         "src/Other/Tweener.cpp"
 
         "src/Utils/MyMath.cpp"
- "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp" "src/Utils/Utils.cpp"  )
+        "src/Utils/Utils.cpp"
+)
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

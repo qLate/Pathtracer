@@ -2,7 +2,7 @@
 
 #include "ImGuiHandler.h"
 
-class ImGUIWindowDrawer
+class WindowDrawer
 {
 	inline static bool _showInspector = true;
 	inline static bool _showStats = true;
