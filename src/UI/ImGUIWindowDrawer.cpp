@@ -45,7 +45,7 @@ void ImGUIWindowDrawer::drawScene()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-	if (ImGUIHandler::_isAfterInit || SDLHandler::isMouseAttachedToScene())
+	if (ImGuiHandler::_isAfterInit || SDLHandler::isMouseAttachedToScene())
 		ImGui::SetNextWindowFocus();
 
 	ImGui::Begin("Scene", nullptr);
@@ -79,7 +79,7 @@ void ImGUIWindowDrawer::drawScene_displayStats(bool barVisible)
 	static Timer updateTimer = Timer(100);
 
 	if (updateTimer.trigger())
-		currFPS = ImGUIHandler::_io->Framerate;
+		currFPS = ImGuiHandler::_io->Framerate;
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3f ms)\n%zu Triangles", currFPS, 1000.0f / currFPS, Scene::triangles.size());

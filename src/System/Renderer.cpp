@@ -3,7 +3,7 @@
 #include "BufferController.h"
 #include "Camera.h"
 #include "GLObject.h"
-#include "ImGUIHandler.h"
+#include "ImGuiHandler.h"
 #include "Material.h"
 #include "MyMath.h"
 
@@ -12,7 +12,7 @@ void Renderer::init()
 	_renderProgram = make_unique<DefaultShaderProgram<TraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	_renderProgram->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);
+	_renderProgram->setFloat2("pixelSize", ImGuiHandler::INIT_RENDER_SIZE);
 }
 
 void Renderer::render()

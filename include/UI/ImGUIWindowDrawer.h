@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ImGUIHandler.h"
+#include "ImGuiHandler.h"
 
 class ImGUIWindowDrawer
 {
 	inline static bool _showInspector = true;
 	inline static bool _showStats = true;
 
-	inline static glm::ivec2 _currRenderSize = ImGUIHandler::INIT_RENDER_SIZE;
+	inline static glm::ivec2 _currRenderSize = ImGuiHandler::INIT_RENDER_SIZE;
 
 	static void drawMenuBar();
 	static void drawScene();
@@ -20,5 +20,5 @@ public:
 	static void setShowInspector(bool show) { _showInspector = show; }
 	static void setShowStats(bool show) { _showStats = show; }
 
-	friend class ImGUIHandler;
+	friend class ImGuiHandler;
 };

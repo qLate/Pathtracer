@@ -5,7 +5,7 @@
 #include "Debug.h"
 #include "glad.h"
 #include "GLObject.h"
-#include "ImGUIHandler.h"
+#include "ImGuiHandler.h"
 #include "imgui_impl_sdl2.h"
 #include "Input.h"
 #include "Program.h"
@@ -25,13 +25,13 @@ void SDLHandler::init()
 
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
-	auto initialSize = ImGUIHandler::INIT_FULL_WINDOW_SIZE;
+	auto initialSize = ImGuiHandler::INIT_FULL_WINDOW_SIZE;
 	_window = SDL_CreateWindow("Pathtracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, initialSize.x, initialSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	_context = SDL_GL_CreateContext(_window);
 	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	initOpenGL();
-	ImGUIHandler::init();
+	ImGuiHandler::init();
 
 	SDL_GL_SetSwapInterval(0);
 }
@@ -50,7 +50,7 @@ void SDLHandler::initOpenGL()
 		Debug::log("OpenGL msg: ", message);
 	}, nullptr);
 
-	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE));
+	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGuiHandler::INIT_RENDER_SIZE));
 
 	Shader::addInclude("shaders/common/common.glsl");
 	Shader::addInclude("shaders/common/utils.glsl");

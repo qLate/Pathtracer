@@ -122,6 +122,7 @@ glm::mat<4, 4, float> BaseShaderMethods::getMatrix4X4(const std::string& name) c
 	return value;
 }
 
+static inline constexpr const char* SEARCH_DIRS[] = { "/" };
 Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id)
 {
 	auto shader = glCreateShader(type);
@@ -131,8 +132,7 @@ Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id
 	const char* shaderCode = code.c_str();
 
 	glShaderSource(shader, 1, &shaderCode, nullptr);
-	const char* search_directories[] = {"/", "/shaders"};
-	glCompileShaderIncludeARB(shader, _countof(search_directories), search_directories, NULL);
+	glCompileShaderIncludeARB(shader, _countof(SEARCH_DIRS), SEARCH_DIRS, NULL);
 	checkCompileErrors(shader, "SHADER", path);
 
 	glAttachShader(id, shader);
@@ -146,7 +146,6 @@ void Shader::addInclude(const std::string& path)
 	glNamedStringARB(GL_SHADER_INCLUDE_ARB, path_.size(), path_.c_str(), code.size(), code.c_str());
 }
 
-constexpr char SHADERS_DIR[] = "shaders/";
 std::string Shader::parseShader(const std::string& pathStr)
 {
 	auto code = readShaderFile(pathStr);
@@ -158,7 +157,7 @@ std::string Shader::parseShader(const std::string& pathStr)
 	//	auto end = code.find('"', start);
 
 	//	auto relIncludePath = code.substr(start, end - start);
-	//	auto includeCode = readShaderFile(SHADERS_DIR + relIncludePath) + "\n";
+	//	auto includeCode = readShaderFile("shaders/" + relIncludePath) + "\n";
 	//	code.replace(pos, end - pos + 1, includeCode);
 	//}
 

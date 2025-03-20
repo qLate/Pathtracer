@@ -36,6 +36,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_tables.cpp"
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
+        "libs/imgui/src/ImFileDialog.cpp"
 
         "src/Program.cpp"
 
@@ -52,7 +53,7 @@ add_executable(${PROJECT_NAME}
         "src/System/Renderer.cpp"
 
         "src/UI/SDLHandler.cpp"
-        "src/UI/ImGUIHandler.cpp"
+        "src/UI/ImGuiHandler.cpp"
         "src/UI/ImGUIWindowDrawer.cpp"
          
        "libs/glad/glad.c"
@@ -75,7 +76,7 @@ add_executable(${PROJECT_NAME}
         "src/Other/Tweener.cpp"
 
         "src/Utils/MyMath.cpp"
- "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp" "src/Utils/Utils.cpp")
+ "include/BVH/BVH6SidedBuilder.h" "include/BVH/MortonCodes.h" "src/BVH/MortonCodes.cpp" "src/Utils/Utils.cpp"  )
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
@@ -87,6 +88,4 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_LIBRARIES})
 endif()
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
-endif ()
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)

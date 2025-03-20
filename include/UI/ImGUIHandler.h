@@ -11,7 +11,7 @@ enum class WindowType
 	Inspector = 1,
 };
 
-class ImGUIHandler
+class ImGuiHandler
 {
 	static constexpr char GLSL_VERSION[] = "#version 460";
 	static constexpr int INSPECTOR_WIDTH = 300;
@@ -22,6 +22,8 @@ class ImGUIHandler
 	inline static ImGuiIO* _io;
 
 	static void init();
+	static void initImGui();
+	static void initImFileDialog();
 	static void initDocking();
 
 	static void draw();

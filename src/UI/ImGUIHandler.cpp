@@ -1,6 +1,7 @@
-#include "ImGUIHandler.h"
+#include "ImGuiHandler.h"
 
 #include "Camera.h"
+#include "ImFileDialog.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_internal.h"
@@ -11,7 +12,35 @@
 #include "ImGuiExtensions.h"
 #include "ImGUIWindowDrawer.h"
 
-void ImGUIHandler::init()
+void ImGuiHandler::init()
+{
+	initImGui();
+	initImFileDialog();
+}
+void ImGuiHandler::initImFileDialog()
+{
+	ifd::FileDialog::Instance().CreateTexture = [](const uint8_t* data, int w, int h, char fmt) -> void* {
+		GLuint tex;
+
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, fmt == 0 ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return (void*)tex;
+	};
+	ifd::FileDialog::Instance().DeleteTexture = [](void* tex)
+	{
+		GLuint texID = (GLuint)tex;
+		glDeleteTextures(1, &texID);
+	};
+}
+void ImGuiHandler::initImGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -35,16 +64,14 @@ void ImGUIHandler::init()
 
 	_io->Fonts->AddFontFromFileTTF("assets/fonts/Cousine-Regular.ttf", 15.0f);
 }
-
-void ImGUIHandler::initDocking()
+void ImGuiHandler::initDocking()
 {
 	auto dockSpace = ImGui::GetID("MyDockSpace");
 	ImGuiID dock_id_left = 1, dock_id_right = 2;
-	ImVec2 mainSize = ImGui::GetMainViewport()->Size;
 
 	ImGui::DockBuilderRemoveNode(dockSpace);
 	ImGui::DockBuilderAddNode(dockSpace);
-	ImGui::DockBuilderSetNodeSize(dockSpace, mainSize);
+	ImGui::DockBuilderSetNodeSize(dockSpace, ImGui::GetMainViewport()->Size);
 
 	ImGui::DockBuilderSplitNode(dockSpace, ImGuiDir_Left, INSPECTOR_WIDTH / (float)INIT_FULL_WINDOW_SIZE.x, &dock_id_left, &dock_id_right);
 	ImGui::DockBuilderDockWindow(windowTypeToString(WindowType::Inspector), dock_id_left);
@@ -53,7 +80,7 @@ void ImGUIHandler::initDocking()
 	ImGui::DockBuilderFinish(dockSpace);
 }
 
-void ImGUIHandler::draw()
+void ImGuiHandler::draw()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -65,6 +92,45 @@ void ImGUIHandler::draw()
 	ImGUIWindowDrawer::drawMenuBar();
 	ImGUIWindowDrawer::drawScene();
 	ImGUIWindowDrawer::drawInspector();
+
+	ImGui::Begin("Control Panel");
+	if (ImGui::Button("Open file"))
+		ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Open a shader", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*", true);
+	if (ImGui::Button("Open directory"))
+		ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
+	if (ImGui::Button("Save file"))
+		ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
+	ImGui::End();
+
+	// file dialogs
+	if (ifd::FileDialog::Instance().IsDone("ShaderOpenDialog"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+		{
+			const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+			for (const auto& r : res) // ShaderOpenDialog supports multiselection
+				printf("OPEN[%s]\n", r.u8string().c_str());
+		}
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+		{
+			std::string res = ifd::FileDialog::Instance().GetResult().string();
+			printf("DIRECTORY[%s]\n", res.c_str());
+		}
+		ifd::FileDialog::Instance().Close();
+	}
+	if (ifd::FileDialog::Instance().IsDone("ShaderSaveDialog"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+		{
+			std::string res = ifd::FileDialog::Instance().GetResult().string();
+			printf("SAVE[%s]\n", res.c_str());
+		}
+		ifd::FileDialog::Instance().Close();
+	}
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -79,13 +145,13 @@ void ImGUIHandler::draw()
 	else if (_isAfterInit)
 		_isAfterInit = false;
 }
-void ImGUIHandler::updateDocking()
+void ImGuiHandler::updateDocking()
 {
 	ImGuiID dockSpace_id = ImGui::GetID("MyDockSpace");
 	ImGui::DockSpaceOverViewport(dockSpace_id);
 }
 
-void ImGUIHandler::finalizeViewports()
+void ImGuiHandler::finalizeViewports()
 {
 	if (_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
@@ -97,12 +163,12 @@ void ImGUIHandler::finalizeViewports()
 	}
 }
 
-bool ImGUIHandler::isWindowFocused(WindowType type)
+bool ImGuiHandler::isWindowFocused(WindowType type)
 {
 	auto window = ImGui::FindWindowByType(type);
 	return window && window->DockNode && window->DockNode->IsFocused;
 }
-glm::vec2 ImGUIHandler::getRelativeMousePos(WindowType type)
+glm::vec2 ImGuiHandler::getRelativeMousePos(WindowType type)
 {
 	auto window = ImGui::FindWindowByType(type);
 	if (!window) return {0, 0};

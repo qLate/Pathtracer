@@ -4,7 +4,7 @@
 
 #include "BufferController.h"
 #include "BVH.h"
-#include "ImGUIHandler.h"
+#include "ImGuiHandler.h"
 #include "Input.h"
 #include "MyTime.h"
 #include "Physics.h"
@@ -66,7 +66,7 @@ void Program::loop()
 		BufferController::checkIfBufferUpdateRequired();
 
 		Renderer::render();
-		ImGUIHandler::draw();
+		ImGuiHandler::draw();
 
 		SDL_GL_SwapWindow(SDLHandler::window());
 	}

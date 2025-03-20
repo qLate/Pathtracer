@@ -11,7 +11,6 @@
 #include "MyTime.h"
 #include "Physics.h"
 #include "Scene.h"
-#include "Triangle.h"
 #include "Utils.h"
 
 void Input::update()
@@ -32,7 +31,7 @@ void Input::updateInputState()
 }
 void Input::updateMovement()
 {
-	if (!ImGUIHandler::isWindowFocused(WindowType::Scene)) return;
+	if (!ImGuiHandler::isWindowFocused(WindowType::Scene)) return;
 
 	auto camera = Camera::instance;
 	auto finalMoveSpeed = MOVE_SPEED * _moveSpeedMult;
@@ -97,7 +96,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			_mouseLeftState = true;
 
-			if (ImGUIHandler::isWindowFocused(WindowType::Scene))
+			if (ImGuiHandler::isWindowFocused(WindowType::Scene))
 			{
 				auto hit = Physics::raycast(camera->pos(), camera->getMouseDir());
 				if (hit.hit)
@@ -126,7 +125,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			SDLHandler::setAttachMouseToScene(false);
 		}
 	}
-	if (event.type == SDL_MOUSEMOTION && ImGUIHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
+	if (event.type == SDL_MOUSEMOTION && ImGuiHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
 	{
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
@@ -180,7 +179,7 @@ bool Input::wasMouseReleased(bool left)
 }
 glm::vec2 Input::getSceneMousePos()
 {
-	return ImGUIHandler::getRelativeMousePos(WindowType::Scene);
+	return ImGuiHandler::getRelativeMousePos(WindowType::Scene);
 }
 
 float Input::getMouseWheelChange()
