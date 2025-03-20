@@ -1,5 +1,7 @@
 #version 460 core
-/// #include "default/_shaderBase.glsl"
+#extension GL_ARB_shading_language_include : enable
+#include "common.glsl"
+
 layout(local_size_x = 32) in;
 
 layout(std140, binding = 6) /*buffer*/ uniform BVHNodes

@@ -12,10 +12,10 @@ class Texture;
 class BaseShaderMethods
 {
 protected:
-	static void checkCompileErrors(unsigned int shader, const std::string& type);
+	static void checkCompileErrors(unsigned int shader, const std::string& type, const std::string& path = "");
 
 public:
-	unsigned int id = -1;
+	unsigned int _id = -1;
 
 	BaseShaderMethods(int id);
 
@@ -44,4 +44,6 @@ class Shader : public BaseShaderMethods
 
 public:
 	Shader(const std::string& path, int id, int type);
+
+	static void addInclude(const std::string& path);
 };

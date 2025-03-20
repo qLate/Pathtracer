@@ -91,7 +91,6 @@ void BVHMortonBuilder::buildCPU(const std::vector<Triangle*>& triangles)
 	std::vector<std::pair<uint32_t, int>> sortedCodes;
 	buildCPU_morton(triangles, sortedCodes);
 	buildCPU_recordTriIndices(triangles, sortedCodes);
-
 	buildCPU_buildInternal(triangles, sortedCodes);
 }
 void BVHMortonBuilder::buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)

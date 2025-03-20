@@ -17,7 +17,6 @@ class Renderer
 	static void init();
 
 	static void render();
-	static void bindTextures();
 	static void updateCameraUniforms();
 
 public:

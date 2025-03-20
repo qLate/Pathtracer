@@ -1,5 +1,7 @@
 #extension GL_ARB_bindless_texture : enable
-/// #include "default/utils.glsl"
+#extension GL_ARB_shading_language_include : enable
+
+#include "utils.glsl"
 
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)

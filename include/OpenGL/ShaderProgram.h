@@ -37,11 +37,11 @@ public:
 template <typename FragType>
 DefaultShaderProgram<FragType>::DefaultShaderProgram(const char* vertPath, const char* fragPath) : BaseShaderMethods(glCreateProgram())
 {
-	_vertShader = new Shader(vertPath, id, GL_VERTEX_SHADER);
-	_fragShader = new FragType(fragPath, id, GL_FRAGMENT_SHADER);
+	_vertShader = new Shader(vertPath, _id, GL_VERTEX_SHADER);
+	_fragShader = new FragType(fragPath, _id, GL_FRAGMENT_SHADER);
 
-	glLinkProgram(id);
-	checkCompileErrors(id, "PROGRAM");
+	glLinkProgram(_id);
+	checkCompileErrors(_id, "PROGRAM");
 }
 
 template <typename FragType>
@@ -49,17 +49,17 @@ DefaultShaderProgram<FragType>::~DefaultShaderProgram()
 {
 	delete _vertShader;
 	delete _fragShader;
-	glDeleteProgram(id);
+	glDeleteProgram(_id);
 }
 
 template <typename FragType>
 void DefaultShaderProgram<FragType>::addShader(const char* path, int type) const
 {
-	Shader(path, id, type);
+	Shader(path, _id, type);
 }
 
 template <typename FragType>
 void DefaultShaderProgram<FragType>::use() const
 {
-	glUseProgram(id);
+	glUseProgram(_id);
 }

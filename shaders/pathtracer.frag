@@ -1,5 +1,6 @@
 #version 460 core
-/// #include "default/_shaderBase.glsl"
+#extension GL_ARB_shading_language_include : enable
+#include "common.glsl"
 
 layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 {
@@ -22,16 +23,15 @@ vec4 COLOR_HEAT = vec4(0);
 uniform int maxRayBounce;
 uniform int samplesPerPixel = 1;
 
-// ----------- CAMERA -----------
+#include "intersection.glsl"
+#include "light.glsl"
+
 uniform vec2 pixelSize;
 uniform vec2 screenSize;
 uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec4 bgColor = vec4(0, 0, 0, 1);
-
-/// #include "intersection.glsl"
-/// #include "light.glsl"
 
 vec4 castRay(Ray ray)
 {

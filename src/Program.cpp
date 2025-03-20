@@ -51,7 +51,7 @@ void Program::init()
 	tm.printElapsedFromLast("Buffers init in ");
 
 	BVH::buildBVH();
-	tm.printElapsedFromLast("BVH tree built in ");
+	tm.printElapsed("Total init in ");
 }
 
 void Program::loop()

@@ -51,6 +51,11 @@ void SDLHandler::initOpenGL()
 	}, nullptr);
 
 	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGUIHandler::INIT_RENDER_SIZE));
+
+	Shader::addInclude("shaders/common/common.glsl");
+	Shader::addInclude("shaders/common/utils.glsl");
+	Shader::addInclude("shaders/intersection.glsl");
+	Shader::addInclude("shaders/light.glsl");
 }
 
 void SDLHandler::update()

@@ -9,7 +9,7 @@
 
 void Renderer::init()
 {
-	_renderProgram = make_unique<DefaultShaderProgram<TraceShader>>("shaders/default/pathtracer.vert", "shaders/pathtracer.frag");
+	_renderProgram = make_unique<DefaultShaderProgram<TraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
 	_renderProgram->setFloat2("pixelSize", ImGUIHandler::INIT_RENDER_SIZE);

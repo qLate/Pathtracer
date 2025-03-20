@@ -2,19 +2,19 @@
 
 ComputeShaderProgram::ComputeShaderProgram(const char* path) : BaseShaderMethods(glCreateProgram())
 {
-	_computeShader = new Shader(path, id, GL_COMPUTE_SHADER);
-	glLinkProgram(id);
-	checkCompileErrors(id, "PROGRAM");
+	_computeShader = new Shader(path, _id, GL_COMPUTE_SHADER);
+	glLinkProgram(_id);
+	checkCompileErrors(_id, "PROGRAM");
 }
 ComputeShaderProgram::~ComputeShaderProgram()
 {
 	delete _computeShader;
-	glDeleteProgram(id);
+	glDeleteProgram(_id);
 }
 
 void ComputeShaderProgram::use() const
 {
-	glUseProgram(id);
+	glUseProgram(_id);
 }
 void ComputeShaderProgram::dispatch(glm::ivec3 numGroups, GLenum sync)
 {
