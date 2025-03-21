@@ -6,6 +6,10 @@
 
 void ObjectManipulator::update()
 {
+	ImGuizmo::BeginFrame();
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::SetAlternativeWindow(ImGuiHandler::getWindow(WindowType::Scene));
+
 	ImGui::Begin("Object Manipulation");
 
 	if (!_selectedObject)
@@ -80,8 +84,14 @@ void ObjectManipulator::update()
 	auto size = ImGuiHandler::getWindowSize(WindowType::Scene);
 	ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-	Manipulate(&viewMatrix[0][0], &projMatrix[0][0], _currGizmoOperation, _currGizmoMode, &transform[0][0], NULL, useSnap ? &snap.x : NULL);
-	_selectedObject->setTransform(transform);
+	if (Manipulate(&viewMatrix[0][0], &projMatrix[0][0], _currGizmoOperation, _currGizmoMode, &transform[0][0], NULL, useSnap ? &snap.x : NULL))
+	{
+		_isManipulating = true;
+		_selectedObject->setTransform(transform);
+	}
+	else
+		_isManipulating = false;
+
 	ImGui::End();
 }
 
@@ -92,4 +102,9 @@ void ObjectManipulator::selectObject(Object* object)
 void ObjectManipulator::deselectObject()
 {
 	_selectedObject = nullptr;
+}
+
+bool ObjectManipulator::isMouseOverGizmo()
+{
+	return ImGuizmo::IsOver();
 }

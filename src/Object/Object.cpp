@@ -36,11 +36,20 @@ glm::mat4 Object::getTransform() const
 }
 void Object::setTransform(const glm::mat4& transform, bool notify)
 {
+	glm::vec3 pos, scale;
+	glm::quat rot;
 	glm::vec3 skew;
 	glm::vec4 perspective;
-	decompose(transform, _scale, _rot, _pos, skew, perspective);
+	decompose(transform, scale, rot, pos, skew, perspective);
 
-	if (notify) BufferController::markBufferForUpdate(BufferType::Objects);
+	if (_pos != pos || _rot != rot || _scale != scale)
+	{
+		_pos = pos;
+		_rot = rot;
+		_scale = scale;
+
+		BufferController::markBufferForUpdate(BufferType::Objects);
+	}
 }
 
 void Object::translate(const glm::vec3& v)
@@ -67,4 +76,3 @@ glm::vec3 Object::globalToLocalPos(const glm::vec3& globalPos) const
 {
 	return inverse(_rot) * (globalPos - _pos) / _scale;
 }
-

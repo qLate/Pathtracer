@@ -87,9 +87,6 @@ void ImGuiHandler::draw()
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 
-	ImGuizmo::SetOrthographic(false);
-	ImGuizmo::BeginFrame();
-
 	if (_isInit) initDocking();
 	updateDocking();
 
