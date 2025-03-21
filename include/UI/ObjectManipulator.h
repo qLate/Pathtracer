@@ -22,6 +22,7 @@ class ObjectManipulator
 	inline static bool _useSnap = false;
 
 	inline static Object* _selectedObject = nullptr;
+	inline static Object* _lastUpdateSelectedObject = nullptr;
 	inline static bool _isManipulating = false;
 
 	inline static glm::mat4x4 _initialTransform;
@@ -40,6 +41,9 @@ class ObjectManipulator
 	static void performUndo();
 	static void performRedo();
 
+	static void performDuplicate();
+	static void performDelete();
+
 	static void drawMenu();
 
 public:
@@ -47,6 +51,7 @@ public:
 	static void deselectObject();
 
 	static Object* selectedObject() { return _selectedObject; }
+	static bool isDisplaying() { return _selectedObject != nullptr; }
 	static bool isManipulating() { return _isManipulating; }
 
 	static bool isMouseOverGizmo();

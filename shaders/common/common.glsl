@@ -46,10 +46,17 @@ struct Vertex
     vec4 normalV;
 };
 
+struct BaseTriangle
+{
+    Vertex vertices[3];
+    vec4 materialIndex; // materialIndex, meshIndex
+    vec4 rows[3];
+};
+
 struct Triangle
 {
     Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, meshIndex, triIndex
+    vec4 materialIndex; // materialIndex, meshIndex
     vec4 rows[3];
 };
 
@@ -97,6 +104,11 @@ layout(std140, binding = 4) uniform Objects
 {
     Object objects[1];
 };
+
+// layout(std140, binding = 0) /*buffer*/ uniform Triangles
+// {
+//     Triangle triangles[];
+// };
 
 layout(std140, binding = 5) /*buffer*/ uniform Triangles
 {

@@ -5,18 +5,30 @@
 #include "Scene.h"
 #include "Triangle.h"
 
-#include "rapidobj.hpp"
 #include "Utils.h"
 #include "Model.h"
 
-
 Graphical::Graphical(glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Object(pos, rot, scale)
+{
+	init();
+}
+Graphical::Graphical(const Graphical& other) : Object(other), _sharedMaterial(other._sharedMaterial)
+{
+	init();
+
+	if (other._material != nullptr)
+		_material = new Material(*other._material);
+}
+void Graphical::init()
 {
 	this->_indexId = Scene::graphicals.size();
 	Scene::graphicals.emplace_back(this);
 }
+
 Graphical::~Graphical()
 {
+	auto ind = std::ranges::find(Scene::graphicals, this);
+	Scene::graphicals[ind - Scene::graphicals.begin()] = nullptr;
 	delete _material;
 }
 
@@ -53,95 +65,100 @@ void Graphical::setSharedMaterial(Material* material)
 	_sharedMaterial = material;
 }
 
-Mesh::Mesh(std::vector<Triangle*> triangles, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Graphical(pos, rot, scale), _triangles(std::move(triangles))
+Mesh::Mesh(Model* model, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Graphical(pos, rot, scale), _model(model)
 {
-	for (auto& t : this->_triangles)
-	{
-		t->attachTo(this);
-		Scene::triangles.push_back(t);
-	}
+	init(model);
+}
+Mesh::Mesh(const Mesh& orig) : Graphical(orig), _model(orig._model)
+{
+	init(orig._model);
+}
+void Mesh::init(const Model* model)
+{
+	_triangles.reserve(model->baseTriangles().size());
+	for (auto& t : model->baseTriangles())
+		_triangles.push_back(new Triangle(t, this));
 
+	Scene::triangles.insert(Scene::triangles.end(), this->_triangles.begin(), this->_triangles.end());
 	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
-Mesh::Mesh(const Model& model, glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Mesh(model.triangles(), pos, rot, scale) {}
 
 Mesh::~Mesh()
 {
-	for (const auto& triangle : _triangles)
-		delete triangle;
+	auto triStart = std::ranges::find(Scene::triangles, _triangles[0]);
+	auto triEnd = std::ranges::find(Scene::triangles, _triangles.back());
+	Scene::triangles.erase(triStart, triEnd + 1);
 
 	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
 
-void Mesh::setPos(glm::vec3 pos, bool notify)
-{
-	Graphical::setPos(pos);
-	for (auto& t : _triangles)
-		t->updateGeometry();
-}
-void Mesh::setRot(glm::quat rot, bool notify)
-{
-	Graphical::setRot(rot);
-	for (auto& t : _triangles)
-		t->updateGeometry();
-}
-void Mesh::setScale(glm::vec3 scale, bool notify)
-{
-	Graphical::setScale(scale);
-	for (auto& t : _triangles)
-		t->updateGeometry();
-}
+std::vector<Triangle*> Mesh::triangles() const { return _triangles; }
 
-Square::Square(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(generateTriangles(side), pos, rot, scale) {}
-std::vector<Triangle*> Square::generateTriangles(float side)
+Square::Square(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(getBaseModel(), pos, rot, side * scale), _side(side) {}
+Square::Square(const Square& orig) : Mesh(orig), _side(orig._side) {}
+
+Model* Square::getBaseModel()
 {
-	auto p1 = glm::vec3(-side / 2, 0, -side / 2);
-	auto p2 = glm::vec3(-side / 2, 0, side / 2);
-	auto p3 = glm::vec3(side / 2, 0, side / 2);
-	auto p4 = glm::vec3(side / 2, 0, -side / 2);
+	static Model* _baseModel = nullptr;
+
+	if (_baseModel != nullptr) return _baseModel;
+
+	auto p1 = glm::vec3(-1 / 2.0f, 0, -1 / 2.0f);
+	auto p2 = glm::vec3(-1 / 2.0f, 0, 1 / 2.0f);
+	auto p3 = glm::vec3(1 / 2.0f, 0, 1 / 2.0f);
+	auto p4 = glm::vec3(1 / 2.0f, 0, -1 / 2.0f);
 
 	Vertex vertex1 {p1, {0, 0}};
 	Vertex vertex2 {p2, {1, 0}};
 	Vertex vertex3 {p3, {1, 1}};
 	Vertex vertex4 {p4, {0, 1}};
 
-	std::vector<Triangle*> triangles;
-	triangles.push_back(new Triangle(vertex1, vertex2, vertex3, this));
-	triangles.push_back(new Triangle(vertex1, vertex3, vertex4, this));
-	return triangles;
+	std::vector<BaseTriangle*> baseTris;
+	baseTris.push_back(new BaseTriangle(vertex1, vertex2, vertex3));
+	baseTris.push_back(new BaseTriangle(vertex1, vertex3, vertex4));
+
+	return _baseModel = new Model(baseTris);
 }
 
-Cube::Cube(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(generateTriangles(side), pos, rot, scale), _side(side) {}
-std::vector<Triangle*> Cube::generateTriangles(float side)
+Cube::Cube(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(getBaseModel(), pos, rot, side * scale), _side(side) {}
+Cube::Cube(const Cube& orig) : Mesh(orig), _side(orig._side) {}
+
+Model* Cube::getBaseModel()
 {
-	auto p1 = glm::vec3(-side / 2, -side / 2, -side / 2);
-	auto p2 = glm::vec3(-side / 2, -side / 2, side / 2);
-	auto p3 = glm::vec3(side / 2, -side / 2, side / 2);
-	auto p4 = glm::vec3(side / 2, -side / 2, -side / 2);
+	static Model* _baseModel = nullptr;
+	if (_baseModel != nullptr) return _baseModel;
 
-	auto p5 = glm::vec3(-side / 2, side / 2, -side / 2);
-	auto p6 = glm::vec3(-side / 2, side / 2, side / 2);
-	auto p7 = glm::vec3(side / 2, side / 2, side / 2);
-	auto p8 = glm::vec3(side / 2, side / 2, -side / 2);
+	auto p1 = glm::vec3(-1 / 2.0f, -1 / 2.0f, -1 / 2.0f);
+	auto p2 = glm::vec3(-1 / 2.0f, -1 / 2.0f, 1 / 2.0f);
+	auto p3 = glm::vec3(1 / 2.0f, -1 / 2.0f, 1 / 2.0f);
+	auto p4 = glm::vec3(1 / 2.0f, -1 / 2.0f, -1 / 2.0f);
 
-	std::vector<Triangle*> triangles;
-	triangles.push_back(new Triangle(p1, p3, p2, this));
-	triangles.push_back(new Triangle(p1, p4, p3, this));
-	triangles.push_back(new Triangle(p5, p6, p7, this));
-	triangles.push_back(new Triangle(p5, p7, p8, this));
+	auto p5 = glm::vec3(-1 / 2.0f, 1 / 2.0f, -1 / 2.0f);
+	auto p6 = glm::vec3(-1 / 2.0f, 1 / 2.0f, 1 / 2.0f);
+	auto p7 = glm::vec3(1 / 2.0f, 1 / 2.0f, 1 / 2.0f);
+	auto p8 = glm::vec3(1 / 2.0f, 1 / 2.0f, -1 / 2.0f);
 
-	triangles.push_back(new Triangle(p1, p2, p6, this));
-	triangles.push_back(new Triangle(p1, p6, p5, this));
-	triangles.push_back(new Triangle(p4, p7, p3, this));
-	triangles.push_back(new Triangle(p4, p8, p7, this));
+	std::vector<BaseTriangle*> baseTris;
+	baseTris.push_back(new BaseTriangle(p1, p3, p2));
+	baseTris.push_back(new BaseTriangle(p1, p4, p3));
+	baseTris.push_back(new BaseTriangle(p5, p6, p7));
+	baseTris.push_back(new BaseTriangle(p5, p7, p8));
 
-	triangles.push_back(new Triangle(p2, p3, p7, this));
-	triangles.push_back(new Triangle(p2, p7, p6, this));
-	triangles.push_back(new Triangle(p1, p8, p4, this));
-	triangles.push_back(new Triangle(p1, p5, p8, this));
-	return triangles;
+	baseTris.push_back(new BaseTriangle(p1, p2, p6));
+	baseTris.push_back(new BaseTriangle(p1, p6, p5));
+	baseTris.push_back(new BaseTriangle(p4, p7, p3));
+	baseTris.push_back(new BaseTriangle(p4, p8, p7));
+
+	baseTris.push_back(new BaseTriangle(p2, p3, p7));
+	baseTris.push_back(new BaseTriangle(p2, p7, p6));
+	baseTris.push_back(new BaseTriangle(p1, p8, p4));
+	baseTris.push_back(new BaseTriangle(p1, p5, p8));
+
+	return _baseModel = new Model(baseTris);
 }
 
 Sphere::Sphere(glm::vec3 pos, float radius, glm::vec3 scale) : Graphical(pos, {}, scale), _radius(radius) {}
+Sphere::Sphere(const Sphere& orig) : Graphical(orig), _radius(orig._radius) {}
 
 Plane::Plane(glm::vec3 pos, glm::vec3 normal) : Graphical({}, pos), _normal {normalize(normal)} {}
+Plane::Plane(const Plane& orig) : Graphical(orig), _normal(orig._normal) {}

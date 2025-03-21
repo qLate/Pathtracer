@@ -16,26 +16,36 @@ struct Vertex
 	Vertex(glm::vec3 pos = glm::vec3(), glm::vec2 uvPos = glm::vec2 {}, glm::vec3 normal = glm::vec3 {}) : pos(pos), uvPos(uvPos), normal(normal) {}
 };
 
+class BaseTriangle
+{
+	std::vector<Vertex> _vertices;
+	glm::vec3 _localNormal;
+
+public:
+	BaseTriangle(Vertex v1, Vertex v2, Vertex v3);
+
+	std::vector<Vertex>& vertices() { return _vertices; }
+};
+
 class Triangle
 {
-	Mesh* _mesh = nullptr;
-	std::vector<Vertex> _vertices {};
-	std::vector<glm::vec3> _globalVertPositions {};
-	std::vector<glm::vec3> _globalVertNormals {};
+	BaseTriangle* _baseTriangle;
+	Mesh* _mesh;
 
-	glm::vec3 _localNormal;
-	glm::vec3 _globalNormal {};
+	//std::vector<glm::vec3> _globalVertPositions {};
+	//std::vector<glm::vec3> _globalVertNormals {};
+	//glm::vec3 _globalNormal {};
 
 public:
 	void updateGeometry();
 
-	Triangle(Vertex v1, Vertex v2, Vertex v3, Mesh* mesh = nullptr);
-	void attachTo(Mesh* mesh);
+	Triangle(BaseTriangle* baseTri, Mesh* mesh);
 
+	std::vector<Vertex>& vertices() const { return _baseTriangle->vertices(); }
 	Mesh* mesh() const { return _mesh; }
-	std::vector<Vertex>& vertices() { return _vertices; }
-	std::vector<glm::vec3>& globalVertPositions() { return _globalVertPositions; }
-	std::vector<glm::vec3>& globalVertNormals() { return _globalVertNormals; }
+
+	//std::vector<glm::vec3>& globalVertPositions() { return _globalVertPositions; }
+	//std::vector<glm::vec3>& globalVertNormals() { return _globalVertNormals; }
 
 	AABB getBoundingBox() const;
 	glm::vec3 getCenter() const;

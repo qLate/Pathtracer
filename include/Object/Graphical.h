@@ -13,13 +13,15 @@ class Model;
 
 class Graphical : public Object
 {
+protected:
 	int _indexId;
 
 	Material* _sharedMaterial = Material::defaultLit();
 	Material* _material = nullptr;
 
-protected:
 	Graphical(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Graphical(const Graphical& other);
+	void init();
 	~Graphical() override;
 
 public:
@@ -31,31 +33,45 @@ public:
 
 	void setMaterial(const Material& material);
 	void setSharedMaterial(Material* material);
+
+private:
+	Graphical* clone_internal() const override { return new Graphical(*this); }
 };
 
 
 class Mesh : public Graphical
 {
-	std::vector<Triangle*> _triangles {};
+protected:
+	Model* _model;
+	std::vector<Triangle*> _triangles;
+
+	void init(const Model* model);
 
 public:
-	Mesh(std::vector<Triangle*> triangles, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
-	Mesh(const Model& model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Mesh(Model* model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Mesh(const Mesh& orig);
 	~Mesh() override;
 
-	std::vector<Triangle*> triangles() const { return _triangles; }
+	std::vector<Triangle*> triangles() const;
 
-	void setPos(glm::vec3 pos, bool notify = true) override;
-	void setRot(glm::quat rot, bool notify = true) override;
-	void setScale(glm::vec3 scale, bool notify = true) override;
+private:
+	Mesh* clone_internal() const override { return new Mesh(*this); }
 };
 
 
 class Square : public Mesh
 {
+	float _side;
+
 public:
 	Square(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
-	std::vector<Triangle*> generateTriangles(float side);
+	Square(const Square& orig);
+	static Model* getBaseModel();
+
+	float side() const { return _side; }
+
+private:
+	Square* clone_internal() const override { return new Square(*this); }
 };
 
 
@@ -65,9 +81,13 @@ class Cube final : public Mesh
 
 public:
 	Cube(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
-	std::vector<Triangle*> generateTriangles(float side);
+	Cube(const Cube& orig);
+	static Model* getBaseModel();
 
 	float side() const { return _side; }
+
+private:
+	Cube* clone_internal() const override { return new Cube(*this); }
 };
 
 
@@ -77,9 +97,13 @@ class Sphere final : public Graphical
 
 public:
 	Sphere(glm::vec3 pos, float radius, glm::vec3 scale = {1, 1, 1});
+	Sphere(const Sphere& orig);
 
 	float radius() const { return _radius; }
 	void setRadius(float radius) { _radius = radius; }
+
+private:
+	Sphere* clone_internal() const override { return new Sphere(*this); }
 };
 
 
@@ -89,7 +113,11 @@ class Plane final : public Graphical
 
 public:
 	Plane(glm::vec3 pos, glm::vec3 normal);
+	Plane(const Plane& orig);
 
 	glm::vec3 normal() const { return _normal; }
 	void setNormal(glm::vec3 normal) { _normal = normal; }
+
+private:
+	Plane* clone_internal() const override { return new Plane(*this); }
 };

@@ -15,6 +15,11 @@ void Model::parse(const std::filesystem::path& path)
 	parseRapidobj(path);
 }
 
+Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
+{
+	_baseTriangles = baseTriangles;
+}
+
 void Model::parseRapidobj(const std::filesystem::path& path)
 {
 	using namespace rapidobj;
@@ -30,7 +35,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 		const auto& mesh = shape.mesh;
 		const auto& attributes = result.attributes;
 
-		_triangles.resize(_triangles.size() + mesh.num_face_vertices.size());
+		_baseTriangles.resize(_baseTriangles.size() + mesh.num_face_vertices.size());
 #ifndef NDEBUG
 		std::vector<Vertex> vertices(3);
 #else
@@ -66,7 +71,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 				}
 			}
 
-			_triangles[f] = new Triangle(vertices[0], vertices[1], vertices[2]);
+			_baseTriangles[f] = new BaseTriangle(vertices[0], vertices[1], vertices[2]);
 		}
 	}
 }
@@ -164,7 +169,7 @@ void Model::parseSelfWritten(const std::filesystem::path& path)
 					v3.normal = vertexNormals[normalIndexes[i]];
 				}
 
-				_triangles.emplace_back(new Triangle(v1, v2, v3));
+				_baseTriangles.emplace_back(new BaseTriangle(v1, v2, v3));
 			}
 		}
 	}

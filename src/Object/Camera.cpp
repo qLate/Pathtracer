@@ -71,7 +71,7 @@ glm::mat4 Camera::getProjectionMatrix() const
 {
 	float fov = 2.0f * glm::degrees(glm::atan(_ratio.y * 0.5f / _focalDis));
 	float nearPlane = 0.1f;
-	float farPlane = 100.0f;
+	float farPlane = 10000.0f;
 
 	return glm::perspective(glm::radians(fov), _ratio.x, nearPlane, farPlane);
 }

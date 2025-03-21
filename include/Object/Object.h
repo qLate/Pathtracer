@@ -10,10 +10,14 @@ protected:
 	glm::quat _rot;
 	glm::vec3 _scale;
 
-	virtual ~Object() = default;
 	Object(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Object(const Object& other);
+	virtual ~Object();
 
 public:
+	static void destroy(const Object* object);
+	static Object* clone(const Object* object) { return object->clone_internal(); }
+
 	glm::vec3 pos() const { return _pos; }
 	glm::quat rot() const { return _rot; }
 	glm::vec3 scale() const { return _scale; }
@@ -28,7 +32,6 @@ public:
 	void translate(const glm::vec3& v);
 	void rotate(const glm::vec3& degrees);
 
-
 	glm::vec3 forward() const;
 	glm::vec3 backward() const;
 	glm::vec3 up() const;
@@ -38,4 +41,7 @@ public:
 
 	glm::vec3 localToGlobalPos(const glm::vec3& localPos) const;
 	glm::vec3 globalToLocalPos(const glm::vec3& globalPos) const;
+
+private:
+	virtual Object* clone_internal() const { return new Object(*this); }
 };

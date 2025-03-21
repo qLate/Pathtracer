@@ -18,6 +18,10 @@ void ObjectManipulator::update()
 		performUndo();
 	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Y))
 		performRedo();
+	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))
+		performDuplicate();
+	else if (ImGui::IsKeyPressed(ImGuiKey_Delete))
+		performDelete();
 }
 void ObjectManipulator::updateManipulation()
 {
@@ -25,6 +29,10 @@ void ObjectManipulator::updateManipulation()
 
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetAlternativeWindow(ImGuiHandler::getWindow(WindowType::Scene));
+	if (_lastUpdateSelectedObject == _selectedObject)
+		ImGuizmo::Enable(true);
+	else
+		_lastUpdateSelectedObject = _selectedObject;
 
 	updateChangeOperation();
 
@@ -105,6 +113,26 @@ void ObjectManipulator::performRedo()
 	_currUndoIndex++;
 }
 
+void ObjectManipulator::performDuplicate()
+{
+	if (!_selectedObject) return;
+
+	auto object = Object::clone(_selectedObject);
+	object->setTransform(_selectedObject->getTransform());
+	_selectedObject = object;
+
+	BufferController::markBufferForUpdate(BufferType::Objects);
+}
+void ObjectManipulator::performDelete()
+{
+	if (!_selectedObject) return;
+
+	Object::destroy(_selectedObject);
+	_selectedObject = nullptr;
+
+	BufferController::markBufferForUpdate(BufferType::Objects);
+}
+
 void ObjectManipulator::drawMenu()
 {
 	ImGui::Begin("Object Manipulation");
@@ -151,9 +179,11 @@ void ObjectManipulator::selectObject(Object* object)
 void ObjectManipulator::deselectObject()
 {
 	_selectedObject = nullptr;
+	_lastUpdateSelectedObject = nullptr;
+	ImGuizmo::Enable(false);
 }
 
 bool ObjectManipulator::isMouseOverGizmo()
 {
-	return ImGuizmo::IsOver();
+	return isDisplaying() && ImGuizmo::IsOver();
 }

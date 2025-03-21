@@ -149,12 +149,12 @@ void BufferController::updateLights()
 
 void BufferController::updateObjects()
 {
-	auto triangleCount = 0;
 	auto graphicals = Scene::graphicals;
 	std::vector<ObjectStruct> data(graphicals.size());
 #pragma omp parallel for
 	for (int i = 0; i < graphicals.size(); i++)
 	{
+		if (graphicals[i] == nullptr) continue;
 		auto obj = graphicals[i];
 
 		ObjectStruct objectStruct {};
@@ -166,9 +166,6 @@ void BufferController::updateObjects()
 		{
 			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
-			objectStruct.properties.x = triangleCount;
-			objectStruct.properties.y = mesh->triangles().size();
-			triangleCount += mesh->triangles().size();
 		}
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
 		{

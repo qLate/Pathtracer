@@ -10,6 +10,18 @@ Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : _pos(pos),
 {
 	Scene::objects.emplace_back(this);
 }
+Object::Object(const Object& other) : Object(other._pos, other._rot, other._scale) {}
+
+Object::~Object()
+{
+	auto ind = std::ranges::find(Scene::objects, this);
+	Scene::objects[ind - Scene::objects.begin()] = nullptr;
+}
+
+void Object::destroy(const Object* object)
+{
+	delete object;
+}
 
 void Object::setPos(glm::vec3 pos, bool notify)
 {
