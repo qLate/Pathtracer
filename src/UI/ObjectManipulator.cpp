@@ -115,7 +115,7 @@ void ObjectManipulator::performRedo()
 
 void ObjectManipulator::performDuplicate()
 {
-	if (!_selectedObject) return;
+	if (!_selectedObject || SDLHandler::isNavigatingScene()) return;
 
 	auto object = Object::clone(_selectedObject);
 	object->setTransform(_selectedObject->getTransform());
