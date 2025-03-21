@@ -10,8 +10,8 @@ class SDLHandler
 	inline static SDL_Event _event;
 	inline static SDL_GLContext _context;
 
-	inline static bool _isMouseAttachedToScene = false;
 	inline static bool _isFullscreen = false;
+	inline static bool _isNavigatingScene = false;
 
 	inline static float _lastUpdateTime = 0;
 
@@ -26,11 +26,11 @@ class SDLHandler
 public:
 	static SDL_Window* window() { return _window; }
 	static SDL_GLContext context() { return _context; }
-	static bool isMouseAttachedToScene() { return _isMouseAttachedToScene; }
 	static bool isFullscreen() { return _isFullscreen; }
+	static bool isNavigatingScene() { return _isNavigatingScene; }
 
 	static void setFullscreen(bool fullscreen);
-	static void setAttachMouseToScene(bool attached);
+	static void setNavigatingScene(bool navigating);
 
 	static void setWindowSize(glm::ivec2 size);
 

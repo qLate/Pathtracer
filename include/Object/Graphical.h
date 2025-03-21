@@ -40,7 +40,7 @@ class Mesh : public Graphical
 
 public:
 	Mesh(std::vector<Triangle*> triangles, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
-	Mesh(const Model& model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = { 1, 1, 1 });
+	Mesh(const Model& model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	~Mesh() override;
 
 	std::vector<Triangle*> triangles() const { return _triangles; }

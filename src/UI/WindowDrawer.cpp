@@ -45,7 +45,7 @@ void WindowDrawer::drawScene()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 
-	if (ImGuiHandler::_isAfterInit || SDLHandler::isMouseAttachedToScene())
+	if (ImGuiHandler::_isAfterInit || SDLHandler::isNavigatingScene())
 		ImGui::SetNextWindowFocus();
 
 	ImGui::Begin("Scene", nullptr);

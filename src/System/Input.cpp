@@ -32,7 +32,7 @@ void Input::updateInputState()
 }
 void Input::updateMovement()
 {
-	if (!ImGuiHandler::isWindowFocused(WindowType::Scene)) return;
+	if (!SDLHandler::isNavigatingScene()) return;
 
 	auto camera = Camera::instance;
 	auto finalMoveSpeed = MOVE_SPEED * _moveSpeedMult;
@@ -83,6 +83,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			Debug::log("Player is at: pos ", to_string(camera->pos()), " rot ", to_string(camera->rot()));
 		}
+		else if (event.key.keysym.sym == SDLK_ESCAPE)
+		{
+			ObjectManipulator::deselectObject();
+		}
 	}
 
 	if (event.type == SDL_KEYUP)
@@ -110,8 +114,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			_mouseRightState = true;
 
-			SDL_SetRelativeMouseMode(SDL_TRUE);
-			SDLHandler::setAttachMouseToScene(true);
+			SDLHandler::setNavigatingScene(true);
 		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONUP)
@@ -124,10 +127,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			_mouseRightState = false;
 
-			SDL_SetRelativeMouseMode(SDL_FALSE);
-			SDLHandler::setAttachMouseToScene(false);
+			SDLHandler::setNavigatingScene(false);
 		}
 	}
+
 	if (event.type == SDL_MOUSEMOTION && ImGuiHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
 	{
 		auto dx = (float)event.motion.xrel;

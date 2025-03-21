@@ -101,8 +101,11 @@ void SDLHandler::setFullscreen(bool fullscreen)
 	else
 		SDL_SetWindowFullscreen(_window, 0);
 }
-void SDLHandler::setAttachMouseToScene(bool attached) { _isMouseAttachedToScene = attached; }
-
+void SDLHandler::setNavigatingScene(bool navigating)
+{
+	_isNavigatingScene = navigating;
+	SDL_SetRelativeMouseMode(navigating ? SDL_TRUE : SDL_FALSE);
+}
 void SDLHandler::setWindowSize(glm::ivec2 size)
 {
 	SDL_SetWindowSize(_window, size.x, size.y);

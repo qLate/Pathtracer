@@ -17,6 +17,7 @@ void ImGuiHandler::init()
 {
 	initImGui();
 	initImFileDialog();
+	ObjectManipulator::init();
 }
 void ImGuiHandler::initImFileDialog()
 {

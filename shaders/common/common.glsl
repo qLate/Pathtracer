@@ -122,6 +122,13 @@ vec3 localToGlobalDir(vec3 normal, Object obj)
     return normalize((obj.transform * vec4(normal, 0.0f)).xyz);
 }
 
+vec3 getTransformScale(mat4x4 mat) {
+    vec3 scale;
+    for (int i = 0; i < 3; i++)
+        scale[i] = sqrt(mat[i][0] * mat[i][0] + mat[i][1] * mat[i][1] + mat[i][2] * mat[i][2]);
+    return scale;
+}
+
 vec3 getTriangleCenter(Triangle tri)
 {
     vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
