@@ -9,8 +9,6 @@
 
 void BufferController::init()
 {
-	_precomputeTriCoefsProgram = make_unique<ComputeShaderProgram>("shaders/compute/precomputeTriCoefs.comp");
-
 	_uboTextures = make_unique<UBO>(TEXTURE_ALIGN, 1);
 	_uboMaterials = make_unique<UBO>(MATERIAL_ALIGN, 2);
 	_uboLights = make_unique<UBO>(LIGHT_ALIGN, 3);
@@ -41,10 +39,7 @@ void BufferController::checkIfBufferUpdateRequired()
 		updateBVHNodes();
 
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles | BufferType::Objects))
-	{
-		precomputeTriCoefs();
 		BVH::rebuildBVH();
-	}
 
 	_buffersForUpdate = BufferType::None;
 }
@@ -69,8 +64,6 @@ void BufferController::initBuffers()
 	updateLights();
 	updateTriangles();
 	updateObjects();
-
-	precomputeTriCoefs();
 
 	_buffersForUpdate = BufferType::None;
 }
@@ -234,13 +227,4 @@ void BufferController::updateBVHNodes()
 		data2[i] = indices[i];
 	_ssboBVHTriIndices->ensureDataCapacity(indices.size());
 	_ssboBVHTriIndices->setSubData((float*)data2.data(), data2.size());
-}
-
-void BufferController::precomputeTriCoefs()
-{
-	_precomputeTriCoefsProgram->use();
-
-	int triCount = Scene::triangles.size();
-	ComputeShaderProgram::dispatch({triCount / 64 + 1, 1, 1});
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }

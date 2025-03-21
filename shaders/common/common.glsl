@@ -46,18 +46,10 @@ struct Vertex
     vec4 normalV;
 };
 
-struct BaseTriangle
-{
-    Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, meshIndex
-    vec4 rows[3];
-};
-
 struct Triangle
 {
     Vertex vertices[3];
-    vec4 materialIndex; // materialIndex, meshIndex
-    vec4 rows[3];
+    vec4 info; // materialIndex, meshIndex, baseTriIndex
 };
 
 struct BVHNode
@@ -105,11 +97,6 @@ layout(std140, binding = 4) uniform Objects
     Object objects[1];
 };
 
-// layout(std140, binding = 0) /*buffer*/ uniform Triangles
-// {
-//     Triangle triangles[];
-// };
-
 layout(std140, binding = 5) /*buffer*/ uniform Triangles
 {
     Triangle triangles[];
@@ -143,16 +130,16 @@ vec3 getTransformScale(mat4x4 mat) {
 
 vec3 getTriangleCenter(Triangle tri)
 {
-    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
-    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.materialIndex.y)]);
-    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.info.y)]);
+    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.info.y)]);
+    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.info.y)]);
     return (p0 + p1 + p2) * 0.33333333f;
 }
 
 void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound) {
-    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.materialIndex.y)]);
-    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.materialIndex.y)]);
-    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.materialIndex.y)]);
+    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.info.y)]);
+    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.info.y)]);
+    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.info.y)]);
 
     minBound = min(min(p0, p1), p2) - vec3(0.0001);
     maxBound = max(max(p0, p1), p2) + vec3(0.0001);

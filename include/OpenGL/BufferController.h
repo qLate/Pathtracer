@@ -6,7 +6,6 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 #include "GLObject.h"
-#include "ShaderProgram.h"
 
 enum class BufferType
 {
@@ -25,7 +24,7 @@ class BufferController
 	static constexpr int LIGHT_ALIGN = 12;
 	static constexpr int MATERIAL_ALIGN = 12;
 	static constexpr int OBJECT_ALIGN = 28;
-	static constexpr int TRIANGLE_ALIGN = 40;
+	static constexpr int TRIANGLE_ALIGN = 28;
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 
@@ -36,8 +35,6 @@ class BufferController
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
-
-	inline static UPtr<ComputeShaderProgram> _precomputeTriCoefsProgram;
 
 	inline static BufferType _buffersForUpdate;
 
@@ -64,8 +61,6 @@ public:
 	static void updateObjects();
 	static void updateTriangles();
 	static void updateBVHNodes();
-
-	static void precomputeTriCoefs();
 
 	friend class TraceShader;
 	friend class Program;
@@ -116,7 +111,6 @@ private:
 
 		VertexStruct vertices[3];
 		glm::vec4 materialIndex;
-		glm::vec4 rows[3];
 	};
 
 	struct BVHNodeStruct

@@ -1,52 +1,50 @@
 vec3 getTriangleNormalAt(Triangle tri, float u, float v)
 {
-    Object obj = objects[int(tri.materialIndex.y)];
+    Object obj = objects[int(tri.info.y)];
     vec3 norm1 = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
     vec3 norm2 = localToGlobalDir(tri.vertices[1].normalV.xyz, obj);
     vec3 norm3 = localToGlobalDir(tri.vertices[2].normalV.xyz, obj);
     return normalize((1 - u - v) * norm1 + u * norm2 + v * norm3);
 }
 
-bool intersectTriangle1(inout Ray ray, Triangle tri)
-{
-    float dz = dot(tri.rows[2].xyz, ray.dir);
-    if (dz == 0) return false;
+// bool intersectTriangle1(inout Ray ray, Triangle tri)
+// {
+//     float dz = dot(tri.rows[2].xyz, ray.dir);
+//     if (dz == 0) return false;
 
-    float oz = dot(tri.rows[2].xyz, ray.pos) + tri.rows[2].w;
-    float t = -oz / dz;
-    if (t < 0.0 || t > ray.t || t > ray.maxDis) return false;
+//     float oz = dot(tri.rows[2].xyz, ray.pos) + tri.rows[2].w;
+//     float t = -oz / dz;
+//     if (t < 0.0 || t > ray.t || t > ray.maxDis) return false;
 
-    vec3 hitPos = ray.pos + ray.dir * t;
-    float u = dot(tri.rows[0].xyz, hitPos) + tri.rows[0].w;
-    if (u < 0.0 || u > 1.0) return false;
+//     vec3 hitPos = ray.pos + ray.dir * t;
+//     float u = dot(tri.rows[0].xyz, hitPos) + tri.rows[0].w;
+//     if (u < 0.0 || u > 1.0) return false;
 
-    float v = dot(tri.rows[1].xyz, hitPos) + tri.rows[1].w;
-    if (v < 0.0 || u + v > 1.0) return false;
+//     float v = dot(tri.rows[1].xyz, hitPos) + tri.rows[1].w;
+//     if (v < 0.0 || u + v > 1.0) return false;
 
-    ray.t = t;
-    ray.materialIndex = int(tri.materialIndex.x);
-    ray.surfaceNormal = getTriangleNormalAt(tri, u, v);
-    ray.interPoint = hitPos;
+//     ray.t = t;
+//     ray.materialIndex = int(tri.info.x);
+//     ray.surfaceNormal = getTriangleNormalAt(tri, u, v);
+//     ray.interPoint = hitPos;
 
-    vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
-    vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
-    vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
-    ray.uvPos = uv0 + u * (uv1 - uv0) + v * (uv2 - uv0);
+//     vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
+//     vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
+//     vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
+//     ray.uvPos = uv0 + u * (uv1 - uv0) + v * (uv2 - uv0);
 
-    return true;
-}
+//     return true;
+// }
 bool intersectTriangle2(inout Ray ray, Triangle tri)
 {
-    intersectTriangle1(ray, tri);
+    Object obj = objects[int(tri.info.y)];
+    vec3 v0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
+    vec3 v1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
+    vec3 v2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
 
-    Object obj = objects[int(tri.materialIndex.y)];
-    vec3 V0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
-    vec3 V1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
-    vec3 V2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
-
-    vec3 p0 = V0;
-    vec3 e1 = V1 - V0;
-    vec3 e2 = V2 - V0;
+    vec3 p0 = v0;
+    vec3 e1 = v1 - v0;
+    vec3 e2 = v2 - v0;
 
     vec3 pv = cross(ray.dir, e2);
     float det = dot(e1, pv);
@@ -60,16 +58,16 @@ bool intersectTriangle2(inout Ray ray, Triangle tri)
     uvt.xyz = uvt.xyz / det;
     uvt.w = 1.0 - uvt.x - uvt.y;
 
-    if (all(greaterThanEqual(uvt, vec4(0))) && (uvt.z < ray.t && ray.t < ray.maxDis)) {
-        // ray.t = uvt.z;
-        // ray.materialIndex = int(tri.materialIndex.x);
-        // ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y);
-        // ray.interPoint = ray.pos + ray.dir * uvt.z;
+    if (all(greaterThanEqual(uvt, vec4(-0.00001))) && (uvt.z < ray.t && uvt.z <= ray.maxDis)) {
+        ray.t = uvt.z;
+        ray.materialIndex = int(tri.info.x);
+        ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y);
+        ray.interPoint = ray.pos + ray.dir * uvt.z;
 
-        // vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
-        // vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
-        // vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
-        // ray.uvPos = uv0 + uvt.x * (uv1 - uv0) + uvt.y * (uv2 - uv0);
+        vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
+        vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
+        vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
+        ray.uvPos = uv0 + uvt.x * (uv1 - uv0) + uvt.y * (uv2 - uv0);
 
         return true;
     }
@@ -158,7 +156,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
             ray.interPoint = point;
             ray.uvPos = vec2(0.01);
             ray.t = t;
-            ray.materialIndex = 2;
+            ray.materialIndex = 2; // Gizmo material
             return true;
         }
     }
