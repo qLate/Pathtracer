@@ -89,6 +89,7 @@ void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
+	#pragma omp parallel for
 	for (int i = 0; i < materials.size(); i++)
 	{
 		auto mat = materials[i];
@@ -144,7 +145,6 @@ void BufferController::updateObjects()
 {
 	auto graphicals = Scene::graphicals;
 	std::vector<ObjectStruct> data(graphicals.size());
-#pragma omp parallel for
 	for (int i = 0; i < graphicals.size(); i++)
 	{
 		if (graphicals[i] == nullptr) continue;
@@ -193,7 +193,7 @@ void BufferController::updateTriangles()
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices()[k].pos, triangle->vertices()[k].uvPos.x);
 			triangleStruct.vertices[k].normalV = glm::vec4(triangle->vertices()[k].normal, triangle->vertices()[k].uvPos.y);
 		}
-		triangleStruct.materialIndex = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexID(), 0, 0);
+		triangleStruct.materialIndex = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexId(), 0, 0);
 
 		data[i] = triangleStruct;
 	}

@@ -25,7 +25,7 @@ protected:
 	~Graphical() override;
 
 public:
-	int indexID() const { return _indexId; }
+	int indexId() const { return _indexId; }
 
 	Material* material();
 	Material* materialNoCopy() const;
@@ -36,7 +36,7 @@ public:
 
 private:
 	Graphical* clone_internal() const override { return new Graphical(*this); }
-	void drawInspector() override { return GraphicalInspectorDrawer().draw(this); }
+	void drawInspector() override { return GraphicalInspectorDrawer::draw(this); }
 };
 
 

@@ -14,7 +14,7 @@ enum class WindowType
 class ImGuiHandler
 {
 	static constexpr char GLSL_VERSION[] = "#version 460";
-	static constexpr int INSPECTOR_WIDTH = 300;
+	static constexpr int INSPECTOR_WIDTH = 400;
 
 	inline static bool _isInit = true;
 	inline static bool _isAfterInit = true;
@@ -32,8 +32,8 @@ class ImGuiHandler
 	static void finalizeViewports();
 
 public:
-	static constexpr glm::ivec2 INIT_RENDER_SIZE = {640 * 2, 360 * 2};
-	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x, INIT_RENDER_SIZE.y};
+	static constexpr glm::ivec2 INIT_RENDER_SIZE = {980, 720};
+	static constexpr glm::ivec2 INIT_FULL_WINDOW_SIZE = {INIT_RENDER_SIZE.x + INSPECTOR_WIDTH, INIT_RENDER_SIZE.y};
 
 	static ImGuiIO& io() { return *_io; }
 

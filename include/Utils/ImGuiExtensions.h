@@ -1,9 +1,10 @@
 // ReSharper disable CppInconsistentNaming
 #pragma once
 
+#include <functional>
+
 #include "imgui_internal.h"
 #include "ImGuiHandler.h"
-#include <string_view>
 #include <imgui.h>
 #include <string>
 
@@ -23,37 +24,49 @@ namespace ImGui
 
 	void ItemLabel(std::string_view title, ItemLabelFlag flags = ItemLabelFlag::Left);
 
-	template <typename T, typename Func, typename... Args,
-	          std::enable_if_t<std::is_same_v<
-		                           std::invoke_result_t<Func, const char*, T*, Args...>, bool>, int>  = 0>
-	bool LabeledInput(const char* label, T& value, Func func, Args&&... args)
+	template <typename Func, typename... Args>
+	bool LabeledInput(const char* label, Func func, ImGuiInputTextFlags flags, Args&&... args)
 	{
+		if (flags & ImGuiInputTextFlags_ReadOnly)
+		{
+			PushItemFlag(ImGuiItemFlags_Disabled, true);
+			PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
+		}
+
 		ItemLabel(label);
 		SameLine();
-		return func((std::string("##") + label).c_str(), &value, std::forward<Args>(args)...);
+
+		bool result = false;
+		if constexpr (std::is_same_v<decltype(func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags)), bool>)
+		{
+			result = func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags);
+		}
+		else
+			func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags);
+
+
+		if (flags & ImGuiInputTextFlags_ReadOnly)
+		{
+			PopStyleVar();
+			PopItemFlag();
+		}
+
+		return result;
 	}
-	template <typename T, typename Func, typename... Args,
-	          std::enable_if_t<std::is_same_v<
-		                           std::invoke_result_t<Func, const char*, T*, Args...>, bool>, int>  = 0>
-	bool LabeledInput(const char* label, T value[], Func func, Args&&... args)
+	template <typename Func, typename... Args>
+	bool LabeledInput(const char* label, Func func, ImGuiInputTextFlags flags, bool& isDirty, Args&&... args)
 	{
-		ItemLabel(label);
-		SameLine();
-		return func((std::string("##") + label).c_str(), value, std::forward<Args>(args)...);
-	}
-	template <typename T, typename Func, typename... Args,
-	          std::enable_if_t<std::is_void_v<
-		                           std::invoke_result_t<Func, const char*, T*, Args...>>, int>  = 0>
-	bool LabeledInput(const char* label, T& value, Func func, Args&&... args)
-	{
-		ItemLabel(label);
-		SameLine();
-		func((std::string("##") + label).c_str(), &value, std::forward<Args>(args)...);
+		if (LabeledInput(label, func, flags, std::forward<Args>(args)...))
+		{
+			isDirty = true;
+			return true;
+		}
 		return false;
 	}
 
-	bool LabeledText(const char* label, const char* text);
+	bool LabeledText(const char* label, const char* text, ImGuiInputTextFlags flags);
 	bool LabeledValue(const char* label, float value, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
+	bool LabeledInt(const char* label, int value, ImGuiInputTextFlags flags = 0);
 	bool LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
 	bool LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
 	bool LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
@@ -61,6 +74,7 @@ namespace ImGui
 
 	// With dirty flag
 	bool LabeledValue(const char* label, float value, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
+	bool LabeledInt(const char* label, int value, bool& isDirty, ImGuiInputTextFlags flags = 0);
 	bool LabeledInputFloat2(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
 	bool LabeledInputFloat3(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
 	bool LabeledInputFloat4(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");

@@ -46,7 +46,7 @@ public:
 
 private:
 	virtual Object* clone_internal() const { return new Object(*this); }
-	virtual void drawInspector() { return ObjectInspectorDrawer().draw(this); }
+	virtual void drawInspector() { return ObjectInspectorDrawer::draw(this); }
 
 	friend class WindowDrawer;
 };

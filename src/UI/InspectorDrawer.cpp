@@ -13,6 +13,8 @@ void ObjectInspectorDrawer::draw(Object* target)
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
+		ImGui::LabeledInt("Object Id", ((Graphical*)target)->indexId(), ImGuiInputTextFlags_ReadOnly);
+
 		bool isDirty = false;
 		auto transform = target->getTransform();
 
@@ -43,11 +45,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		auto isDirty = false;
 		auto material = target->material();
 
-		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		ImGui::LabeledValue("id", material->id(), isDirty, ImGuiInputTextFlags_ReadOnly);
-		ImGui::PopStyleVar();
-		ImGui::PopItemFlag();
+		ImGui::LabeledInt("Material Id", material->id(), isDirty, ImGuiInputTextFlags_ReadOnly);
 
 		auto color = material->color();
 		if (ImGui::LabeledColorEdit4("Color", &color[0], isDirty, ImGuiColorEditFlags_NoInputs))

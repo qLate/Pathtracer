@@ -60,7 +60,7 @@ bool intersectTriangle2(inout Ray ray, Triangle tri)
 
     if (all(greaterThanEqual(uvt, vec4(-0.00001))) && (uvt.z < ray.t && uvt.z <= ray.maxDis)) {
         ray.t = uvt.z;
-        ray.materialIndex = int(tri.info.x);
+        ray.materialIndex = int(obj.materialIndex);
         ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y);
         ray.interPoint = ray.pos + ray.dir * uvt.z;
 

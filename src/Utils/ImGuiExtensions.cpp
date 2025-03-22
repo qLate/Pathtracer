@@ -57,83 +57,56 @@ void ImGui::ItemLabel(std::string_view title, ItemLabelFlag flags)
 		SetCursorScreenPos(lineStart);
 }
 
-bool ImGui::LabeledText(const char* label, const char* text)
+bool ImGui::LabeledText(const char* label, const char* text, ImGuiInputTextFlags flags)
 {
-	return LabeledInput(label, text, Text);
+	return LabeledInput(label, Text, flags, text);
 }
 bool ImGui::LabeledValue(const char* label, float value, ImGuiInputTextFlags flags, const char* format)
 {
-	return LabeledInput(label, value, InputFloat, 0.0f, 0.0f, format, flags);
+	return LabeledInput(label, InputFloat, flags, &value, 0.0f, 0.0f, format);
+}
+bool ImGui::LabeledInt(const char* label, int value, ImGuiInputTextFlags flags)
+{
+	return LabeledValue(label, (float)value, flags, "%.0f");
 }
 bool ImGui::LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
 {
-	return LabeledInput(label, values, InputFloat2, format, flags);
+	return LabeledInput(label, InputFloat2, flags, values, format);
 }
 bool ImGui::LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
 {
-	return LabeledInput(label, values, InputFloat3, format, flags);
+	return LabeledInput(label, InputFloat3, flags, values, format);
 }
 bool ImGui::LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
 {
-	return LabeledInput(label, values, InputFloat4, format, flags);
+	return LabeledInput(label, InputFloat4, flags, values, format);
 }
 bool ImGui::LabeledColorEdit4(const char* label, float* color, ImGuiColorEditFlags flags)
 {
-	return LabeledInput(label, color, ColorEdit4, flags);
+	return LabeledInput(label, ColorEdit4, flags, color);
 }
 
 bool ImGui::LabeledValue(const char* label, float value, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
 {
-	ItemLabel(label);
-	SameLine();
-	if (InputFloat((std::string("##") + label).c_str(), &value, 0.0f, 0.0f, format, flags))
-	{
-		isDirty = true;
-		return true;
-	}
-	return false;
+	return LabeledInput(label, InputFloat, flags, isDirty, &value, 0.0f, 0.0f, format);
+}
+bool ImGui::LabeledInt(const char* label, int value, bool& isDirty, ImGuiInputTextFlags flags)
+{
+	return LabeledValue(label, (float)value, isDirty, flags, "%.0f");
 }
 bool ImGui::LabeledInputFloat2(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
 {
-	ItemLabel(label);
-	SameLine();
-	if (InputFloat2((std::string("##") + label).c_str(), values, format, flags))
-	{
-		isDirty = true;
-		return true;
-	}
-	return false;
+	return LabeledInput(label, InputFloat2, flags, isDirty, values, format);
 }
 bool ImGui::LabeledInputFloat3(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
 {
-	ItemLabel(label);
-	SameLine();
-	if (InputFloat3((std::string("##") + label).c_str(), values, format, flags))
-	{
-		isDirty = true;
-		return true;
-	}
-	return false;
+	return LabeledInput(label, InputFloat3, flags, isDirty, values, format);
 }
 bool ImGui::LabeledInputFloat4(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
 {
-	ItemLabel(label);
-	SameLine();
-	if (InputFloat4((std::string("##") + label).c_str(), values, format, flags))
-	{
-		isDirty = true;
-		return true;
-	}
-	return false;
+	return LabeledInput(label, InputFloat4, flags, isDirty, values, format);
 }
 bool ImGui::LabeledColorEdit4(const char* label, float* color, bool& isDirty, ImGuiColorEditFlags flags)
 {
-	ItemLabel(label);
-	SameLine();
-	if (ColorEdit4((std::string("##") + label).c_str(), color, flags))
-	{
-		isDirty = true;
-		return true;
-	}
-	return false;
+	return LabeledInput(label, ColorEdit4, flags, isDirty, color);
 }

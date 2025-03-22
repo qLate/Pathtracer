@@ -37,6 +37,7 @@ Material* Graphical::material()
 	if (_material) return _material;
 
 	_material = new Material(*_sharedMaterial);
+	BufferController::markBufferForUpdate(BufferType::Objects);
 	return _material;
 }
 Material* Graphical::materialNoCopy() const
