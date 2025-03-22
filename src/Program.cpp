@@ -44,6 +44,7 @@ void Program::init()
 	tm.printElapsedFromLast("BVH init in ");
 
 	Debug::log("--------------------------------");
+
 	SceneSetup::setupScene();
 	tm.printElapsedFromLast("Scene setup in ");
 
@@ -68,7 +69,7 @@ void Program::loop()
 		Renderer::render();
 		ImGuiHandler::draw();
 
-		SDL_GL_SwapWindow(SDLHandler::window());
+		SDLHandler::swapBuffers();
 	}
 }
 

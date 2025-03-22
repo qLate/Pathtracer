@@ -139,6 +139,7 @@ Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id
 
 	glDeleteShader(shader);
 }
+
 void Shader::addInclude(const std::string& path)
 {
 	auto code = parseShader(path);

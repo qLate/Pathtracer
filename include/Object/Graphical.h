@@ -36,6 +36,7 @@ public:
 
 private:
 	Graphical* clone_internal() const override { return new Graphical(*this); }
+	void drawInspector() override { return GraphicalInspectorDrawer().draw(this); }
 };
 
 

@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.18)
 set(CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(PROFILING TRUE)
-set(USING_VISUAL_STUDIO TRUE)
 set(ENABLE_FAST_MATH ON)
+
 project("Pathtracer")
 
 include(FetchContent)
@@ -37,7 +37,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/imgui_impl_sdl2.cpp"
         "libs/imgui/src/imgui_impl_opengl3.cpp"
         "libs/imgui/src/ImFileDialog.cpp"
-        "include/UI/ImGuizmo.cpp"
+        "libs/imgui/src/ImGuizmo.cpp"
         "libs/glad/glad.c"
 
         "src/Program.cpp"
@@ -59,7 +59,7 @@ add_executable(${PROJECT_NAME}
         "src/UI/ImGuiHandler.cpp"
         "src/UI/WindowDrawer.cpp"
         "src/UI/ObjectManipulator.cpp"
-        
+        "src/UI/InspectorDrawer.cpp"
 
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
@@ -79,16 +79,21 @@ add_executable(${PROJECT_NAME}
 
         "src/Utils/MyMath.cpp"
         "src/Utils/Utils.cpp"
+        "src/Utils/ImGuiExtensions.cpp"
 )
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
 
 find_package(OpenMP REQUIRED)
+target_compile_options(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_LIBRARIES})
 
-if(OpenMP_CXX_FOUND)
-    target_compile_options(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_FLAGS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenMP_CXX_LIBRARIES})
-endif()
+# Copy SDL2.dll to the build directory
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/libs/SDL2/lib/x86/SDL2.dll"
+        $<TARGET_FILE_DIR:Pathtracer>
+)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)

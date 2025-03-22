@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <vector>
 
+#include "BufferController.h"
 #include "Color.h"
 #include "Utils.h"
 
@@ -63,9 +64,9 @@ public:
 	float diffuseCoef() const { return _diffuseCoef; }
 	float reflection() const { return _reflection; }
 
-	void setLit(bool lit) { _lit = lit; }
-	void setColor(const Color& color) { _color = color; }
-	void setTexture(Texture* texture) { _texture = texture; }
-	void setDiffuseCoef(float diffuseCoef) { _diffuseCoef = diffuseCoef; }
-	void setReflection(float reflection) { _reflection = reflection; }
+	void setLit(bool lit);
+	void setColor(const Color& color);
+	void setTexture(Texture* texture);
+	void setDiffuseCoef(float diffuseCoef);
+	void setReflection(float reflection);
 };

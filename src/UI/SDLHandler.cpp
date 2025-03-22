@@ -86,6 +86,11 @@ void SDLHandler::updateLimitFPS()
 	_lastUpdateTime = std::max(_lastUpdateTime, SDL_GetTicks() - targetDelta);
 }
 
+void SDLHandler::swapBuffers()
+{
+	SDL_GL_SwapWindow(_window);
+}
+
 void SDLHandler::quit()
 {
 	SDL_DestroyWindow(_window);

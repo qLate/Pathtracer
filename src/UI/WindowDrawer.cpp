@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "ImGuiExtensions.h"
 #include "Input.h"
+#include "ObjectManipulator.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "SDLHandler.h"
@@ -94,8 +95,11 @@ void WindowDrawer::drawInspector()
 
 	ImGui::Begin("Inspector", nullptr);
 	{
-		ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
-		ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+		//ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
+		//ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+
+		if (auto obj = ObjectManipulator::selectedObject())
+			obj->drawInspector();
 	}
 	ImGui::End();
 

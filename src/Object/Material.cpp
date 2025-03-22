@@ -71,3 +71,35 @@ Material::~Material()
 {
 	std::erase(Scene::materials, this);
 }
+
+void Material::setLit(bool lit)
+{
+	_lit = lit;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void Material::setColor(const Color& color)
+{
+	_color = color;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void Material::setTexture(Texture* texture)
+{
+	_texture = texture;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+	BufferController::markBufferForUpdate(BufferType::Textures);
+}
+void Material::setDiffuseCoef(float diffuseCoef)
+{
+	_diffuseCoef = diffuseCoef;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void Material::setReflection(float reflection)
+{
+	_reflection = reflection;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}

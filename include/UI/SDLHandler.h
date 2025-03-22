@@ -21,6 +21,8 @@ class SDLHandler
 	static void update();
 	static void updateLimitFPS();
 
+	static void swapBuffers();
+
 	static void quit();
 
 public:
