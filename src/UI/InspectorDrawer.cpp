@@ -7,62 +7,53 @@
 #include "Object.h"
 #include "ImGuiExtensions.h"
 
-void BaseInspectorDrawer::draw(Object* target)
+void ObjectInspectorDrawer::draw(Object* target)
 {
-	drawInnerWrapper(target);
-}
-
-void ObjectInspectorDrawer::drawInner(Object* target)
-{
-	auto isDirty = false;
-	auto transform = target->getTransform();
-
-	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-	ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], matrixTranslation, matrixRotation, matrixScale);
-
-	if (ImGui::LabeledInputFloat3("Position", matrixTranslation)) isDirty = true;
-	if (ImGui::LabeledInputFloat3("Rotation", matrixRotation)) isDirty = true;
-	if (ImGui::LabeledInputFloat3("Scale", matrixScale)) isDirty = true;
-
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform[0][0]);
-
-	if (isDirty) target->setTransform(transform);
-}
-void ObjectInspectorDrawer::drawInnerWrapper(Object* target)
-{
-	const char* name = "Object";
-	if (ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen))
+	const char* name = "Transform";
+	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
+	ImGui::PushID(name);
 	{
-		ImGui::PushID(name);
-		drawInner(target);
-		ImGui::PopID();
+		bool isDirty = false;
+		auto transform = target->getTransform();
+
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], matrixTranslation, matrixRotation, matrixScale);
+
+		ImGui::LabeledInputFloat3("Position", matrixTranslation, isDirty);
+		ImGui::LabeledInputFloat3("Rotation", matrixRotation, isDirty);
+		ImGui::LabeledInputFloat3("Scale", matrixScale, isDirty);
+
+		if (isDirty)
+		{
+			ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform[0][0]);
+			target->setTransform(transform);
+		}
 	}
+	ImGui::PopID();
 }
 
-void GraphicalInspectorDrawer::drawInner(Graphical* target)
+void GraphicalInspectorDrawer::draw(Graphical* target)
 {
-	auto isDirty = false;
-
-	auto material = target->material();
-	auto color = material->color();
-	if (ImGui::LabeledColorEdit4("Color", &color[0], ImGuiColorEditFlags_NoInputs))
-	{
-		isDirty = true;
-		material->setColor(color);
-	}
-
-	if (isDirty)
-		BufferController::markBufferForUpdate(BufferType::Materials);
-}
-void GraphicalInspectorDrawer::drawInnerWrapper(Object* target)
-{
-	ObjectInspectorDrawer::drawInnerWrapper(target);
+	ObjectInspectorDrawer::draw(target);
 
 	const char* name = "Graphical";
-	if (ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen))
+	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
+	ImGui::PushID(name);
 	{
-		ImGui::PushID(name);
-		drawInner(dynamic_cast<Graphical*>(target));
-		ImGui::PopID();
+		auto isDirty = false;
+		auto material = target->material();
+
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+		ImGui::LabeledValue("id", material->id(), isDirty, ImGuiInputTextFlags_ReadOnly);
+		ImGui::PopStyleVar();
+		ImGui::PopItemFlag();
+
+		auto color = material->color();
+		if (ImGui::LabeledColorEdit4("Color", &color[0], isDirty, ImGuiColorEditFlags_NoInputs))
+			material->setColor(color);
+
+		if (isDirty) BufferController::markBufferForUpdate(BufferType::Materials);
 	}
+	ImGui::PopID();
 }

@@ -3,27 +3,15 @@
 class Object;
 class Graphical;
 
-class BaseInspectorDrawer
+class ObjectInspectorDrawer
 {
-protected:
-	virtual void drawInnerWrapper(Object* target) = 0;
-
 public:
-	virtual void draw(Object* target);
+	static void draw(Object* target);
 };
 
-class ObjectInspectorDrawer : public BaseInspectorDrawer
+
+class GraphicalInspectorDrawer
 {
-	static void drawInner(Object* target);
-
-protected:
-	void drawInnerWrapper(Object* target) override;
-};
-
-class GraphicalInspectorDrawer : public ObjectInspectorDrawer
-{
-	static void drawInner(Graphical* target);
-
-protected:
-	void drawInnerWrapper(Object* target) override;
+public:
+	static void draw(Graphical* target);
 };
