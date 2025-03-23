@@ -22,6 +22,7 @@ protected:
 	Graphical(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Graphical(const Graphical& other);
 	void init();
+
 	~Graphical() override;
 
 public:
@@ -47,29 +48,29 @@ protected:
 	std::vector<Triangle*> _triangles;
 
 	void init(const Model* model);
+	void removeTriangles();
 
 public:
-	Mesh(Model* model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Mesh(Model* model = nullptr, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Mesh(const Mesh& orig);
 	~Mesh() override;
 
-	std::vector<Triangle*> triangles() const;
+	std::vector<Triangle*> triangles() const { return _triangles; }
+
+	void setModel(const Model* model);
 
 private:
 	Mesh* clone_internal() const override { return new Mesh(*this); }
+	void drawInspector() override { return MeshInspectorDrawer::draw(this); }
 };
 
 
-class Square : public Mesh
+class Square final : public Mesh
 {
-	float _side;
-
 public:
 	Square(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Square(const Square& orig);
 	static Model* getBaseModel();
-
-	float side() const { return _side; }
 
 private:
 	Square* clone_internal() const override { return new Square(*this); }
@@ -101,23 +102,19 @@ public:
 	Sphere(const Sphere& orig);
 
 	float radius() const { return _radius; }
-	void setRadius(float radius) { _radius = radius; }
+	void setRadius(float radius);
 
 private:
 	Sphere* clone_internal() const override { return new Sphere(*this); }
+	void drawInspector() override { return SphereInspectorDrawer::draw(this); }
 };
 
 
 class Plane final : public Graphical
 {
-	glm::vec3 _normal;
-
 public:
-	Plane(glm::vec3 pos, glm::vec3 normal);
+	Plane(glm::vec3 pos, glm::vec3 rot = {});
 	Plane(const Plane& orig);
-
-	glm::vec3 normal() const { return _normal; }
-	void setNormal(glm::vec3 normal) { _normal = normal; }
 
 private:
 	Plane* clone_internal() const override { return new Plane(*this); }

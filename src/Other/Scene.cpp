@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include "Assets.h"
 #include "Camera.h"
 #include "Graphical.h"
 #include "Light.h"
@@ -19,7 +20,7 @@ void SceneSetup::museumScene()
 	camera->setRot({0.83f, 0.05f, 0.036f, 0.54f});
 	auto tex = Texture::defaultTex();
 
-	auto model = new Model("assets/models/museum1.obj");
+	auto model = Assets::import<Model>("assets/models/museum1.obj");
 	auto obj = new Mesh(model);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight({-5.56, -0.19, 14.79}, {255 / 255.0f, 255 / 255.0f, 255.0 / 255.0f}, 1.3f, FLT_MAX);
@@ -30,9 +31,9 @@ void SceneSetup::churchScene()
 	auto camera = new Camera({0.30f, -9.57f, 3.03f});
 	camera->setRot({0.99f, 0.12f, 0, 0});
 
-	auto tex = new Texture("assets/textures/church.jpg");
+	auto tex = Assets::import<Texture>("assets/textures/church.jpg");
 
-	auto model = new Model("assets/models/west.obj");
+	auto model = Assets::import<Model>("assets/models/west.obj");
 	auto obj = new Mesh(model);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight({0.33f, 2.0f, 14.72f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
@@ -43,9 +44,9 @@ void SceneSetup::spiderScene()
 	auto camera = new Camera({-3.18f, 196.43f, -42.60f});
 	camera->setRot({0.0f, {0.0f, -0.052f, -1}});
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
-	auto tex = new Texture("assets/textures/spider.jpg");
+	auto tex = Assets::import<Texture>("assets/textures/spider.jpg");
 
-	auto model = new Model("assets/models/spider.obj");
+	auto model = Assets::import<Model>("assets/models/spider.obj");
 	auto obj = new Mesh(model);
 	obj->setMaterial({Color::white(), true, tex});
 	auto light = new PointLight({-3.18f, 196.43f, -42.60f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
@@ -55,7 +56,7 @@ void SceneSetup::redGreenRoom()
 {
 	auto camera = new Camera({0, -30, 0});
 	//camera->setBackgroundColor(Color::white());
-	auto tex = new Texture("assets/textures/marble.jpg");
+	auto tex = Assets::import<Texture>("assets/textures/marble.jpg");
 
 	auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35);
 	auto square = new Square({0, 0, 9.995f}, 5, {{-90 * DEG_TO_RAD, 0, 0}});
@@ -76,7 +77,7 @@ void SceneSetup::redGreenRoom()
 	plane5->setSharedMaterial(whiteWallMat);
 
 	sphere1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
-	cube1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
+	cube1->setMaterial({Color::skyblue(), true, Assets::import<Texture>("assets/textures/cat.png"), 1, 0.3f});
 }
 
 void SceneSetup::minecraftHouseScene()
@@ -86,7 +87,7 @@ void SceneSetup::minecraftHouseScene()
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
-	auto model = new Model("assets/models/minecraft.obj");
+	auto model = Assets::import<Model>("assets/models/minecraft.obj");
 	auto obj = new Mesh(model, {}, {{90 * DEG_TO_RAD, 0, 0}});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight({25, 25, 15}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
@@ -99,7 +100,7 @@ void SceneSetup::kokuraScene()
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
-	auto model = new Model("assets/models/kokura.obj");
+	auto model = Assets::import<Model>("assets/models/kokura.obj");
 	auto obj = new Mesh(model);
 	obj->setMaterial({Color::white(), false, tex, 1});
 	auto light = new PointLight {{177.24, 173.63, 100.03}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
@@ -112,7 +113,7 @@ void SceneSetup::skeletonScene()
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
-	auto model = new Model("assets/models/skeleton.obj");
+	auto model = Assets::import<Model>("assets/models/skeleton.obj");
 	auto obj = new Mesh(model, {}, {}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight({1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
@@ -125,7 +126,7 @@ void SceneSetup::spaceStationScene()
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
-	auto model = new Model("assets/models/spaceStationScene/Space Station Scene.obj");
+	auto model = Assets::import<Model>("assets/models/spaceStationScene/Space Station Scene.obj");
 	auto obj = new Mesh(model, {}, glm::quat({90, 0, 0}));
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight({-3.19f, 44.20f, 54.34f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);

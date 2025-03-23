@@ -18,9 +18,9 @@ void ObjectManipulator::update()
 		performUndo();
 	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Y))
 		performRedo();
-	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D))
+	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D, false))
 		performDuplicate();
-	else if (ImGui::IsKeyPressed(ImGuiKey_Delete))
+	else if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
 		performDelete();
 }
 void ObjectManipulator::updateManipulation()
@@ -66,11 +66,11 @@ void ObjectManipulator::updateChangeOperation()
 {
 	if (!ImGuiHandler::isWindowFocused(WindowType::Scene) || SDLHandler::isNavigatingScene()) return;
 
-	if (ImGui::IsKeyPressed(ImGuiKey_W))
+	if (ImGui::IsKeyPressed(ImGuiKey_W, false))
 		_currGizmoOperation = ImGuizmo::TRANSLATE;
-	if (ImGui::IsKeyPressed(ImGuiKey_E))
+	if (ImGui::IsKeyPressed(ImGuiKey_E, false))
 		_currGizmoOperation = ImGuizmo::ROTATE;
-	if (ImGui::IsKeyPressed(ImGuiKey_R))
+	if (ImGui::IsKeyPressed(ImGuiKey_R, false))
 		_currGizmoOperation = ImGuizmo::SCALE;
 }
 

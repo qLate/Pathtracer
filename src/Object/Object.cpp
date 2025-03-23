@@ -9,6 +9,8 @@
 Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) :  _pos(pos), _rot(rot), _scale(scale)
 {
 	Scene::objects.emplace_back(this);
+
+	BufferController::markBufferForUpdate(BufferType::Objects);
 }
 Object::Object(const Object& other) : Object(other._pos, other._rot, other._scale) {}
 

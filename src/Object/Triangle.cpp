@@ -1,3 +1,4 @@
+// ReSharper disable CppMemberFunctionMayBeStatic
 #include "Triangle.h"
 
 #include "BVH.h"
@@ -10,6 +11,12 @@ BaseTriangle::BaseTriangle(Vertex v1, Vertex v2, Vertex v3) : _vertices({v1, v2,
 		if (v.normal == glm::vec3(0, 0, 0))
 			v.normal = _localNormal;
 	}
+}
+void BaseTriangle::setUVs(glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3)
+{
+	_vertices[0].uvPos = uv1;
+	_vertices[1].uvPos = uv2;
+	_vertices[2].uvPos = uv3;
 }
 
 Triangle::Triangle(BaseTriangle* baseTri, Mesh* mesh) : _baseTriangle(baseTri), _mesh(mesh) {}

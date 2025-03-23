@@ -116,9 +116,9 @@ vec3 localToGlobal(vec3 pos, Object obj)
 {
     return (obj.transform * vec4(pos, 1.0f)).xyz;
 }
-vec3 localToGlobalDir(vec3 normal, Object obj)
+vec3 localToGlobalDir(vec3 dir, Object obj)
 {
-    return normalize((obj.transform * vec4(normal, 0.0f)).xyz);
+    return normalize((obj.transform * vec4(dir, 0.0f)).xyz);
 }
 
 vec3 getTransformScale(mat4x4 mat) {
@@ -126,6 +126,14 @@ vec3 getTransformScale(mat4x4 mat) {
     for (int i = 0; i < 3; i++)
         scale[i] = sqrt(mat[i][0] * mat[i][0] + mat[i][1] * mat[i][1] + mat[i][2] * mat[i][2]);
     return scale;
+}
+
+mat4x4 getTransformRotation(mat4x4 mat) {
+    mat4x4 rotMat = mat4x4(1.0);
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            rotMat[i][j] = mat[i][j];
+    return rotMat;
 }
 
 vec3 getTriangleCenter(Triangle tri)

@@ -89,7 +89,7 @@ void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
-	#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < materials.size(); i++)
 	{
 		auto mat = materials[i];
@@ -126,7 +126,7 @@ void BufferController::updateLights()
 		{
 			auto globalLight = (DirectionalLight*)light;
 			lightStruct.lightType = 0;
-			lightStruct.properties1 = glm::vec4(lightStruct.properties1.x, globalLight->dir());
+			lightStruct.properties1.yzw = glm::vec3(0, 0, 1);
 		}
 		else if (dynamic_cast<PointLight*>(light))
 		{
@@ -170,7 +170,7 @@ void BufferController::updateObjects()
 		{
 			auto plane = (Plane*)obj;
 			objectStruct.objType = 2;
-			objectStruct.properties = glm::vec4(plane->normal(), 0);
+			objectStruct.properties.xyz = glm::vec3(0, 0, 1);
 		}
 
 		data[i] = objectStruct;

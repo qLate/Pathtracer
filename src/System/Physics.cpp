@@ -28,8 +28,9 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 
 	bool hit = result.normal != glm::vec3(0);
 	auto triangle = result.triIndex != -1 ? Scene::triangles[result.triIndex] : nullptr;
-	auto obj = result.objIndex != -1 ? Scene::graphicals[result.objIndex] : triangle ? (Graphical*)triangle->mesh() : nullptr;
-	RaycastHit raycastHit = {hit, result.pos, result.normal, result.uv, obj, triangle};
+	auto hitObj = result.objIndex != -1 ? Scene::graphicals[result.objIndex] : nullptr;
+	auto finalObj = triangle == nullptr ? hitObj : (Graphical*)triangle->mesh();
+	RaycastHit raycastHit = {hit, result.pos, result.normal, result.uv, finalObj, triangle};
 
 	return raycastHit;
 }

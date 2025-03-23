@@ -1,13 +1,14 @@
 #include "WindowDrawer.h"
 
 #include "Camera.h"
+#include "Graphical.h"
 #include "ImGuiExtensions.h"
 #include "Input.h"
+#include "Light.h"
 #include "ObjectManipulator.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "SDLHandler.h"
-#include "Tweener.h"
 #include "Utils.h"
 
 void WindowDrawer::drawMenuBar()
@@ -33,6 +34,26 @@ void WindowDrawer::drawMenuBar()
 				_showInspector = !_showInspector;
 			if (ImGui::MenuItem("Stats", "F1", _showStats))
 				_showStats = !_showStats;
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Object"))
+		{
+			auto spawnPos = Camera::instance->pos() + Camera::instance->forward() * 10.0f;
+			if (ImGui::MenuItem("New Mesh", "Tab"))
+			{
+				auto mesh = new Mesh();
+				mesh->setPos(spawnPos);
+				ObjectManipulator::selectObject(mesh);
+			}
+			if (ImGui::MenuItem("New Sphere", "Tab"))
+				ObjectManipulator::selectObject(new Sphere(spawnPos, 2));
+			if (ImGui::MenuItem("New Cube", "Tab"))
+				ObjectManipulator::selectObject(new Cube(spawnPos, 2));
+			if (ImGui::MenuItem("New Square", "Tab"))
+				ObjectManipulator::selectObject(new Square(spawnPos, 2));
+			if (ImGui::MenuItem("New Plane", "Tab"))
+				ObjectManipulator::selectObject(new Plane(spawnPos));
 
 			ImGui::EndMenu();
 		}
@@ -95,11 +116,14 @@ void WindowDrawer::drawInspector()
 
 	ImGui::Begin("Inspector", nullptr);
 	{
-		//ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
-		//ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
-
 		if (auto obj = ObjectManipulator::selectedObject())
 			obj->drawInspector();
+		else
+		{
+			Scene::lights[0]->drawInspector();
+			//ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
+			//ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+		}
 	}
 	ImGui::End();
 

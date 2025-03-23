@@ -25,6 +25,8 @@ public:
 	BaseTriangle(Vertex v1, Vertex v2, Vertex v3);
 
 	std::vector<Vertex>& vertices() { return _vertices; }
+
+	void setUVs(glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3);
 };
 
 class Triangle

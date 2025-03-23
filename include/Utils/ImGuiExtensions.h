@@ -25,7 +25,7 @@ namespace ImGui
 	void ItemLabel(std::string_view title, ItemLabelFlag flags = ItemLabelFlag::Left);
 
 	template <typename Func, typename... Args>
-	bool LabeledInput(const char* label, Func func, ImGuiInputTextFlags flags, Args&&... args)
+	bool LabeledInput(const char* label, Func func, int flags, Args&&... args)
 	{
 		if (flags & ImGuiInputTextFlags_ReadOnly)
 		{
@@ -54,23 +54,44 @@ namespace ImGui
 		return result;
 	}
 	template <typename Func, typename... Args>
-	bool LabeledInput(const char* label, Func func, ImGuiInputTextFlags flags, bool& isDirty, Args&&... args)
+	bool LabeledInputNoFlags(const char* label, Func func, int flags, Args&&... args)
 	{
-		if (LabeledInput(label, func, flags, std::forward<Args>(args)...))
+		if (flags & ImGuiInputTextFlags_ReadOnly)
 		{
-			isDirty = true;
-			return true;
+			PushItemFlag(ImGuiItemFlags_Disabled, true);
+			PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
 		}
-		return false;
+
+		ItemLabel(label);
+		SameLine();
+
+		bool result = false;
+		if constexpr (std::is_same_v<decltype(func((std::string("##") + label).c_str(), std::forward<Args>(args)...)), bool>)
+		{
+			result = func((std::string("##") + label).c_str(), std::forward<Args>(args)...);
+		}
+		else
+			func((std::string("##") + label).c_str(), std::forward<Args>(args)...);
+
+
+		if (flags & ImGuiInputTextFlags_ReadOnly)
+		{
+			PopStyleVar();
+			PopItemFlag();
+		}
+
+		return result;
 	}
 
-	bool LabeledText(const char* label, const char* text, ImGuiInputTextFlags flags);
-	bool LabeledFloat(const char* label, float& value, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
-	bool LabeledInt(const char* label, int& value, ImGuiInputTextFlags flags = 0);
-	bool LabeledInt(const char* label, int value, ImGuiInputTextFlags flags = 0);
-	bool LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
-	bool LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
-	bool LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
-	bool LabeledColorEdit4(const char* label, float* color, ImGuiColorEditFlags flags = 0);
+	bool LabeledText(const char* label, const char* text, int flags);
+	bool LabeledFloat(const char* label, float& value, int flags = 0, const char* format = "%.1f");
+	bool LabeledInt(const char* label, int& value, int flags = 0);
+	bool LabeledInt(const char* label, int value, int flags = 0);
+	bool LabeledInputFloat2(const char* label, float* values, int flags = 0, const char* format = "%.1f");
+	bool LabeledInputFloat3(const char* label, float* values, int flags = 0, const char* format = "%.1f");
+	bool LabeledInputFloat4(const char* label, float* values, int flags = 0, const char* format = "%.1f");
+	bool LabeledColorEdit3(const char* label, float* color, int flags = 0);
+	bool LabeledColorEdit4(const char* label, float* color, int flags = 0);
 	bool LabeledSliderFloat(const char* label, float& value, float min, float max, ImGuiSliderFlags flags = 0, const char* format = "%.3f");
+	bool LabeledCheckbox(const char* label, bool& value, int flags = 0);
 }

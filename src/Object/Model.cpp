@@ -30,6 +30,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 	bool success = Triangulate(result);
 	if (!success) Debug::logError("Triangulation failed!");
 
+	int f = 0;
 	for (const auto& shape : result.shapes)
 	{
 		const auto& mesh = shape.mesh;
@@ -41,15 +42,15 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 #else
 		#pragma omp parallel for
 #endif
-		for (int f = 0; f < mesh.num_face_vertices.size(); f++)
+		for (int j = 0; j < mesh.num_face_vertices.size(); j++)
 		{
-			if (mesh.num_face_vertices[f] != 3) throw std::runtime_error("Non triangle found after triangulation.");
+			if (mesh.num_face_vertices[j] != 3) throw std::runtime_error("Non triangle found after triangulation.");
 #ifdef NDEBUG
 			std::vector<Vertex> vertices(3);
 #endif
 			for (int v = 0; v < 3; v++)
 			{
-				const auto& [posIdx, uvIdx, normalIdx] = mesh.indices[f * 3 + v];
+				const auto& [posIdx, uvIdx, normalIdx] = mesh.indices[j * 3 + v];
 #ifndef NDEBUG
 				vertices[v] = Vertex();
 #endif
@@ -71,7 +72,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 				}
 			}
 
-			_baseTriangles[f] = new BaseTriangle(vertices[0], vertices[1], vertices[2]);
+			_baseTriangles[f++] = new BaseTriangle(vertices[0], vertices[1], vertices[2]);
 		}
 	}
 }

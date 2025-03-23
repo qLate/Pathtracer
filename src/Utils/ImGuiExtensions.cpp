@@ -57,43 +57,51 @@ void ImGui::ItemLabel(std::string_view title, ItemLabelFlag flags)
 		SetCursorScreenPos(lineStart);
 }
 
-bool ImGui::LabeledText(const char* label, const char* text, ImGuiInputTextFlags flags)
+bool ImGui::LabeledText(const char* label, const char* text, int flags)
 {
 	return LabeledInput(label, Text, flags, text);
 }
-bool ImGui::LabeledFloat(const char* label, float& value, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledFloat(const char* label, float& value, int flags, const char* format)
 {
 	return LabeledInput(label, InputFloat, flags, &value, 0.0f, 0.0f, format);
 }
-bool ImGui::LabeledInt(const char* label, int& value, ImGuiInputTextFlags flags)
+bool ImGui::LabeledInt(const char* label, int& value, int flags)
 {
 	float val = value;
 	bool result = LabeledFloat(label, val, flags, "%.0f");
 	value = (int)val;
 	return result;
 }
-bool ImGui::LabeledInt(const char* label, int value, ImGuiInputTextFlags flags)
+bool ImGui::LabeledInt(const char* label, int value, int flags)
 {
 	float val = value;
 	return LabeledFloat(label, val, flags, "%.0f");
 }
-bool ImGui::LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledInputFloat2(const char* label, float* values, int flags, const char* format)
 {
 	return LabeledInput(label, InputFloat2, flags, values, format);
 }
-bool ImGui::LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledInputFloat3(const char* label, float* values, int flags, const char* format)
 {
 	return LabeledInput(label, InputFloat3, flags, values, format);
 }
-bool ImGui::LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledInputFloat4(const char* label, float* values, int flags, const char* format)
 {
 	return LabeledInput(label, InputFloat4, flags, values, format);
 }
-bool ImGui::LabeledColorEdit4(const char* label, float* color, ImGuiColorEditFlags flags)
+bool ImGui::LabeledColorEdit3(const char* label, float* color, int flags)
+{
+	return LabeledInput(label, ColorEdit3, flags, color);
+}
+bool ImGui::LabeledColorEdit4(const char* label, float* color, int flags)
 {
 	return LabeledInput(label, ColorEdit4, flags, color);
 }
-bool ImGui::LabeledSliderFloat(const char* label, float& value, float min, float max, ImGuiSliderFlags flags, const char* format)
+bool ImGui::LabeledSliderFloat(const char* label, float& value, float min, float max, int flags, const char* format)
 {
 	return LabeledInput(label, SliderFloat, flags, &value, min, max, format);
+}
+bool ImGui::LabeledCheckbox(const char* label, bool& value, int flags)
+{
+	return LabeledInputNoFlags(label, Checkbox, flags, &value);
 }

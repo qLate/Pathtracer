@@ -103,8 +103,9 @@ bool intersectSphere(inout Ray ray, Object sphere)
 bool intersectPlane(inout Ray ray, Object plane)
 {
     vec3 normal = plane.properties.xyz;
+    normal = localToGlobalDir(normal, plane);
     float denom = -dot(normal, ray.dir);
-    if (denom <= 1e-6) return false;
+    if (denom == 0) return false;
 
     vec3 dir = plane.pos.xyz - ray.pos;
     float t = -dot(normal, dir) / denom;
@@ -112,7 +113,7 @@ bool intersectPlane(inout Ray ray, Object plane)
 
     ray.t = t;
     ray.interPoint = ray.pos + t * ray.dir;
-    ray.surfaceNormal = normal;
+    ray.surfaceNormal = dot(ray.dir, normal) < 0 ? normal : -normal;
     ray.materialIndex = int(plane.materialIndex);
 
     return true;
