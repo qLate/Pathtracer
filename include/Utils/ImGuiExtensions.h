@@ -65,18 +65,12 @@ namespace ImGui
 	}
 
 	bool LabeledText(const char* label, const char* text, ImGuiInputTextFlags flags);
-	bool LabeledValue(const char* label, float value, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
+	bool LabeledFloat(const char* label, float& value, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
+	bool LabeledInt(const char* label, int& value, ImGuiInputTextFlags flags = 0);
 	bool LabeledInt(const char* label, int value, ImGuiInputTextFlags flags = 0);
-	bool LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
+	bool LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
+	bool LabeledInputFloat3(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
+	bool LabeledInputFloat4(const char* label, float* values, ImGuiInputTextFlags flags = 0, const char* format = "%.1f");
 	bool LabeledColorEdit4(const char* label, float* color, ImGuiColorEditFlags flags = 0);
-
-	// With dirty flag
-	bool LabeledValue(const char* label, float value, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledInt(const char* label, int value, bool& isDirty, ImGuiInputTextFlags flags = 0);
-	bool LabeledInputFloat2(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledInputFloat3(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledInputFloat4(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags = 0, const char* format = "%.3f");
-	bool LabeledColorEdit4(const char* label, float* color, bool& isDirty, ImGuiInputTextFlags flags = 0);
+	bool LabeledSliderFloat(const char* label, float& value, float min, float max, ImGuiSliderFlags flags = 0, const char* format = "%.3f");
 }

@@ -63,7 +63,6 @@ vec4 castRay(Ray ray)
         colorImpact *= mat.reflection;
         if (colorImpact <= 1e-6) break;
 
-        // vec3 dir = ray.dir - 2 * dot(ray.dir, ray.surfaceNormal) * ray.surfaceNormal;
         vec3 dir = reflect(ray.dir, ray.surfaceNormal);
         ray = Ray(ray.interPoint, dir, RAY_DEFAULT_ARGS);
     }
@@ -95,5 +94,5 @@ void main()
     }
 
     color /= samplesPerPixel;
-    outColor = color + COLOR_HEAT;
+    outColor = color + COLOR_HEAT + COLOR_DEBUG;
 }

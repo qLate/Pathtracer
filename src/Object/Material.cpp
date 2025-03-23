@@ -1,8 +1,7 @@
-#define STB_IMAGE_IMPLEMENTATION
+#include "Material.h"
 
 #include <stb_image.h>
 
-#include "Material.h"
 #include "BufferController.h"
 #include "Scene.h"
 #include "Utils.h"

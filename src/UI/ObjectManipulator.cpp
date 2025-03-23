@@ -136,11 +136,6 @@ void ObjectManipulator::performDelete()
 void ObjectManipulator::drawMenu()
 {
 	ImGui::Begin("Object Manipulation");
-	if (!_selectedObject)
-	{
-		ImGui::End();
-		return;
-	}
 
 	if (ImGui::RadioButton("Translate", _currGizmoOperation == ImGuizmo::TRANSLATE))
 		_currGizmoOperation = ImGuizmo::TRANSLATE;
@@ -151,17 +146,6 @@ void ObjectManipulator::drawMenu()
 	if (ImGui::RadioButton("Scale", _currGizmoOperation == ImGuizmo::SCALE))
 		_currGizmoOperation = ImGuizmo::SCALE;
 
-	auto transform = _selectedObject->getTransform();
-
-	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-	ImGuizmo::DecomposeMatrixToComponents(&transform[0][0], matrixTranslation, matrixRotation, matrixScale);
-	ImGui::InputFloat3("Tr", matrixTranslation);
-	ImGui::InputFloat3("Rt", matrixRotation);
-	ImGui::InputFloat3("Sc", matrixScale);
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform[0][0]);
-
-	_selectedObject->setTransform(transform);
-
 	if (_currGizmoOperation != ImGuizmo::SCALE)
 	{
 		if (ImGui::RadioButton("Local", _currGizmoMode == ImGuizmo::LOCAL))
@@ -170,17 +154,19 @@ void ObjectManipulator::drawMenu()
 		if (ImGui::RadioButton("World", _currGizmoMode == ImGuizmo::WORLD))
 			_currGizmoMode = ImGuizmo::WORLD;
 	}
+
+	ImGui::End();
 }
 
 void ObjectManipulator::selectObject(Object* object)
 {
 	_selectedObject = object;
+	ImGuizmo::Enable(false);
 }
 void ObjectManipulator::deselectObject()
 {
 	_selectedObject = nullptr;
 	_lastUpdateSelectedObject = nullptr;
-	ImGuizmo::Enable(false);
 }
 
 bool ObjectManipulator::isMouseOverGizmo()

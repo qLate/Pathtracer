@@ -12,12 +12,9 @@ Graphical::Graphical(glm::vec3 pos, glm::quat rot, glm::vec3 scale) : Object(pos
 {
 	init();
 }
-Graphical::Graphical(const Graphical& other) : Object(other), _sharedMaterial(other._sharedMaterial)
+Graphical::Graphical(const Graphical& other) : Object(other), _sharedMaterial(other.materialNoCopy())
 {
 	init();
-
-	if (other._material != nullptr)
-		_material = new Material(*other._material);
 }
 void Graphical::init()
 {

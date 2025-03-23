@@ -1,5 +1,7 @@
 #include "Program.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include <SDL.h>
 
 #include "BufferController.h"

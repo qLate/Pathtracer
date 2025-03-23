@@ -61,13 +61,21 @@ bool ImGui::LabeledText(const char* label, const char* text, ImGuiInputTextFlags
 {
 	return LabeledInput(label, Text, flags, text);
 }
-bool ImGui::LabeledValue(const char* label, float value, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledFloat(const char* label, float& value, ImGuiInputTextFlags flags, const char* format)
 {
 	return LabeledInput(label, InputFloat, flags, &value, 0.0f, 0.0f, format);
 }
+bool ImGui::LabeledInt(const char* label, int& value, ImGuiInputTextFlags flags)
+{
+	float val = value;
+	bool result = LabeledFloat(label, val, flags, "%.0f");
+	value = (int)val;
+	return result;
+}
 bool ImGui::LabeledInt(const char* label, int value, ImGuiInputTextFlags flags)
 {
-	return LabeledValue(label, (float)value, flags, "%.0f");
+	float val = value;
+	return LabeledFloat(label, val, flags, "%.0f");
 }
 bool ImGui::LabeledInputFloat2(const char* label, float* values, ImGuiInputTextFlags flags, const char* format)
 {
@@ -85,28 +93,7 @@ bool ImGui::LabeledColorEdit4(const char* label, float* color, ImGuiColorEditFla
 {
 	return LabeledInput(label, ColorEdit4, flags, color);
 }
-
-bool ImGui::LabeledValue(const char* label, float value, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
+bool ImGui::LabeledSliderFloat(const char* label, float& value, float min, float max, ImGuiSliderFlags flags, const char* format)
 {
-	return LabeledInput(label, InputFloat, flags, isDirty, &value, 0.0f, 0.0f, format);
-}
-bool ImGui::LabeledInt(const char* label, int value, bool& isDirty, ImGuiInputTextFlags flags)
-{
-	return LabeledValue(label, (float)value, isDirty, flags, "%.0f");
-}
-bool ImGui::LabeledInputFloat2(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
-{
-	return LabeledInput(label, InputFloat2, flags, isDirty, values, format);
-}
-bool ImGui::LabeledInputFloat3(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
-{
-	return LabeledInput(label, InputFloat3, flags, isDirty, values, format);
-}
-bool ImGui::LabeledInputFloat4(const char* label, float* values, bool& isDirty, ImGuiInputTextFlags flags, const char* format)
-{
-	return LabeledInput(label, InputFloat4, flags, isDirty, values, format);
-}
-bool ImGui::LabeledColorEdit4(const char* label, float* color, bool& isDirty, ImGuiColorEditFlags flags)
-{
-	return LabeledInput(label, ColorEdit4, flags, isDirty, color);
+	return LabeledInput(label, SliderFloat, flags, &value, min, max, format);
 }
