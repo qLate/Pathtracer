@@ -49,9 +49,9 @@ void Program::init()
 
 	Debug::log("--------------------------------");
 
-	//SceneSetup::setupScene();
+	SceneSetup::setupScene();
 	//SceneLoader::saveScene("scene.json");
-	SceneLoader::loadScene("scene.json");
+	//SceneLoader::loadScene("scene.json");
 	tm.printElapsedFromLast("Scene setup in ");
 
 	BufferController::initBuffers();

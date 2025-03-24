@@ -16,7 +16,5 @@ Folder.DotSettings.user
 
 CMakeSettings.json
 
-assets/models
-assets/textures
-
 imgui.ini
+assets/models/skeleton.obj

@@ -9,6 +9,7 @@
 #include "ObjectManipulator.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "SceneLoader.h"
 #include "SDLHandler.h"
 #include "Utils.h"
 
@@ -22,6 +23,9 @@ void WindowDrawer::drawWindows()
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_F2))
 		_showIcons = !_showIcons;
+
+	if (ImGui::IsKeyPressed(ImGuiKey_S))
+		SceneLoader::saveScene("scene.json");
 
 	drawMenuBar();
 	drawScene();

@@ -4,10 +4,34 @@
 
 #include "Camera.h"
 #include "Graphical.h"
+#include "ImFileDialog.h"
 #include "Light.h"
 #include "Scene.h"
 #include "Model.h"
 
+
+void SceneLoader::update()
+{
+	if (ifd::FileDialog::Instance().IsDone("SaveScene"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+		{
+			auto path = ifd::FileDialog::Instance().GetResult().string();
+			saveScene(path);
+		}
+		ifd::FileDialog::Instance().Close();
+	}
+
+	if (ifd::FileDialog::Instance().IsDone("OpenScene"))
+	{
+		if (ifd::FileDialog::Instance().HasResult())
+		{
+			auto path = ifd::FileDialog::Instance().GetResult().string();
+			loadScene(path);
+		}
+		ifd::FileDialog::Instance().Close();
+	}
+}
 
 void SceneLoader::saveScene(const std::string& path)
 {
@@ -67,4 +91,14 @@ void SceneLoader::loadScene(const std::string& path)
 		else if (type == "DirectionalLight")
 			new DirectionalLight(JsonUtility::fromJson<DirectionalLight>(objJson));
 	}
+}
+void SceneLoader::saveSceneDialog()
+{
+	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
+	ifd::FileDialog::Instance().Open("SaveScene", "Save a scene file", "Scene file (*.json){.json},.*", true, dir);
+}
+void SceneLoader::loadSceneDialog()
+{
+	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
+	ifd::FileDialog::Instance().Open("OpenScene", "Open a scene file", "Scene file (*.json){.json},.*", false, dir);
 }
