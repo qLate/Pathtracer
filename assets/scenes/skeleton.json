@@ -1,0 +1,113 @@
+{
+    "objects": [
+        {
+            "bgColor": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806,
+                1.0
+            ],
+            "classType": "Camera",
+            "focalDistance": 1.0,
+            "lensRadius": 0.0,
+            "pos": [
+                -26.051307678222656,
+                -64.24848175048828,
+                33.874168395996094
+            ],
+            "rot": [
+                0.9624905586242676,
+                -0.09868838638067245,
+                0.025284819304943085,
+                -0.25146225094795227
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "classType": "Mesh",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "model": {
+                "classType": "Model",
+                "path": "assets/models/skeleton.obj"
+            },
+            "pos": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rot": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        },
+        {
+            "classType": "PointLight",
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "dis": 3.4028234663852886e+38,
+            "intensity": 1.0,
+            "pos": [
+                -26.051307678222656,
+                -64.24848175048828,
+                33.874168395996094
+            ],
+            "rot": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ]
+}

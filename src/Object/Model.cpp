@@ -10,6 +10,10 @@ Model::Model(const std::filesystem::path& path) : _path(path.string())
 {
 	parse(path);
 }
+Model::Model(const Model& other) : _path(other._path)
+{
+	parse(std::filesystem::path(_path));
+}
 void Model::parse(const std::filesystem::path& path)
 {
 	parseRapidobj(path);
@@ -19,6 +23,7 @@ Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
 {
 	_baseTriangles = baseTriangles;
 }
+
 
 void Model::parseRapidobj(const std::filesystem::path& path)
 {

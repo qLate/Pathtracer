@@ -13,5 +13,5 @@ public:
 	static void saveSceneDialog();
 	static void loadSceneDialog();
 
-	friend class WindowDrawer;
+	friend class ImGuiHandler;
 };

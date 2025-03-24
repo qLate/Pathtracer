@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "Scene.h"
 #include "Model.h"
+#include "ObjectManipulator.h"
 
 
 void SceneLoader::update()
@@ -68,6 +69,20 @@ void SceneLoader::saveScene(const std::string& path)
 }
 void SceneLoader::loadScene(const std::string& path)
 {
+	for (int i = Scene::objects.size() - 1; i >= 0; i--)
+		delete Scene::objects[i];
+	Scene::objects.clear();
+
+	//for (int i = Scene::materials.size() - 1; i >= 0; i--)
+	//	delete Scene::materials[i];
+	//Scene::materials.clear();
+
+	//for (int i = Scene::textures.size() - 1; i >= 0; i--)
+	//	delete Scene::textures[i];
+	//Scene::textures.clear();
+
+	ObjectManipulator::deselectObject();
+
 	std::ifstream file(path);
 	nlohmann::json json;
 	file >> json;
@@ -95,7 +110,7 @@ void SceneLoader::loadScene(const std::string& path)
 void SceneLoader::saveSceneDialog()
 {
 	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
-	ifd::FileDialog::Instance().Open("SaveScene", "Save a scene file", "Scene file (*.json){.json},.*", true, dir);
+	ifd::FileDialog::Instance().Save("SaveScene", "Save a scene file", "Scene file (*.json){.json},.*", dir);
 }
 void SceneLoader::loadSceneDialog()
 {

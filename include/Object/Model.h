@@ -16,6 +16,7 @@ class Model
 	void parse(const std::filesystem::path& path);
 	void parseRapidobj(const std::filesystem::path& path);
 	void parseSelfWritten(const std::filesystem::path& path);
+	Model(const Model& other);
 
 public:
 	Model(const std::vector<BaseTriangle*>& baseTriangles);
@@ -26,6 +27,7 @@ public:
 	constexpr static auto properties();
 
 	friend class Assets;
+	friend class JsonUtility;
 };
 
 constexpr auto Model::properties()

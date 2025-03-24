@@ -12,13 +12,19 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 
 	std::vector<uint8_t> image;
 	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
-	setImageData(image);
+	initData(image);
 
 	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
 Texture::Texture(const Texture& other) :Texture(other._path) {}
+
+Texture::~Texture()
+{
+	delete[] _data;
+	std::erase(Scene::textures, this);
+}
 
 Texture* Texture::defaultTex()
 {
@@ -36,7 +42,7 @@ bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::pat
 	stbi_image_free(data);
 	return data != nullptr;
 }
-void Texture::setImageData(const std::vector<uint8_t>& image)
+void Texture::initData(const std::vector<uint8_t>& image)
 {
 	_data = new unsigned char[_width * _height * 4];
 	memcpy(_data, image.data(), _width * _height * 4);

@@ -12,6 +12,7 @@
 #include "Utils.h"
 #include "ImGuiExtensions.h"
 #include "ObjectManipulator.h"
+#include "SceneLoader.h"
 #include "WindowDrawer.h"
 
 void ImGuiHandler::init()
@@ -93,6 +94,7 @@ void ImGuiHandler::draw()
 	if (_isInit) initDocking();
 	updateDocking();
 
+	SceneLoader::update();
 	WindowDrawer::drawWindows();
 	ObjectManipulator::update();
 

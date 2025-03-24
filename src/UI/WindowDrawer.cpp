@@ -15,17 +15,19 @@
 
 void WindowDrawer::drawWindows()
 {
-	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
+	if (ImGui::IsKeyPressed(ImGuiKey_Tab))
 		_showInspector = !_showInspector;
 
-	if (Input::wasKeyPressed(SDL_SCANCODE_F1))
+	if (ImGui::IsKeyPressed(ImGuiKey_F1))
 		_showStats = !_showStats;
 
-	if (Input::wasKeyPressed(SDL_SCANCODE_F2))
+	if (ImGui::IsKeyPressed(ImGuiKey_F2))
 		_showIcons = !_showIcons;
 
-	if (ImGui::IsKeyPressed(ImGuiKey_S))
-		SceneLoader::saveScene("scene.json");
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))
+		SceneLoader::saveSceneDialog();
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_O))
+		SceneLoader::loadSceneDialog();
 
 	drawMenuBar();
 	drawScene();
@@ -41,6 +43,10 @@ void WindowDrawer::drawMenuBar()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+				SceneLoader::saveSceneDialog();
+			if (ImGui::MenuItem("Load Scene", "Ctrl+O"))
+				SceneLoader::loadSceneDialog();
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View"))

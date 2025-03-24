@@ -5,17 +5,30 @@
 #include "Renderer.h"
 #include "Triangle.h"
 
-Camera::Camera(glm::vec3 pos, glm::vec2 ratio, float focalDistance, float lensRadius) : Object(pos), _ratio(ratio), _focalDis(focalDistance), _lensRadius(lensRadius)
+Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(pos), _focalDis(focalDistance), _lensRadius(lensRadius)
 {
 	if (instance != nullptr)
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
 
-	Renderer::renderProgram()->setFloat2("screenSize", ratio);
+	auto renderSize = WindowDrawer::currRenderSize();
+	_ratio = {renderSize.x / (float)renderSize.y, 1};
+
+	Renderer::renderProgram()->setFloat2("screenSize", _ratio);
 	Renderer::renderProgram()->setFloat("focalDistance", focalDistance);
 	Renderer::renderProgram()->setFloat("lensRadius", lensRadius);
 }
-Camera::Camera(const Camera& orig) : Camera(orig._pos, orig._ratio, orig._focalDis, orig._lensRadius) {}
+Camera::Camera(const Camera& orig) : Camera(orig._pos, orig._focalDis, orig._lensRadius)
+{
+	_bgColor = orig._bgColor;
+	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
+}
+
+Camera::~Camera()
+{
+	if (!initialized()) return;
+	instance = nullptr;
+}
 
 void Camera::setPos(glm::vec3 pos, bool notify)
 {

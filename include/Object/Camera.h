@@ -1,9 +1,8 @@
-// ReSharper disable CppRedefinitionOfDefaultArgumentInOverrideFunction
 #pragma once
 
 #include "Color.h"
 #include "Object.h"
-#include "ImGuiHandler.h"
+#include "ImGUIHandler.h"
 
 class Camera : public Object
 {
@@ -16,8 +15,9 @@ class Camera : public Object
 public:
 	inline static Camera* instance = nullptr;
 
-	Camera(glm::vec3 pos, glm::vec2 ratio = {ImGuiHandler::INIT_RENDER_SIZE.x / (float)ImGuiHandler::INIT_RENDER_SIZE.y, 1}, float focalDistance = 1, float lensRadius = 0);
+	Camera(glm::vec3 pos, float focalDistance = 1, float lensRadius = 0);
 	Camera(const Camera& orig);
+	~Camera() override;
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
