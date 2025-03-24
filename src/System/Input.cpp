@@ -3,6 +3,7 @@
 #include "BufferController.h"
 #include "Camera.h"
 #include "Graphical.h"
+#include "ImFileDialog.h"
 #include "WindowDrawer.h"
 #include "Light.h"
 #include "SDLHandler.h"
@@ -12,7 +13,7 @@
 #include "ObjectManipulator.h"
 #include "Physics.h"
 #include "Scene.h"
-#include "Utils.h"
+#include "SceneLoader.h"
 
 void Input::update()
 {
@@ -32,7 +33,7 @@ void Input::updateInputState()
 }
 void Input::updateMovement()
 {
-	if (!SDLHandler::isNavigatingScene()) return;
+	if (!SDLHandler::isNavigatingScene() || SceneLoader::isSelectingPath()) return;
 
 	auto camera = Camera::instance;
 	auto finalMoveSpeed = MOVE_SPEED * _moveSpeedMult;
@@ -67,6 +68,8 @@ void Input::updateMovement()
 
 void Input::handleSDLEvent(const SDL_Event& event)
 {
+	if (SceneLoader::isSelectingPath()) return;
+
 	auto camera = Camera::instance;
 	if (event.type == SDL_KEYDOWN)
 	{

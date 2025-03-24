@@ -184,7 +184,7 @@ void BufferController::updateTriangles()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
-#pragma omp parallel for
+//#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];

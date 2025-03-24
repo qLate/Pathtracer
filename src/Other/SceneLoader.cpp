@@ -17,6 +17,8 @@ void SceneLoader::update()
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 		{
+			_isSelectingPath = false;
+
 			auto path = ifd::FileDialog::Instance().GetResult().string();
 			saveScene(path);
 		}
@@ -27,6 +29,8 @@ void SceneLoader::update()
 	{
 		if (ifd::FileDialog::Instance().HasResult())
 		{
+			_isSelectingPath = false;
+
 			auto path = ifd::FileDialog::Instance().GetResult().string();
 			loadScene(path);
 		}
@@ -109,11 +113,15 @@ void SceneLoader::loadScene(const std::string& path)
 }
 void SceneLoader::saveSceneDialog()
 {
+	_isSelectingPath = true;
+
 	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
 	ifd::FileDialog::Instance().Save("SaveScene", "Save a scene file", "Scene file (*.json){.json},.*", dir);
 }
 void SceneLoader::loadSceneDialog()
 {
+	_isSelectingPath = true;
+
 	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
 	ifd::FileDialog::Instance().Open("OpenScene", "Open a scene file", "Scene file (*.json){.json},.*", false, dir);
 }

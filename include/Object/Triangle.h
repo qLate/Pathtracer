@@ -43,6 +43,7 @@ public:
 
 	Triangle(BaseTriangle* baseTri, Mesh* mesh);
 
+	BaseTriangle* baseTriangle() const { return _baseTriangle; }
 	std::vector<Vertex>& vertices() const { return _baseTriangle->vertices(); }
 	Mesh* mesh() const { return _mesh; }
 

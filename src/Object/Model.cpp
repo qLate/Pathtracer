@@ -24,7 +24,6 @@ Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
 	_baseTriangles = baseTriangles;
 }
 
-
 void Model::parseRapidobj(const std::filesystem::path& path)
 {
 	using namespace rapidobj;
@@ -45,7 +44,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 #ifndef NDEBUG
 		std::vector<Vertex> vertices(3);
 #else
-		#pragma omp parallel for
+#pragma omp parallel for
 #endif
 		for (int j = 0; j < mesh.num_face_vertices.size(); j++)
 		{
@@ -79,6 +78,12 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 
 			_baseTriangles[f++] = new BaseTriangle(vertices[0], vertices[1], vertices[2]);
 		}
+	}
+
+	for (int i = 0; i < _baseTriangles.size(); i++)
+	{
+		if (_baseTriangles[i] == nullptr)
+			Debug::log("Triangle ", i);
 	}
 }
 
