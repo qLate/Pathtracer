@@ -7,6 +7,17 @@
 
 Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(pos), _focalDis(focalDistance), _lensRadius(lensRadius)
 {
+	init();
+}
+Camera::Camera(const Camera& orig) : Object(orig), _ratio(orig._ratio), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius)
+{
+	init();
+
+	_bgColor = orig._bgColor;
+	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
+}
+void Camera::init()
+{
 	if (instance != nullptr)
 		throw std::runtime_error("Camera object already exists.");
 	instance = this;
@@ -15,13 +26,8 @@ Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(po
 	_ratio = {renderSize.x / (float)renderSize.y, 1};
 
 	Renderer::renderProgram()->setFloat2("screenSize", _ratio);
-	Renderer::renderProgram()->setFloat("focalDistance", focalDistance);
-	Renderer::renderProgram()->setFloat("lensRadius", lensRadius);
-}
-Camera::Camera(const Camera& orig) : Camera(orig._pos, orig._focalDis, orig._lensRadius)
-{
-	_bgColor = orig._bgColor;
-	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
+	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
+	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
 }
 
 Camera::~Camera()

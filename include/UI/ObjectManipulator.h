@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "imgui.h"
 #include "ImGuizmo.h"
 #include "Utils.h"
 

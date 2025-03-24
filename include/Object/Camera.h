@@ -2,7 +2,6 @@
 
 #include "Color.h"
 #include "Object.h"
-#include "ImGUIHandler.h"
 
 class Camera : public Object
 {
@@ -17,6 +16,7 @@ public:
 
 	Camera(glm::vec3 pos, float focalDistance = 1, float lensRadius = 0);
 	Camera(const Camera& orig);
+	void init();
 	~Camera() override;
 
 	void setPos(glm::vec3 pos, bool notify = true) override;

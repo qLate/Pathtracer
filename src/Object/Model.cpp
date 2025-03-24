@@ -34,7 +34,7 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 	bool success = Triangulate(result);
 	if (!success) Debug::logError("Triangulation failed!");
 
-	int f = 0;
+	std::atomic f = 0;
 	for (const auto& shape : result.shapes)
 	{
 		const auto& mesh = shape.mesh;
