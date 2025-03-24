@@ -1,8 +1,8 @@
 bool castShadowRays(Ray ray)
 {
-    for (int objInd = 0; objInd < objectCount; objInd++)
+    for (int i = 0; i < objectCount; i++)
     {
-        if (objects[objInd].objType != 0 && intersectDefaultObj(ray, objects[objInd])) return true;
+        if (objects[i].objType != 0 && intersectDefaultObj(ray, objects[i])) return true;
     }
     return intersectBVHTree(ray, true);
 }
@@ -11,7 +11,10 @@ void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diff
 {
     if (castShadowRays(Ray(ray.interPoint, globalLight.properties1.yzw, RAY_DEFAULT_ARGS))) return;
 
-    float light = max(dot(globalLight.properties1.yzw, ray.surfaceNormal), 0.0);
+    // mat4x4 rotMat = getTransformRotation(objects[0].transform);
+    mat4x4 rotMat = mat4x4(1.0);
+    vec3 dir = (rotMat * vec4(globalLight.properties1.yzw, 1.0)).xyz;
+    float light = max(dot(dir, ray.surfaceNormal), 0.0);
     diffuse += light * globalLight.color * globalLight.properties1.x;
 }
 

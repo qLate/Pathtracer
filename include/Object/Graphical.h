@@ -13,14 +13,15 @@ class Model;
 
 class Graphical : public Object
 {
-protected:
-	int _indexId;
+	int _indexId = -1;
 
+protected:
 	Material* _sharedMaterial = Material::defaultLit();
 	Material* _material = nullptr;
 
-	Graphical(glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Graphical(glm::vec3 pos, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Graphical(const Graphical& other);
+	Graphical() = default;
 	void init();
 
 	~Graphical() override;
@@ -35,6 +36,8 @@ public:
 	void setMaterial(const Material& material);
 	void setSharedMaterial(Material* material);
 
+	constexpr static auto properties();
+
 private:
 	Graphical* clone_internal() const override { return new Graphical(*this); }
 	void drawInspector() override { return GraphicalInspectorDrawer::draw(this); }
@@ -47,11 +50,13 @@ protected:
 	Model* _model;
 	std::vector<Triangle*> _triangles;
 
+	Mesh() = default;
+
 	void init(const Model* model);
 	void removeTriangles();
 
 public:
-	Mesh(Model* model = nullptr, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Mesh(Model* model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Mesh(const Mesh& orig);
 	~Mesh() override;
 
@@ -59,27 +64,43 @@ public:
 
 	void setModel(const Model* model);
 
+	constexpr static auto properties();
+
 private:
 	Mesh* clone_internal() const override { return new Mesh(*this); }
 	void drawInspector() override { return MeshInspectorDrawer::draw(this); }
+
+	friend class JsonUtility;
 };
 
 
 class Square final : public Mesh
 {
+	float _side;
+
+	Square();
+
 public:
 	Square(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Square(const Square& orig);
 	static Model* getBaseModel();
 
+	float side() const { return _side; }
+
+	constexpr static auto properties();
+
 private:
 	Square* clone_internal() const override { return new Square(*this); }
+
+	friend class JsonUtility;
 };
 
 
 class Cube final : public Mesh
 {
 	float _side;
+
+	Cube();
 
 public:
 	Cube(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
@@ -88,14 +109,20 @@ public:
 
 	float side() const { return _side; }
 
+	constexpr static auto properties();
+
 private:
 	Cube* clone_internal() const override { return new Cube(*this); }
+
+	friend class JsonUtility;
 };
 
 
 class Sphere final : public Graphical
 {
 	float _radius;
+
+	Sphere() = default;
 
 public:
 	Sphere(glm::vec3 pos, float radius, glm::vec3 scale = {1, 1, 1});
@@ -104,18 +131,87 @@ public:
 	float radius() const { return _radius; }
 	void setRadius(float radius);
 
+	constexpr static auto properties();
+
 private:
 	Sphere* clone_internal() const override { return new Sphere(*this); }
 	void drawInspector() override { return SphereInspectorDrawer::draw(this); }
+
+	friend class JsonUtility;
 };
 
 
 class Plane final : public Graphical
 {
+	Plane() = default;
+
 public:
 	Plane(glm::vec3 pos, glm::vec3 rot = {});
 	Plane(const Plane& orig);
 
+	constexpr static auto properties();
+
 private:
 	Plane* clone_internal() const override { return new Plane(*this); }
+
+	friend class JsonUtility;
 };
+
+
+constexpr auto Graphical::properties()
+{
+	return std::tuple_cat(
+		Object::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Graphical::_sharedMaterial, "sharedMaterial"),
+			JsonUtility::property(&Graphical::_material, "material")
+		)
+	);
+}
+
+constexpr auto Mesh::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Mesh::_model, "model")
+		)
+	);
+}
+
+constexpr auto Square::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Square::_side, "side")
+		)
+	);
+}
+
+constexpr auto Cube::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Cube::_side, "side")
+		)
+	);
+}
+
+constexpr auto Sphere::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Sphere::_radius, "radius")
+		)
+	);
+}
+
+constexpr auto Plane::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties()
+	);
+}

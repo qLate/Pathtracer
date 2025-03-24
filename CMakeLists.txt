@@ -25,6 +25,7 @@ include_directories(libs/stb_image)
 include_directories(libs/imgui/include)
 include_directories(libs/rapidobj)
 include_directories(libs/gl-radix-sort)
+include_directories(libs/nlohmann)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
@@ -60,6 +61,7 @@ add_executable(${PROJECT_NAME}
         "src/UI/WindowDrawer.cpp"
         "src/UI/ObjectManipulator.cpp"
         "src/UI/InspectorDrawer.cpp"
+        "src/UI/IconDrawer.cpp"
 
         "src/OpenGL/Shader.cpp"
         "src/OpenGL/TraceShader.cpp"
@@ -76,11 +78,12 @@ add_executable(${PROJECT_NAME}
 
         "src/Other/Scene.cpp"
         "src/Other/Tweener.cpp"
+        "src/Other/SceneLoader.cpp"
 
         "src/Utils/MyMath.cpp"
         "src/Utils/Utils.cpp"
         "src/Utils/ImGuiExtensions.cpp"
- "include/System/Assets.h" )
+)
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
@@ -96,4 +99,4 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         $<TARGET_FILE_DIR:Pathtracer>
 )
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)

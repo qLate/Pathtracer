@@ -15,7 +15,7 @@ void ObjectInspectorDrawer::draw(Object* target)
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
-		ImGui::LabeledInt("Object Id", ((Graphical*)target)->indexId(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::LabeledInt("Object Id", ((Graphical*)target)->id(), ImGuiInputTextFlags_ReadOnly);
 
 		auto transform = target->getTransform();
 
@@ -80,7 +80,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 			if (ifd::FileDialog::Instance().HasResult())
 			{
 				auto path = ifd::FileDialog::Instance().GetResult().u8string();
-				material->setTexture(Assets::import<Texture>(path));
+				material->setTexture(Assets::load<Texture>(path));
 			}
 			ifd::FileDialog::Instance().Close();
 		}
@@ -123,7 +123,7 @@ void MeshInspectorDrawer::draw(Mesh* target)
 			if (ifd::FileDialog::Instance().HasResult())
 			{
 				auto path = ifd::FileDialog::Instance().GetResult().u8string();
-				target->setModel(Assets::import<Model>(path));
+				target->setModel(Assets::load<Model>(path));
 			}
 			ifd::FileDialog::Instance().Close();
 		}

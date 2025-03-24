@@ -5,6 +5,7 @@
 
 #include "BufferController.h"
 #include "Color.h"
+#include "JsonUtility.h"
 #include "Utils.h"
 
 class GLTexture2D;
@@ -14,6 +15,8 @@ class Texture
 	inline static int _nextAvailableId = 0;
 
 	int _id;
+	std::string _path;
+
 	unsigned char* _data;
 	int _width = 0, _height = 0;
 
@@ -23,6 +26,8 @@ class Texture
 	void setImageData(const std::vector<uint8_t>& image);
 
 	Texture(const std::filesystem::path& path);
+	Texture(const Texture& other);
+	Texture() = default;
 
 public:
 	static Texture* defaultTex();
@@ -33,9 +38,11 @@ public:
 	int height() const { return _height; }
 	UPtr<GLTexture2D>& glTex() { return _glTex; }
 
-	friend class Assets;
-};
+	constexpr static auto properties();
 
+	friend class Assets;
+	friend class JsonUtility;
+};
 
 class Material
 {
@@ -71,4 +78,26 @@ public:
 	void setTexture(Texture* texture);
 	void setDiffuseCoef(float diffuseCoef);
 	void setReflection(float reflection);
+
+	constexpr static auto properties();
 };
+
+constexpr auto Texture::properties()
+{
+	return std::make_tuple(
+		JsonUtility::property(&Texture::_path, "path")
+	);
+}
+
+constexpr auto Material::properties()
+{
+	return std::tuple_cat(
+		std::make_tuple(
+			JsonUtility::property(&Material::_lit, "lit"),
+			JsonUtility::property(&Material::_color, "color"),
+			JsonUtility::property(&Material::_texture, "texture"),
+			JsonUtility::property(&Material::_diffuseCoef, "diffuseCoef"),
+			JsonUtility::property(&Material::_reflection, "reflection")
+		)
+	);
+}

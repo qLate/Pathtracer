@@ -11,16 +11,19 @@ class Camera : public Object
 	float _focalDis, _lensRadius;
 	Color _bgColor = Color::black();
 
+	Camera() = default;
+
 public:
 	inline static Camera* instance = nullptr;
 
 	Camera(glm::vec3 pos, glm::vec2 ratio = {ImGuiHandler::INIT_RENDER_SIZE.x / (float)ImGuiHandler::INIT_RENDER_SIZE.y, 1}, float focalDistance = 1, float lensRadius = 0);
+	Camera(const Camera& orig);
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
 	void setScale(glm::vec3 scale, bool notify = true) override;
 
-	glm::vec2 size() const { return _ratio; }
+	glm::vec2 ratio() const { return _ratio; }
 	float focalDistance() const { return _focalDis; }
 	float lensRadius() const { return _lensRadius; }
 	Color bgColor() const { return _bgColor; }
@@ -37,4 +40,21 @@ public:
 
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getProjectionMatrix() const;
+
+	glm::vec2 worldToViewportPos(const glm::vec3& worldPos) const;
+	glm::ivec2 worldToScreenPos(const glm::vec3& worldPos) const;
+
+	constexpr static auto properties()
+	{
+		return std::tuple_cat(
+			Object::properties(),
+			std::make_tuple(
+				JsonUtility::property(&Camera::_focalDis, "focalDistance"),
+				JsonUtility::property(&Camera::_lensRadius, "lensRadius"),
+				JsonUtility::property(&Camera::_bgColor, "bgColor")
+			)
+		);
+	}
+
+	friend class JsonUtility;
 };

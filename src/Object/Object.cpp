@@ -6,7 +6,7 @@
 #include "MyMath.h"
 #include "Scene.h"
 
-Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) :  _pos(pos), _rot(rot), _scale(scale)
+Object::Object(const glm::vec3 pos, glm::quat rot, glm::vec3 scale) : _initialized(true), _id(_nextAvailableId++), _pos(pos), _rot(rot), _scale(scale)
 {
 	Scene::objects.emplace_back(this);
 
@@ -16,6 +16,8 @@ Object::Object(const Object& other) : Object(other._pos, other._rot, other._scal
 
 Object::~Object()
 {
+	if (!_initialized) return;
+
 	auto ind = std::ranges::find(Scene::objects, this);
 	Scene::objects[ind - Scene::objects.begin()] = nullptr;
 }
@@ -56,14 +58,12 @@ void Object::setTransform(const glm::mat4& transform, bool notify)
 	glm::vec4 perspective;
 	decompose(transform, scale, rot, pos, skew, perspective);
 
-	if (_pos != pos || _rot != rot || _scale != scale)
-	{
-		_pos = pos;
-		_rot = rot;
-		_scale = scale;
-
-		BufferController::markBufferForUpdate(BufferType::Objects);
-	}
+	if (_pos != pos)
+		setPos(pos, notify);
+	if (_rot != rot)
+		setRot(rot, notify);
+	if (_scale != scale)
+		setScale(scale, notify);
 }
 
 void Object::translate(const glm::vec3& v)

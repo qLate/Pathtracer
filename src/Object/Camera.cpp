@@ -15,6 +15,7 @@ Camera::Camera(glm::vec3 pos, glm::vec2 ratio, float focalDistance, float lensRa
 	Renderer::renderProgram()->setFloat("focalDistance", focalDistance);
 	Renderer::renderProgram()->setFloat("lensRadius", lensRadius);
 }
+Camera::Camera(const Camera& orig) : Camera(orig._pos, orig._ratio, orig._focalDis, orig._lensRadius) {}
 
 void Camera::setPos(glm::vec3 pos, bool notify)
 {
@@ -74,4 +75,21 @@ glm::mat4 Camera::getProjectionMatrix() const
 	float farPlane = 10000.0f;
 
 	return glm::perspective(glm::radians(fov), _ratio.x, nearPlane, farPlane);
+}
+
+glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const
+{
+	auto viewMatrix = getViewMatrix();
+	auto projectionMatrix = getProjectionMatrix();
+
+	auto screenPos = projectionMatrix * viewMatrix * glm::vec4(worldPos, 1);
+	screenPos /= screenPos.w;
+	screenPos = 0.5f * screenPos + 0.5f;
+	screenPos.y = 1 - screenPos.y;
+	return screenPos;
+}
+glm::ivec2 Camera::worldToScreenPos(const glm::vec3& worldPos) const
+{
+	auto screenPos = worldToViewportPos(worldPos);
+	return screenPos * (glm::vec2)WindowDrawer::currRenderSize();
 }

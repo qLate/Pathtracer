@@ -36,6 +36,7 @@ public:
 	glm::mat<4, 4, float> getMatrix4X4(const std::string& name) const;
 };
 
+
 class Shader : public BaseShaderMethods
 {
 	static std::string parseShader(const std::string& pathStr);

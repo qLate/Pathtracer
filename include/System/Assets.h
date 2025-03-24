@@ -25,11 +25,11 @@ class Assets
 
 public:
 	template <typename T>
-	static T* import(const std::filesystem::path& path);
+	static T* load(const std::filesystem::path& path);
 };
 
 template <typename T>
-T* Assets::import(const std::filesystem::path& path)
+T* Assets::load(const std::filesystem::path& path)
 {
 	if (auto asset = findAsset<T>(path)) return asset;
 

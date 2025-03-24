@@ -146,11 +146,11 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type) : _width(width), _height(height)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type, GLint internalFormat) : _width(width), _height(height)
 {
 	glBindTexture(GL_TEXTURE_2D, _id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, type, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, type, GL_UNSIGNED_BYTE, data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -194,7 +194,7 @@ GLFrameBuffer::GLFrameBuffer(glm::ivec2 size)
 	glGenFramebuffers(1, &_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
-	renderTexture = new GLTexture2D(size.x, size.y, nullptr, GL_RGB);
+	renderTexture = new GLTexture2D(size.x, size.y, nullptr, GL_RGB, GL_RGB);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id(), 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

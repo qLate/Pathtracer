@@ -100,6 +100,25 @@ bool intersectSphere(inout Ray ray, Object sphere)
     return true;
 }
 
+bool intersectLight(inout Ray ray, Light light, float radius)
+{
+    float x0, x1;
+    vec3 dir = ray.dir;
+    vec3 inter = (ray.pos - light.pos.xyz);
+    float a = dot(dir, dir);
+    float b = dot(dir + dir, inter);
+    float c = abs(dot(inter, inter)) - radius * radius;
+
+    if (!solveQuadratic(a, b, c, x0, x1)) return false;
+    if (x0 <= 0 || x0 >= ray.t || x0 >= ray.maxDis) return false;
+
+    ray.t = x0;
+    ray.interPoint = ray.pos + x0 * dir;
+    ray.surfaceNormal = vec3(1, 0, 0);
+
+    return true;
+}
+
 bool intersectPlane(inout Ray ray, Object plane)
 {
     vec3 normal = plane.properties.xyz;

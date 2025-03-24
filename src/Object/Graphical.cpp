@@ -18,14 +18,22 @@ Graphical::Graphical(const Graphical& other) : Object(other), _sharedMaterial(ot
 }
 void Graphical::init()
 {
-	this->_indexId = Scene::graphicals.size();
+	_indexId = Scene::graphicals.size();
 	Scene::graphicals.emplace_back(this);
 }
 
 Graphical::~Graphical()
 {
-	auto ind = std::ranges::find(Scene::graphicals, this);
-	Scene::graphicals[ind - Scene::graphicals.begin()] = nullptr;
+	if (!initialized()) return;
+
+	auto ind = std::ranges::find(Scene::graphicals, this) - Scene::graphicals.begin();
+	std::erase(Scene::graphicals, this);
+	for (int i = ind; i < Scene::graphicals.size(); i++)
+	{
+		Scene::graphicals[i]->_indexId--;
+		assert(Scene::graphicals[i]->_indexId == i);
+	}
+
 	delete _material;
 }
 
@@ -78,6 +86,8 @@ void Mesh::init(const Model* model)
 
 Mesh::~Mesh()
 {
+	if (!initialized()) return;
+
 	removeTriangles();
 }
 void Mesh::removeTriangles()
@@ -108,8 +118,12 @@ void Mesh::setModel(const Model* model)
 	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
 
-Square::Square(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(getBaseModel(), pos, rot, side * scale) {}
-Square::Square(const Square& orig) : Mesh(orig) {}
+Square::Square() : _side(0)
+{
+	_model = getBaseModel();
+}
+Square::Square(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(getBaseModel(), pos, rot, side * scale), _side(side) {}
+Square::Square(const Square& orig) : Mesh(orig), _side(orig._side) {}
 
 Model* Square::getBaseModel()
 {
@@ -134,6 +148,10 @@ Model* Square::getBaseModel()
 	return _baseModel = new Model(baseTris);
 }
 
+Cube::Cube(): _side(0)
+{
+	_model = getBaseModel();
+}
 Cube::Cube(glm::vec3 pos, float side, glm::quat rot, glm::vec3 scale) : Mesh(getBaseModel(), pos, rot, side * scale), _side(side) {}
 Cube::Cube(const Cube& orig) : Mesh(orig), _side(orig._side) {}
 

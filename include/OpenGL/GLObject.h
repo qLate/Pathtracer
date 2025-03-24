@@ -42,6 +42,7 @@ public:
 	void bindDefault();
 };
 
+
 class GLBufferObject : public GLBuffer
 {
 	GLenum _type;
@@ -66,20 +67,6 @@ public:
 	std::vector<T> readData(int count) const;
 };
 
-template <typename T>
-std::vector<T> GLBufferObject::readData(int count) const
-{
-	glBindBuffer(_type, _id);
-
-	auto ptr = glMapBuffer(_type, GL_READ_ONLY);
-	auto data = std::vector<T>(count);
-	memcpy(data.data(), ptr, count * _align * sizeof(float));
-	glUnmapBuffer(_type);
-
-	glBindBuffer(_type, 0);
-	return data;
-}
-
 
 class UBO : public GLBufferObject
 {
@@ -93,6 +80,7 @@ class SSBO : public GLBufferObject
 public:
 	SSBO(int align, int baseIndex = -1);
 };
+
 
 class AtomicCounterBuffer : public GLBuffer
 {
@@ -125,7 +113,7 @@ class GLTexture2D : public GLTexture
 	int _width, _height;
 
 public:
-	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA);
+	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA, GLint internalFormat = GL_RGBA);
 
 	uint64_t getHandle() const;
 };
@@ -151,3 +139,18 @@ public:
 	GLFrameBuffer(glm::ivec2 size);
 	~GLFrameBuffer() override;
 };
+
+
+template <typename T>
+std::vector<T> GLBufferObject::readData(int count) const
+{
+	glBindBuffer(_type, _id);
+
+	auto ptr = glMapBuffer(_type, GL_READ_ONLY);
+	auto data = std::vector<T>(count);
+	memcpy(data.data(), ptr, count * _align * sizeof(float));
+	glUnmapBuffer(_type);
+
+	glBindBuffer(_type, 0);
+	return data;
+}

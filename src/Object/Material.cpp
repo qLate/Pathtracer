@@ -6,7 +6,7 @@
 #include "Scene.h"
 #include "Utils.h"
 
-Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++)
+Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _path(path.string())
 {
 	Scene::textures.push_back(this);
 
@@ -18,17 +18,18 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++)
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
+Texture::Texture(const Texture& other) :Texture(other._path) {}
 
 Texture* Texture::defaultTex()
 {
-	static Texture instance("assets/textures/default.png");
+	static Texture instance("assets/textures/core/default.png");
 	return &instance;
 }
 
 bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
 {
 	int n;
-	unsigned char* data = stbi_load(path.string().c_str(), &_width, &_height, &n, 4);
+	unsigned char* data = stbi_load(path.string().c_str(), &_width, &_height, &n, STBI_rgb_alpha);
 	if (data != nullptr)
 		data_v = std::vector(data, data + _width * _height * 4);
 

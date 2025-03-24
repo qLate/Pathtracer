@@ -1,0 +1,429 @@
+{
+    "objects": [
+        {
+            "bgColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "classType": "Camera",
+            "focalDistance": 1.0,
+            "lensRadius": 0.0,
+            "pos": [
+                0.0,
+                -30.0,
+                0.0
+            ],
+            "rot": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "classType": "PointLight",
+            "color": [
+                1.0,
+                0.9254902005195618,
+                0.6117647290229797,
+                1.0
+            ],
+            "dis": 35.0,
+            "intensity": 1.0,
+            "pos": [
+                0.0,
+                0.0,
+                8.0
+            ],
+            "rot": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "classType": "Square",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    3.0,
+                    3.0,
+                    3.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "pos": [
+                0.0,
+                0.0,
+                9.994999885559082
+            ],
+            "rot": [
+                0.7071067094802856,
+                -0.7071068286895752,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                5.0,
+                5.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 5.0
+        },
+        {
+            "classType": "Square",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "pos": [
+                -10.0,
+                0.0,
+                0.0
+            ],
+            "rot": [
+                0.7071067094802856,
+                0.0,
+                0.0,
+                -0.7071068286895752
+            ],
+            "scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 20.0
+        },
+        {
+            "classType": "Square",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "pos": [
+                10.0,
+                0.0,
+                0.0
+            ],
+            "rot": [
+                0.7071067094802856,
+                0.0,
+                0.0,
+                0.7071068286895752
+            ],
+            "scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 20.0
+        },
+        {
+            "classType": "Square",
+            "material": null,
+            "pos": [
+                0.0,
+                10.0,
+                0.0
+            ],
+            "rot": [
+                -1.6292068494294654e-07,
+                -0.0,
+                0.0,
+                1.0
+            ],
+            "scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "side": 20.0
+        },
+        {
+            "classType": "Square",
+            "material": null,
+            "pos": [
+                0.0,
+                0.0,
+                -10.0
+            ],
+            "rot": [
+                0.7071067094802856,
+                0.7071068286895752,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "side": 20.0
+        },
+        {
+            "classType": "Square",
+            "material": null,
+            "pos": [
+                0.0,
+                0.0,
+                10.0
+            ],
+            "rot": [
+                0.7071067094802856,
+                -0.7071068286895752,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "side": 20.0
+        },
+        {
+            "classType": "Cube",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    0.5289999842643738,
+                    0.8080000281333923,
+                    0.921999990940094,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.30000001192092896,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/cat.png"
+                }
+            },
+            "pos": [
+                4.0,
+                -4.0,
+                -6.699999809265137
+            ],
+            "rot": [
+                0.9702957272529602,
+                0.0,
+                0.0,
+                -0.24192191660404205
+            ],
+            "scale": [
+                6.599999904632568,
+                6.599999904632568,
+                6.599999904632568
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 6.599999904632568
+        },
+        {
+            "classType": "Sphere",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    0.5289999842643738,
+                    0.8080000281333923,
+                    0.921999990940094,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.30000001192092896,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/marble.jpg"
+                }
+            },
+            "pos": [
+                -4.0,
+                2.0,
+                -5.0
+            ],
+            "radius": 5.0,
+            "rot": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        }
+    ]
+}

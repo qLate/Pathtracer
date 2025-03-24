@@ -1,25 +1,36 @@
 #pragma once
 
-#include <filesystem>
 #include <vector>
 
+#include "JsonUtility.h"
 #include "Triangle.h"
 
 class Triangle;
 
 class Model
 {
+	std::string _path;
 	std::vector<BaseTriangle*> _baseTriangles;
 
-	explicit Model(const std::filesystem::path& path);
+	Model(const std::filesystem::path& path);
 	void parse(const std::filesystem::path& path);
 	void parseRapidobj(const std::filesystem::path& path);
 	void parseSelfWritten(const std::filesystem::path& path);
 
 public:
 	Model(const std::vector<BaseTriangle*>& baseTriangles);
+	Model() = default;
 
 	std::vector<BaseTriangle*> baseTriangles() const { return _baseTriangles; }
 
+	constexpr static auto properties();
+
 	friend class Assets;
 };
+
+constexpr auto Model::properties()
+{
+	return std::make_tuple(
+		JsonUtility::property(&Model::_path, "path")
+	);
+}

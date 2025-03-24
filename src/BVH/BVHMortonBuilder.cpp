@@ -5,6 +5,7 @@
 #include "BufferController.h"
 #include "GLObject.h"
 #include "MortonCodes.h"
+#include "Scene.h"
 #include "ShaderProgram.h"
 #include "Triangle.h"
 #include "Utils.h"
@@ -63,6 +64,8 @@ void BVHMortonBuilder::buildGPU_buildTree(int n)
 	BufferController::ssboBVHTriIndices()->bind(7);
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboTriangles()->bindDefault();
+
+	_bvhBuild->setInt("objectCount", Scene::objects.size());
 
 	_bvhBuild->use();
 	_bvhBuild->setInt("n", n);

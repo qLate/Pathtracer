@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "Graphical.h"
+#include "IconDrawer.h"
 #include "ImGuiExtensions.h"
 #include "Input.h"
 #include "Light.h"
@@ -11,7 +12,7 @@
 #include "SDLHandler.h"
 #include "Utils.h"
 
-void WindowDrawer::drawMenuBar()
+void WindowDrawer::drawWindows()
 {
 	if (Input::wasKeyPressed(SDL_SCANCODE_TAB))
 		_showInspector = !_showInspector;
@@ -19,6 +20,16 @@ void WindowDrawer::drawMenuBar()
 	if (Input::wasKeyPressed(SDL_SCANCODE_F1))
 		_showStats = !_showStats;
 
+	if (Input::wasKeyPressed(SDL_SCANCODE_F2))
+		_showIcons = !_showIcons;
+
+	drawMenuBar();
+	drawScene();
+	if (_showInspector) drawInspector();
+}
+
+void WindowDrawer::drawMenuBar()
+{
 	if (SDLHandler::isFullscreen()) return;
 
 	ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
@@ -34,6 +45,8 @@ void WindowDrawer::drawMenuBar()
 				_showInspector = !_showInspector;
 			if (ImGui::MenuItem("Stats", "F1", _showStats))
 				_showStats = !_showStats;
+			if (ImGui::MenuItem("Icons", "F2", _showIcons))
+				_showIcons = !_showIcons;
 
 			ImGui::EndMenu();
 		}
@@ -42,8 +55,7 @@ void WindowDrawer::drawMenuBar()
 			auto spawnPos = Camera::instance->pos() + Camera::instance->forward() * 10.0f;
 			if (ImGui::MenuItem("New Mesh", "Tab"))
 			{
-				auto mesh = new Mesh();
-				mesh->setPos(spawnPos);
+				auto mesh = new Mesh(nullptr, spawnPos);
 				ObjectManipulator::selectObject(mesh);
 			}
 			if (ImGui::MenuItem("New Sphere", "Tab"))
@@ -54,6 +66,10 @@ void WindowDrawer::drawMenuBar()
 				ObjectManipulator::selectObject(new Square(spawnPos, 2));
 			if (ImGui::MenuItem("New Plane", "Tab"))
 				ObjectManipulator::selectObject(new Plane(spawnPos));
+			if (ImGui::MenuItem("New Point Light", "Tab"))
+				ObjectManipulator::selectObject(new PointLight(spawnPos, Color::white(), 1, 10));
+			if (ImGui::MenuItem("New Directional Light", "Tab"))
+				ObjectManipulator::selectObject(new DirectionalLight(spawnPos, Color::white(), 1));
 
 			ImGui::EndMenu();
 		}
@@ -85,7 +101,8 @@ void WindowDrawer::drawScene()
 			Renderer::resizeView(_currRenderSize);
 		}
 
-		drawScene_displayStats(!node->IsHiddenTabBar());
+		if (_showIcons) IconDrawer::draw();
+		if (_showStats) displayStats(!node->IsHiddenTabBar());
 	}
 	ImGui::End();
 
@@ -93,10 +110,8 @@ void WindowDrawer::drawScene()
 	ImGui::PopStyleVar();
 }
 
-void WindowDrawer::drawScene_displayStats(bool barVisible)
+void WindowDrawer::displayStats(bool barVisible)
 {
-	if (!_showStats) return;
-
 	static float currFPS;
 	static Timer updateTimer = Timer(100);
 
@@ -109,8 +124,6 @@ void WindowDrawer::drawScene_displayStats(bool barVisible)
 
 void WindowDrawer::drawInspector()
 {
-	if (!_showInspector) return;
-
 	auto moveSpeedMult = Input::_moveSpeedMult;
 	auto bgColor = Camera::instance->bgColor();
 
@@ -118,12 +131,6 @@ void WindowDrawer::drawInspector()
 	{
 		if (auto obj = ObjectManipulator::selectedObject())
 			obj->drawInspector();
-		else
-		{
-			Scene::lights[0]->drawInspector();
-			//ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
-			//ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
-		}
 	}
 	ImGui::End();
 

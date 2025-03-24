@@ -19,6 +19,7 @@ layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 uniform vec3 rayPos;
 uniform vec3 rayDir;
 uniform float rayMaxDis;
+uniform bool doIntersectLights = false;
 
 struct RaycastHit
 {
@@ -27,11 +28,24 @@ struct RaycastHit
     vec2 uv;
     int objIndex;
     int triIndex;
+    bool hitLight;
 };
 
 layout(std140, binding = 20) /*buffer*/ uniform SSBO {
     RaycastHit hit;
 };
+
+bool intersectLights(inout Ray ray, inout int hitObjIndex) {
+    bool hit = false;
+    for (int i = 0; i < lightCount; i++)
+    {
+        if (intersectLight(ray, lights[i], 1.0f)) {
+            hit = true;
+            hitObjIndex = i;
+        }
+    }
+    return hit;
+}
 
 void main()
 {
@@ -40,5 +54,11 @@ void main()
     int hitTriIndex = -1, hitObjIndex = -1;
     intersectWorld(ray, hitTriIndex, hitObjIndex);
 
-    hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uvPos, hitObjIndex, hitTriIndex);
+    bool hitLight = false;
+    if (doIntersectLights) {
+        if (intersectLights(ray, hitObjIndex))
+            hitLight = true;
+    }
+
+    hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uvPos, hitObjIndex, hitTriIndex, hitLight);
 }

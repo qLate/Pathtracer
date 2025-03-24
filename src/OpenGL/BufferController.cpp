@@ -145,6 +145,7 @@ void BufferController::updateObjects()
 {
 	auto graphicals = Scene::graphicals;
 	std::vector<ObjectStruct> data(graphicals.size());
+#pragma omp parallel for
 	for (int i = 0; i < graphicals.size(); i++)
 	{
 		if (graphicals[i] == nullptr) continue;

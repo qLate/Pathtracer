@@ -6,7 +6,7 @@
 #include "rapidobj.hpp"
 #include "Utils.h"
 
-Model::Model(const std::filesystem::path& path)
+Model::Model(const std::filesystem::path& path) : _path(path.string())
 {
 	parse(path);
 }

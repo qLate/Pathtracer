@@ -1,6 +1,7 @@
 #include "ImGuiHandler.h"
 
 #include "Camera.h"
+#include "IconDrawer.h"
 #include "ImFileDialog.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
@@ -18,6 +19,7 @@ void ImGuiHandler::init()
 	initImGui();
 	initImFileDialog();
 	ObjectManipulator::init();
+	IconDrawer::init();
 }
 void ImGuiHandler::initImFileDialog()
 {
@@ -34,11 +36,11 @@ void ImGuiHandler::initImFileDialog()
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		return (void*)tex;
+		return reinterpret_cast<void*>(static_cast<uintptr_t>(tex));
 	};
 	ifd::FileDialog::Instance().DeleteTexture = [](void* tex)
 	{
-		GLuint texID = (GLuint)tex;
+			GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(tex));
 		glDeleteTextures(1, &texID);
 	};
 }
@@ -91,9 +93,7 @@ void ImGuiHandler::draw()
 	if (_isInit) initDocking();
 	updateDocking();
 
-	WindowDrawer::drawMenuBar();
-	WindowDrawer::drawScene();
-	WindowDrawer::drawInspector();
+	WindowDrawer::drawWindows();
 	ObjectManipulator::update();
 
 	ImGui::Render();

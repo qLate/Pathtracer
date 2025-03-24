@@ -15,6 +15,7 @@ struct RaycastHit
 	glm::vec2 uv;
 	Object* object;
 	Triangle* triangle;
+	bool hitLight;
 };
 
 class Physics
@@ -40,5 +41,6 @@ private:
 		glm::vec2 uv;
 		int objIndex;
 		int triIndex;
+		bool hitLight;
 	};
 };

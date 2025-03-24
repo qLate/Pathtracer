@@ -101,7 +101,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		{
 			_mouseLeftState = true;
 
-			if (ImGuiHandler::isWindowHovered(WindowType::Scene) && !ObjectManipulator::isMouseOverGizmo())
+			if (ImGuiHandler::isWindowHovered(WindowType::Scene) && !ObjectManipulator::isMouseOverGizmo() && !SDLHandler::isNavigatingScene())
 			{
 				auto hit = Physics::raycast(camera->pos(), camera->getMouseDir());
 				if (hit.hit)

@@ -17,6 +17,7 @@ public:
 	static void dispatch(glm::ivec3 numGroups, GLenum sync = -1);
 };
 
+
 template <typename FragType = Shader>
 class DefaultShaderProgram : public BaseShaderMethods
 {
@@ -33,6 +34,7 @@ public:
 	void addShader(const char* path, int type) const;
 	void use() const;
 };
+
 
 template <typename FragType>
 DefaultShaderProgram<FragType>::DefaultShaderProgram(const char* vertPath, const char* fragPath) : BaseShaderMethods(glCreateProgram())
