@@ -96,7 +96,7 @@ void WindowDrawer::drawScene()
 	if (ImGuiHandler::_isAfterInit || SDLHandler::isNavigatingScene())
 		ImGui::SetNextWindowFocus();
 
-	ImGui::Begin("Scene", nullptr);
+	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	{
 		auto node = ImGui::FindWindowByType(WindowType::Scene)->DockNode;
 		if (!node->IsHiddenTabBar())

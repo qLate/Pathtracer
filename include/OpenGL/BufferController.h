@@ -74,12 +74,13 @@ private:
 
 	struct MaterialStruct
 	{
-		glm::vec4 color;
+		glm::vec3 color;
+		float _pad1;
 		bool lit;
 		float diffuseCoeff;
 		float reflection;
 		float id;
-		glm::vec3 _pad;
+		glm::vec3 _pad2;
 		int textureIndex;
 	};
 

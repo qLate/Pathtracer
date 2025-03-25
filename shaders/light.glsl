@@ -7,7 +7,7 @@ bool castShadowRays(Ray ray)
     return intersectBVHTree(ray, true);
 }
 
-void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diffuse)
+void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec3 diffuse)
 {
     if (castShadowRays(Ray(ray.interPoint, globalLight.properties1.yzw, RAY_DEFAULT_ARGS))) return;
 
@@ -18,7 +18,7 @@ void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec4 diff
     diffuse += light * globalLight.color * globalLight.properties1.x;
 }
 
-void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse)
+void getPointLightIllumination(Ray ray, Light pointLight, inout vec3 diffuse)
 {
     vec3 dir = pointLight.pos - ray.interPoint;
     float dist = length(dir);
@@ -29,13 +29,13 @@ void getPointLightIllumination(Ray ray, Light pointLight, inout vec4 diffuse)
     if (castShadowRays(Ray(pointLight.pos, -dir, dist, RAY_DEFAULT_ARGS_WO_DIST))) return;
 
     float distanceImpact = min(pow(1 - dist / pointLight.properties1.y, 2), 1.);
-    float lightFacingAtPoint = max(dot(dir, ray.surfaceNormal), 0.0);
-    diffuse += (distanceImpact * lightFacingAtPoint) * pointLight.color * pointLight.properties1.x;
+    float angleMult = max(dot(dir, ray.surfaceNormal), 0.0);
+    diffuse += (distanceImpact * angleMult) * pointLight.color * pointLight.properties1.x;
 }
 
-void getIllumination(Ray ray, inout vec4 diffuse)
+vec3 getIllumination(Ray ray)
 {
-    diffuse = vec4(0);
+    vec3 diffuse = vec3(0);
     for (int i = 0; i < lightCount; i++)
     {
         if (lights[i].lightType == 0)
@@ -43,4 +43,5 @@ void getIllumination(Ray ray, inout vec4 diffuse)
         else if (lights[i].lightType == 1)
             getPointLightIllumination(ray, lights[i], diffuse);
     }
+    return diffuse;
 }

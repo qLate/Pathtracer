@@ -9,10 +9,13 @@ class GLFrameBuffer;
 
 class Renderer
 {
-	static constexpr int MAX_RAY_BOUNCE = 5;
+	static constexpr int MAX_RAY_BOUNCE = 3;
+	static constexpr int SAMPLES_PER_PIXEL = 16;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO;
+
+	inline static int _frame = 0;
 
 	static void init();
 

@@ -9,24 +9,25 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
-vec4 COLOR_DEBUG = vec4(0);
+vec3 COLOR_DEBUG = vec3(0);
 
 struct Light
 {
     vec3 pos;
     int lightType; // 0 - global, 1 - point
-    vec4 color;
+    vec3 color;
     vec4 properties1; // intensity, [PointLight(distance) : GlobalLight(dirX, dirY, dirZ) : AreaLight(size)]
 };
 
 struct Material
 {
-    vec4 color;
+    vec3 color;
+    float _pad1;
     bool lit;
     float diffuseCoeff;
     float reflection;
     float id;
-    vec3 _pad;
+    vec3 _pad2;
     int textureIndex;
 };
 

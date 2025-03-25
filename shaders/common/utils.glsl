@@ -1,11 +1,39 @@
 #define FLT_MAX 3.402823466e+38
 #define FLT_MIN 1.175494351e-38
 #define PI 3.14159265359
+#define TWO_PI 6.28318530718
 #define PHI 1.61803398874
 
-float random(in vec2 xy, in float seed) {
-    return fract(sin(distance(xy * PHI, xy) * seed) * xy.x);
+// --- Random ---
+uvec4 seed;
+ivec2 pixel;
+
+void InitRNG(vec2 p, int frame)
+{
+    pixel = ivec2(p);
+    seed = uvec4(p, uint(frame), uint(p.x) + uint(p.y));
 }
+
+void pcg4d(inout uvec4 v)
+{
+    v = v * 1664525u + 1013904223u;
+    v.x += v.y * v.w;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    v.w += v.y * v.z;
+    v = v ^ (v >> 16u);
+    v.x += v.y * v.w;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    v.w += v.y * v.z;
+}
+
+float rand()
+{
+    pcg4d(seed);
+    return float(seed.x) / float(0xffffffffu);
+}
+// --- Random ---
 
 bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1)
 {
@@ -49,20 +77,34 @@ vec3 orderedIntToFloatVec3(ivec3 intVal)
     return vec3(orderedIntToFloat(intVal.x), orderedIntToFloat(intVal.y), orderedIntToFloat(intVal.z));
 }
 
-vec3 randomDirInHemisphere(float r1, float r2)
+void onb(in vec3 N, inout vec3 T, inout vec3 B)
 {
-    float cosTheta = r1;
-    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    vec3 up = abs(N.z) < 0.9999999 ? vec3(0, 0, 1) : vec3(1, 0, 0);
+    T = normalize(cross(up, N));
+    B = cross(N, T);
+}
 
-    float phi = 2.0 * PI * r2;
-    float x = sinTheta * cos(phi);
-    float z = sinTheta * sin(phi);
-    return vec3(x, cosTheta, z);
+vec3 sampleHemisphereUniform(float r1, float r2)
+{
+    float r = sqrt(max(0.0, 1.0 - r1 * r1));
+    float phi = TWO_PI * r2;
+    return vec3(r * cos(phi), r * sin(phi), r1);
+}
+
+vec3 sampleHemisphereCosine(float r1, float r2)
+{
+    vec3 dir;
+    float r = sqrt(r1);
+    float phi = TWO_PI * r2;
+    dir.x = r * cos(phi);
+    dir.y = r * sin(phi);
+    dir.z = sqrt(max(0.0, 1.0 - dir.x * dir.x - dir.y * dir.y));
+    return dir;
 }
 
 vec3 worldToTangent(vec3 dir, vec3 normal)
 {
-    vec3 tangent = normalize(cross(normal, dir));
-    vec3 bitangent = cross(normal, tangent);
-    return vec3(dot(dir, tangent), dot(dir, bitangent), dot(dir, normal));
+    vec3 tangent, bitangent;
+    onb(normal, tangent, bitangent);
+    return dir.x * tangent + dir.y * bitangent + dir.z * normal;
 }

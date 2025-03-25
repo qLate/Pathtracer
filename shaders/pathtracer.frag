@@ -13,7 +13,7 @@ layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 };
 
 out vec4 outColor;
-vec4 COLOR_HEAT = vec4(0);
+vec3 COLOR_HEAT = vec3(0);
 
 // ----------- OPTIONS -----------
 // #define SHOW_BVH_BOXES
@@ -21,7 +21,8 @@ vec4 COLOR_HEAT = vec4(0);
 
 // ----------- SETTINGS -----------
 uniform int maxRayBounce;
-uniform int samplesPerPixel = 1;
+uniform int samplesPerPixel;
+uniform int frame;
 
 #include "intersection.glsl"
 #include "light.glsl"
@@ -31,47 +32,44 @@ uniform vec2 screenSize;
 uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
-uniform vec4 bgColor = vec4(0, 0, 0, 1);
+uniform vec3 bgColor = vec3(0, 0, 0);
 
-vec4 castRay(Ray ray)
+vec3 castRay(Ray ray)
 {
-    vec4 color = vec4(0);
-    bool hit = false;
-    float colorImpact = 1;
-    for (int bounce = 0; bounce < maxRayBounce; bounce++)
+    vec3 color = vec3(0);
+    vec3 impact = vec3(1);
+    for (int i = 0; i < maxRayBounce; i++)
     {
-        intersectWorld(ray);
-        
-        if (ray.t == FLT_MAX) break; // no hit
-        hit = true;
+        if (!intersectWorld(ray)) break;
         ray.interPoint += ray.surfaceNormal * 0.0001;
 
         Material mat = getMaterial(ray.materialIndex);
-        
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-        vec4 uvColor = texture(textures[int(mat.textureIndex)], uv);
-        if (mat.lit)
-        {
-            vec4 diffuse;
-            getIllumination(ray, diffuse);
-            color += colorImpact * (1 - mat.reflection) * uvColor * mat.color * diffuse * mat.diffuseCoeff;
-        }
-        else
-            color += colorImpact * (1 - mat.reflection) * uvColor * mat.color;
+        vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
-        colorImpact *= mat.reflection;
-        if (colorImpact <= 1e-6) break;
+        vec3 directLighting = getIllumination(ray);
+        color += directLighting * albedo / PI * impact;
 
-        vec3 dir = reflect(ray.dir, ray.surfaceNormal);
-        ray = Ray(ray.interPoint, dir, RAY_DEFAULT_ARGS);
+        float pdf = 1 / (2 * PI);
+        float r1 = rand(); // cos(theta)
+        float r2 = rand();
+
+        vec3 samp = sampleHemisphereUniform(r1, r2);
+        vec3 bounceDir = worldToTangent(samp, ray.surfaceNormal);
+
+        impact *= r1 / (pdf * PI) * albedo;
+        if (dot(impact, impact) < 0.01) break;
+        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
     }
 
-    color += colorImpact * bgColor;
-    return hit ? color : bgColor;
+    color += impact * bgColor;
+    return color;
 }
 
 void main()
 {
+    InitRNG(gl_FragCoord.xy, frame);
+
     vec3 right = cameraRotMat[0].xyz;
     vec3 forward = cameraRotMat[1].xyz;
     vec3 up = cameraRotMat[2].xyz;
@@ -79,19 +77,14 @@ void main()
     vec3 lb = focalDistance * forward - 0.5 * screenSize.x * right - 0.5 * screenSize.y * up;
     float x = gl_FragCoord.x / pixelSize.x * screenSize.x;
     float y = gl_FragCoord.y / pixelSize.y * screenSize.y;
-    vec3 rayDir = lb + x * right + y * up;
+    vec3 rayDir = normalize(lb + x * right + y * up);
 
-    float rand = 0.5;
-    vec4 color = vec4(0);
+    vec3 color = vec3(0);
     for (int i = 0; i < samplesPerPixel; ++i)
     {
-        rand = fract(rand * 1232142);
-
-        vec3 lensOffsetStarting = lensRadius * vec3(random(gl_FragCoord.xy, i * 2) - 0.5, random(gl_FragCoord.xy, i * 2 + 1) - 0.5, 0) * (random(gl_FragCoord.xy, i * 2 + 2) - 0.5) * 2;
-        vec3 lensOffset = right * lensOffsetStarting.x + up * lensOffsetStarting.y;
-        color += castRay(Ray(cameraPos + lensOffset, normalize(rayDir - lensOffset), RAY_DEFAULT_ARGS));
+        color += castRay(Ray(cameraPos, rayDir, RAY_DEFAULT_ARGS));
     }
 
     color /= samplesPerPixel;
-    outColor = color + COLOR_HEAT + COLOR_DEBUG;
+    outColor = vec4(color + COLOR_HEAT + COLOR_DEBUG, 1);
 }

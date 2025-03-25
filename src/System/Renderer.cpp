@@ -5,19 +5,20 @@
 #include "GLObject.h"
 #include "ImGuiHandler.h"
 #include "Material.h"
-#include "MyMath.h"
 
 void Renderer::init()
 {
 	_renderProgram = make_unique<DefaultShaderProgram<RaytraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
+	_renderProgram->setInt("samplesPerPixel", SAMPLES_PER_PIXEL);
 	_renderProgram->setFloat2("pixelSize", ImGuiHandler::INIT_RENDER_SIZE);
 }
 
 void Renderer::render()
 {
 	_renderProgram->use();
+	_renderProgram->setInt("frame", _frame++);
 
 	updateCameraUniforms();
 

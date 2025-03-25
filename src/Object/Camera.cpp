@@ -27,7 +27,7 @@ void Camera::init()
 	Renderer::renderProgram()->setFloat2("screenSize", _ratio);
 	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
 	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
-	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
+	Renderer::renderProgram()->setFloat3("bgColor", _bgColor);
 }
 
 Camera::~Camera()
@@ -59,7 +59,7 @@ void Camera::setLensRadius(float lensRadius) { _lensRadius = lensRadius; }
 void Camera::setBgColor(Color color)
 {
 	_bgColor = color;
-	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
+	Renderer::renderProgram()->setFloat3("bgColor", _bgColor);
 }
 
 glm::vec3 Camera::getScreenCenter() const
