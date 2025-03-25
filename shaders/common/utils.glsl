@@ -48,3 +48,21 @@ vec3 orderedIntToFloatVec3(ivec3 intVal)
 {
     return vec3(orderedIntToFloat(intVal.x), orderedIntToFloat(intVal.y), orderedIntToFloat(intVal.z));
 }
+
+vec3 randomDirInHemisphere(float r1, float r2)
+{
+    float cosTheta = r1;
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    float phi = 2.0 * PI * r2;
+    float x = sinTheta * cos(phi);
+    float z = sinTheta * sin(phi);
+    return vec3(x, cosTheta, z);
+}
+
+vec3 worldToTangent(vec3 dir, vec3 normal)
+{
+    vec3 tangent = normalize(cross(normal, dir));
+    vec3 bitangent = cross(normal, tangent);
+    return vec3(dot(dir, tangent), dot(dir, bitangent), dot(dir, normal));
+}

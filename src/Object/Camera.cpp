@@ -103,6 +103,8 @@ glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const
 
 	auto screenPos = projectionMatrix * viewMatrix * glm::vec4(worldPos, 1);
 	screenPos /= screenPos.w;
+	if (screenPos.z < 0 || screenPos.z > 1) return glm::vec2(-1);
+
 	screenPos = 0.5f * screenPos + 0.5f;
 	screenPos.y = 1 - screenPos.y;
 	return screenPos;

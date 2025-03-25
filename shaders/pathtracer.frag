@@ -41,15 +41,14 @@ vec4 castRay(Ray ray)
     for (int bounce = 0; bounce < maxRayBounce; bounce++)
     {
         intersectWorld(ray);
-
+        
         if (ray.t == FLT_MAX) break; // no hit
-
         hit = true;
-        ray.interPoint += ray.surfaceNormal * 0.01;
+        ray.interPoint += ray.surfaceNormal * 0.0001;
 
         Material mat = getMaterial(ray.materialIndex);
+        
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-
         vec4 uvColor = texture(textures[int(mat.textureIndex)], uv);
         if (mat.lit)
         {
