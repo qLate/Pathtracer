@@ -14,7 +14,6 @@ Camera::Camera(const Camera& orig) : Object(orig), _ratio(orig._ratio), _focalDi
 	init();
 
 	_bgColor = orig._bgColor;
-	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
 }
 void Camera::init()
 {
@@ -28,6 +27,7 @@ void Camera::init()
 	Renderer::renderProgram()->setFloat2("screenSize", _ratio);
 	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
 	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
+	Renderer::renderProgram()->setFloat4("bgColor", _bgColor);
 }
 
 Camera::~Camera()

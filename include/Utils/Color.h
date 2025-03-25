@@ -20,6 +20,7 @@ public:
 	static Color cyan() { return {0.f, 1.f, 1.f}; }
 	static Color magenta() { return {1.f, 0.f, 1.f}; }
 	static Color gray() { return {0.2f, 0.2f, 0.2f}; }
+	static Color darkGray() { return {0.1f, 0.1f, 0.1f}; }
 
 	static Color darkGreen() { return {0.f, 0.5f, 0.f}; }
 	static Color skyblue() { return {.529f, .808f, .922f}; }

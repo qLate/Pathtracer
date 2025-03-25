@@ -62,7 +62,7 @@ public:
 	static void updateTriangles();
 	static void updateBVHNodes();
 
-	friend class TraceShader;
+	friend class RaytraceShader;
 	friend class Program;
 
 private:

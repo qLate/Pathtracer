@@ -1,16 +1,16 @@
-#include "TraceShader.h"
+#include "RaytraceShader.h"
 
 #include "BufferController.h"
 #include "glad.h"
 #include "Renderer.h"
 
-TraceShader::TraceShader(const char* path, int id, int) : Shader(path, id, GL_FRAGMENT_SHADER)
+RaytraceShader::RaytraceShader(const char* path, int id, int) : Shader(path, id, GL_FRAGMENT_SHADER)
 {
 	_vaoScreen = new VAO();
 	setUpScreenTriangles();
 }
 
-void TraceShader::setUpScreenTriangles() const
+void RaytraceShader::setUpScreenTriangles() const
 {
 	float screenVertices[] = {
 		-1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f,

@@ -64,7 +64,7 @@ add_executable(${PROJECT_NAME}
         "src/UI/IconDrawer.cpp"
 
         "src/OpenGL/Shader.cpp"
-        "src/OpenGL/TraceShader.cpp"
+        "src/OpenGL/RaytraceShader.cpp"
         "src/OpenGL/BufferController.cpp" 
         "src/OpenGL/GLObject.cpp"
         "src/OpenGL/ShaderProgram.cpp"

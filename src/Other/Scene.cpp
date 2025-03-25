@@ -12,7 +12,7 @@
 
 void SceneSetup::setupScene()
 {
-	skeletonScene();
+	redGreenRoom();
 }
 
 void SceneSetup::museumScene()
@@ -56,7 +56,6 @@ void SceneSetup::spiderScene()
 void SceneSetup::redGreenRoom()
 {
 	auto camera = new Camera({0, -30, 0});
-	//camera->setBackgroundColor(Color::white());
 	auto tex = Assets::load<Texture>("assets/textures/marble.jpg");
 
 	auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35);
@@ -78,7 +77,7 @@ void SceneSetup::redGreenRoom()
 	plane5->setSharedMaterial(whiteWallMat);
 
 	sphere1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
-	cube1->setMaterial({Color::skyblue(), true, Assets::load<Texture>("assets/textures/cat.png"), 1, 0.3f});
+	cube1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f}); // Assets::load<Texture>("assets/textures/cat.png")
 }
 
 void SceneSetup::minecraftHouseScene()

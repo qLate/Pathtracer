@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/vec2.hpp"
-#include "TraceShader.h"
+#include "RaytraceShader.h"
 #include "ShaderProgram.h"
 #include "Utils.h"
 
@@ -11,7 +11,7 @@ class Renderer
 {
 	static constexpr int MAX_RAY_BOUNCE = 5;
 
-	inline static UPtr<DefaultShaderProgram<TraceShader>> _renderProgram;
+	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO;
 
 	static void init();
@@ -20,7 +20,7 @@ class Renderer
 	static void updateCameraUniforms();
 
 public:
-	static UPtr<DefaultShaderProgram<TraceShader>>& renderProgram() { return _renderProgram; }
+	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
 	static UPtr<GLFrameBuffer>& sceneViewFBO() { return _viewFBO; }
 
 	static void resizeView(glm::ivec2 size);

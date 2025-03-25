@@ -141,6 +141,11 @@ void WindowDrawer::drawInspector()
 	{
 		if (auto obj = ObjectManipulator::selectedObject())
 			obj->drawInspector();
+		else
+		{
+			ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
+			ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+		}
 	}
 	ImGui::End();
 
