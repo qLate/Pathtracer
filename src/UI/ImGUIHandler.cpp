@@ -19,6 +19,7 @@ void ImGuiHandler::init()
 {
 	initImGui();
 	initImFileDialog();
+	WindowDrawer::init();
 	ObjectManipulator::init();
 	IconDrawer::init();
 }

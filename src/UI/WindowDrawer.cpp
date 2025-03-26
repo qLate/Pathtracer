@@ -13,6 +13,11 @@
 #include "SDLHandler.h"
 #include "Utils.h"
 
+void WindowDrawer::init()
+{
+	_currRenderSize = ImGuiHandler::INIT_RENDER_SIZE;
+}
+
 void WindowDrawer::drawWindows()
 {
 	if (ImGui::IsKeyPressed(ImGuiKey_Tab))

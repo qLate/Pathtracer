@@ -23,6 +23,8 @@ void Renderer::initViewFBO()
 
 void Renderer::render()
 {
+	if (RENDER_ONCE && _accumFrame > 0) return;
+
 	_renderProgram->use();
 	_renderProgram->setInt("frame", _frame);
 	_renderProgram->setInt("accumFrame", _accumFrame);
@@ -36,9 +38,14 @@ void Renderer::render()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fboCurr->id());
 
+	TimeMeasurerGL tm;
+
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
+
+	if (RENDER_ONCE)
+		tm.printElapsed("Render time: ");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -53,7 +60,7 @@ void Renderer::updateCameraUniforms()
 
 GLFrameBuffer* Renderer::sceneViewFBO()
 {
-	return _frame % 2 == 0 ? _viewFBO1.get() : _viewFBO2.get();
+	return _frame % 2 == 0 || RENDER_ONCE ? _viewFBO1.get() : _viewFBO2.get();
 }
 
 void Renderer::setSamplesPerPixel(int samples)

@@ -18,7 +18,7 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
-Texture::Texture(const Texture& other) :Texture(other._path) {}
+Texture::Texture(const Texture& other) : Texture(other._path) {}
 
 Texture::~Texture()
 {
@@ -58,21 +58,22 @@ Material* Material::defaultUnlit()
 	static Material instance(Color::white(), false);
 	return &instance;
 }
-Material* Material::debugLine()
+Material* Material::debug()
 {
 	static Material instance(Color::red(), false);
 	return &instance;
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float diffuseCoef, float reflection): _id(_nextAvailableId++), _lit {lit}, _color {color}, _texture {texture},
-                                                                                                  _diffuseCoef {diffuseCoef}, _reflection {reflection}
+Material::Material(Color color, bool lit, Texture* texture, float roughness, float reflection, Color emission) : _id(_nextAvailableId++), _lit {lit}, _color {color},
+                                                                                                                  _texture {texture}, _emission {emission},
+                                                                                                                  _roughness {roughness}, _reflection {reflection}
 {
 	Scene::materials.push_back(this);
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }
 Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex()) {}
-Material::Material(const Material& material) : Material(material._color, material._lit, material._texture, material._diffuseCoef, material._reflection) {}
+Material::Material(const Material& material) : Material(material._color, material._lit, material._texture, material._roughness, material._reflection, material._emission) {}
 Material::~Material()
 {
 	std::erase(Scene::materials, this);
@@ -99,13 +100,19 @@ void Material::setTexture(Texture* texture)
 }
 void Material::setDiffuseCoef(float diffuseCoef)
 {
-	_diffuseCoef = diffuseCoef;
+	_roughness = diffuseCoef;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }
 void Material::setReflection(float reflection)
 {
 	_reflection = reflection;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void Material::setEmission(const Color& emission)
+{
+	_emission = emission;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }

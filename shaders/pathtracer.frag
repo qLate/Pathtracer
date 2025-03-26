@@ -41,7 +41,12 @@ vec3 castRay(Ray ray)
     vec3 throughput = vec3(1);
     for (int i = 0; i < maxRayBounces; i++)
     {
-        if (!intersectWorld(ray)) break;
+        if (!intersectWorld(ray))
+        {
+            color += throughput * bgColor;
+            break;
+        }
+
         ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
         ray.interPoint += ray.surfaceNormal * 0.0001;
 
@@ -49,26 +54,39 @@ vec3 castRay(Ray ray)
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
+        if (length(mat.emission) > 0)
+        {
+            color += throughput * mat.emission;
+            break;
+        }
+
         vec3 directLighting = getIllumination(ray);
         color += directLighting * albedo / PI * throughput;
 
         // vec3 samp = sampleHemisphereUniform(rand(), rand());
         // float cosTheta = samp.z;
         // float pdf = 1 / (2 * PI);
+        // throughput *= albedo / (pdf * PI) * cosTheta;
 
         vec3 samp = sampleHemisphereCosine(rand(), rand());
-        float cosTheta = samp.z;
-        float pdf = cosTheta / PI;
+        // float cosTheta = samp.z;
+        // float pdf = cosTheta / PI;
+        throughput *= albedo;
+
+        if (length(throughput) < 0.01) break;
+
+        // Russian roulette
+        if (i > 3)
+        {
+            float p = clamp(max(throughput.r, max(throughput.g, throughput.b)), 0.05, 1.0);
+            if (rand() > p) break;
+            throughput /= p;
+        }
 
         vec3 bounceDir = worldToTangent(samp, ray.surfaceNormal);
-
-        throughput *= albedo / (pdf * PI) * cosTheta;
-        if (dot(throughput, throughput) < 0.01) break;
-
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
     }
 
-    color += throughput * bgColor;
     return color;
 }
 
@@ -89,15 +107,13 @@ void main()
     vec3 rayDir = normalize(lb + x * right + y * up);
 
     vec3 color = vec3(0);
-    for (int i = 0; i < samplesPerPixel; ++i)
+    for (int i = 0; i < samplesPerPixel; i++)
     {
-        vec2 jitter = vec2(rand(), rand());
+        vec2 jitter = vec2(rand(), rand()) - 0.5;
         vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
         color += castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
     }
-
     color /= samplesPerPixel;
-    color = clamp(color, 0, 1);
 
     vec4 accumColor = texture(accumTexture, gl_FragCoord.xy / pixelSize);
     accumColor.rgb = mix(accumColor.rgb, color, 1.0f / (accumFrame + 1));

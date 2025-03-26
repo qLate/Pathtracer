@@ -54,16 +54,17 @@ class Material
 	bool _lit;
 	Color _color;
 	Texture* _texture;
+	Color _emission;
 
-	float _diffuseCoef = 1;
+	float _roughness = 1;
 	float _reflection = 0;
 
 public:
 	static Material* defaultLit();
 	static Material* defaultUnlit();
-	static Material* debugLine();
+	static Material* debug();
 
-	Material(Color color, bool lit, Texture* texture, float diffuseCoef = 1, float reflection = 0);
+	Material(Color color, bool lit, Texture* texture, float roughness = 1, float reflection = 0, Color emission = Color::clear());
 	Material(Color color = Color::white(), bool lit = true);
 	Material(const Material& material);
 	~Material();
@@ -72,14 +73,16 @@ public:
 	bool lit() const { return _lit; }
 	Color color() const { return _color; }
 	Texture* texture() const { return _texture; }
-	float diffuseCoef() const { return _diffuseCoef; }
+	float roughness() const { return _roughness; }
 	float reflection() const { return _reflection; }
+	Color emission() const { return _emission; }
 
 	void setLit(bool lit);
 	void setColor(const Color& color);
 	void setTexture(Texture* texture);
 	void setDiffuseCoef(float diffuseCoef);
 	void setReflection(float reflection);
+	void setEmission(const Color& emission);
 
 	constexpr static auto properties();
 };
@@ -98,7 +101,7 @@ constexpr auto Material::properties()
 			JsonUtility::property(&Material::_lit, "lit"),
 			JsonUtility::property(&Material::_color, "color"),
 			JsonUtility::property(&Material::_texture, "texture"),
-			JsonUtility::property(&Material::_diffuseCoef, "diffuseCoef"),
+			JsonUtility::property(&Material::_roughness, "diffuseCoef"),
 			JsonUtility::property(&Material::_reflection, "reflection")
 		)
 	);

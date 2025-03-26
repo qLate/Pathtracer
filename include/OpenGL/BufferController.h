@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 #pragma once
 
 #include "Utils.h"
@@ -74,14 +75,9 @@ private:
 
 	struct MaterialStruct
 	{
-		glm::vec3 color;
-		float _pad1;
-		bool lit;
-		float diffuseCoeff;
-		float reflection;
-		float id;
-		glm::vec3 _pad2;
-		int textureIndex;
+		glm::vec4 v1;
+		glm::vec4 v2;
+		glm::vec4 v3;
 	};
 
 	struct LightStruct

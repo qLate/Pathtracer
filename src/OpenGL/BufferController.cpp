@@ -96,12 +96,9 @@ void BufferController::updateMaterials()
 		auto mat = materials[i];
 
 		MaterialStruct materialStruct {};
-		materialStruct.color = mat->color();
-		materialStruct.lit = mat->lit();
-		materialStruct.diffuseCoeff = mat->diffuseCoef();
-		materialStruct.reflection = mat->reflection();
-		materialStruct.id = mat->id();
-		materialStruct.textureIndex = mat->texture()->id();
+		materialStruct.v1 = glm::vec4(mat->color().x, mat->color().y, mat->color().z, mat->id());
+		materialStruct.v2 = glm::vec4(mat->lit(), mat->roughness(), mat->reflection(), mat->texture()->id());
+		materialStruct.v3 = glm::vec4(mat->emission().x, mat->emission().y, mat->emission().z, 0);
 
 		data[i] = materialStruct;
 	}

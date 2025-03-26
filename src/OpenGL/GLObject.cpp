@@ -195,7 +195,7 @@ GLFrameBuffer::GLFrameBuffer(glm::ivec2 size)
 	glGenFramebuffers(1, &_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
-	renderTexture = new GLTexture2D(size.x, size.y, nullptr, GL_RGB, GL_RGB);
+	renderTexture = new GLTexture2D(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture->id(), 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

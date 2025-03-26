@@ -12,6 +12,7 @@ public:
 	Color(const glm::vec4& v) : Color(v.x, v.y, v.z, v.w) {}
 	Color() : Color(0, 0, 0, 0) {}
 
+	static Color clear() { return {0.f, 0.f, 0.f, 0.f}; }
 	static Color white() { return {1.f, 1.f, 1.f}; }
 	static Color black() { return {0.f, 0.f, 0.f}; }
 	static Color red() { return {1.f, 0.f, 0.f}; }

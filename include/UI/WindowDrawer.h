@@ -10,6 +10,8 @@ class WindowDrawer
 
 	inline static glm::ivec2 _currRenderSize = ImGuiHandler::INIT_RENDER_SIZE;
 
+	static void init();
+
 	static void drawWindows();
 
 	static void drawMenuBar();

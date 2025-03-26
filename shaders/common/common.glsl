@@ -26,16 +26,21 @@ struct Light
     vec4 properties1; // intensity, [PointLight(distance) : GlobalLight(dirX, dirY, dirZ) : AreaLight(size)]
 };
 
+struct MaterialStruct
+{
+    vec4 v1;
+    vec4 v2;
+    vec4 v3;
+};
 struct Material
 {
+    int id;
     vec3 color;
-    float _pad1;
     bool lit;
-    float diffuseCoeff;
+    float roughness;
     float reflection;
-    float id;
-    vec3 _pad2;
     int textureIndex;
+    vec3 emission;
 };
 
 struct Object
@@ -90,7 +95,7 @@ layout(std140, binding = 1) uniform Textures
 uniform int materialCount;
 layout(std140, binding = 2) uniform Materials
 {
-    Material materials[1];
+    MaterialStruct materials[1];
 };
 
 uniform int lightCount;
@@ -110,14 +115,29 @@ layout(std140, binding = 5) /*buffer*/ uniform Triangles
     Triangle triangles[];
 };
 
+Material structToMaterial(MaterialStruct mat)
+{
+    Material material;
+
+    material.color = mat.v1.xyz;
+    material.id = int(mat.v1.w);
+    material.lit = mat.v2.x == 1.0;
+    material.roughness = mat.v2.y;
+    material.reflection = mat.v2.z;
+    material.textureIndex = int(mat.v2.w);
+    material.emission = mat.v3.xyz;
+
+    return material;
+}
+
 Material getMaterial(int id)
 {
     for (int i = 0; i < materialCount; i++)
     {
-        if (materials[i].id == id)
-            return materials[i];
+        if (materials[i].v1.w == id)
+            return structToMaterial(materials[i]);
     }
-    return materials[0];
+    return structToMaterial(materials[0]);
 }
 
 vec3 localToGlobal(vec3 pos, Object obj)

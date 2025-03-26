@@ -59,9 +59,9 @@ void SceneSetup::redGreenRoom()
 	//auto tex = Assets::load<Texture>("assets/textures/marble.jpg");
 	auto tex = Texture::defaultTex();
 
-	auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 2, 35);
+	//auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 2, 35);
 	auto square = new Square({0, 0, 9.9999f}, 5, {{-90 * DEG_TO_RAD, 0, 0}});
-	square->material()->setColor(Color::white() * 3);
+	square->material()->setEmission(Color(255 / 255.0f, 236 / 255.0f, 156 / 255.0f) * 12);
 	auto plane1 = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});
 	auto plane2 = new Square({10, 0, 0}, 20, {{0, 0, 90 * DEG_TO_RAD}});
 	auto plane3 = new Square({0, 10, 0}, 20, {{0, 0, 180 * DEG_TO_RAD}});

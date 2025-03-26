@@ -9,8 +9,9 @@ class GLFrameBuffer;
 
 class Renderer
 {
-	inline static int _samplesPerPixel = 1;
-	inline static int _maxRayBounces = 3;
+	static constexpr bool RENDER_ONCE = true;
+	inline static int _samplesPerPixel = RENDER_ONCE ? 100 : 1;
+	inline static int _maxRayBounces = 7;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO1;
