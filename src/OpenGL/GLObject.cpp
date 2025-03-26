@@ -162,7 +162,8 @@ GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenu
 uint64_t GLTexture2D::getHandle() const
 {
 	GLuint64 handle = glGetTextureHandleARB(_id);
-	glMakeTextureHandleResidentARB(handle);
+	if (!glIsTextureHandleResidentARB(handle))
+		glMakeTextureHandleResidentARB(handle);
 	return handle;
 }
 

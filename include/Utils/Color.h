@@ -9,7 +9,8 @@ class Color : public glm::vec4
 {
 public:
 	Color(float r, float g, float b, float a = 1) : glm::vec4(r, g, b, a) {}
-	Color() : Color {0, 0, 0, 0} {}
+	Color(const glm::vec4& v) : Color(v.x, v.y, v.z, v.w) {}
+	Color() : Color(0, 0, 0, 0) {}
 
 	static Color white() { return {1.f, 1.f, 1.f}; }
 	static Color black() { return {0.f, 0.f, 0.f}; }
@@ -30,6 +31,13 @@ public:
 	float g() const { return y; }
 	float b() const { return z; }
 	float a() const { return w; }
+
+	float intensity() const { return (r() + g() + b()) / 3; }
+	Color withIntensity(float intensity) const
+	{
+		if (this->intensity() == 0) return white() * intensity;
+		return *this * intensity / this->intensity();
+	}
 
 	Color& operator*=(float v);
 	Color& operator*=(Color c);

@@ -71,6 +71,11 @@ void BaseShaderMethods::setMatrix4X4(const std::string& name, glm::mat<4, 4, flo
 	glUseProgram(_id);
 	glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, false, value_ptr(mat));
 }
+void BaseShaderMethods::setHandle(const std::string& name, GLuint64 handle) const
+{
+	glUseProgram(_id);
+	glUniformHandleui64ARB(glGetUniformLocation(_id, name.c_str()), handle);
+}
 
 bool BaseShaderMethods::getBool(const std::string& name) const
 {
@@ -128,10 +133,9 @@ Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id
 	auto shader = glCreateShader(type);
 
 	std::string code = parseShader(path);
-	writeOutShader(code, path);
-	const char* shaderCode = code.c_str();
+	const char* codePtr = code.c_str();
 
-	glShaderSource(shader, 1, &shaderCode, nullptr);
+	glShaderSource(shader, 1, &codePtr, nullptr);
 	glCompileShaderIncludeARB(shader, _countof(SEARCH_DIRS), SEARCH_DIRS, NULL);
 	checkCompileErrors(shader, "SHADER", path);
 

@@ -50,7 +50,7 @@ void SDLHandler::initOpenGL()
 		Debug::log("OpenGL msg: ", message);
 	}, nullptr);
 
-	Renderer::setViewFBO(make_unique<GLFrameBuffer>(ImGuiHandler::INIT_RENDER_SIZE));
+	Renderer::initViewFBO();
 
 	Shader::addInclude("shaders/common/common.glsl");
 	Shader::addInclude("shaders/common/utils.glsl");

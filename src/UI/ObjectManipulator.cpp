@@ -3,7 +3,6 @@
 #include "BufferController.h"
 #include "BVH.h"
 #include "SDLHandler.h"
-#include "WindowDrawer.h"
 #include "ImGUIHandler.h"
 
 void ObjectManipulator::init()
@@ -16,12 +15,14 @@ void ObjectManipulator::update()
 
 	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Z))
 		performUndo();
-	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Y))
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Y))
 		performRedo();
-	else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D, false))
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_D, false))
 		performDuplicate();
-	else if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+	if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
 		performDelete();
+	if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+		_currGizmoMode = _currGizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 }
 void ObjectManipulator::updateManipulation()
 {

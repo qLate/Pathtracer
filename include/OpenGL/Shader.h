@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "glad.h"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
@@ -26,6 +27,7 @@ public:
 	void setFloat3(const std::string& name, glm::vec3 value) const;
 	void setFloat4(const std::string& name, glm::vec4 value) const;
 	void setMatrix4X4(const std::string& name, glm::mat<4, 4, float> mat) const;
+	void setHandle(const std::string& name, GLuint64 handle) const;
 
 	bool getBool(const std::string& name) const;
 	int getInt(const std::string& name) const;

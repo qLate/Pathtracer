@@ -8,6 +8,7 @@
 #include "Object.h"
 #include "ImGuiExtensions.h"
 #include "Light.h"
+#include "ObjectManipulator.h"
 
 void ObjectInspectorDrawer::draw(Object* target)
 {
@@ -15,7 +16,7 @@ void ObjectInspectorDrawer::draw(Object* target)
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
-		ImGui::LabeledInt("Object Id", ((Graphical*)target)->id(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::LabeledInt("Object Id", target->id(), ImGuiInputTextFlags_ReadOnly);
 
 		auto transform = target->getTransform();
 
@@ -30,7 +31,10 @@ void ObjectInspectorDrawer::draw(Object* target)
 		if (isDirty)
 		{
 			ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform[0][0]);
+
+			auto startTransform = target->getTransform();
 			target->setTransform(transform);
+			ObjectManipulator::recordOperation(target, startTransform, transform);
 		}
 	}
 	ImGui::PopID();
@@ -50,6 +54,10 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		auto color = material->color();
 		if (ImGui::LabeledColorEdit4("Color", &color[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
 			material->setColor(color);
+
+		auto intensity = material->color().intensity();
+		if (ImGui::LabeledSliderFloat("Intensity", intensity, 0.01f, 10.0f))
+			material->setColor(color.withIntensity(intensity));
 
 		auto diffuseCoef = material->diffuseCoef();
 		if (ImGui::LabeledSliderFloat("Diffuse", diffuseCoef, 0.0f, 1.0f))

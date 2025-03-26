@@ -83,6 +83,7 @@ void BufferController::updateTexInfos()
 		data[i] = texInfoStruct;
 	}
 	_uboTextures->setSubData((float*)data.data(), data.size());
+	Renderer::resetAccumulation();
 }
 
 void BufferController::updateMaterials()
@@ -106,6 +107,7 @@ void BufferController::updateMaterials()
 	}
 	_uboMaterials->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("materialCount", materials.size());
+	Renderer::resetAccumulation();
 }
 
 void BufferController::updateLights()
@@ -139,6 +141,7 @@ void BufferController::updateLights()
 	}
 	_uboLights->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("lightCount", lights.size());
+	Renderer::resetAccumulation();
 }
 
 void BufferController::updateObjects()
@@ -178,13 +181,14 @@ void BufferController::updateObjects()
 	}
 	_uboObjects->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("objectCount", graphicals.size());
+	Renderer::resetAccumulation();
 }
 
 void BufferController::updateTriangles()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
-//#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];
@@ -200,6 +204,7 @@ void BufferController::updateTriangles()
 	}
 	_ssboTriangles->ensureDataCapacity(triangles.size());
 	_ssboTriangles->setSubData((float*)data.data(), data.size());
+	Renderer::resetAccumulation();
 }
 
 void BufferController::updateBVHNodes()
@@ -228,4 +233,6 @@ void BufferController::updateBVHNodes()
 		data2[i] = indices[i];
 	_ssboBVHTriIndices->ensureDataCapacity(indices.size());
 	_ssboBVHTriIndices->setSubData((float*)data2.data(), data2.size());
+
+	Renderer::resetAccumulation();
 }

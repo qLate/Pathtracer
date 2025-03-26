@@ -134,19 +134,25 @@ void WindowDrawer::displayStats(bool barVisible)
 
 void WindowDrawer::drawInspector()
 {
-	auto moveSpeedMult = Input::_moveSpeedMult;
-	auto bgColor = Camera::instance->bgColor();
-
 	ImGui::Begin("Inspector", nullptr);
 	{
 		if (auto obj = ObjectManipulator::selectedObject())
+		{
+			ImGui::PushID(obj->id());
 			obj->drawInspector();
+			ImGui::PopID();
+		}
 		else
 		{
 			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
-				ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+				auto moveSpeedMult = Input::_moveSpeedMult;
+				if (ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f))
+					Input::_moveSpeedMult = moveSpeedMult;
+
+				auto bgColor = Camera::instance->bgColor();
+				if (ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs))
+					Camera::instance->setBgColor(bgColor);
 			}
 
 			if (ImGui::CollapsingHeader("Path Tracing", ImGuiTreeNodeFlags_DefaultOpen))
@@ -164,7 +170,4 @@ void WindowDrawer::drawInspector()
 		}
 	}
 	ImGui::End();
-
-	Input::_moveSpeedMult = moveSpeedMult;
-	if (bgColor != Camera::instance->bgColor()) Camera::instance->setBgColor(bgColor);
 }

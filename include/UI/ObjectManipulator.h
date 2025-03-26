@@ -38,9 +38,6 @@ class ObjectManipulator
 	static void updateChangeOperation();
 	static glm::vec3 getSnapValue(ImGuizmo::OPERATION operation);
 
-	static void recordOperation(Object* object, const glm::mat4& transformFrom, const glm::mat4& transformTo);
-	static void performUndo();
-	static void performRedo();
 
 	static void performDuplicate();
 	static void performDelete();
@@ -56,6 +53,10 @@ public:
 	static bool isManipulating() { return _isManipulating; }
 
 	static bool isMouseOverGizmo();
+
+	static void recordOperation(Object* object, const glm::mat4& transformFrom, const glm::mat4& transformTo);
+	static void performUndo();
+	static void performRedo();
 
 	friend class ImGuiHandler;
 };

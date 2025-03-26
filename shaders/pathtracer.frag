@@ -23,9 +23,7 @@ vec3 COLOR_HEAT = vec3(0);
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
 uniform int frame;
-
-#include "intersection.glsl"
-#include "light.glsl"
+uniform int accumFrame;
 
 uniform vec2 pixelSize;
 uniform vec2 viewSize;
@@ -33,6 +31,9 @@ uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec3 bgColor = vec3(0, 0, 0);
+
+#include "intersection.glsl"
+#include "light.glsl"
 
 vec3 castRay(Ray ray)
 {
@@ -51,16 +52,13 @@ vec3 castRay(Ray ray)
         vec3 directLighting = getIllumination(ray);
         color += directLighting * albedo / PI * throughput;
 
-        float r1 = rand(); // cos(theta)
-        float r2 = rand();
-
-        vec3 samp = sampleHemisphereUniform(r1, r2);
-        float cosTheta = samp.z;
-        float pdf = 1 / (2 * PI);
-
-        // vec3 samp = sampleHemisphereCosine(r1, r2);
+        // vec3 samp = sampleHemisphereUniform(rand(), rand());
         // float cosTheta = samp.z;
-        // float pdf = cosTheta / PI;
+        // float pdf = 1 / (2 * PI);
+
+        vec3 samp = sampleHemisphereCosine(rand(), rand());
+        float cosTheta = samp.z;
+        float pdf = cosTheta / PI;
 
         vec3 bounceDir = worldToTangent(samp, ray.surfaceNormal);
 
@@ -74,6 +72,7 @@ vec3 castRay(Ray ray)
     return color;
 }
 
+uniform sampler2D accumTexture;
 void main()
 {
     InitRNG(gl_FragCoord.xy, frame);
@@ -98,8 +97,13 @@ void main()
     }
 
     color /= samplesPerPixel;
+    color = clamp(color, 0, 1);
+
+    vec4 accumColor = texture(accumTexture, gl_FragCoord.xy / pixelSize);
+    accumColor.rgb = mix(accumColor.rgb, color, 1.0f / (accumFrame + 1));
+
     if (COLOR_DEBUG != vec3(0))
         outColor = vec4(COLOR_DEBUG, 1);
     else
-        outColor = vec4(color + COLOR_HEAT, 1);
+        outColor = vec4(accumColor.rgb + COLOR_HEAT, 1);
 }

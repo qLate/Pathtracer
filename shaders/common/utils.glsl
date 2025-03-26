@@ -86,7 +86,7 @@ void onb(in vec3 N, inout vec3 T, inout vec3 B)
 
 vec3 sampleHemisphereUniform(float r1, float r2)
 {
-    float r = sqrt(1.0 - r1 * r1);
+    float r = sqrt(max(1.0 - r1 * r1, 0));
     float phi = TWO_PI * r2;
 
     float x = r * cos(phi);
@@ -97,12 +97,12 @@ vec3 sampleHemisphereUniform(float r1, float r2)
 
 vec3 sampleHemisphereCosine(float r1, float r2)
 {
-    float r = sqrt(r1);
+    float r = sqrt(max(r1, 0));
     float phi = TWO_PI * r2;
 
     float x = r * cos(phi);
     float y = r * sin(phi);
-    float z = sqrt(1.0 - r1);
+    float z = sqrt(max(1.0 - r1, 0));
     return vec3(x, y, z);
 }
 

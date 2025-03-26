@@ -21,7 +21,6 @@ public:
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
-	void setScale(glm::vec3 scale, bool notify = true) override;
 
 	glm::vec2 ratio() const { return _viewSize; }
 	float focalDistance() const { return _focalDis; }
