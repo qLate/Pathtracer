@@ -9,11 +9,9 @@ Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(po
 {
 	init();
 }
-Camera::Camera(const Camera& orig) : Object(orig), _ratio(orig._ratio), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius)
+Camera::Camera(const Camera& orig) : Object(orig), _viewSize(orig._viewSize), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius), _bgColor(orig._bgColor)
 {
 	init();
-
-	_bgColor = orig._bgColor;
 }
 void Camera::init()
 {
@@ -22,12 +20,12 @@ void Camera::init()
 	instance = this;
 
 	auto renderSize = WindowDrawer::currRenderSize();
-	_ratio = {renderSize.x / (float)renderSize.y, 1};
+	_viewSize = {renderSize.x / (float)renderSize.y, 1};
 
-	Renderer::renderProgram()->setFloat2("screenSize", _ratio);
-	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
-	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
-	Renderer::renderProgram()->setFloat3("bgColor", _bgColor);
+	setViewSize(_viewSize);
+	setFocalDistance(_focalDis);
+	setLensRadius(_lensRadius);
+	setBgColor(_bgColor);
 }
 
 Camera::~Camera()
@@ -49,13 +47,21 @@ void Camera::setScale(glm::vec3 scale, bool notify)
 	Object::setScale(scale, false);
 }
 
-void Camera::setRatio(glm::vec2 ratio)
+void Camera::setViewSize(glm::vec2 viewSize)
 {
-	this->_ratio = ratio;
-	Renderer::renderProgram()->setFloat2("screenSize", ratio);
+	this->_viewSize = viewSize;
+	Renderer::renderProgram()->setFloat2("viewSize", viewSize);
 }
-void Camera::setFocalDistance(float focalDistance) { _focalDis = focalDistance; }
-void Camera::setLensRadius(float lensRadius) { _lensRadius = lensRadius; }
+void Camera::setFocalDistance(float focalDistance)
+{
+	_focalDis = focalDistance;
+	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
+}
+void Camera::setLensRadius(float lensRadius)
+{
+	_lensRadius = lensRadius;
+	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
+}
 void Camera::setBgColor(Color color)
 {
 	_bgColor = color;
@@ -68,12 +74,12 @@ glm::vec3 Camera::getScreenCenter() const
 }
 glm::vec3 Camera::getLeftBotCorner() const
 {
-	return getScreenCenter() - 0.5f * _ratio.y * up() - 0.5f * _ratio.x * right();
+	return getScreenCenter() - 0.5f * _viewSize.y * up() - 0.5f * _viewSize.x * right();
 }
 glm::vec3 Camera::getDir(const glm::vec2& screenPos) const
 {
 	auto lbWorld = getLeftBotCorner();
-	auto screenPosWorld = lbWorld + screenPos.x * _ratio.x * right() + screenPos.y * _ratio.y * up();
+	auto screenPosWorld = lbWorld + screenPos.x * _viewSize.x * right() + screenPos.y * _viewSize.y * up();
 	return normalize(screenPosWorld - _pos);
 }
 glm::vec3 Camera::getMouseDir() const
@@ -89,11 +95,11 @@ glm::mat4 Camera::getViewMatrix() const
 }
 glm::mat4 Camera::getProjectionMatrix() const
 {
-	float fov = 2.0f * glm::degrees(glm::atan(_ratio.y * 0.5f / _focalDis));
+	float fov = 2.0f * glm::degrees(glm::atan(_viewSize.y * 0.5f / _focalDis));
 	float nearPlane = 0.1f;
 	float farPlane = 10000.0f;
 
-	return glm::perspective(glm::radians(fov), _ratio.x, nearPlane, farPlane);
+	return glm::perspective(glm::radians(fov), _viewSize.x, nearPlane, farPlane);
 }
 
 glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const

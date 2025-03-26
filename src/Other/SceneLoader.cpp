@@ -45,6 +45,7 @@ void SceneLoader::saveScene(const std::string& path)
 	std::vector<nlohmann::json> serializedObjects;
 	for (auto obj : Scene::objects)
 	{
+		if (obj == nullptr) continue;
 		nlohmann::json objJson;
 
 		if (auto camera = dynamic_cast<Camera*>(obj))
@@ -57,6 +58,8 @@ void SceneLoader::saveScene(const std::string& path)
 			objJson = JsonUtility::toJson(*mesh);
 		else if (auto sphere = dynamic_cast<Sphere*>(obj))
 			objJson = JsonUtility::toJson(*sphere);
+		else if (auto plane = dynamic_cast<Plane*>(obj))
+			objJson = JsonUtility::toJson(*plane);
 		else if (auto pointLight = dynamic_cast<PointLight*>(obj))
 			objJson = JsonUtility::toJson(*pointLight);
 		else if (auto dirLight = dynamic_cast<DirectionalLight*>(obj))
@@ -107,6 +110,8 @@ void SceneLoader::loadScene(const std::string& path)
 			new Sphere(JsonUtility::fromJson<Sphere>(objJson));
 		else if (type == "PointLight")
 			new PointLight(JsonUtility::fromJson<PointLight>(objJson));
+		else if (type == "Plane")
+			new Plane(JsonUtility::fromJson<Plane>(objJson));
 		else if (type == "DirectionalLight")
 			new DirectionalLight(JsonUtility::fromJson<DirectionalLight>(objJson));
 	}

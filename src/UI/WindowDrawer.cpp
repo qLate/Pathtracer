@@ -143,8 +143,24 @@ void WindowDrawer::drawInspector()
 			obj->drawInspector();
 		else
 		{
-			ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
-			ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f);
+				ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs);
+			}
+
+			if (ImGui::CollapsingHeader("Path Tracing", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				auto bounces = Renderer::maxRayBounces();
+				ImGui::SliderInt("Ray Bounces", &bounces, 1, 10);
+				if (bounces != Renderer::maxRayBounces())
+					Renderer::setMaxRayBounces(bounces);
+
+				auto samplesPerPixel = Renderer::samplesPerPixel();
+				ImGui::SliderInt("Samples Per Pixel", &samplesPerPixel, 1, 100);
+				if (samplesPerPixel != Renderer::samplesPerPixel())
+					Renderer::setSamplesPerPixel(samplesPerPixel);
+			}
 		}
 	}
 	ImGui::End();

@@ -86,25 +86,29 @@ void onb(in vec3 N, inout vec3 T, inout vec3 B)
 
 vec3 sampleHemisphereUniform(float r1, float r2)
 {
-    float r = sqrt(max(0.0, 1.0 - r1 * r1));
+    float r = sqrt(1.0 - r1 * r1);
     float phi = TWO_PI * r2;
-    return vec3(r * cos(phi), r * sin(phi), r1);
+
+    float x = r * cos(phi);
+    float y = r * sin(phi);
+    float z = r1;
+    return vec3(x, y, z);
 }
 
 vec3 sampleHemisphereCosine(float r1, float r2)
 {
-    vec3 dir;
     float r = sqrt(r1);
     float phi = TWO_PI * r2;
-    dir.x = r * cos(phi);
-    dir.y = r * sin(phi);
-    dir.z = sqrt(max(0.0, 1.0 - dir.x * dir.x - dir.y * dir.y));
-    return dir;
+
+    float x = r * cos(phi);
+    float y = r * sin(phi);
+    float z = sqrt(1.0 - r1);
+    return vec3(x, y, z);
 }
 
-vec3 worldToTangent(vec3 dir, vec3 normal)
+vec3 worldToTangent(vec3 dir, vec3 N)
 {
-    vec3 tangent, bitangent;
-    onb(normal, tangent, bitangent);
-    return dir.x * tangent + dir.y * bitangent + dir.z * normal;
+    vec3 T, B;
+    onb(N, T, B);
+    return dir.x * T + dir.y * B + dir.z * N;
 }

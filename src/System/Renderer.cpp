@@ -10,9 +10,9 @@ void Renderer::init()
 {
 	_renderProgram = make_unique<DefaultShaderProgram<RaytraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
-	_renderProgram->setInt("maxRayBounce", MAX_RAY_BOUNCE);
-	_renderProgram->setInt("samplesPerPixel", SAMPLES_PER_PIXEL);
 	_renderProgram->setFloat2("pixelSize", ImGuiHandler::INIT_RENDER_SIZE);
+	setSamplesPerPixel(_samplesPerPixel);
+	setMaxRayBounces(_maxRayBounces);
 }
 
 void Renderer::render()
@@ -36,13 +36,25 @@ void Renderer::updateCameraUniforms()
 	_renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->rot()));
 }
 
+void Renderer::setSamplesPerPixel(int samples)
+{
+	_samplesPerPixel = samples;
+	_renderProgram->use();
+	_renderProgram->setInt("samplesPerPixel", _samplesPerPixel);
+}
+void Renderer::setMaxRayBounces(int bounces)
+{
+	_maxRayBounces = bounces;
+	_renderProgram->use();
+	_renderProgram->setInt("maxRayBounces", _maxRayBounces);
+}
 void Renderer::resizeView(glm::ivec2 size)
 {
 	_viewFBO.reset();
 	_viewFBO = make_unique<GLFrameBuffer>(size);
 
 	_renderProgram->setFloat2("pixelSize", size);
-	Camera::instance->setRatio({size.x / (float)size.y, 1});
+	Camera::instance->setViewSize({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 }
 

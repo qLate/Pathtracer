@@ -3,6 +3,13 @@
 
 #include "utils.glsl"
 
+#define LIGHT_TYPE_GLOBAL 0
+#define LIGHT_TYPE_POINT 1
+
+#define OBJ_TYPE_MESH 0
+#define OBJ_TYPE_SPHERE 1
+#define OBJ_TYPE_PLANE 2
+
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 

@@ -5,7 +5,7 @@
 
 class Camera : public Object
 {
-	glm::vec2 _ratio;
+	glm::vec2 _viewSize;
 	float _focalDis, _lensRadius;
 	Color _bgColor = Color::black();
 
@@ -23,12 +23,12 @@ public:
 	void setRot(glm::quat rot, bool notify = true) override;
 	void setScale(glm::vec3 scale, bool notify = true) override;
 
-	glm::vec2 ratio() const { return _ratio; }
+	glm::vec2 ratio() const { return _viewSize; }
 	float focalDistance() const { return _focalDis; }
 	float lensRadius() const { return _lensRadius; }
 	Color bgColor() const { return _bgColor; }
 
-	void setRatio(glm::vec2 ratio);
+	void setViewSize(glm::vec2 viewSize);
 	void setFocalDistance(float focalDistance);
 	void setLensRadius(float lensRadius);
 	void setBgColor(Color color);

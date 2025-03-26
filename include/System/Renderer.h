@@ -9,8 +9,8 @@ class GLFrameBuffer;
 
 class Renderer
 {
-	static constexpr int MAX_RAY_BOUNCE = 3;
-	static constexpr int SAMPLES_PER_PIXEL = 16;
+	inline static int _samplesPerPixel = 16;
+	inline static int _maxRayBounces = 3;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO;
@@ -23,9 +23,13 @@ class Renderer
 	static void updateCameraUniforms();
 
 public:
+	static int samplesPerPixel() { return _samplesPerPixel; }
+	static int maxRayBounces() { return _maxRayBounces; }
 	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
 	static UPtr<GLFrameBuffer>& sceneViewFBO() { return _viewFBO; }
 
+	static void setSamplesPerPixel(int samples);
+	static void setMaxRayBounces(int bounces);
 	static void resizeView(glm::ivec2 size);
 	static void setViewFBO(std::unique_ptr<GLFrameBuffer> fbo);
 

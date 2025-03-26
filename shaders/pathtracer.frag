@@ -20,7 +20,7 @@ vec3 COLOR_HEAT = vec3(0);
 // #define SHOW_BVH_HEAT
 
 // ----------- SETTINGS -----------
-uniform int maxRayBounce;
+uniform int maxRayBounces;
 uniform int samplesPerPixel;
 uniform int frame;
 
@@ -28,7 +28,7 @@ uniform int frame;
 #include "light.glsl"
 
 uniform vec2 pixelSize;
-uniform vec2 screenSize;
+uniform vec2 viewSize;
 uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
@@ -37,10 +37,11 @@ uniform vec3 bgColor = vec3(0, 0, 0);
 vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
-    vec3 impact = vec3(1);
-    for (int i = 0; i < maxRayBounce; i++)
+    vec3 throughput = vec3(1);
+    for (int i = 0; i < maxRayBounces; i++)
     {
         if (!intersectWorld(ray)) break;
+        ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
         ray.interPoint += ray.surfaceNormal * 0.0001;
 
         Material mat = getMaterial(ray.materialIndex);
@@ -48,21 +49,28 @@ vec3 castRay(Ray ray)
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
         vec3 directLighting = getIllumination(ray);
-        color += directLighting * albedo / PI * impact;
+        color += directLighting * albedo / PI * throughput;
 
-        float pdf = 1 / (2 * PI);
         float r1 = rand(); // cos(theta)
         float r2 = rand();
 
         vec3 samp = sampleHemisphereUniform(r1, r2);
+        float cosTheta = samp.z;
+        float pdf = 1 / (2 * PI);
+
+        // vec3 samp = sampleHemisphereCosine(r1, r2);
+        // float cosTheta = samp.z;
+        // float pdf = cosTheta / PI;
+
         vec3 bounceDir = worldToTangent(samp, ray.surfaceNormal);
 
-        impact *= r1 / (pdf * PI) * albedo;
-        if (dot(impact, impact) < 0.01) break;
+        throughput *= albedo / (pdf * PI) * cosTheta;
+        if (dot(throughput, throughput) < 0.01) break;
+
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
     }
 
-    color += impact * bgColor;
+    color += throughput * bgColor;
     return color;
 }
 
@@ -74,17 +82,24 @@ void main()
     vec3 forward = cameraRotMat[1].xyz;
     vec3 up = cameraRotMat[2].xyz;
 
-    vec3 lb = focalDistance * forward - 0.5 * screenSize.x * right - 0.5 * screenSize.y * up;
-    float x = gl_FragCoord.x / pixelSize.x * screenSize.x;
-    float y = gl_FragCoord.y / pixelSize.y * screenSize.y;
+    vec3 lb = focalDistance * forward - 0.5 * viewSize.x * right - 0.5 * viewSize.y * up;
+    float dx = viewSize.x / pixelSize.x;
+    float dy = viewSize.y / pixelSize.y;
+    float x = gl_FragCoord.x * dx;
+    float y = gl_FragCoord.y * dy;
     vec3 rayDir = normalize(lb + x * right + y * up);
 
     vec3 color = vec3(0);
     for (int i = 0; i < samplesPerPixel; ++i)
     {
-        color += castRay(Ray(cameraPos, rayDir, RAY_DEFAULT_ARGS));
+        vec2 jitter = vec2(rand(), rand());
+        vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
+        color += castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
     }
 
     color /= samplesPerPixel;
-    outColor = vec4(color + COLOR_HEAT + COLOR_DEBUG, 1);
+    if (COLOR_DEBUG != vec3(0))
+        outColor = vec4(COLOR_DEBUG, 1);
+    else
+        outColor = vec4(color + COLOR_HEAT, 1);
 }

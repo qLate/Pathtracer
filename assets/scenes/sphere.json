@@ -1,0 +1,215 @@
+{
+    "objects": [
+        {
+            "bgColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "classType": "Camera",
+            "focalDistance": 1.0,
+            "lensRadius": 0.0,
+            "pos": [
+                -18.376813888549805,
+                44.651336669921875,
+                22.426889419555664
+            ],
+            "rot": [
+                0.2065262496471405,
+                -0.039964694529771805,
+                0.18573369085788727,
+                -0.9598191380500793
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "classType": "Sphere",
+            "material": null,
+            "pos": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "radius": 5.0,
+            "rot": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    0.08332681655883789,
+                    0.3759920597076416,
+                    0.4955752491950989,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.30000001192092896,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        },
+        {
+            "classType": "Sphere",
+            "material": null,
+            "pos": [
+                17.589527130126953,
+                -1.0210230350494385,
+                0.0
+            ],
+            "radius": 5.0,
+            "rot": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    0.08332681655883789,
+                    0.3759920597076416,
+                    0.4955752491950989,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.30000001192092896,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        },
+        {
+            "classType": "Sphere",
+            "material": null,
+            "pos": [
+                13.537237167358398,
+                22.634254455566406,
+                0.0
+            ],
+            "radius": 5.0,
+            "rot": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    0.08332681655883789,
+                    0.3759920597076416,
+                    0.4955752491950989,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.30000001192092896,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        },
+        {
+            "classType": "Cube",
+            "material": null,
+            "pos": [
+                -20.183502197265625,
+                -2.7926864624023438,
+                14.156671524047852
+            ],
+            "rot": [
+                0.7994505167007446,
+                -0.3951241075992584,
+                -0.20049409568309784,
+                0.4056573510169983
+            ],
+            "scale": [
+                10.000001907348633,
+                10.00000286102295,
+                10.000001907348633
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 2.0
+        },
+        {
+            "classType": "Plane",
+            "material": null,
+            "pos": [
+                0.0,
+                0.0,
+                -5.0
+            ],
+            "rot": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    0.04604904353618622,
+                    0.6504424810409546,
+                    0.10488380491733551,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "lit": true,
+                "reflection": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        }
+    ]
+}

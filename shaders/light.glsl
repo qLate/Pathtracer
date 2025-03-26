@@ -7,30 +7,27 @@ bool castShadowRays(Ray ray)
     return intersectBVHTree(ray, true);
 }
 
-void getDirectionalLightIllumination(Ray ray, Light globalLight, inout vec3 diffuse)
+vec3 getDirectionalLightIllumination(Ray ray, Light globalLight)
 {
-    if (castShadowRays(Ray(ray.interPoint, globalLight.properties1.yzw, RAY_DEFAULT_ARGS))) return;
+    if (castShadowRays(Ray(ray.interPoint, globalLight.properties1.yzw, RAY_DEFAULT_ARGS))) return vec3(0);
 
     // mat4x4 rotMat = getTransformRotation(objects[0].transform);
     mat4x4 rotMat = mat4x4(1.0);
     vec3 dir = (rotMat * vec4(globalLight.properties1.yzw, 1.0)).xyz;
     float light = max(dot(dir, ray.surfaceNormal), 0.0);
-    diffuse += light * globalLight.color * globalLight.properties1.x;
+    return light * globalLight.color * globalLight.properties1.x;
 }
 
-void getPointLightIllumination(Ray ray, Light pointLight, inout vec3 diffuse)
+vec3 getPointLightIllumination(Ray ray, Light pointLight)
 {
-    vec3 dir = pointLight.pos - ray.interPoint;
-    float dist = length(dir);
-    if (dist > pointLight.properties1.y) return;
+    float dist = length(pointLight.pos - ray.interPoint);
+    if (dist > pointLight.properties1.y) return vec3(0);
 
-    dir = normalize(dir);
-    if (sign(dot(ray.surfaceNormal, dir)) == sign(dot(ray.surfaceNormal, ray.dir))) return;
-    if (castShadowRays(Ray(pointLight.pos, -dir, dist, RAY_DEFAULT_ARGS_WO_DIST))) return;
+    vec3 lightDir = normalize(pointLight.pos - ray.interPoint);
+    if (castShadowRays(Ray(pointLight.pos, -lightDir, dist, RAY_DEFAULT_ARGS_WO_DIST))) return vec3(0);
 
-    float distanceImpact = min(pow(1 - dist / pointLight.properties1.y, 2), 1.);
-    float angleMult = max(dot(dir, ray.surfaceNormal), 0.0);
-    diffuse += (distanceImpact * angleMult) * pointLight.color * pointLight.properties1.x;
+    float disImpact = min(pow(1 - dist / pointLight.properties1.y, 2), 1);
+    return disImpact * pointLight.color * pointLight.properties1.x;
 }
 
 vec3 getIllumination(Ray ray)
@@ -38,10 +35,16 @@ vec3 getIllumination(Ray ray)
     vec3 diffuse = vec3(0);
     for (int i = 0; i < lightCount; i++)
     {
-        if (lights[i].lightType == 0)
-            getDirectionalLightIllumination(ray, lights[i], diffuse);
-        else if (lights[i].lightType == 1)
-            getPointLightIllumination(ray, lights[i], diffuse);
+        Light light = lights[i];
+        vec3 lightDir = normalize(light.pos - ray.interPoint);
+
+        float cosTheta = max(dot(lightDir, ray.surfaceNormal), 0.0);
+        if (cosTheta == 0) continue;
+
+        if (light.lightType == LIGHT_TYPE_GLOBAL)
+            diffuse += getDirectionalLightIllumination(ray, light) * cosTheta;
+        else if (light.lightType == LIGHT_TYPE_POINT)
+            diffuse += getPointLightIllumination(ray, light) * cosTheta;
     }
     return diffuse;
 }

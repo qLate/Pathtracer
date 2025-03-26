@@ -172,7 +172,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
                     (abs(min_.z - point.z) <= width || abs(max_.z - point.z) <= width ||
                         abs(min_.x - point.x) <= width || abs(max_.x - point.x) <= width)))
         {
-            ray.surfaceNormal = vec3(0, 1, 0);
+            ray.surfaceNormal = vec3(0, 0, 1);
             ray.interPoint = point;
             ray.uvPos = vec2(0.01);
             ray.t = t;
@@ -217,11 +217,11 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
 
 bool intersectDefaultObj(inout Ray ray, Object obj)
 {
-    if (obj.objType == 1)
+    if (obj.objType == OBJ_TYPE_SPHERE)
     {
         if (intersectSphere(ray, obj)) return true;
     }
-    else if (obj.objType == 2)
+    else if (obj.objType == OBJ_TYPE_PLANE)
     {
         if (intersectPlane(ray, obj)) return true;
     }
