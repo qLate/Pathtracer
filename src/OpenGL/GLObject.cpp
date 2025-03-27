@@ -146,7 +146,8 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum format, GLenum internalFormat) : _width(width), _height(height), _format(format)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum format, GLenum internalFormat, GLenum filter) : _width(width), _height(height),
+	_format(format)
 {
 	glBindTexture(GL_TEXTURE_2D, _id);
 
@@ -154,8 +155,8 @@ GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenu
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

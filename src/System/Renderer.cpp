@@ -104,9 +104,9 @@ void Renderer::resizeTextures(glm::ivec2 size)
 	_varianceTex.reset();
 
 	_viewFBO = make_unique<GLFrameBuffer>(size);
-	_accumMeanTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
-	_accumSqrTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
-	_varianceTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
+	_accumMeanTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
+	_accumSqrTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
+	_varianceTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _accumMeanTex->id(), 0);

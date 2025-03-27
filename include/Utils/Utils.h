@@ -8,6 +8,8 @@
 #include "rapidobj.hpp"
 #include "SDL_timer.h"
 #include "Debug.h"
+#include "glm/geometric.hpp"
+#include "glm/vec3.hpp"
 
 template <typename T>
 using UPtr = std::unique_ptr<T>;
@@ -32,6 +34,8 @@ public:
 
 	template <typename T>
 	static bool hasFlag(T flags, T flag);
+
+	static float computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference);
 };
 
 template <typename T>

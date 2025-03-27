@@ -39,6 +39,19 @@ std::string Utils::toString(float f, int decimals)
 	return std::to_string(round(f, decimals));
 }
 
+float Utils::computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference)
+{
+	assert(rendered.size() == reference.size());
+	float mse = 0.0f;
+	for (size_t i = 0; i < rendered.size(); ++i)
+	{
+		glm::vec3 diff = rendered[i] - reference[i];
+		mse += dot(diff, diff);
+	}
+	mse /= (float)rendered.size();
+	return mse;
+}
+
 bool Timer::trigger()
 {
 	float currTime = SDL_GetTicks();

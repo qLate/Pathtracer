@@ -114,7 +114,7 @@ class GLTexture2D : public GLTexture
 	GLenum _format;
 
 public:
-	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum format = GL_RGBA, GLenum internalFormat = GL_RGBA);
+	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum format = GL_RGBA, GLenum internalFormat = GL_RGBA, GLenum filter = GL_LINEAR);
 
 	template <typename T>
 	std::vector<T> readData() const;
