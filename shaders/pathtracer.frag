@@ -23,7 +23,7 @@ vec3 COLOR_HEAT = vec3(0);
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
 uniform int frame;
-uniform int accumFrame;
+uniform int currSamples;
 
 uniform vec2 pixelSize;
 uniform vec2 viewSize;
@@ -90,7 +90,7 @@ vec3 castRay(Ray ray)
     return color;
 }
 
-void trace(out vec3 mean, out vec3 m2)
+vec3 trace()
 {
     vec3 right = cameraRotMat[0].xyz;
     vec3 forward = cameraRotMat[1].xyz;
@@ -101,56 +101,40 @@ void trace(out vec3 mean, out vec3 m2)
     float dy = viewSize.y / pixelSize.y;
     float x = gl_FragCoord.x * dx;
     float y = gl_FragCoord.y * dy;
+    vec3 rayDir = normalize(lb + x * right + y * up);
 
-    mean = vec3(0.0);
-    m2 = vec3(0.0);
-
-    for (int i = 0; i < samplesPerPixel; ++i)
-    {
-        vec2 jitter = vec2(rand(), rand()) - 0.5;
-        vec3 dir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
-        vec3
-        sample_ = castRay(Ray(cameraPos, dir, RAY_DEFAULT_ARGS));
-
-        vec3 delta = sample_ - mean;
-        mean += delta / float(i + 1);
-        vec3 delta2 = sample_ - mean;
-        m2 += delta * delta2;
-    }
+    vec2 jitter = vec2(rand(), rand()) - 0.5;
+    vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
+    return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
 
-uniform sampler2D accumTexture;
-uniform sampler2D accumM2Texture;
+uniform sampler2D accumMeanTexture;
+uniform sampler2D accumSqrTexture;
 
-layout(location = 1) out vec4 outM2;
-layout(location = 2) out vec4 outVariance;
+layout(location = 1) out vec4 outMean;
+layout(location = 2) out vec4 outSqr;
+layout(location = 3) out vec4 outVariance;
 
 void main()
 {
-    InitRNG(gl_FragCoord.xy, frame);
+    InitRNG(gl_FragCoord.xy, frame * samplesPerPixel + currSamples);
 
-    vec3 frameMean, frameM2;
-    trace(frameMean, frameM2);
-    float frameSampleCount = float(samplesPerPixel);
+    vec3 color = trace();
 
     vec2 uv = gl_FragCoord.xy / pixelSize;
-    vec3 prevMean = texture(accumTexture, uv).rgb;
-    vec3 prevM2 = texture(accumM2Texture, uv).rgb;
+    vec3 prevMean = texture(accumMeanTexture, uv).rgb;
+    vec3 prevSqr = texture(accumSqrTexture, uv).rgb;
 
-    float frameIndex = float(accumFrame + 1); // starts at 1
+    vec3 newMean = mix(prevMean, color, 1.0 / (currSamples + 1));
+    vec3 newSqr = mix(prevSqr, color * color, 1.0 / (currSamples + 1));
+    vec3 variance = newSqr - newMean * newMean;
 
-    vec3 delta = frameMean - prevMean;
-    vec3 newMean = prevMean + delta / frameIndex;
-    vec3 delta2 = frameMean - newMean;
-
-    vec3 newM2 = prevM2 + frameM2 + delta * delta2 * frameSampleCount * (frameIndex - 1.0) / frameIndex;
-    vec3 variance = newM2 / (frameIndex * frameSampleCount); // variance per pixel sample
-
-    outM2 = vec4(newM2, 1.0);
-    outVariance = vec4(variance, 1.0); // optional, for debug display
+    outMean = vec4(newMean, 1.0);
+    outSqr = vec4(newSqr, 1.0);
+    outVariance = vec4(variance, 1.0);
 
     if (COLOR_DEBUG != vec3(0))
-        outColor = vec4(COLOR_DEBUG, 1.0);
+        outColor = vec4(COLOR_DEBUG, 1);
     else
-        outColor = vec4(newMean + COLOR_HEAT, 1.0);
+        outColor = vec4(newMean + COLOR_HEAT, 1);
 }

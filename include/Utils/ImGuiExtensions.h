@@ -92,6 +92,7 @@ namespace ImGui
 	bool LabeledInputFloat4(const char* label, float* values, int flags = 0, const char* format = "%.1f");
 	bool LabeledColorEdit3(const char* label, float* color, int flags = 0);
 	bool LabeledColorEdit4(const char* label, float* color, int flags = 0);
-	bool LabeledSliderFloat(const char* label, float& value, float min, float max, ImGuiSliderFlags flags = 0, const char* format = "%.3f");
+	bool LabeledSliderInt(const char* label, int& value, int min, int max, int flags = 0, const char* format = "%d");
+	bool LabeledSliderFloat(const char* label, float& value, float min, float max, int flags = 0, const char* format = "%.3f");
 	bool LabeledCheckbox(const char* label, bool& value, int flags = 0);
 }

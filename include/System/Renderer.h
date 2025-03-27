@@ -9,18 +9,18 @@ class GLFrameBuffer;
 
 class Renderer
 {
-	inline static bool _renderOnce = false;
-	inline static int _samplesPerPixel = _renderOnce ? 100 : 1;
+	inline static bool _limitSamples = false;
+	inline static int _samplesPerPixel = 100;
 	inline static int _maxRayBounces = 7;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
-	inline static UPtr<GLFrameBuffer> _viewFBO1;
-	inline static UPtr<GLFrameBuffer> _viewFBO2;
+	inline static UPtr<GLFrameBuffer> _viewFBO;
+	inline static UPtr<GLTexture2D> _accumMeanTex;
 	inline static UPtr<GLTexture2D> _accumSqrTex;
 	inline static UPtr<GLTexture2D> _varianceTex;
 
 	inline static int _frame = 0;
-	inline static int _accumFrame = 0;
+	inline static int _currSamples = 0;
 
 	static void init();
 
@@ -30,18 +30,20 @@ class Renderer
 	static void resizeTextures(glm::ivec2 size);
 
 public:
+	static bool limitSamples() { return _limitSamples; }
 	static int samplesPerPixel() { return _samplesPerPixel; }
 	static int maxRayBounces() { return _maxRayBounces; }
 	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
-	static GLFrameBuffer* sceneViewFBO();
+	static GLFrameBuffer* sceneViewFBO() { return _viewFBO.get(); }
 
+	static void setLimitSamples(bool limit);
 	static void setSamplesPerPixel(int samples);
 	static void setMaxRayBounces(int bounces);
 
 	static void resizeView(glm::ivec2 size);
-	static void resetAccumulation();
+	static void resetSamples();
 
-	static float computeAccumVariance();
+	static float computeSampleVariance();
 
 	friend class Program;
 	friend class SDLHandler;
@@ -50,6 +52,7 @@ private:
 	static constexpr GLenum DRAW_BUFFERS[] = {
 		GL_COLOR_ATTACHMENT0,
 		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2
+		GL_COLOR_ATTACHMENT2,
+		GL_COLOR_ATTACHMENT3
 	};
 };

@@ -97,6 +97,10 @@ bool ImGui::LabeledColorEdit4(const char* label, float* color, int flags)
 {
 	return LabeledInput(label, ColorEdit4, flags, color);
 }
+bool ImGui::LabeledSliderInt(const char* label, int& value, int min, int max, int flags, const char* format)
+{
+	return LabeledInput(label, SliderInt, flags, &value, min, max, format);
+}
 bool ImGui::LabeledSliderFloat(const char* label, float& value, float min, float max, int flags, const char* format)
 {
 	return LabeledInput(label, SliderFloat, flags, &value, min, max, format);

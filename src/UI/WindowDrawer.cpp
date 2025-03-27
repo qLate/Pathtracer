@@ -134,13 +134,16 @@ void WindowDrawer::displayStats(bool barVisible)
 	if (updateTimer.trigger())
 	{
 		currFPS = ImGuiHandler::_io->Framerate;
-		currAccumVariance = Renderer::computeAccumVariance();
+		currAccumVariance = Renderer::computeSampleVariance();
 	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3f ms)\n"
 	            "%zu Triangles\n"
-	            "Variance: %.5f", currFPS, 1000.0f / currFPS, Scene::triangles.size(), currAccumVariance);
+	            "Variance: %.5f",
+	            currFPS, 1000.0f / currFPS,
+	            Scene::triangles.size(),
+	            currAccumVariance);
 }
 
 void WindowDrawer::drawInspector()
@@ -158,25 +161,30 @@ void WindowDrawer::drawInspector()
 			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				auto moveSpeedMult = Input::_moveSpeedMult;
-				if (ImGui::SliderFloat("Move Speed", &moveSpeedMult, 0.1f, 20.0f))
+				if (ImGui::LabeledSliderFloat("Move Speed", moveSpeedMult, 0.1f, 20.0f))
 					Input::_moveSpeedMult = moveSpeedMult;
 
 				auto bgColor = Camera::instance->bgColor();
-				if (ImGui::ColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs))
+				if (ImGui::LabeledColorEdit3("Background Color", (float*)&bgColor, ImGuiColorEditFlags_NoInputs))
 					Camera::instance->setBgColor(bgColor);
 			}
 
 			if (ImGui::CollapsingHeader("Path Tracing", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				auto bounces = Renderer::maxRayBounces();
-				ImGui::SliderInt("Ray Bounces", &bounces, 1, 10);
-				if (bounces != Renderer::maxRayBounces())
-					Renderer::setMaxRayBounces(bounces);
+				auto limitSamples = Renderer::limitSamples();
+				ImGui::LabeledCheckbox("Limit Samples", limitSamples);
+				if (limitSamples != Renderer::limitSamples())
+					Renderer::setLimitSamples(limitSamples);
 
 				auto samplesPerPixel = Renderer::samplesPerPixel();
-				ImGui::SliderInt("Samples Per Pixel", &samplesPerPixel, 1, 100);
+				ImGui::LabeledSliderInt("Samples Per Pixel", samplesPerPixel, 1, 100);
 				if (samplesPerPixel != Renderer::samplesPerPixel())
 					Renderer::setSamplesPerPixel(samplesPerPixel);
+
+				auto bounces = Renderer::maxRayBounces();
+				ImGui::LabeledSliderInt("Ray Bounces", bounces, 1, 10);
+				if (bounces != Renderer::maxRayBounces())
+					Renderer::setMaxRayBounces(bounces);
 			}
 		}
 	}

@@ -38,38 +38,38 @@ void Camera::setPos(glm::vec3 pos, bool notify)
 {
 	Object::setPos(pos, false);
 
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 void Camera::setRot(glm::quat rot, bool notify)
 {
 	Object::setRot(rot, false);
 
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 
 void Camera::setViewSize(glm::vec2 viewSize)
 {
 	this->_viewSize = viewSize;
 	Renderer::renderProgram()->setFloat2("viewSize", viewSize);
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 void Camera::setFocalDistance(float focalDistance)
 {
 	_focalDis = focalDistance;
 	Renderer::renderProgram()->setFloat("focalDistance", _focalDis);
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 void Camera::setLensRadius(float lensRadius)
 {
 	_lensRadius = lensRadius;
 	Renderer::renderProgram()->setFloat("lensRadius", _lensRadius);
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 void Camera::setBgColor(Color color)
 {
 	_bgColor = color;
 	Renderer::renderProgram()->setFloat3("bgColor", _bgColor);
-	Renderer::resetAccumulation();
+	Renderer::resetSamples();
 }
 
 glm::vec3 Camera::getScreenCenter() const

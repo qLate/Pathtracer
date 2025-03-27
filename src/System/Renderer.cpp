@@ -20,41 +20,24 @@ void Renderer::init()
 
 void Renderer::render()
 {
-	if (_renderOnce && _accumFrame > 0) return;
-
+	if (_limitSamples && _currSamples >= _samplesPerPixel) return;
 	_renderProgram->use();
 	_renderProgram->setInt("frame", _frame);
-	_renderProgram->setInt("accumFrame", _accumFrame);
+	_renderProgram->setInt("currSamples", _currSamples);
 
 	updateCameraUniforms();
 
-	auto& fboCurr = _frame % 2 == 0 ? _viewFBO1 : _viewFBO2;
-	auto& fboPrev = _frame % 2 == 0 ? _viewFBO2 : _viewFBO1;
-
-	_renderProgram->setHandle("accumTexture", fboPrev->renderTexture()->getHandle());
+	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
 	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fboCurr->id());
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboCurr->renderTexture()->id(), 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _accumSqrTex->id(), 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _varianceTex->id(), 0);
-	glDrawBuffers(3, DRAW_BUFFERS);
-
+	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
-	if (_renderOnce && _frame >= 2)
-	{
-		TimeMeasurerGL tm {};
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		tm.printElapsed("Render time: ");
-	}
-	else
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	_frame++;
-	_accumFrame++;
+	_currSamples++;
 }
 void Renderer::updateCameraUniforms()
 {
@@ -62,8 +45,10 @@ void Renderer::updateCameraUniforms()
 	_renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->rot()));
 }
 
-float Renderer::computeAccumVariance()
+float Renderer::computeSampleVariance()
 {
+	auto meanData = _accumMeanTex->readData<glm::vec3>();
+	auto sqrData = _accumSqrTex->readData<glm::vec3>();
 	auto varianceData = _varianceTex->readData<glm::vec3>();
 
 	float varianceSum = 0;
@@ -76,18 +61,21 @@ float Renderer::computeAccumVariance()
 	return varianceSum / varianceData.size();
 }
 
-GLFrameBuffer* Renderer::sceneViewFBO()
+void Renderer::setLimitSamples(bool limit)
 {
-	return _frame % 2 == 0 || _renderOnce ? _viewFBO1.get() : _viewFBO2.get();
-}
+	_limitSamples = limit;
+	_renderProgram->use();
+	_renderProgram->setInt("limitSamples", _limitSamples);
 
+	resetSamples();
+}
 void Renderer::setSamplesPerPixel(int samples)
 {
 	_samplesPerPixel = samples;
 	_renderProgram->use();
 	_renderProgram->setInt("samplesPerPixel", _samplesPerPixel);
 
-	resetAccumulation();
+	resetSamples();
 }
 void Renderer::setMaxRayBounces(int bounces)
 {
@@ -95,7 +83,7 @@ void Renderer::setMaxRayBounces(int bounces)
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounces", _maxRayBounces);
 
-	resetAccumulation();
+	resetSamples();
 }
 
 void Renderer::resizeView(glm::ivec2 size)
@@ -106,22 +94,28 @@ void Renderer::resizeView(glm::ivec2 size)
 	Camera::instance->setViewSize({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 
-	resetAccumulation();
+	resetSamples();
 }
 void Renderer::resizeTextures(glm::ivec2 size)
 {
-	_viewFBO1.reset();
-	_viewFBO2.reset();
+	_viewFBO.reset();
+	_accumMeanTex.reset();
 	_accumSqrTex.reset();
 	_varianceTex.reset();
 
-	_viewFBO1 = make_unique<GLFrameBuffer>(size);
-	_viewFBO2 = make_unique<GLFrameBuffer>(size);
+	_viewFBO = make_unique<GLFrameBuffer>(size);
+	_accumMeanTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
 	_accumSqrTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
 	_varianceTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _accumMeanTex->id(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _accumSqrTex->id(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _varianceTex->id(), 0);
+	glDrawBuffers(4, DRAW_BUFFERS);
 }
 
-void Renderer::resetAccumulation()
+void Renderer::resetSamples()
 {
-	_accumFrame = 0;
+	_currSamples = 0;
 }
