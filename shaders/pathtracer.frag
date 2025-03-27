@@ -23,7 +23,6 @@ vec3 COLOR_HEAT = vec3(0);
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
 uniform int frame;
-uniform int currSamples;
 
 uniform vec2 pixelSize;
 uniform vec2 viewSize;
@@ -108,6 +107,8 @@ vec3 trace()
     return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
 
+uniform int totalSamples;
+
 uniform sampler2D accumMeanTexture;
 uniform sampler2D accumSqrTexture;
 
@@ -117,7 +118,7 @@ layout(location = 3) out vec4 outVariance;
 
 void main()
 {
-    InitRNG(gl_FragCoord.xy, frame * samplesPerPixel + currSamples);
+    InitRNG(gl_FragCoord.xy, frame * samplesPerPixel + totalSamples);
 
     vec3 color = trace();
 
@@ -125,8 +126,8 @@ void main()
     vec3 prevMean = texture(accumMeanTexture, uv).rgb;
     vec3 prevSqr = texture(accumSqrTexture, uv).rgb;
 
-    vec3 newMean = mix(prevMean, color, 1.0 / (currSamples + 1));
-    vec3 newSqr = mix(prevSqr, color * color, 1.0 / (currSamples + 1));
+    vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
+    vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
     vec3 variance = newSqr - newMean * newMean;
 
     outMean = vec4(newMean, 1.0);

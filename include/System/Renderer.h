@@ -9,6 +9,7 @@ class GLFrameBuffer;
 
 class Renderer
 {
+	inline static bool _renderOneByOne = false;
 	inline static bool _limitSamples = false;
 	inline static int _samplesPerPixel = 100;
 	inline static int _maxRayBounces = 7;
@@ -20,7 +21,9 @@ class Renderer
 	inline static UPtr<GLTexture2D> _varianceTex;
 
 	inline static int _frame = 0;
-	inline static int _currSamples = 0;
+	inline static int _sampleFrame = 0;
+	inline static int _totalSamples = 0;
+	inline static float _renderTime = -1;
 
 	static void init();
 
@@ -35,6 +38,8 @@ public:
 	static int maxRayBounces() { return _maxRayBounces; }
 	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
 	static GLFrameBuffer* sceneViewFBO() { return _viewFBO.get(); }
+
+	static float renderTime() { return _renderTime; }
 
 	static void setLimitSamples(bool limit);
 	static void setSamplesPerPixel(int samples);

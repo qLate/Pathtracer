@@ -129,21 +129,27 @@ void WindowDrawer::displayStats(bool barVisible)
 {
 	static float currFPS = -1;
 	static float currAccumVariance = -1;
+	static float renderTime = -1;
 	static Timer updateTimer = Timer(100);
 
 	if (updateTimer.trigger())
 	{
 		currFPS = ImGuiHandler::_io->Framerate;
 		currAccumVariance = Renderer::computeSampleVariance();
+		renderTime = Renderer::renderTime();
 	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
-	ImGui::Text("%.1f FPS (%.3f ms)\n"
+	ImGui::Text("%.1f FPS (%.3fms)\n"
 	            "%zu Triangles\n"
-	            "Variance: %.5f",
+	            "Variance: %.5f\n"
+	            "Render time: %.3fms\n"
+	            "Efficiency: %.3f",
 	            currFPS, 1000.0f / currFPS,
 	            Scene::triangles.size(),
-	            currAccumVariance);
+	            currAccumVariance,
+	            renderTime,
+	            1 / currAccumVariance / renderTime * 1000);
 }
 
 void WindowDrawer::drawInspector()

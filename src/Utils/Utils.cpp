@@ -73,36 +73,36 @@ void TimeMeasurer::reset()
 	_lastMeasure = _start;
 	timeSum = 0;
 }
-long long TimeMeasurer::elapsed()
+float TimeMeasurer::elapsed()
 {
 	_lastMeasure = std::chrono::high_resolution_clock::now();
-	return std::chrono::duration_cast<std::chrono::microseconds>(_lastMeasure - _start).count();
+	return std::chrono::duration_cast<std::chrono::microseconds>(_lastMeasure - _start).count() / 1000.0f;
 }
 
-long long TimeMeasurer::elapsedFromLast()
+float TimeMeasurer::elapsedFromLast()
 {
 	auto curr = std::chrono::high_resolution_clock::now();
 	auto dur = std::chrono::duration_cast<std::chrono::microseconds>(curr - _lastMeasure).count();
 
 	_lastMeasure = curr;
-	return dur;
+	return dur / 1000.0f;
 }
-long long TimeMeasurer::measureSum()
+float TimeMeasurer::measureSum()
 {
 	auto curr = std::chrono::high_resolution_clock::now();
 	timeSum += std::chrono::duration_cast<std::chrono::microseconds>(curr - _lastMeasure).count();
 	_lastMeasure = curr;
 
-	return timeSum;
+	return timeSum / 1000.0f;
 }
 
 void TimeMeasurer::printElapsed(const std::string& msg)
 {
-	Debug::log(msg, std::format("{}", Utils::round(elapsed() / 1000.0f, _decimals)), "ms");
+	Debug::log(msg, std::format("{}", Utils::round(elapsed(), _decimals)), "ms");
 }
 void TimeMeasurer::printElapsedFromLast(const std::string& msg)
 {
-	Debug::log(msg, std::format("{}", Utils::round(elapsedFromLast() / 1000.0f, _decimals)), "ms");
+	Debug::log(msg, std::format("{}", Utils::round(elapsedFromLast(), _decimals)), "ms");
 }
 
 TimeMeasurerGL::TimeMeasurerGL(int decimals, bool doFinish): tm(decimals)
@@ -111,11 +111,23 @@ TimeMeasurerGL::TimeMeasurerGL(int decimals, bool doFinish): tm(decimals)
 		glFinish();
 	tm.reset();
 }
+
+float TimeMeasurerGL::elapsed()
+{
+	glFinish();
+	return tm.elapsed();
+}
+float TimeMeasurerGL::elapsedFromLast()
+{
+	glFinish();
+	return tm.elapsedFromLast();
+}
 void TimeMeasurerGL::reset()
 {
 	glFinish();
 	tm.reset();
 }
+
 void TimeMeasurerGL::printElapsed(const std::string& msg)
 {
 	glFinish();

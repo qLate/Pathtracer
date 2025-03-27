@@ -5,7 +5,6 @@
 #include "GLObject.h"
 #include "ImGuiHandler.h"
 #include "Material.h"
-#include "WindowDrawer.h"
 
 void Renderer::init()
 {
@@ -20,10 +19,9 @@ void Renderer::init()
 
 void Renderer::render()
 {
-	if (_limitSamples && _currSamples >= _samplesPerPixel) return;
+	if (_limitSamples && _totalSamples >= _samplesPerPixel) return;
 	_renderProgram->use();
 	_renderProgram->setInt("frame", _frame);
-	_renderProgram->setInt("currSamples", _currSamples);
 
 	updateCameraUniforms();
 
@@ -32,12 +30,28 @@ void Renderer::render()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	TimeMeasurerGL tm;
+	if (_renderOneByOne)
+	{
+		_renderProgram->setInt("totalSamples", _totalSamples++);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	else
+	{
+		for (int i = 0; i < _samplesPerPixel; i++)
+		{
+			_renderProgram->setInt("totalSamples", _totalSamples++);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+	}
+	_renderTime = tm.elapsedFromLast();
+
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	_frame++;
-	_currSamples++;
+	_sampleFrame++;
 }
 void Renderer::updateCameraUniforms()
 {
@@ -117,5 +131,7 @@ void Renderer::resizeTextures(glm::ivec2 size)
 
 void Renderer::resetSamples()
 {
-	_currSamples = 0;
+	_sampleFrame = 0;
+	_totalSamples = 0;
+	_renderTime = 0;
 }

@@ -68,9 +68,9 @@ public:
 
 	void reset();
 
-	long long elapsed();
-	long long elapsedFromLast();
-	long long measureSum();
+	float elapsed();
+	float elapsedFromLast();
+	float measureSum();
 
 	void printElapsed(const std::string& msg = "");
 	void printElapsedFromLast(const std::string& msg = "");
@@ -83,6 +83,8 @@ class TimeMeasurerGL
 public:
 	TimeMeasurerGL(int decimals = 1, bool doFinish = true);
 
+	float elapsed();
+	float elapsedFromLast();
 	void reset();
 
 	void printElapsed(const std::string& msg = "");
