@@ -15,10 +15,10 @@ void SceneLoader::update()
 {
 	if (ifd::FileDialog::Instance().IsDone("SaveScene"))
 	{
+		_isSelectingPath = false;
+
 		if (ifd::FileDialog::Instance().HasResult())
 		{
-			_isSelectingPath = false;
-
 			auto path = ifd::FileDialog::Instance().GetResult().string();
 			saveScene(path);
 		}
@@ -27,10 +27,10 @@ void SceneLoader::update()
 
 	if (ifd::FileDialog::Instance().IsDone("OpenScene"))
 	{
+		_isSelectingPath = false;
+
 		if (ifd::FileDialog::Instance().HasResult())
 		{
-			_isSelectingPath = false;
-
 			auto path = ifd::FileDialog::Instance().GetResult().string();
 			loadScene(path);
 		}

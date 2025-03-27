@@ -31,12 +31,14 @@ void Renderer::render()
 	auto& fboCurr = _frame % 2 == 0 ? _viewFBO1 : _viewFBO2;
 	auto& fboPrev = _frame % 2 == 0 ? _viewFBO2 : _viewFBO1;
 
-	_renderProgram->setHandle("accumTexture", fboPrev->renderTexture->getHandle());
+	_renderProgram->setHandle("accumTexture", fboPrev->renderTexture()->getHandle());
 	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fboCurr->id());
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboCurr->renderTexture()->id(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _accumSqrTex->id(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _varianceTex->id(), 0);
+	glDrawBuffers(3, DRAW_BUFFERS);
 
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 	if (_renderOnce && _frame >= 2)
@@ -48,8 +50,6 @@ void Renderer::render()
 	else
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
-
-	Debug::log("Variance: ", computeAccumVariance());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

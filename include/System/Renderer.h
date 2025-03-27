@@ -27,8 +27,6 @@ class Renderer
 	static void render();
 	static void updateCameraUniforms();
 
-	static float computeAccumVariance();
-
 	static void resizeTextures(glm::ivec2 size);
 
 public:
@@ -43,6 +41,15 @@ public:
 	static void resizeView(glm::ivec2 size);
 	static void resetAccumulation();
 
+	static float computeAccumVariance();
+
 	friend class Program;
 	friend class SDLHandler;
+
+private:
+	static constexpr GLenum DRAW_BUFFERS[] = {
+		GL_COLOR_ATTACHMENT0,
+		GL_COLOR_ATTACHMENT1,
+		GL_COLOR_ATTACHMENT2
+	};
 };

@@ -90,7 +90,7 @@ vec3 castRay(Ray ray)
     return color;
 }
 
-vec3 trace()
+void trace(out vec3 mean, out vec3 m2)
 {
     vec3 right = cameraRotMat[0].xyz;
     vec3 forward = cameraRotMat[1].xyz;
@@ -101,41 +101,56 @@ vec3 trace()
     float dy = viewSize.y / pixelSize.y;
     float x = gl_FragCoord.x * dx;
     float y = gl_FragCoord.y * dy;
-    vec3 rayDir = normalize(lb + x * right + y * up);
 
-    vec3 color = vec3(0);
-    for (int i = 0; i < samplesPerPixel; i++)
+    mean = vec3(0.0);
+    m2 = vec3(0.0);
+
+    for (int i = 0; i < samplesPerPixel; ++i)
     {
         vec2 jitter = vec2(rand(), rand()) - 0.5;
-        vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
-        color += castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
+        vec3 dir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
+        vec3
+        sample_ = castRay(Ray(cameraPos, dir, RAY_DEFAULT_ARGS));
+
+        vec3 delta = sample_ - mean;
+        mean += delta / float(i + 1);
+        vec3 delta2 = sample_ - mean;
+        m2 += delta * delta2;
     }
-    color /= samplesPerPixel;
-    return color;
 }
 
 uniform sampler2D accumTexture;
-uniform sampler2D accumSqrTexture;
+uniform sampler2D accumM2Texture;
 
-layout(location = 1) out vec4 outSqr;
+layout(location = 1) out vec4 outM2;
+layout(location = 2) out vec4 outVariance;
 
 void main()
 {
     InitRNG(gl_FragCoord.xy, frame);
 
-    vec3 color = trace();
+    vec3 frameMean, frameM2;
+    trace(frameMean, frameM2);
+    float frameSampleCount = float(samplesPerPixel);
 
-    vec3 prevMeanColor = texture(accumTexture, gl_FragCoord.xy / pixelSize).rgb;
-    vec3 prevSqrColor = texture(accumSqrTexture, gl_FragCoord.xy / pixelSize).rgb;
+    vec2 uv = gl_FragCoord.xy / pixelSize;
+    vec3 prevMean = texture(accumTexture, uv).rgb;
+    vec3 prevM2 = texture(accumM2Texture, uv).rgb;
 
-    float blendFactor = 1.0 / (accumFrame + 1);
-    vec3 newMeanColor = mix(prevMeanColor, color, blendFactor);
-    vec3 newSqrColor = mix(prevSqrColor, color * color, blendFactor);
+    float frameIndex = float(accumFrame + 1); // starts at 1
 
-    outSqr = vec4(newSqrColor, 1);
+    vec3 delta = frameMean - prevMean;
+    vec3 newMean = prevMean + delta / frameIndex;
+    vec3 delta2 = frameMean - newMean;
+
+    vec3 newM2 = prevM2 + frameM2 + delta * delta2 * frameSampleCount * (frameIndex - 1.0) / frameIndex;
+    vec3 variance = newM2 / (frameIndex * frameSampleCount); // variance per pixel sample
+
+    outM2 = vec4(newM2, 1.0);
+    outVariance = vec4(variance, 1.0); // optional, for debug display
 
     if (COLOR_DEBUG != vec3(0))
-        outColor = vec4(COLOR_DEBUG, 1);
+        outColor = vec4(COLOR_DEBUG, 1.0);
     else
-        outColor = vec4(newMeanColor + COLOR_HEAT, 1);
+        outColor = vec4(newMean + COLOR_HEAT, 1.0);
 }

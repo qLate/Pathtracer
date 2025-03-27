@@ -29,9 +29,9 @@ void WindowDrawer::drawWindows()
 	if (ImGui::IsKeyPressed(ImGuiKey_F2))
 		_showIcons = !_showIcons;
 
-	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))
+	if (!SDLHandler::isNavigatingScene() && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))
 		SceneLoader::saveSceneDialog();
-	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_O))
+	if (!SDLHandler::isNavigatingScene() && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_O))
 		SceneLoader::loadSceneDialog();
 
 	drawMenuBar();
@@ -108,7 +108,7 @@ void WindowDrawer::drawScene()
 			node->WantHiddenTabBarToggle = true;
 
 		ImVec2 availSize = ImGui::GetContentRegionAvail();
-		ImGui::Image(Renderer::sceneViewFBO()->renderTexture->id(), availSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(Renderer::sceneViewFBO()->renderTexture()->id(), availSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		if (availSize.x != _currRenderSize.x || availSize.y != _currRenderSize.y)
 		{
@@ -127,14 +127,20 @@ void WindowDrawer::drawScene()
 
 void WindowDrawer::displayStats(bool barVisible)
 {
-	static float currFPS;
+	static float currFPS = -1;
+	static float currAccumVariance = -1;
 	static Timer updateTimer = Timer(100);
 
 	if (updateTimer.trigger())
+	{
 		currFPS = ImGuiHandler::_io->Framerate;
+		currAccumVariance = Renderer::computeAccumVariance();
+	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
-	ImGui::Text("%.1f FPS (%.3f ms)\n%zu Triangles", currFPS, 1000.0f / currFPS, Scene::triangles.size());
+	ImGui::Text("%.1f FPS (%.3f ms)\n"
+	            "%zu Triangles\n"
+	            "Variance: %.5f", currFPS, 1000.0f / currFPS, Scene::triangles.size(), currAccumVariance);
 }
 
 void WindowDrawer::drawInspector()

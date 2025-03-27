@@ -137,11 +137,13 @@ public:
 
 class GLFrameBuffer : public GLObject
 {
-public:
-	GLTexture2D* renderTexture = nullptr;
+	GLTexture2D* _renderTexture = nullptr;
 
+public:
 	GLFrameBuffer(glm::ivec2 size);
 	~GLFrameBuffer() override;
+
+	GLTexture2D* renderTexture() const { return _renderTexture; }
 };
 
 
