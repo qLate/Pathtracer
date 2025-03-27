@@ -10,6 +10,7 @@
 #include "Debug.h"
 #include "glm/geometric.hpp"
 #include "glm/vec3.hpp"
+#include <windows.h>
 
 template <typename T>
 using UPtr = std::unique_ptr<T>;
@@ -36,6 +37,8 @@ public:
 	static bool hasFlag(T flags, T flag);
 
 	static float computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference);
+
+	static void copyToClipboard(const std::string& text);
 };
 
 template <typename T>

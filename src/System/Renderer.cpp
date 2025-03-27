@@ -29,27 +29,21 @@ void Renderer::render()
 	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
 	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
 
-	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 
 	TimeMeasurerGL tm;
-	if (_renderOneByOne)
+	int n = _renderOneByOne ? 1 : _samplesPerPixel;
+	for (int i = 0; i < n; i++)
 	{
 		_renderProgram->setInt("totalSamples", _totalSamples++);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}
-	else
-	{
-		for (int i = 0; i < _samplesPerPixel; i++)
-		{
-			_renderProgram->setInt("totalSamples", _totalSamples++);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	_renderTime = tm.elapsedFromLast();
 
 	glBindVertexArray(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	_frame++;
 	_sampleFrame++;

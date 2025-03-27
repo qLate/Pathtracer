@@ -52,6 +52,21 @@ float Utils::computeMSE(const std::vector<glm::vec3>& rendered, const std::vecto
 	return mse;
 }
 
+void Utils::copyToClipboard(const std::string& text)
+{
+	if (OpenClipboard(nullptr))
+	{
+		EmptyClipboard();
+
+		HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, text.size() + 1);
+		memcpy(GlobalLock(hMem), text.c_str(), text.size() + 1);
+		GlobalUnlock(hMem);
+
+		SetClipboardData(CF_TEXT, hMem);
+		CloseClipboard();
+	}
+}
+
 bool Timer::trigger()
 {
 	float currTime = SDL_GetTicks();

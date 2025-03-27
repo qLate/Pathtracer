@@ -33,6 +33,7 @@ class Renderer
 	static void resizeTextures(glm::ivec2 size);
 
 public:
+	static bool renderOneByOne() { return _renderOneByOne; }
 	static bool limitSamples() { return _limitSamples; }
 	static int samplesPerPixel() { return _samplesPerPixel; }
 	static int maxRayBounces() { return _maxRayBounces; }

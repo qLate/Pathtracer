@@ -130,6 +130,7 @@ void WindowDrawer::displayStats(bool barVisible)
 	static float currFPS = -1;
 	static float currAccumVariance = -1;
 	static float renderTime = -1;
+	static float efficiency = -1;
 	static Timer updateTimer = Timer(100);
 
 	if (updateTimer.trigger())
@@ -137,19 +138,24 @@ void WindowDrawer::displayStats(bool barVisible)
 		currFPS = ImGuiHandler::_io->Framerate;
 		currAccumVariance = Renderer::computeSampleVariance();
 		renderTime = Renderer::renderTime();
+		int sppFactor = Renderer::renderOneByOne() ? Renderer::samplesPerPixel() : 1;
+		efficiency = 1000 / currAccumVariance / renderTime / sppFactor;
+
+		if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+			Utils::copyToClipboard(std::format("{:.1f}ms, {:.3f} variance, {:.2f} efficiency", renderTime, currAccumVariance, efficiency));
 	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3fms)\n"
 	            "%zu Triangles\n"
-	            "Variance: %.5f\n"
+	            "Variance: %.3f\n"
 	            "Render time: %.3fms\n"
 	            "Efficiency: %.3f",
 	            currFPS, 1000.0f / currFPS,
 	            Scene::triangles.size(),
 	            currAccumVariance,
 	            renderTime,
-	            1 / currAccumVariance / renderTime * 1000);
+	            efficiency);
 }
 
 void WindowDrawer::drawInspector()
