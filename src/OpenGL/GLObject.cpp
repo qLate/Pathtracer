@@ -146,11 +146,11 @@ void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum type, GLint internalFormat) : _width(width), _height(height)
+GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum format, GLenum internalFormat) : _width(width), _height(height), _format(format)
 {
 	glBindTexture(GL_TEXTURE_2D, _id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, type, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

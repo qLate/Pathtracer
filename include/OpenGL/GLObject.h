@@ -111,9 +111,13 @@ public:
 class GLTexture2D : public GLTexture
 {
 	int _width, _height;
+	GLenum _format;
 
 public:
-	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum type = GL_RGBA, GLint internalFormat = GL_RGBA);
+	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum format = GL_RGBA, GLenum internalFormat = GL_RGBA);
+
+	template <typename T>
+	std::vector<T> readData() const;
 
 	uint64_t getHandle() const;
 };
@@ -152,5 +156,16 @@ std::vector<T> GLBufferObject::readData(int count) const
 	glUnmapBuffer(_type);
 
 	glBindBuffer(_type, 0);
+	return data;
+}
+
+template <typename T>
+std::vector<T> GLTexture2D::readData() const
+{
+	auto data = std::vector<T>(_width * _height);
+
+	glBindTexture(GL_TEXTURE_2D, _id);
+	glGetTexImage(GL_TEXTURE_2D, 0, _format, GL_FLOAT, data.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return data;
 }

@@ -9,7 +9,7 @@ Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(po
 {
 	init();
 }
-Camera::Camera(const Camera& orig) : Object(orig), _viewSize(orig._viewSize), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius), _bgColor(orig._bgColor)
+Camera::Camera(const Camera& orig) : Object(orig), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius), _bgColor(orig._bgColor)
 {
 	init();
 }
@@ -20,9 +20,9 @@ void Camera::init()
 	instance = this;
 
 	auto renderSize = WindowDrawer::currRenderSize();
-	_viewSize = {renderSize.x / (float)renderSize.y, 1};
+	auto viewSize = glm::vec2(renderSize.x / (float)renderSize.y, 1);
 
-	setViewSize(_viewSize);
+	setViewSize(viewSize);
 	setFocalDistance(_focalDis);
 	setLensRadius(_lensRadius);
 	setBgColor(_bgColor);

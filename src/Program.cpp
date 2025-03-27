@@ -14,7 +14,6 @@
 #include "SDLHandler.h"
 #include "Scene.h"
 #include "Renderer.h"
-#include "SceneLoader.h"
 #include "Tweener.h"
 #include "Utils.h"
 
@@ -38,6 +37,9 @@ void Program::init()
 	Renderer::init();
 	tm.printElapsedFromLast("Renderer init in ");
 
+	ImGuiHandler::init();
+	tm.printElapsedFromLast("ImGui init in ");
+
 	Physics::init();
 	tm.printElapsedFromLast("Physics init in ");
 
@@ -50,8 +52,6 @@ void Program::init()
 	Debug::log("--------------------------------");
 
 	SceneSetup::setupScene();
-	//SceneLoader::saveScene("scene.json");
-	//SceneLoader::loadScene("scene.json");
 	tm.printElapsedFromLast("Scene setup in ");
 
 	BufferController::initBuffers();

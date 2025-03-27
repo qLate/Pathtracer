@@ -90,11 +90,8 @@ vec3 castRay(Ray ray)
     return color;
 }
 
-uniform sampler2D accumTexture;
-void main()
+vec3 trace()
 {
-    InitRNG(gl_FragCoord.xy, frame);
-
     vec3 right = cameraRotMat[0].xyz;
     vec3 forward = cameraRotMat[1].xyz;
     vec3 up = cameraRotMat[2].xyz;
@@ -114,12 +111,31 @@ void main()
         color += castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
     }
     color /= samplesPerPixel;
+    return color;
+}
 
-    vec4 accumColor = texture(accumTexture, gl_FragCoord.xy / pixelSize);
-    accumColor.rgb = mix(accumColor.rgb, color, 1.0f / (accumFrame + 1));
+uniform sampler2D accumTexture;
+uniform sampler2D accumSqrTexture;
+
+layout(location = 1) out vec4 outSqr;
+
+void main()
+{
+    InitRNG(gl_FragCoord.xy, frame);
+
+    vec3 color = trace();
+
+    vec3 prevMeanColor = texture(accumTexture, gl_FragCoord.xy / pixelSize).rgb;
+    vec3 prevSqrColor = texture(accumSqrTexture, gl_FragCoord.xy / pixelSize).rgb;
+
+    float blendFactor = 1.0 / (accumFrame + 1);
+    vec3 newMeanColor = mix(prevMeanColor, color, blendFactor);
+    vec3 newSqrColor = mix(prevSqrColor, color * color, blendFactor);
+
+    outSqr = vec4(newSqrColor, 1);
 
     if (COLOR_DEBUG != vec3(0))
         outColor = vec4(COLOR_DEBUG, 1);
     else
-        outColor = vec4(accumColor.rgb + COLOR_HEAT, 1);
+        outColor = vec4(newMeanColor + COLOR_HEAT, 1);
 }

@@ -31,7 +31,6 @@ void SDLHandler::init()
 	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	initOpenGL();
-	ImGuiHandler::init();
 
 	SDL_GL_SetSwapInterval(0);
 }
@@ -49,8 +48,6 @@ void SDLHandler::initOpenGL()
 		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 		Debug::log("OpenGL msg: ", message);
 	}, nullptr);
-
-	Renderer::initViewFBO();
 
 	Shader::addInclude("shaders/common/common.glsl");
 	Shader::addInclude("shaders/common/utils.glsl");
