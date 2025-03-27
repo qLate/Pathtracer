@@ -22,7 +22,6 @@ vec3 COLOR_HEAT = vec3(0);
 // ----------- SETTINGS -----------
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
-uniform int frame;
 
 uniform vec2 pixelSize;
 uniform vec2 viewSize;
@@ -30,6 +29,10 @@ uniform float focalDistance;
 uniform float lensRadius;
 uniform vec3 cameraPos;
 uniform vec3 bgColor = vec3(0, 0, 0);
+
+uniform int frame;
+uniform int sampleFrame;
+uniform int totalSamples;
 
 #include "intersection.glsl"
 #include "light.glsl"
@@ -67,9 +70,21 @@ vec3 castRay(Ray ray)
         // float pdf = 1 / (2 * PI);
         // throughput *= albedo / (pdf * PI) * cosTheta;
 
-        vec3 samp = sampleHemisphereCosine(rand(), rand());
-        // float cosTheta = samp.z;
-        // float pdf = cosTheta / PI;
+        float r1;
+        float r2;
+        if (i == 0) {
+            // stratified sampling
+            int strata = int(ceil(sqrt(samplesPerPixel)));
+            int j = totalSamples % (strata * strata);
+            r1 = (j % strata + rand()) / strata;
+            r2 = (j / strata + rand()) / strata;
+        }
+        else {
+            r1 = rand();
+            r2 = rand();
+        }
+
+        vec3 samp = sampleHemisphereCosine(r1, r2);
         throughput *= albedo;
 
         if (length(throughput) < 0.01) break;
@@ -106,8 +121,6 @@ vec3 trace()
     vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
     return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
-
-uniform int totalSamples;
 
 uniform sampler2D accumMeanTexture;
 uniform sampler2D accumSqrTexture;

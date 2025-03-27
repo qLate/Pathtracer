@@ -22,6 +22,7 @@ void Renderer::render()
 	if (_limitSamples && _totalSamples >= _samplesPerPixel) return;
 	_renderProgram->use();
 	_renderProgram->setInt("frame", _frame);
+	_renderProgram->setInt("sampleFrame", _sampleFrame);
 
 	updateCameraUniforms();
 
