@@ -138,8 +138,7 @@ void WindowDrawer::displayStats(bool barVisible)
 		currFPS = ImGuiHandler::_io->Framerate;
 		currAccumVariance = Renderer::computeSampleVariance();
 		renderTime = Renderer::renderTime();
-		int sppFactor = Renderer::renderOneByOne() ? Renderer::samplesPerPixel() : 1;
-		efficiency = 1000 / currAccumVariance / renderTime / sppFactor;
+		efficiency = 1000 / currAccumVariance / renderTime;
 
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
 			Utils::copyToClipboard(std::format("{:.1f}ms, {:.3f} variance, {:.2f} efficiency", renderTime, currAccumVariance, efficiency));
@@ -191,7 +190,7 @@ void WindowDrawer::drawInspector()
 				auto samplesPerPixel = Renderer::samplesPerPixel();
 				ImGui::LabeledSliderInt("Samples Per Pixel", samplesPerPixel, 1, 100);
 				if (samplesPerPixel != Renderer::samplesPerPixel())
-					Renderer::setSamplesPerPixel(samplesPerPixel);
+					Renderer::setSPP(samplesPerPixel);
 
 				auto bounces = Renderer::maxRayBounces();
 				ImGui::LabeledSliderInt("Ray Bounces", bounces, 1, 10);

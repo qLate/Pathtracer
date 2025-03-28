@@ -5,26 +5,28 @@
 #include "GLObject.h"
 #include "ImGuiHandler.h"
 #include "Material.h"
+#include "SDLHandler.h"
 
 void Renderer::init()
 {
 	_renderProgram = make_unique<DefaultShaderProgram<RaytraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
-	_renderProgram->setFloat2("pixelSize", ImGuiHandler::INIT_RENDER_SIZE);
-	setSamplesPerPixel(_samplesPerPixel);
-	setMaxRayBounces(_maxRayBounces);
 
-	resizeTextures(ImGuiHandler::INIT_RENDER_SIZE);
+	setSPP(_samplesPerPixel);
+	setMaxRayBounces(_maxRayBounces);
+	resizeView(ImGuiHandler::INIT_RENDER_SIZE);
 }
 
 void Renderer::render()
 {
 	if (_limitSamples && _totalSamples >= _samplesPerPixel) return;
 	_renderProgram->use();
+
+	updateSetLowSPPIfInteracting();
+	updateCameraUniforms();
+
 	_renderProgram->setInt("frame", _frame);
 	_renderProgram->setInt("sampleFrame", _sampleFrame);
-
-	updateCameraUniforms();
 
 	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
 	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
@@ -53,6 +55,28 @@ void Renderer::updateCameraUniforms()
 	_renderProgram->setFloat3("cameraPos", Camera::instance->pos());
 	_renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->rot()));
 }
+void Renderer::updateSetLowSPPIfInteracting()
+{
+	static int oldSpp = 0;
+	static bool isOldSpp = false;
+
+	if (ImGui::IsAnyItemActive() || SDLHandler::isNavigatingScene())
+	{
+		isOldSpp = true;
+		oldSpp = _samplesPerPixel;
+		_samplesPerPixel = 10;
+
+		_renderProgram->setInt("samplesPerPixel", 10);
+	}
+	else
+	{
+		if (!isOldSpp) return;
+		isOldSpp = false;
+		_samplesPerPixel = oldSpp;
+
+		_renderProgram->setInt("samplesPerPixel", _samplesPerPixel);
+	}
+}
 
 float Renderer::computeSampleVariance()
 {
@@ -78,7 +102,7 @@ void Renderer::setLimitSamples(bool limit)
 
 	resetSamples();
 }
-void Renderer::setSamplesPerPixel(int samples)
+void Renderer::setSPP(int samples)
 {
 	_samplesPerPixel = samples;
 	_renderProgram->use();
@@ -100,7 +124,8 @@ void Renderer::resizeView(glm::ivec2 size)
 	resizeTextures(size);
 
 	_renderProgram->setFloat2("pixelSize", size);
-	Camera::instance->setViewSize({size.x / (float)size.y, 1});
+	if (Camera::instance)
+		Camera::instance->setViewSize({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 
 	resetSamples();

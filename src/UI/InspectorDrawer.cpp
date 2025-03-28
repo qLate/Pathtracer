@@ -59,9 +59,9 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (ImGui::LabeledSliderFloat("Intensity", intensity, 0.01f, 10.0f))
 			material->setColor(color.withIntensity(intensity));
 
-		auto diffuseCoef = material->roughness();
-		if (ImGui::LabeledSliderFloat("Diffuse", diffuseCoef, 0.0f, 1.0f))
-			material->setDiffuseCoef(diffuseCoef);
+		auto roughness = material->roughness();
+		if (ImGui::LabeledSliderFloat("Roughness", roughness, 0.0f, 1.0f))
+			material->setDiffuseCoef(roughness);
 
 		auto reflection = material->reflection();
 		if (ImGui::LabeledSliderFloat("Reflection", reflection, 0.0f, 1.0f))

@@ -29,6 +29,7 @@ class Renderer
 
 	static void render();
 	static void updateCameraUniforms();
+	static void updateSetLowSPPIfInteracting();
 
 	static void resizeTextures(glm::ivec2 size);
 
@@ -43,7 +44,7 @@ public:
 	static float renderTime() { return _renderTime; }
 
 	static void setLimitSamples(bool limit);
-	static void setSamplesPerPixel(int samples);
+	static void setSPP(int samples);
 	static void setMaxRayBounces(int bounces);
 
 	static void resizeView(glm::ivec2 size);

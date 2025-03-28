@@ -84,6 +84,18 @@ void onb(in vec3 N, inout vec3 T, inout vec3 B)
     B = cross(N, T);
 }
 
+vec3 worldToTangent(vec3 dir, vec3 N)
+{
+    vec3 T, B;
+    onb(N, T, B);
+    return dir.x * T + dir.y * B + dir.z * N;
+}
+
+float maxv3(vec3 v)
+{
+    return max(max(v.x, v.y), v.z);
+}
+
 vec3 sampleHemisphereUniform(float r1, float r2)
 {
     float r = sqrt(max(1.0 - r1 * r1, 0));
@@ -106,9 +118,18 @@ vec3 sampleHemisphereCosine(float r1, float r2)
     return vec3(x, y, z);
 }
 
-vec3 worldToTangent(vec3 dir, vec3 N)
+vec3 sampleGlossyGGX(vec3 N, vec3 dir, float roughness, float r1, float r2)
 {
+    float a = max(roughness * roughness, 0.001);
+    float phi = TWO_PI * r1;
+    float cosTheta = sqrt((1.0 - r2) / (1.0 + (a * a - 1.0) * r2));
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    vec3 H = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+
     vec3 T, B;
     onb(N, T, B);
-    return dir.x * T + dir.y * B + dir.z * N;
+    H = normalize(H.x * T + H.y * B + H.z * N);
+
+    return reflect(-dir, H);
 }

@@ -53,6 +53,7 @@ void SDLHandler::initOpenGL()
 	Shader::addInclude("shaders/common/utils.glsl");
 	Shader::addInclude("shaders/intersection.glsl");
 	Shader::addInclude("shaders/light.glsl");
+	Shader::addInclude("shaders/sampling.glsl");
 }
 
 void SDLHandler::update()

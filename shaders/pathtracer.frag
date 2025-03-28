@@ -36,12 +36,13 @@ uniform int totalSamples;
 
 #include "intersection.glsl"
 #include "light.glsl"
+#include "sampling.glsl"
 
 vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
     vec3 throughput = vec3(1);
-    for (int i = 0; i < maxRayBounces; i++)
+    for (int bounce = 0; bounce < maxRayBounces; bounce++)
     {
         if (!intersectWorld(ray))
         {
@@ -65,40 +66,18 @@ vec3 castRay(Ray ray)
         vec3 directLighting = getIllumination(ray);
         color += directLighting * albedo / PI * throughput;
 
-        // vec3 samp = sampleHemisphereUniform(rand(), rand());
-        // float cosTheta = samp.z;
-        // float pdf = 1 / (2 * PI);
-        // throughput *= albedo / (pdf * PI) * cosTheta;
-
-        float r1;
-        float r2;
-        if (i == 0) {
-            // stratified sampling
-            int strata = int(ceil(sqrt(samplesPerPixel)));
-            int j = totalSamples % (strata * strata);
-            r1 = (j % strata + rand()) / strata;
-            r2 = (j / strata + rand()) / strata;
-        }
-        else {
-            r1 = rand();
-            r2 = rand();
-        }
-
-        vec3 samp = sampleHemisphereCosine(r1, r2);
-        throughput *= albedo;
+        vec3 bounceDir = sampleMaterial(ray, throughput, albedo, mat, bounce);
+        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
 
         if (length(throughput) < 0.01) break;
 
         // Russian roulette
-        if (i > 3)
+        if (bounce > 3)
         {
-            float p = clamp(max(throughput.r, max(throughput.g, throughput.b)), 0.05, 1.0);
+            float p = clamp(maxv3(throughput), 0.05, 1.0);
             if (rand() > p) break;
             throughput /= p;
         }
-
-        vec3 bounceDir = worldToTangent(samp, ray.surfaceNormal);
-        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
     }
 
     return color;
