@@ -39,6 +39,7 @@ void Renderer::render()
 	#ifndef PERFORMANCE_BUILD
 	TimeMeasurerGL tm;
 	#endif
+
 	int n = _renderOneByOne ? 1 : _samplesPerPixel;
 	for (int i = 0; i < n; i++)
 	{
@@ -48,6 +49,7 @@ void Renderer::render()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+
 	#ifndef PERFORMANCE_BUILD
 	_renderTime = tm.elapsedFromLast();
 	#endif

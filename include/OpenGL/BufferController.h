@@ -75,9 +75,13 @@ private:
 
 	struct MaterialStruct
 	{
-		glm::vec4 v1;
-		glm::vec4 v2;
-		glm::vec4 v3;
+		glm::vec3 color;
+		int id;
+		bool lit;
+		float roughness;
+		float reflection;
+		int textureIndex;
+		glm::vec3 emission;
 	};
 
 	struct LightStruct
