@@ -51,12 +51,11 @@ vec3 castRay(Ray ray)
         }
 
         ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
-        ray.interPoint += ray.surfaceNormal * 0.0001;
+        ray.interPoint += ray.surfaceNormal * 0.01;
 
         Material mat = getMaterial(ray.materialIndex);
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
-
         if (length(mat.emission) > 0)
         {
             color += throughput * mat.emission;
@@ -115,7 +114,7 @@ void main()
 
     vec3 color = trace();
 
-    #ifdef PERFORMANCE_BUILD
+    #ifdef BENCHMARK_BUILD
     {
         outColor = vec4(color, 1);
     }

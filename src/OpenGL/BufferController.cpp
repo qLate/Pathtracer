@@ -96,12 +96,12 @@ void BufferController::updateMaterials()
 		auto mat = materials[i];
 
 		MaterialStruct materialStruct {};
-		materialStruct.color = mat->color();
+		materialStruct.color = mat->color().xyz;
 		materialStruct.id = mat->id();
 		materialStruct.lit = mat->lit();
 		materialStruct.roughness = mat->roughness();
 		materialStruct.textureIndex = mat->texture()->id();
-		materialStruct.emission = mat->emission();
+		materialStruct.emission = mat->emission().xyz;
 
 		data[i] = materialStruct;
 	}

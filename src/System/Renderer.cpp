@@ -9,9 +9,6 @@
 
 void Renderer::init()
 {
-	_samplesPerPixel = _enablePathtracing ? SAMPLES_PER_PIXEL : 1;
-	_maxRayBounces = _enablePathtracing ? MAX_RAY_BOUNCES : 0;
-
 	_renderProgram = make_unique<DefaultShaderProgram<RaytraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
 
@@ -33,13 +30,12 @@ void Renderer::render()
 
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 
-	#ifndef PERFORMANCE_BUILD
+	#ifndef BENCHMARK_BUILD
 	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
 	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
-
-	TimeMeasurerGL tm;
 	#endif
 
+	TimeMeasurerGL tm;
 	int n = _renderOneByOne ? 1 : _samplesPerPixel;
 	for (int i = 0; i < n; i++)
 	{
@@ -49,10 +45,7 @@ void Renderer::render()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-
-	#ifndef PERFORMANCE_BUILD
 	_renderTime = tm.elapsedFromLast();
-	#endif
 
 	glBindVertexArray(0);
 
@@ -90,6 +83,9 @@ void Renderer::updateSetLowSPPIfInteracting()
 
 float Renderer::computeSampleVariance()
 {
+	#ifdef BENCHMARK_BUILD
+	return 0;
+	#else
 	auto meanData = _accumMeanTex->readData<glm::vec3>();
 	auto sqrData = _accumSqrTex->readData<glm::vec3>();
 	auto varianceData = _varianceTex->readData<glm::vec3>();
@@ -102,6 +98,7 @@ float Renderer::computeSampleVariance()
 		varianceSum += (pixelVariance.r + pixelVariance.g + pixelVariance.b) / 3;
 	}
 	return varianceSum / varianceData.size();
+	#endif
 }
 
 void Renderer::setLimitSamples(bool limit)
@@ -150,7 +147,7 @@ void Renderer::resizeTextures(glm::ivec2 size)
 	_viewFBO = make_unique<GLFrameBuffer>(size);
 	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 
-	#ifndef PERFORMANCE_BUILD
+	#ifndef BENCHMARK_BUILD
 	_accumMeanTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 	_accumSqrTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 	_varianceTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);

@@ -9,11 +9,19 @@
 #include "SDLHandler.h"
 #include "Triangle.h"
 #include "JsonUtility.h"
+#include "Renderer.h"
 
+#ifdef BENCHMARK_BUILD
 void SceneSetup::setupScene()
 {
-	skeletonScene();
+	skeletonScene_benchmark();
 }
+#else
+void SceneSetup::setupScene()
+{
+	redGreenRoom();
+}
+#endif
 
 void SceneSetup::museumScene()
 {
@@ -118,6 +126,22 @@ void SceneSetup::skeletonScene()
 	auto obj = new Mesh(model, {}, {}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight({1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
+}
+
+void SceneSetup::skeletonScene_benchmark()
+{
+	Renderer::setSPP(1);
+	Renderer::setMaxRayBounces(0);
+
+	auto camera = new Camera({ -365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f });
+	camera->setRot({ 0.98f, {-0.072f, 0.012f, -0.17f} });
+	camera->setBgColor({ 0.05f, 0.05f, 0.05f });
+	auto tex = Texture::defaultTex();
+
+	auto model = Assets::load<Model>("assets/models/skeleton.obj");
+	auto obj = new Mesh(model, {}, {}, { 0.05f, 0.05f, 0.05f });
+	obj->setMaterial({ Color::white(), true, tex, 1 });
+	auto light = new PointLight({ 1460.3f, -1246.5f, 423.4f }, { 255 / 255.0f, 255 / 255.0f, 255 / 255.0f }, 1, FLT_MAX);
 }
 
 void SceneSetup::spaceStationScene()

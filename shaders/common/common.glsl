@@ -35,6 +35,7 @@ struct Material
     float reflection;
     int textureIndex;
     vec3 emission;
+    float _pad;
 };
 
 struct Object
@@ -89,7 +90,7 @@ layout(std140, binding = 1) uniform Textures
 uniform int materialCount;
 layout(std140, binding = 2) uniform Materials
 {
-    Material materials[1];
+    Material materials[5];
 };
 
 uniform int lightCount;

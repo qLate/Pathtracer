@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18)
 
 add_compile_definitions(GLM_FORCE_SWIZZLE)
 
-if(PERFORMANCE_BUILD)
-add_compile_definitions(PERFORMANCE_BUILD)
+if(BENCHMARK_BUILD)
+add_compile_definitions(BENCHMARK_BUILD)
 endif()
 
 set(CXX_STANDARD 20)

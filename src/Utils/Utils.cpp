@@ -122,34 +122,46 @@ void TimeMeasurer::printElapsedFromLast(const std::string& msg)
 
 TimeMeasurerGL::TimeMeasurerGL(int decimals, bool doFinish): tm(decimals)
 {
+	#ifndef BENCHMARK_BUILD
 	if (doFinish)
 		glFinish();
+	#endif
 	tm.reset();
 }
 
 float TimeMeasurerGL::elapsed()
 {
+	#ifndef BENCHMARK_BUILD
 	glFinish();
+	#endif
 	return tm.elapsed();
 }
 float TimeMeasurerGL::elapsedFromLast()
 {
+	#ifndef BENCHMARK_BUILD
 	glFinish();
+	#endif
 	return tm.elapsedFromLast();
 }
 void TimeMeasurerGL::reset()
 {
+	#ifndef BENCHMARK_BUILD
 	glFinish();
+	#endif
 	tm.reset();
 }
 
 void TimeMeasurerGL::printElapsed(const std::string& msg)
 {
+	#ifndef BENCHMARK_BUILD
 	glFinish();
+	#endif
 	tm.printElapsed(msg);
 }
 void TimeMeasurerGL::printElapsedFromLast(const std::string& msg)
 {
+	#ifndef BENCHMARK_BUILD
 	glFinish();
+	#endif
 	tm.printElapsedFromLast(msg);
 }

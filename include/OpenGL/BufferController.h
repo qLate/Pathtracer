@@ -82,6 +82,7 @@ private:
 		float reflection;
 		int textureIndex;
 		glm::vec3 emission;
+		float _pad;
 	};
 
 	struct LightStruct

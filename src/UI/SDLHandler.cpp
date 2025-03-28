@@ -55,8 +55,8 @@ void SDLHandler::initOpenGL()
 	Shader::addInclude("shaders/light.glsl");
 	Shader::addInclude("shaders/sampling.glsl");
 
-	#ifdef PERFORMANCE_BUILD
-	Shader::addDefine("PERFORMANCE_BUILD");
+	#ifdef BENCHMARK_BUILD
+	Shader::addDefine("BENCHMARK_BUILD");
 	#endif
 }
 

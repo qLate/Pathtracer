@@ -32,6 +32,7 @@ class SceneSetup
 	static void minecraftHouseScene();
 	static void kokuraScene();
 	static void skeletonScene();
+	static void skeletonScene_benchmark();
 	static void spaceStationScene();
 
 	friend class Program;
