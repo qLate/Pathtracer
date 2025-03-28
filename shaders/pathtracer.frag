@@ -115,27 +115,30 @@ void main()
 
     vec3 color = trace();
 
-    vec2 uv = gl_FragCoord.xy / pixelSize;
-    vec3 prevMean = texture(accumMeanTexture, uv).rgb;
-    vec3 prevSqr = texture(accumSqrTexture, uv).rgb;
-
-    // Catch NaNs
-    if (prevMean != prevMean) prevMean = vec3(0);
-    if (prevSqr != prevSqr) prevSqr = vec3(0);
-
     #ifdef PERFORMANCE_BUILD
-    outColor = vec4(color, 1);
-
+    {
+        outColor = vec4(color, 1);
+    }
     #else
-    vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
-    vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
-    vec3 variance = newSqr - newMean * newMean;
+    {
+        vec2 uv = gl_FragCoord.xy / pixelSize;
+        vec3 prevMean = texture(accumMeanTexture, uv).rgb;
+        vec3 prevSqr = texture(accumSqrTexture, uv).rgb;
 
-    outMean = vec4(newMean, 1.0);
-    outSqr = vec4(newSqr, 1.0);
-    outVariance = vec4(variance, 1.0);
+        // Catch NaNs
+        if (prevMean != prevMean) prevMean = vec3(0);
+        if (prevSqr != prevSqr) prevSqr = vec3(0);
 
-    outColor = vec4(newMean, 1);
+        vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
+        vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
+        vec3 variance = newSqr - newMean * newMean;
+
+        outMean = vec4(newMean, 1.0);
+        outSqr = vec4(newSqr, 1.0);
+        outVariance = vec4(variance, 1.0);
+
+        outColor = vec4(newMean, 1);
+    }
     #endif
 
     if (COLOR_DEBUG != vec3(0))

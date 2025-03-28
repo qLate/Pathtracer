@@ -31,12 +31,12 @@ void Renderer::render()
 	_renderProgram->setInt("frame", _frame);
 	_renderProgram->setInt("sampleFrame", _sampleFrame);
 
-	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
-	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
-
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 
 	#ifndef PERFORMANCE_BUILD
+	_renderProgram->setHandle("accumMeanTexture", _accumMeanTex->getHandle());
+	_renderProgram->setHandle("accumSqrTexture", _accumSqrTex->getHandle());
+
 	TimeMeasurerGL tm;
 	#endif
 
@@ -148,15 +148,18 @@ void Renderer::resizeTextures(glm::ivec2 size)
 	_varianceTex.reset();
 
 	_viewFBO = make_unique<GLFrameBuffer>(size);
+	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
+
+	#ifndef PERFORMANCE_BUILD
 	_accumMeanTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 	_accumSqrTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 	_varianceTex = make_unique<GLTexture2D>(size.x, size.y, nullptr, GL_RGB, GL_RGB32F, GL_NEAREST);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, _viewFBO->id());
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _accumMeanTex->id(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _accumSqrTex->id(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, _varianceTex->id(), 0);
 	glDrawBuffers(4, DRAW_BUFFERS);
+	#endif
 }
 
 void Renderer::resetSamples()
