@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "glad.h"
 #include "glm/vec2.hpp"
@@ -41,6 +42,8 @@ public:
 
 class Shader : public BaseShaderMethods
 {
+	inline static std::vector<std::string> _defines;
+
 	static std::string parseShader(const std::string& pathStr);
 	static std::string readShaderFile(const std::string& path);
 	static void writeOutShader(const std::string& code, const std::string& path);
@@ -49,4 +52,5 @@ public:
 	Shader(const std::string& path, int id, int type);
 
 	static void addInclude(const std::string& path);
+	static void addDefine(const std::string& name, const std::string& value = "");
 };

@@ -1,5 +1,8 @@
-
 cmake_minimum_required(VERSION 3.18)
+
+add_compile_definitions(GLM_FORCE_SWIZZLE)
+add_compile_definitions(PERFORMANCE_BUILD)
+
 set(CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(PROFILING TRUE)
@@ -41,6 +44,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/ImGuizmo.cpp"
         "libs/glad/glad.c"
 
+        "include/Program.h"
         "src/Program.cpp"
 
         "src/Object/Graphical.cpp"

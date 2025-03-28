@@ -2,9 +2,6 @@
 
 #include "SDL_stdinc.h"
 
-#define GLM_FORCE_SWIZZLE
-#include "glm/glm.hpp"
-
 class Program
 {
 public:

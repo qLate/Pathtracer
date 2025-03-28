@@ -36,7 +36,9 @@ void Renderer::render()
 
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
 
+	#ifndef PERFORMANCE_BUILD
 	TimeMeasurerGL tm;
+	#endif
 	int n = _renderOneByOne ? 1 : _samplesPerPixel;
 	for (int i = 0; i < n; i++)
 	{
@@ -46,7 +48,9 @@ void Renderer::render()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+	#ifndef PERFORMANCE_BUILD
 	_renderTime = tm.elapsedFromLast();
+	#endif
 
 	glBindVertexArray(0);
 
@@ -89,7 +93,7 @@ float Renderer::computeSampleVariance()
 	auto varianceData = _varianceTex->readData<glm::vec3>();
 
 	float varianceSum = 0;
-#pragma omp parallel for reduction(+:varianceSum)
+	#pragma omp parallel for reduction(+:varianceSum)
 	for (int i = 0; i < varianceData.size(); i++)
 	{
 		glm::vec3& pixelVariance = varianceData[i];

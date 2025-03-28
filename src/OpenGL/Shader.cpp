@@ -127,7 +127,7 @@ glm::mat<4, 4, float> BaseShaderMethods::getMatrix4X4(const std::string& name) c
 	return value;
 }
 
-static inline constexpr const char* SEARCH_DIRS[] = { "/" };
+static inline constexpr const char* SEARCH_DIRS[] = {"/"};
 Shader::Shader(const std::string& path, int id, int type) : BaseShaderMethods(id)
 {
 	auto shader = glCreateShader(type);
@@ -149,6 +149,13 @@ void Shader::addInclude(const std::string& path)
 	auto code = parseShader(path);
 	auto path_ = "/" + std::filesystem::path(path).filename().string();
 	glNamedStringARB(GL_SHADER_INCLUDE_ARB, path_.size(), path_.c_str(), code.size(), code.c_str());
+}
+void Shader::addDefine(const std::string& name, const std::string& value)
+{
+	if (value.empty())
+		_defines.push_back("#define " + name);
+	else
+		_defines.push_back("#define " + name + " " + value);
 }
 
 std::string Shader::parseShader(const std::string& pathStr)
@@ -173,6 +180,12 @@ std::string Shader::parseShader(const std::string& pathStr)
 	std::regex re2 = std::regex("/\\*shared\\*/");
 	while (std::regex_search(code, re2))
 		code = std::regex_replace(code, re2, "shared");
+
+	int versionPos = code.find("#version");
+	int nextLine = code.find('\n', versionPos);
+	for (const auto& define : _defines)
+		code.insert(nextLine + 1, define + "\n");
+
 	return code;
 }
 std::string Shader::readShaderFile(const std::string& path)

@@ -123,6 +123,10 @@ void main()
     if (prevMean != prevMean) prevMean = vec3(0);
     if (prevSqr != prevSqr) prevSqr = vec3(0);
 
+    #ifdef PERFORMANCE_BUILD
+    outColor = vec4(color, 1);
+
+    #else
     vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
     vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
     vec3 variance = newSqr - newMean * newMean;
@@ -131,8 +135,11 @@ void main()
     outSqr = vec4(newSqr, 1.0);
     outVariance = vec4(variance, 1.0);
 
+    outColor = vec4(newMean, 1);
+    #endif
+
     if (COLOR_DEBUG != vec3(0))
         outColor = vec4(COLOR_DEBUG, 1);
-    else
-        outColor = vec4(newMean + COLOR_HEAT, 1);
+    if (COLOR_HEAT != vec3(0))
+        outColor.xyz += COLOR_HEAT;
 }

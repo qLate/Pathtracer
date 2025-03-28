@@ -54,6 +54,10 @@ void SDLHandler::initOpenGL()
 	Shader::addInclude("shaders/intersection.glsl");
 	Shader::addInclude("shaders/light.glsl");
 	Shader::addInclude("shaders/sampling.glsl");
+
+	#ifdef PERFORMANCE_BUILD
+	Shader::addDefine("PERFORMANCE_BUILD");
+	#endif
 }
 
 void SDLHandler::update()
