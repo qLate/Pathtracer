@@ -33,6 +33,11 @@ float rand()
     pcg4d(seed);
     return float(seed.x) / float(0xffffffffu);
 }
+int randInt(int min, int max)
+{
+    pcg4d(seed);
+    return int(seed.x) % (max - min + 1) + min;
+}
 // --- Random ---
 
 bool solveQuadratic(float a, float b, float c, inout float x0, inout float x1)
@@ -118,18 +123,7 @@ vec3 sampleHemisphereCosine(float r1, float r2)
     return vec3(x, y, z);
 }
 
-vec3 sampleGlossyGGX(vec3 N, vec3 dir, float roughness, float r1, float r2)
+float clamp0(float x)
 {
-    float a = max(roughness * roughness, 0.001);
-    float phi = TWO_PI * r1;
-    float cosTheta = sqrt((1.0 - r2) / (1.0 + (a * a - 1.0) * r2));
-    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-    vec3 H = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-
-    vec3 T, B;
-    onb(N, T, B);
-    H = normalize(H.x * T + H.y * B + H.z * N);
-
-    return reflect(-dir, H);
+    return max(x, 0.0);
 }

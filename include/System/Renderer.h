@@ -9,10 +9,14 @@ class GLFrameBuffer;
 
 class Renderer
 {
+	static constexpr int SAMPLES_PER_PIXEL = 100;
+	static constexpr int MAX_RAY_BOUNCES = 6;
+
+	inline static bool _enablePathtracing = false;
 	inline static bool _renderOneByOne = false;
 	inline static bool _limitSamples = false;
-	inline static int _samplesPerPixel = 100;
-	inline static int _maxRayBounces = 7;
+	inline static int _samplesPerPixel;
+	inline static int _maxRayBounces;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO;

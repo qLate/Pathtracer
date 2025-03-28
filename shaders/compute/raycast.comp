@@ -52,7 +52,7 @@ void main()
     Ray ray = Ray(rayPos, rayDir, rayMaxDis, RAY_DEFAULT_ARGS_WO_DIST);
 
     int hitTriIndex = -1, hitObjIndex = -1;
-    intersectWorld(ray, hitTriIndex, hitObjIndex);
+    intersectWorld(ray, false, hitTriIndex, hitObjIndex);
 
     bool hitLight = false;
     if (doIntersectLights) {

@@ -9,6 +9,9 @@
 
 void Renderer::init()
 {
+	_samplesPerPixel = _enablePathtracing ? SAMPLES_PER_PIXEL : 1;
+	_maxRayBounces = _enablePathtracing ? MAX_RAY_BOUNCES : 0;
+
 	_renderProgram = make_unique<DefaultShaderProgram<RaytraceShader>>("shaders/common/pathtracer.vert", "shaders/pathtracer.frag");
 	_renderProgram->use();
 
@@ -60,6 +63,7 @@ void Renderer::updateSetLowSPPIfInteracting()
 	static int oldSpp = 0;
 	static bool isOldSpp = false;
 
+	if (_samplesPerPixel < 10) return;
 	if (ImGui::IsAnyItemActive() || SDLHandler::isNavigatingScene())
 	{
 		isOldSpp = true;

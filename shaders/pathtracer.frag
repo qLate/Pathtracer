@@ -42,7 +42,7 @@ vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
     vec3 throughput = vec3(1);
-    for (int bounce = 0; bounce < maxRayBounces; bounce++)
+    for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
         if (!intersectWorld(ray))
         {
@@ -96,7 +96,8 @@ vec3 trace()
     float y = gl_FragCoord.y * dy;
     vec3 rayDir = normalize(lb + x * right + y * up);
 
-    vec2 jitter = vec2(rand(), rand()) - 0.5;
+    // vec2 jitter = vec2(rand(), rand()) - 0.5;
+    vec2 jitter = vec2(0, 0);
     vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
     return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
@@ -117,6 +118,10 @@ void main()
     vec2 uv = gl_FragCoord.xy / pixelSize;
     vec3 prevMean = texture(accumMeanTexture, uv).rgb;
     vec3 prevSqr = texture(accumSqrTexture, uv).rgb;
+
+    // Catch NaNs
+    if (prevMean != prevMean) prevMean = vec3(0);
+    if (prevSqr != prevSqr) prevSqr = vec3(0);
 
     vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
     vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));

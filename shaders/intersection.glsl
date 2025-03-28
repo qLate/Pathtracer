@@ -261,7 +261,7 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows)
     return intersectBVHTree(ray, castingShadows, hitTriIndex);
 }
 
-bool intersectWorld(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
+bool intersectWorld(inout Ray ray, bool castingShadows, inout int hitTriIndex, inout int hitObjIndex)
 {
     bool hit = false;
     for (int objInd = 0; objInd < objectCount; objInd++)
@@ -271,16 +271,18 @@ bool intersectWorld(inout Ray ray, inout int hitTriIndex, inout int hitObjIndex)
         if (intersectDefaultObj(ray, objects[objInd])) {
             hit = true;
             hitObjIndex = objInd;
+
+            if (castingShadows) return true;
         }
     }
 
-    if (intersectBVHTree(ray, false, hitTriIndex))
+    if (intersectBVHTree(ray, castingShadows, hitTriIndex))
         hit = true;
     return hit;
 }
-bool intersectWorld(inout Ray ray)
+bool intersectWorld(inout Ray ray, bool castingShadows = false)
 {
     int hitTriIndex = -1;
     int hitObjIndex = -1;
-    return intersectWorld(ray, hitTriIndex, hitObjIndex);
+    return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
 }

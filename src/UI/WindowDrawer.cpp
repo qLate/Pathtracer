@@ -132,16 +132,21 @@ void WindowDrawer::displayStats(bool barVisible)
 	static float renderTime = -1;
 	static float efficiency = -1;
 	static Timer updateTimer = Timer(100);
+	static Timer slowUpdateTimer = Timer(500);
 
 	if (updateTimer.trigger())
 	{
 		currFPS = ImGuiHandler::_io->Framerate;
-		currAccumVariance = Renderer::computeSampleVariance();
 		renderTime = Renderer::renderTime();
-		efficiency = 1000 / currAccumVariance / renderTime;
 
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
 			Utils::copyToClipboard(std::format("{:.1f}ms, {:.3f} variance, {:.2f} efficiency", renderTime, currAccumVariance, efficiency));
+	}
+
+	if (slowUpdateTimer.trigger() && Renderer::maxRayBounces() > 0)
+	{
+		currAccumVariance = Renderer::computeSampleVariance();
+		efficiency = 1000 / currAccumVariance / renderTime;
 	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
@@ -193,7 +198,7 @@ void WindowDrawer::drawInspector()
 					Renderer::setSPP(samplesPerPixel);
 
 				auto bounces = Renderer::maxRayBounces();
-				ImGui::LabeledSliderInt("Ray Bounces", bounces, 1, 10);
+				ImGui::LabeledSliderInt("Ray Bounces", bounces, 0, 10);
 				if (bounces != Renderer::maxRayBounces())
 					Renderer::setMaxRayBounces(bounces);
 			}
