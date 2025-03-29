@@ -29,7 +29,6 @@ class Renderer
 
 	static void render();
 	static void updateCameraUniforms();
-	static void updateSetLowSPPIfInteracting();
 
 	static void resizeTextures(glm::ivec2 size);
 

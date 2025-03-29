@@ -90,7 +90,7 @@ void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
 	std::vector<MaterialStruct> data(materials.size());
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < materials.size(); i++)
 	{
 		auto mat = materials[i];
@@ -114,7 +114,7 @@ void BufferController::updateLights()
 {
 	auto lights = Scene::lights;
 	std::vector<LightStruct> data(lights.size());
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < lights.size(); i++)
 	{
 		auto light = lights[i];
@@ -148,7 +148,7 @@ void BufferController::updateObjects()
 {
 	auto graphicals = Scene::graphicals;
 	std::vector<ObjectStruct> data(graphicals.size());
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < graphicals.size(); i++)
 	{
 		if (graphicals[i] == nullptr) continue;
@@ -188,7 +188,7 @@ void BufferController::updateTriangles()
 {
 	auto triangles = Scene::triangles;
 	std::vector<TriangleStruct> data(triangles.size());
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];
@@ -211,7 +211,7 @@ void BufferController::updateBVHNodes()
 {
 	auto nodes = BVH::nodes;
 	std::vector<BVHNodeStruct> data1(nodes.size());
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < nodes.size(); i++)
 	{
 		const auto& node = nodes[i];
@@ -228,7 +228,7 @@ void BufferController::updateBVHNodes()
 	// Update triangle indices
 	auto indices = BVH::originalTriIndices;
 	std::vector<uint32_t> data2(indices.size());
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < indices.size(); i++)
 		data2[i] = indices[i];
 	_ssboBVHTriIndices->ensureDataCapacity(indices.size());

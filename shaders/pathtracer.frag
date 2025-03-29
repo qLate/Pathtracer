@@ -95,8 +95,11 @@ vec3 trace()
     float y = gl_FragCoord.y * dy;
     vec3 rayDir = normalize(lb + x * right + y * up);
 
-    // vec2 jitter = vec2(rand(), rand()) - 0.5;
+    #ifdef BENCHMARK_BUILD
     vec2 jitter = vec2(0, 0);
+    #else
+    vec2 jitter = vec2(rand(), rand()) - 0.5;
+    #endif
     vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
     return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
