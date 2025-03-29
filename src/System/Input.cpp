@@ -73,7 +73,7 @@ void Input::handleSDLEvent(const SDL_Event& event)
 	auto camera = Camera::instance;
 	if (event.type == SDL_KEYDOWN)
 	{
-		if (event.key.keysym.sym == SDLK_f)
+		if (event.key.keysym.sym == SDLK_f || SDLHandler::isFullscreen() && event.key.keysym.sym == SDLK_ESCAPE)
 		{
 			SDLHandler::setFullscreen(!SDLHandler::isFullscreen());
 		}

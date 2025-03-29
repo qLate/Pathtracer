@@ -35,8 +35,10 @@ uniform int sampleFrame;
 uniform int totalSamples;
 
 #include "intersection.glsl"
+#include "shading.glsl"
 #include "light.glsl"
-#include "sampling.glsl"
+
+vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, int bounce, inout float throughput, out vec3 L);
 
 vec3 castRay(Ray ray)
 {
@@ -62,13 +64,11 @@ vec3 castRay(Ray ray)
             break;
         }
 
-        vec3 directLighting = getIllumination(ray);
-        color += directLighting * albedo / PI * throughput;
-
-        vec3 bounceDir = sampleMaterial(ray, throughput, albedo, mat, bounce);
-        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
+        vec3 bounceDir;
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, bounce, throughput, bounceDir);
 
         if (length(throughput) < 0.01) break;
+        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
 
         // Russian roulette
         if (bounce > 3)
@@ -131,7 +131,7 @@ void main()
         if (prevMean != prevMean) prevMean = vec3(0);
         if (prevSqr != prevSqr) prevSqr = vec3(0);
 
-        vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
+        vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1)) + COLOR_DEBUG;
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
 
@@ -143,8 +143,8 @@ void main()
     }
     #endif
 
-    if (COLOR_DEBUG != vec3(0))
-        outColor = vec4(COLOR_DEBUG, 1);
+    // if (COLOR_DEBUG != vec3(0))
+    //     outColor = vec4(COLOR_DEBUG, 1);
     if (COLOR_HEAT != vec3(0))
         outColor.xyz += COLOR_HEAT;
 }

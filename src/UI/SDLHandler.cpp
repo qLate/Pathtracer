@@ -53,7 +53,7 @@ void SDLHandler::initOpenGL()
 	Shader::addInclude("shaders/common/utils.glsl");
 	Shader::addInclude("shaders/intersection.glsl");
 	Shader::addInclude("shaders/light.glsl");
-	Shader::addInclude("shaders/sampling.glsl");
+	Shader::addInclude("shaders/shading.glsl");
 
 	#ifdef BENCHMARK_BUILD
 	Shader::addDefine("BENCHMARK_BUILD");

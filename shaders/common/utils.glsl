@@ -127,3 +127,16 @@ float clamp0(float x)
 {
     return max(x, 0.0);
 }
+float clamp1(float x)
+{
+    return min(x, 1.0);
+}
+float clamp01(float x)
+{
+    return clamp(x, 0.0, 1.0);
+}
+
+float luminance(vec3 color)
+{
+    return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
