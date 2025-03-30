@@ -79,7 +79,7 @@ private:
 		int id;
 		bool lit;
 		float roughness;
-		float reflection;
+		float metallic;
 		int textureIndex;
 		glm::vec3 emission;
 		float _pad;

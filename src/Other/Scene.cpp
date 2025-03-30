@@ -85,8 +85,8 @@ void SceneSetup::redGreenRoom()
 	plane4->setSharedMaterial(whiteWallMat);
 	plane5->setSharedMaterial(whiteWallMat);
 
-	sphere1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f});
-	cube1->setMaterial({Color::skyblue(), true, tex, 1, 0.3f}); // Assets::load<Texture>("assets/textures/cat.png")
+	sphere1->setMaterial({Color::skyblue(), true, tex, 1});
+	cube1->setMaterial({Color::skyblue(), true, tex, 1}); // Assets::load<Texture>("assets/textures/cat.png")
 }
 
 void SceneSetup::minecraftHouseScene()
@@ -133,15 +133,15 @@ void SceneSetup::skeletonScene_benchmark()
 	Renderer::setSPP(1);
 	Renderer::setMaxRayBounces(0);
 
-	auto camera = new Camera({ -365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f });
-	camera->setRot({ 0.98f, {-0.072f, 0.012f, -0.17f} });
-	camera->setBgColor({ 0.05f, 0.05f, 0.05f });
+	auto camera = new Camera({-365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f});
+	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
+	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
 	auto model = Assets::load<Model>("assets/models/skeleton.obj");
-	auto obj = new Mesh(model, {}, {}, { 0.05f, 0.05f, 0.05f });
-	obj->setMaterial({ Color::white(), true, tex, 1 });
-	auto light = new PointLight({ 1460.3f, -1246.5f, 423.4f }, { 255 / 255.0f, 255 / 255.0f, 255 / 255.0f }, 1, FLT_MAX);
+	auto obj = new Mesh(model, {}, {}, {0.05f, 0.05f, 0.05f});
+	obj->setMaterial({Color::white(), true, tex, 1});
+	auto light = new PointLight({1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
 }
 
 void SceneSetup::spaceStationScene()

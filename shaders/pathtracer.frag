@@ -38,8 +38,6 @@ uniform int totalSamples;
 #include "shading.glsl"
 #include "light.glsl"
 
-vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, int bounce, inout float throughput, out vec3 L);
-
 vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
@@ -56,16 +54,19 @@ vec3 castRay(Ray ray)
         ray.interPoint += ray.surfaceNormal * 0.01;
 
         Material mat = getMaterial(ray.materialIndex);
-        vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
-        vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
         if (length(mat.emission) > 0)
         {
             color += throughput * mat.emission;
+            if (bounce == 0)
+                color = clamp(color, 0, 1);
             break;
         }
 
+        vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
+        vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
+
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, bounce, throughput, bounceDir);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
@@ -100,6 +101,7 @@ vec3 trace()
     #else
     vec2 jitter = vec2(rand(), rand()) - 0.5;
     #endif
+
     vec3 finalRayDir = normalize(lb + (x + jitter.x * dx) * right + (y + jitter.y * dy) * up);
     return castRay(Ray(cameraPos, finalRayDir, RAY_DEFAULT_ARGS));
 }
@@ -131,9 +133,12 @@ void main()
         if (prevMean != prevMean) prevMean = vec3(0);
         if (prevSqr != prevSqr) prevSqr = vec3(0);
 
-        vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1)) + COLOR_DEBUG;
+        vec3 newMean = mix(prevMean, color, 1.0 / (totalSamples + 1));
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
+
+        if (COLOR_DEBUG != vec3(0))
+            newMean = COLOR_DEBUG;
 
         outMean = vec4(newMean, 1.0);
         outSqr = vec4(newSqr, 1.0);

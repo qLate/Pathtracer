@@ -95,6 +95,7 @@ T JsonUtility::fromJson(const nlohmann::json& data)
 	for_sequence(std::make_index_sequence<nbProperties> {}, [&](auto i)
 	{
 		constexpr auto property = std::get<i>(T::properties());
+		if (!data.contains(property.name)) return;
 
 		using Type = typename decltype(property)::Type;
 		using CleanType = std::remove_pointer_t<Type>;

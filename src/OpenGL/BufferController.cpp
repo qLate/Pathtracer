@@ -102,6 +102,7 @@ void BufferController::updateMaterials()
 		materialStruct.roughness = mat->roughness();
 		materialStruct.textureIndex = mat->texture()->id();
 		materialStruct.emission = mat->emission().xyz;
+		materialStruct.metallic = mat->metallic();
 
 		data[i] = materialStruct;
 	}

@@ -71,7 +71,7 @@ float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
     float lumSpec = max(0.01, luminance(specColor));
     return lumDiff / (lumDiff + lumSpec);
 }
-vec3 getIndirectReflection(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput)
+vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput)
 {
     float prob = probToSampleDiffuse(diffColor, specColor);
     if (rand() < prob)
@@ -113,12 +113,12 @@ vec3 getIndirectReflection(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float
     }
 }
 
-vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, int bounce, inout vec3 throughput, out vec3 L)
+vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L)
 {
-    vec3 specColor = mix(vec3(0.04), diffColor, 0.5 /*metallic*/ );
+    vec3 specColor = mix(vec3(0), diffColor, metallic);
     vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce);
 
-    L = getIndirectReflection(N, V, diffColor, specColor, roughness, bounce, throughput);
+    L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput);
     return directLighting;
 }
 

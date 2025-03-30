@@ -32,7 +32,7 @@ struct Material
     int id;
     bool lit;
     float roughness;
-    float reflection;
+    float metallic;
     int textureIndex;
     vec3 emission;
     float _pad;

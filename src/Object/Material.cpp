@@ -64,16 +64,16 @@ Material* Material::debug()
 	return &instance;
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float roughness, float reflection, Color emission) : _id(_nextAvailableId++), _lit {lit}, _color {color},
+Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission) : _id(_nextAvailableId++), _lit {lit}, _color {color},
                                                                                                                   _texture {texture}, _emission {emission},
-                                                                                                                  _roughness {roughness}, _reflection {reflection}
+                                                                                                                  _roughness {roughness}, _metallic {metallic}
 {
 	Scene::materials.push_back(this);
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }
 Material::Material(Color color, bool lit) : Material(color, lit, Texture::defaultTex()) {}
-Material::Material(const Material& material) : Material(material._color, material._lit, material._texture, material._roughness, material._reflection, material._emission) {}
+Material::Material(const Material& material) : Material(material._color, material._lit, material._texture, material._roughness, material._metallic, material._emission) {}
 Material::~Material()
 {
 	std::erase(Scene::materials, this);
@@ -104,9 +104,9 @@ void Material::setDiffuseCoef(float diffuseCoef)
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }
-void Material::setReflection(float reflection)
+void Material::setMetallic(float metallic)
 {
-	_reflection = reflection;
+	_metallic = metallic;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }

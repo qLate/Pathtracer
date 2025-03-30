@@ -55,21 +55,21 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (ImGui::LabeledColorEdit4("Color", &color[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
 			material->setColor(color);
 
-		auto intensity = material->color().intensity();
-		if (ImGui::LabeledSliderFloat("Intensity", intensity, 0.01f, 10.0f))
-			material->setColor(color.withIntensity(intensity));
-
 		auto roughness = material->roughness();
 		if (ImGui::LabeledSliderFloat("Roughness", roughness, 0.0f, 1.0f))
 			material->setDiffuseCoef(roughness);
 
-		auto reflection = material->reflection();
-		if (ImGui::LabeledSliderFloat("Reflection", reflection, 0.0f, 1.0f))
-			material->setReflection(reflection);
+		auto metallic = material->metallic();
+		if (ImGui::LabeledSliderFloat("Metallic", metallic, 0.0f, 1.0f))
+			material->setMetallic(metallic);
 
-		auto lit = material->lit();
-		if (ImGui::LabeledCheckbox("Lit", lit))
-			material->setLit(lit);
+		auto emission = material->emission();
+		if (ImGui::LabeledColorEdit4("Emission", &emission[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
+			material->setEmission(emission);
+
+		auto emissionIntensity = material->emission().intensity();
+		if (ImGui::LabeledSliderFloat("Emission Intensity", emissionIntensity, 0, 20.0f))
+			material->setEmission(emission.withIntensity(emissionIntensity));
 
 		if (target->sharedMaterial() == material && ImGui::Button("Clone Material"))
 			material = target->material();
