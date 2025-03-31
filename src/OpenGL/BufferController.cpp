@@ -140,8 +140,34 @@ void BufferController::updateLights()
 
 		data[i] = lightStruct;
 	}
+
+	auto graphicals = Scene::graphicals;
+	for (int i = 0; i < graphicals.size(); i++)
+	{
+		if (graphicals[i]->materialNoCopy()->emission() == Color::clear()) continue;
+
+		if (auto mesh = dynamic_cast<Mesh*>(graphicals[i]))
+		{
+			auto triangles = mesh->triangles();
+			for (int j = 0; j < triangles.size(); j++)
+			{
+				auto v0 = mesh->localToGlobalPos(triangles[j]->vertices()[0].pos);
+				auto v1 = mesh->localToGlobalPos(triangles[j]->vertices()[1].pos);
+				auto v2 = mesh->localToGlobalPos(triangles[j]->vertices()[2].pos);
+				auto triArea = 0.5f * length(cross(v1 - v0, v2 - v0));
+
+				LightStruct lightStruct {};
+				lightStruct.lightType = 2;
+				lightStruct.properties1.x = j;
+				lightStruct.properties1.y = triArea;
+
+				data.push_back(lightStruct);
+			}
+		}
+	}
+
 	_uboLights->setSubData((float*)data.data(), data.size());
-	Renderer::renderProgram()->fragShader()->setInt("lightCount", lights.size());
+	Renderer::renderProgram()->fragShader()->setInt("lightCount", data.size());
 	Renderer::resetSamples();
 }
 

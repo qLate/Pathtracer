@@ -19,7 +19,7 @@ void Renderer::init()
 
 void Renderer::render()
 {
-	if (_limitSamples && _totalSamples >= _samplesPerPixel || SDLHandler::isWindowMinimized()) return;
+	if (_limitSamples && _totalSamples >= _maxAccumSamples || SDLHandler::isWindowMinimized()) return;
 	_renderProgram->use();
 
 	updateCameraUniforms();
@@ -80,7 +80,8 @@ void Renderer::setLimitSamples(bool limit)
 	_renderProgram->use();
 	_renderProgram->setInt("limitSamples", _limitSamples);
 
-	resetSamples();
+	if (limit && _totalSamples > _maxAccumSamples)
+		resetSamples();
 }
 void Renderer::setSPP(int samples)
 {
@@ -89,6 +90,15 @@ void Renderer::setSPP(int samples)
 	_renderProgram->setInt("samplesPerPixel", _samplesPerPixel);
 
 	resetSamples();
+}
+void Renderer::setMaxAccumSamples(int maxAccumSamples)
+{
+	auto prevMaxAccumSamples = _maxAccumSamples;
+	_maxAccumSamples = maxAccumSamples;
+	_renderProgram->use();
+
+	if (prevMaxAccumSamples > maxAccumSamples)
+		resetSamples();
 }
 void Renderer::setMaxRayBounces(int bounces)
 {

@@ -5,6 +5,7 @@
 
 #define LIGHT_TYPE_GLOBAL 0
 #define LIGHT_TYPE_POINT 1
+#define LIGHT_TYPE_TRIANGLE 2
 
 #define OBJ_TYPE_MESH 0
 #define OBJ_TYPE_SPHERE 1
@@ -23,7 +24,7 @@ struct Light
     vec3 pos;
     int lightType; // 0 - global, 1 - point
     vec3 color;
-    vec4 properties1; // intensity, [PointLight(distance) : GlobalLight(dirX, dirY, dirZ) : AreaLight(size)]
+    vec4 properties1; // intensity, [PointLight(distance), GlobalLight(dirX, dirY, dirZ), TriangleLight(triIndex, area)]
 };
 
 struct Material
@@ -159,4 +160,12 @@ void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound) {
 
     minBound = min(min(p0, p1), p2) - vec3(0.0001);
     maxBound = max(max(p0, p1), p2) + vec3(0.0001);
+}
+
+void calcGlobalTriVertices(Triangle tri, out vec3 p0, out vec3 p1, out vec3 p2)
+{
+    Object obj = objects[int(tri.info.y)];
+    p0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
+    p1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
+    p2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
 }

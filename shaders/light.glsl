@@ -1,14 +1,14 @@
 vec2 genRandoms(int bounce)
 {
     float r1, r2;
-    if (bounce == 0) // apply stratified sampling if first bounce
-    {
-        int strata = int(ceil(sqrt(samplesPerPixel)));
-        int j = totalSamples % (strata * strata);
-        r1 = (j % strata + rand()) / strata;
-        r2 = (j / strata + rand()) / strata;
-    }
-    else
+    // if (bounce == 0) // apply stratified sampling if first bounce
+    // {
+    //     int strata = int(ceil(sqrt(samplesPerPixel)));
+    //     int j = totalSamples % (strata * strata);
+    //     r1 = (j % strata + rand()) / strata;
+    //     r2 = (j / strata + rand()) / strata;
+    // }
+    // else
     {
         r1 = rand();
         r2 = rand();
@@ -16,20 +16,37 @@ vec2 genRandoms(int bounce)
     return vec2(r1, r2);
 }
 
-vec3 getPointLightRadiance(Light pointLight, vec3 point, float dist)
-{
-    float distImpact = clamp1(pow(clamp0(1 - dist / pointLight.properties1.y), 2));
-    return distImpact * pointLight.color * pointLight.properties1.x;
-}
-
-void getLightInfo(int lightIndex, vec3 point, out vec3 lightDir, out vec3 radiance, out float dist)
+void sampleLight(int lightIndex, vec3 point, out vec3 lightDir, out vec3 radiance, out float dist)
 {
     Light light = lights[lightIndex];
-    lightDir = normalize(light.pos - point);
-    dist = length(light.pos - point);
 
     if (light.lightType == LIGHT_TYPE_POINT)
-        radiance = getPointLightRadiance(light, point, dist);
+    {
+        lightDir = normalize(light.pos - point);
+        dist = length(light.pos - point);
+
+        float distImpact = clamp1(pow(clamp0(1 - dist / light.properties1.y), 2));
+        radiance = distImpact * light.color * light.properties1.x;
+    }
+    else if (light.lightType == LIGHT_TYPE_TRIANGLE)
+    {
+        Triangle tri = triangles[int(light.properties1.x)];
+        Object obj = objects[int(tri.info.y)];
+
+        vec3 v0, v1, v2;
+        calcGlobalTriVertices(tri, v0, v1, v2);
+        vec3 sample_ = sampleTriangleUniform(v0, v1, v2, rand(), rand());
+
+        lightDir = normalize(sample_ - point);
+        dist = length(sample_ - point);
+
+        vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
+        float cosTerm = max(dot(-lightDir, lightNormal), 0.0);
+
+        float pdf = 1.0 / light.properties1.y;
+        Material mat = getMaterial(obj.materialIndex);
+        radiance = mat.emission * cosTerm / (dist * dist) / pdf;
+    }
 }
 
 vec3 ggxDirect(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 diffColor, vec3 specColor)
@@ -54,14 +71,13 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     vec3 lightDir, radiance;
     float dist;
     int lightIndex = randInt(0, lightCount - 1);
-    getLightInfo(lightIndex, P, lightDir, radiance, dist);
+    sampleLight(lightIndex, P, lightDir, radiance, dist);
 
     float cosTerm = max(dot(lightDir, N), 0.0);
     if (cosTerm == 0) return vec3(0);
 
-    Ray shadowRay = Ray(P, lightDir, dist, RAY_DEFAULT_ARGS_WO_DIST);
+    Ray shadowRay = Ray(P, lightDir, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
     float shadowMult = lightCount * (intersectWorld(shadowRay, true) ? 0.0 : 1.0);
-
     return shadowMult * radiance * ggxDirect(N, lightDir, V, cosTerm, roughness, diffColor, specColor);
 }
 

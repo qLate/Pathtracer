@@ -68,7 +68,7 @@ void SceneSetup::redGreenRoom()
 	auto tex = Texture::defaultTex();
 
 	//auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 2, 35);
-	auto square = new Square({0, 0, 9.98f}, 5, {{-90 * DEG_TO_RAD, 0, 0}});
+	auto square = new Square({0, 0, 9.999f}, 5, {{-90 * DEG_TO_RAD, 0, 0}});
 	square->material()->setEmission(Color(255 / 255.0f, 236 * 0.7f / 255.0f, 156 * 0.7f / 255.0f) * 5);
 
 	auto wallLeft = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});

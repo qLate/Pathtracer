@@ -33,6 +33,8 @@ public:
 	Material* materialNoCopy() const;
 	Material* sharedMaterial() const;
 
+	void setScale(glm::vec3 scale, bool notify = true) override;
+
 	void setMaterial(const Material& material);
 	void setSharedMaterial(Material* material);
 
@@ -85,8 +87,6 @@ public:
 	Square(const Square& orig);
 	static Model* getBaseModel();
 
-	void setScale(glm::vec3 scale, bool notify = true) override;
-
 	float side() const { return _side; }
 
 	constexpr static auto properties();
@@ -108,8 +108,6 @@ public:
 	Cube(glm::vec3 pos, float side, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Cube(const Cube& orig);
 	static Model* getBaseModel();
-
-	void setScale(glm::vec3 scale, bool notify = true) override;
 
 	float side() const { return _side; }
 

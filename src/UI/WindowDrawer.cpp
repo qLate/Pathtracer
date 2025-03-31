@@ -128,9 +128,10 @@ void WindowDrawer::drawScene()
 void WindowDrawer::displayStats(bool barVisible)
 {
 	static float currFPS = -1;
-	static float currAccumVariance = -1;
+	static float currVariance = -1;
 	static float renderTime = -1;
 	static float efficiency = -1;
+	static int totalSamples = -1;
 	static Timer updateTimer = Timer(100);
 	static Timer slowUpdateTimer = Timer(500);
 
@@ -138,26 +139,29 @@ void WindowDrawer::displayStats(bool barVisible)
 	{
 		currFPS = ImGuiHandler::_io->Framerate;
 		renderTime = Renderer::renderTime();
+		totalSamples = Renderer::totalSamples();
 
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
-			Utils::copyToClipboard(std::format("{:.1f}ms, {:.3f} variance, {:.2f} efficiency", renderTime, currAccumVariance, efficiency));
+			Utils::copyToClipboard(std::format("{:.1f}ms, {:.3f} variance, {:.2f} efficiency", renderTime, currVariance, efficiency));
 	}
 
 	if (slowUpdateTimer.trigger() && Renderer::maxRayBounces() > 0)
 	{
-		currAccumVariance = Renderer::computeSampleVariance();
-		efficiency = 1000 / currAccumVariance / renderTime;
+		currVariance = Renderer::computeSampleVariance();
+		efficiency = 10 / currVariance / renderTime * Renderer::samplesPerPixel();
 	}
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3fms)\n"
 	            "%zu Triangles\n"
-	            "Variance: %.3f\n"
+	            "Total samples: %d\n"
+	            "Variance: %.3f (x1000)\n"
 	            "Render time: %.3fms\n"
-	            "Efficiency: %.3f",
+	            "Efficiency: %.3f\n",
 	            currFPS, 1000.0f / currFPS,
 	            Scene::triangles.size(),
-	            currAccumVariance,
+	            totalSamples,
+	            currVariance * 1000,
 	            renderTime,
 	            efficiency);
 }
@@ -191,6 +195,11 @@ void WindowDrawer::drawInspector()
 				ImGui::LabeledCheckbox("Limit Samples", limitSamples);
 				if (limitSamples != Renderer::limitSamples())
 					Renderer::setLimitSamples(limitSamples);
+
+				auto maxAccumSamples = Renderer::maxAccumSamples();
+				ImGui::LabeledSliderInt("Max Accum Samples", maxAccumSamples, Renderer::samplesPerPixel(), 10000);
+				if (maxAccumSamples != Renderer::maxAccumSamples())
+					Renderer::setMaxAccumSamples(maxAccumSamples);
 
 				auto samplesPerPixel = Renderer::samplesPerPixel();
 				ImGui::LabeledSliderInt("Samples Per Pixel", samplesPerPixel, 1, 100);

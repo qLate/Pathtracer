@@ -10,8 +10,9 @@ class GLFrameBuffer;
 class Renderer
 {
 	inline static bool _renderOneByOne = false;
-	inline static bool _limitSamples = false;
-	inline static int _samplesPerPixel = 100;
+	inline static int _samplesPerPixel = 10;
+	inline static bool _limitSamples = true;
+	inline static int _maxAccumSamples = 100000;
 	inline static int _maxRayBounces = 6;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
@@ -36,7 +37,9 @@ public:
 	static bool renderOneByOne() { return _renderOneByOne; }
 	static bool limitSamples() { return _limitSamples; }
 	static int samplesPerPixel() { return _samplesPerPixel; }
+	static int maxAccumSamples() { return _maxAccumSamples; }
 	static int maxRayBounces() { return _maxRayBounces; }
+	static int totalSamples() { return _totalSamples; }
 	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
 	static GLFrameBuffer* sceneViewFBO() { return _viewFBO.get(); }
 
@@ -44,6 +47,7 @@ public:
 
 	static void setLimitSamples(bool limit);
 	static void setSPP(int samples);
+	static void setMaxAccumSamples(int maxAccumSamples);
 	static void setMaxRayBounces(int bounces);
 
 	static void resizeView(glm::ivec2 size);

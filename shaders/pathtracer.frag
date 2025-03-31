@@ -9,7 +9,7 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
 
 layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
 {
-    uint triIndices[];
+    int triIndices[];
 };
 
 out vec4 outColor;
@@ -56,7 +56,9 @@ vec3 castRay(Ray ray)
         Material mat = getMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
         {
-            color += throughput * mat.emission;
+            if (bounce == 0)
+                color += throughput * mat.emission;
+
             if (bounce == 0)
                 color = clamp(color, 0, 1);
             break;
@@ -66,7 +68,7 @@ vec3 castRay(Ray ray)
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce,  throughput, bounceDir);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
@@ -138,8 +140,8 @@ void main()
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
 
-        if (COLOR_DEBUG != vec3(0))
-            newMean = COLOR_DEBUG;
+        // if (COLOR_DEBUG != vec3(0))
+        //     newMean = COLOR_DEBUG;
 
         outMean = vec4(newMean, 1.0);
         outSqr = vec4(newSqr, 1.0);
@@ -154,8 +156,8 @@ void main()
 
     outColor = vec4(finalColor, 1);
 
-    // if (COLOR_DEBUG != vec3(0))
-    //     outColor = vec4(COLOR_DEBUG, 1);
+    if (COLOR_DEBUG != vec3(0))
+        outColor = vec4(COLOR_DEBUG, 1);
     if (COLOR_HEAT != vec3(0))
         outColor.xyz += COLOR_HEAT;
 }

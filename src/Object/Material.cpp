@@ -115,4 +115,5 @@ void Material::setEmission(const Color& emission)
 	_emission = emission;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
+	BufferController::markBufferForUpdate(BufferType::Lights);
 }

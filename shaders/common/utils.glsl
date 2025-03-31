@@ -149,3 +149,10 @@ float linearToGamma(float value)
 {
     return pow(value, 0.454545); // 1 / 2.2
 }
+
+vec3 sampleTriangleUniform(vec3 p0, vec3 p1, vec3 p2, float r1, float r2)
+{
+    float u = sqrt(r1);
+    float v = r2;
+    return (1.0 - u) * p0 + (u * (1.0 - v)) * p1 + (u * v) * p2;
+}
