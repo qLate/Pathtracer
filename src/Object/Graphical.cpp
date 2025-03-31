@@ -147,6 +147,10 @@ Model* Square::getBaseModel()
 
 	return _baseModel = new Model(baseTris);
 }
+void Square::setScale(glm::vec3 scale, bool notify)
+{
+	Mesh::setScale(_side * scale, notify);
+}
 
 Cube::Cube(): _side(0)
 {
@@ -204,6 +208,10 @@ Model* Cube::getBaseModel()
 	baseTris[11]->setUVs({0, 0}, {0, 1}, {1, 1});
 
 	return _baseModel = new Model(baseTris);
+}
+void Cube::setScale(glm::vec3 scale, bool notify)
+{
+	Mesh::setScale(_side * scale, notify);
 }
 
 Sphere::Sphere(glm::vec3 pos, float radius, glm::vec3 scale) : Graphical(pos, {}, scale), _radius(radius) {}

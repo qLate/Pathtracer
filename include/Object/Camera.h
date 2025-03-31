@@ -5,8 +5,8 @@
 
 class Camera : public Object
 {
-	glm::vec2 _viewSize;
-	float _focalDis, _lensRadius;
+	glm::vec2 _ratio;
+	float _size, _focalDis, _lensRadius;
 	Color _bgColor = Color::black();
 
 	Camera() = default;
@@ -14,7 +14,7 @@ class Camera : public Object
 public:
 	inline static Camera* instance = nullptr;
 
-	Camera(glm::vec3 pos, float focalDistance = 1, float lensRadius = 0);
+	Camera(glm::vec3 pos, float size = 1, float focalDis = 1, float lensRadius = 0);
 	Camera(const Camera& orig);
 	void init();
 	~Camera() override;
@@ -22,12 +22,14 @@ public:
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
 
-	glm::vec2 ratio() const { return _viewSize; }
+	float size() const { return _size; }
+	glm::vec2 ratio() const { return _ratio; }
 	float focalDistance() const { return _focalDis; }
 	float lensRadius() const { return _lensRadius; }
 	Color bgColor() const { return _bgColor; }
 
-	void setViewSize(glm::vec2 viewSize);
+	void setRatio(glm::vec2 ratio);
+	void setSize(float size);
 	void setFocalDistance(float focalDistance);
 	void setLensRadius(float lensRadius);
 	void setBgColor(Color color);
@@ -50,7 +52,8 @@ public:
 			std::make_tuple(
 				JsonUtility::property(&Camera::_focalDis, "focalDistance"),
 				JsonUtility::property(&Camera::_lensRadius, "lensRadius"),
-				JsonUtility::property(&Camera::_bgColor, "bgColor")
+				JsonUtility::property(&Camera::_bgColor, "bgColor"),
+				JsonUtility::property(&Camera::_size, "size")
 			)
 		);
 	}

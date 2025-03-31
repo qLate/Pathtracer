@@ -140,3 +140,12 @@ float luminance(vec3 color)
 {
     return dot(color, vec3(0.2126, 0.7152, 0.0722));
 }
+
+vec3 linearToGamma(vec3 color)
+{
+    return pow(color, vec3(0.454545)); // 1 / 2.2
+}
+float linearToGamma(float value)
+{
+    return pow(value, 0.454545); // 1 / 2.2
+}

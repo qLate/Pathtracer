@@ -23,6 +23,12 @@ Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
 {
 	_baseTriangles = baseTriangles;
 }
+Model::Model(const std::vector<glm::vec3>& points)
+{
+	if (points.size() < 2) throw std::exception("Points should be at least of size 3");
+	for (int i = 2; i < points.size(); i++)
+		_baseTriangles.push_back(new BaseTriangle({points[0], points[i - 1], points[i]}));
+}
 
 void Model::parseRapidobj(const std::filesystem::path& path)
 {
@@ -41,23 +47,23 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 		const auto& attributes = result.attributes;
 
 		_baseTriangles.resize(_baseTriangles.size() + mesh.num_face_vertices.size());
-#ifndef NDEBUG
+		#ifndef NDEBUG
 		std::vector<Vertex> vertices(3);
-#else
-#pragma omp parallel for
-#endif
+		#else
+		#pragma omp parallel for
+		#endif
 		for (int j = 0; j < mesh.num_face_vertices.size(); j++)
 		{
 			if (mesh.num_face_vertices[j] != 3) throw std::runtime_error("Non triangle found after triangulation.");
-#ifdef NDEBUG
+			#ifdef NDEBUG
 			std::vector<Vertex> vertices(3);
-#endif
+			#endif
 			for (int v = 0; v < 3; v++)
 			{
 				const auto& [posIdx, uvIdx, normalIdx] = mesh.indices[j * 3 + v];
-#ifndef NDEBUG
+				#ifndef NDEBUG
 				vertices[v] = Vertex();
-#endif
+				#endif
 				vertices[v].pos.x = attributes.positions[posIdx * 3 + 0];
 				vertices[v].pos.y = attributes.positions[posIdx * 3 + 1];
 				vertices[v].pos.z = attributes.positions[posIdx * 3 + 2];

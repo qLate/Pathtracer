@@ -20,6 +20,7 @@ class Model
 
 public:
 	Model(const std::vector<BaseTriangle*>& baseTriangles);
+	Model(const std::vector<glm::vec3>& points);
 	Model() = default;
 
 	std::vector<BaseTriangle*> baseTriangles() const { return _baseTriangles; }

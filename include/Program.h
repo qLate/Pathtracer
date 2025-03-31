@@ -5,7 +5,7 @@
 class Program
 {
 public:
-	static constexpr float FPS_LIMIT = 500;
+	static constexpr float FPS_LIMIT = 1000;
 
 	inline static bool doQuit = false;
 

@@ -29,6 +29,7 @@ class SceneSetup
 	static void churchScene();
 	static void spiderScene();
 	static void redGreenRoom();
+	static void redGreenRoomOriginal();
 	static void minecraftHouseScene();
 	static void kokuraScene();
 	static void skeletonScene();

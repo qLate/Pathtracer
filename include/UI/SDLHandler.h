@@ -30,6 +30,7 @@ public:
 	static SDL_GLContext context() { return _context; }
 	static bool isFullscreen() { return _isFullscreen; }
 	static bool isNavigatingScene() { return _isNavigatingScene; }
+	static bool isWindowMinimized();
 
 	static void setFullscreen(bool fullscreen);
 	static void setNavigatingScene(bool navigating);

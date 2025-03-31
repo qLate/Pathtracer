@@ -43,8 +43,8 @@ vec3 ggxDirect(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 diffCo
     float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
     vec3 F = ggxSchlickFresnel(specColor, LdotH);
 
-    vec3 ggxTerm = (D * G * F) / (4.0 * NdotL + 0.001);
-    return ggxTerm + NdotV * diffColor / PI;
+    vec3 ggxTerm = (D * G * F) / (4.0 * NdotV + 0.001);
+    return ggxTerm + NdotL * diffColor / PI;
 }
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce)
@@ -115,38 +115,9 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
 
 vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L)
 {
-    vec3 specColor = mix(vec3(0), diffColor, metallic);
+    vec3 specColor = mix(vec3(0.05), diffColor, metallic);
     vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce);
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput);
     return directLighting;
 }
-
-/*
-vec3 getPointLightIllumination(Ray ray, Light pointLight)
-{
-    float dist = length(pointLight.pos - ray.interPoint);
-
-    vec3 lightDir = normalize(pointLight.pos - ray.interPoint);
-    Ray shadowRay = Ray(pointLight.pos, -lightDir, dist, RAY_DEFAULT_ARGS_WO_DIST);
-    float shadowMult = intersectWorld(shadowRay, true) ? 0.0 : 1.0;
-
-    float disImpact = min(pow(clamp0(1 - dist / pointLight.properties1.y), 2), 1);
-    return shadowMult * disImpact * pointLight.color * pointLight.properties1.x;
-}
-
-vec3 getIllumination(Ray ray)
-{
-    if (lightCount == 0) return vec3(0);
-
-    Light light = lights[randInt(0, lightCount - 1)];
-    vec3 lightDir = normalize(light.pos - ray.interPoint);
-    float cosTheta = max(dot(lightDir, ray.surfaceNormal), 0.0);
-    if (cosTheta == 0) return vec3(0);
-
-    if (light.lightType == LIGHT_TYPE_POINT)
-        return getPointLightIllumination(ray, light) * cosTheta;
-
-    return vec3(0);
-}
-*/

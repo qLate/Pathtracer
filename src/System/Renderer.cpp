@@ -19,7 +19,7 @@ void Renderer::init()
 
 void Renderer::render()
 {
-	if (_limitSamples && _totalSamples >= _samplesPerPixel) return;
+	if (_limitSamples && _totalSamples >= _samplesPerPixel || SDLHandler::isWindowMinimized()) return;
 	_renderProgram->use();
 
 	updateCameraUniforms();
@@ -105,7 +105,7 @@ void Renderer::resizeView(glm::ivec2 size)
 
 	_renderProgram->setFloat2("pixelSize", size);
 	if (Camera::instance)
-		Camera::instance->setViewSize({size.x / (float)size.y, 1});
+		Camera::instance->setRatio({size.x / (float)size.y, 1});
 	glViewport(0, 0, size.x, size.y);
 
 	resetSamples();

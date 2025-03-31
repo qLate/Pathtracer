@@ -99,6 +99,11 @@ void SDLHandler::quit()
 	SDL_Quit();
 }
 
+bool SDLHandler::isWindowMinimized()
+{
+	return SDL_GetWindowFlags(_window) & SDL_WINDOW_MINIMIZED | !(SDL_GetWindowFlags(_window) & SDL_WINDOW_INPUT_FOCUS);
+}
+
 void SDLHandler::setFullscreen(bool fullscreen)
 {
 	_isFullscreen = fullscreen;

@@ -3,13 +3,14 @@
 #include "WindowDrawer.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "SDLHandler.h"
 #include "Triangle.h"
 
-Camera::Camera(glm::vec3 pos, float focalDistance, float lensRadius) : Object(pos), _focalDis(focalDistance), _lensRadius(lensRadius)
+Camera::Camera(glm::vec3 pos, float size, float focalDis, float lensRadius) : Object(pos), _size(size), _focalDis(focalDis), _lensRadius(lensRadius)
 {
 	init();
 }
-Camera::Camera(const Camera& orig) : Object(orig), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius), _bgColor(orig._bgColor)
+Camera::Camera(const Camera& orig) : Object(orig), _size(orig._size), _focalDis(orig._focalDis), _lensRadius(orig._lensRadius), _bgColor(orig._bgColor)
 {
 	init();
 }
@@ -20,9 +21,9 @@ void Camera::init()
 	instance = this;
 
 	auto renderSize = WindowDrawer::currRenderSize();
-	auto viewSize = glm::vec2(renderSize.x / (float)renderSize.y, 1);
+	_ratio = glm::vec2(renderSize.x / (float)renderSize.y, 1);
 
-	setViewSize(viewSize);
+	setSize(_size);
 	setFocalDistance(_focalDis);
 	setLensRadius(_lensRadius);
 	setBgColor(_bgColor);
@@ -47,10 +48,17 @@ void Camera::setRot(glm::quat rot, bool notify)
 	Renderer::resetSamples();
 }
 
-void Camera::setViewSize(glm::vec2 viewSize)
+void Camera::setRatio(glm::vec2 ratio)
 {
-	this->_viewSize = viewSize;
-	Renderer::renderProgram()->setFloat2("viewSize", viewSize);
+	this->_ratio = ratio;
+
+	Renderer::renderProgram()->setFloat2("viewSize", _size * ratio);
+	Renderer::resetSamples();
+}
+void Camera::setSize(float size)
+{
+	this->_size = size;
+	Renderer::renderProgram()->setFloat2("viewSize", size * _ratio);
 	Renderer::resetSamples();
 }
 void Camera::setFocalDistance(float focalDistance)
@@ -78,12 +86,12 @@ glm::vec3 Camera::getScreenCenter() const
 }
 glm::vec3 Camera::getLeftBotCorner() const
 {
-	return getScreenCenter() - 0.5f * _viewSize.y * up() - 0.5f * _viewSize.x * right();
+	return getScreenCenter() - 0.5f * _size * _ratio.y * up() - 0.5f * _size * _ratio.x * right();
 }
 glm::vec3 Camera::getDir(const glm::vec2& screenPos) const
 {
 	auto lbWorld = getLeftBotCorner();
-	auto screenPosWorld = lbWorld + screenPos.x * _viewSize.x * right() + screenPos.y * _viewSize.y * up();
+	auto screenPosWorld = lbWorld + screenPos.x * _size * _ratio.x * right() + screenPos.y * _size * _ratio.y * up();
 	return normalize(screenPosWorld - _pos);
 }
 glm::vec3 Camera::getMouseDir() const
@@ -99,11 +107,11 @@ glm::mat4 Camera::getViewMatrix() const
 }
 glm::mat4 Camera::getProjectionMatrix() const
 {
-	float fov = 2.0f * glm::degrees(glm::atan(_viewSize.y * 0.5f / _focalDis));
+	float fov = 2.0f * glm::degrees(glm::atan(_size * _ratio.y * 0.5f / _focalDis));
 	float nearPlane = 0.1f;
 	float farPlane = 10000.0f;
 
-	return glm::perspective(glm::radians(fov), _viewSize.x, nearPlane, farPlane);
+	return glm::perspective(glm::radians(fov), _ratio.x, nearPlane, farPlane);
 }
 
 glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const

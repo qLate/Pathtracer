@@ -66,7 +66,7 @@ vec3 castRay(Ray ray)
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce,  throughput, bounceDir);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
@@ -119,9 +119,10 @@ void main()
 
     vec3 color = trace();
 
+    vec3 finalColor;
     #ifdef BENCHMARK_BUILD
     {
-        outColor = vec4(color, 1);
+        finalColor = color;
     }
     #else
     {
@@ -144,9 +145,14 @@ void main()
         outSqr = vec4(newSqr, 1.0);
         outVariance = vec4(variance, 1.0);
 
-        outColor = vec4(newMean, 1);
+        finalColor = newMean;
     }
     #endif
+
+    // gamma correction
+    finalColor = linearToGamma(finalColor);
+
+    outColor = vec4(finalColor, 1);
 
     // if (COLOR_DEBUG != vec3(0))
     //     outColor = vec4(COLOR_DEBUG, 1);
