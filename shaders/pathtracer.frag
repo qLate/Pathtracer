@@ -42,9 +42,11 @@ vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
     vec3 throughput = vec3(1);
+    float brdfPdf = 1;
     for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
-        if (!intersectWorld(ray))
+        int hitTriIndex, _dummy;
+        if (!intersectWorld(ray, false, hitTriIndex, _dummy))
         {
             color += throughput * bgColor;
             break;
@@ -56,19 +58,28 @@ vec3 castRay(Ray ray)
         Material mat = getMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
         {
-            // if (bounce == 0)
-            color += throughput * mat.emission;
-
             if (bounce == 0)
+            {
+                color += throughput * mat.emission;
                 color = clamp(color, 0, 1);
-            // break;
+            }
+            else
+            {
+                Light light = findTriLight(hitTriIndex);
+
+                vec3 L = normalize(ray.interPoint - ray.pos);
+                float lightPdf = getLightPdf(light, ray.pos, L, ray.interPoint);
+                float brdfMis = powerHeuristic(brdfPdf, lightPdf);
+
+                color += throughput * mat.emission * brdfMis;
+            }
         }
 
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);

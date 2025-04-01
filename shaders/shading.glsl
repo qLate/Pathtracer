@@ -44,6 +44,7 @@ vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 spec
     vec3 F = ggxSchlickFresnel(specColor, LdotH);
 
     pdf = D * NdotH / (4.0 * LdotH + 0.001);
+    COLOR_DEBUG = vec3(pdf, 0, 0);
     return (D * G * F) / (4.0 * NdotV * NdotL + 0.001);
 }
 vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor, out float pdf)

@@ -16,13 +16,37 @@ vec2 genRandoms(int bounce)
     return vec2(r1, r2);
 }
 
-void sampleLight(int lightIndex, vec3 point, out vec3 L, out vec3 radiance, out float dist, out float pdf)
+float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L, vec3 LP)
+{
+    vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
+    float LNdotL = max(dot(-L, lightNormal), 0.0);
+
+    float dist = length(LP - P);
+    return dist * dist / (LNdotL * light.properties1.y);
+}
+
+float getLightPdf(Light light, vec3 P, vec3 L, vec3 LP)
+{
+    if (light.lightType == LIGHT_TYPE_POINT)
+    {
+        return -1;
+    }
+    else if (light.lightType == LIGHT_TYPE_TRIANGLE)
+    {
+        Triangle tri = triangles[int(light.properties1.x)];
+        Object obj = objects[int(tri.info.y)];
+        return getTriangleLightPdf(light, tri, obj, P, L, LP);
+    }
+    return -1;
+}
+
+void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out float dist, out float pdf)
 {
     Light light = lights[lightIndex];
     if (light.lightType == LIGHT_TYPE_POINT)
     {
-        L = normalize(light.pos - point);
-        dist = length(light.pos - point);
+        L = normalize(light.pos - P);
+        dist = length(light.pos - P);
 
         float distImpact = clamp1(pow(clamp0(1 - dist / light.properties1.y), 2));
         radiance = distImpact * light.color * light.properties1.x;
@@ -35,17 +59,15 @@ void sampleLight(int lightIndex, vec3 point, out vec3 L, out vec3 radiance, out 
 
         vec3 v0, v1, v2;
         calcGlobalTriVertices(tri, v0, v1, v2);
-        vec3 sample_ = sampleTriangleUniform(v0, v1, v2, rand(), rand());
+        vec3 LP = sampleTriangleUniform(v0, v1, v2, rand(), rand());
 
-        L = normalize(sample_ - point);
-        dist = length(sample_ - point);
+        L = normalize(LP - P);
+        dist = length(LP - P);
 
         Material mat = getMaterial(obj.materialIndex);
         radiance = mat.emission;
 
-        vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
-        float LNdotL = max(dot(-L, lightNormal), 0.0);
-        pdf = dist * dist / LNdotL / light.properties1.y;
+        pdf = getTriangleLightPdf(light, tri, obj, P, L, LP);
     }
 }
 
@@ -104,11 +126,13 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
         return L;
     }
 }
-vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L)
+vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L, out float brdfPdf)
 {
     vec3 specColor = mix(vec3(0), diffColor, metallic);
 
-    float brdfPdf;
+    float lightPdf;
+    vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf);
+
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
     if (brdfPdf < 0.001)
     {
@@ -116,14 +140,6 @@ vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float m
         return vec3(0);
     }
 
-    float lightPdf;
-    vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf);
-
     float lightMis = powerHeuristic(lightPdf, brdfPdf);
-    float brdfMis = powerHeuristic(brdfPdf, lightPdf);
-
-    directLighting *= lightMis;
-    throughput *= brdfMis;
-
-    return directLighting;
+    return directLighting * lightMis;
 }

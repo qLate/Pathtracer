@@ -87,7 +87,7 @@ void SceneSetup::redGreenRoom()
 	floor->setSharedMaterial(whiteWallMat);
 	ceiling->setSharedMaterial(whiteWallMat);
 
-	sphere1->setMaterial({Color::skyblue(), true, tex});
+	sphere1->setMaterial({Color::skyblue(), true, tex, 0.1f});
 	cube1->setMaterial({Color::skyblue(), true, tex, 1}); // Assets::load<Texture>("assets/textures/cat.png")
 }
 

@@ -13,7 +13,7 @@ class Renderer
 	inline static int _samplesPerPixel = 16;
 	inline static bool _limitSamples = true;
 	inline static int _maxAccumSamples = 100000;
-	inline static int _maxRayBounces = 6;
+	inline static int _maxRayBounces = 1;
 
 	inline static UPtr<DefaultShaderProgram<RaytraceShader>> _renderProgram;
 	inline static UPtr<GLFrameBuffer> _viewFBO;

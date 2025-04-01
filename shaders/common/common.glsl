@@ -169,3 +169,13 @@ void calcGlobalTriVertices(Triangle tri, out vec3 p0, out vec3 p1, out vec3 p2)
     p1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
     p2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
 }
+
+Light findTriLight(int triIndex)
+{
+    for (int i = 0; i < lightCount; i++)
+    {
+        if (lights[i].lightType == LIGHT_TYPE_TRIANGLE && int(lights[i].properties1.x) == triIndex)
+            return lights[i];
+    }
+    return lights[0];
+}
