@@ -48,6 +48,6 @@ vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 spec
 }
 vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor, out float pdf)
 {
-    vec3 brdfSpec = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);
-    return brdfSpec + diffColor / PI;
+    vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);
+    return specBrdf + diffColor / PI;
 }

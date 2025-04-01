@@ -56,8 +56,8 @@ vec3 castRay(Ray ray)
         Material mat = getMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
         {
-            if (bounce == 0)
-                color += throughput * mat.emission;
+            // if (bounce == 0)
+            color += throughput * mat.emission;
 
             if (bounce == 0)
                 color = clamp(color, 0, 1);
