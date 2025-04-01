@@ -1,6 +1,6 @@
 float ggxNormalDistribution(float NdotH, float roughness)
 {
-    if (roughness < 1e-4) return 1.0;
+    if (roughness < 1e-4) return 0.0;
     float a2 = roughness * roughness;
     float d = NdotH * NdotH * (a2 - 1.0) + 1.0;
     return a2 / (d * d * PI + 0.001);
@@ -43,10 +43,16 @@ vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 spec
     float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
     vec3 F = ggxSchlickFresnel(specColor, LdotH);
 
-    pdf = D * NdotH / (4.0 * LdotH + 0.001);
-    COLOR_DEBUG = vec3(pdf, 0, 0);
+    pdf = (D * NdotH) / (4.0 * LdotH + 0.001);
     return (D * G * F) / (4.0 * NdotV * NdotL + 0.001);
 }
+vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor)
+{
+    float specPdf_unused;
+    vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, specPdf_unused);
+    return specBrdf + diffColor / PI;
+}
+
 vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor, out float pdf)
 {
     vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);

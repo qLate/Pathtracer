@@ -17,7 +17,9 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
-vec3 COLOR_DEBUG = vec3(0);
+#define MIS_BRDF_MULT 25
+
+vec3 COLOR_DEBUG = vec3(-1);
 
 struct Light
 {

@@ -52,9 +52,6 @@ vec3 castRay(Ray ray)
             break;
         }
 
-        ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
-        ray.interPoint += ray.surfaceNormal * 0.01;
-
         Material mat = getMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
         {
@@ -62,6 +59,7 @@ vec3 castRay(Ray ray)
             {
                 color += throughput * mat.emission;
                 color = clamp(color, 0, 1);
+                break;
             }
             else
             {
@@ -69,11 +67,15 @@ vec3 castRay(Ray ray)
 
                 vec3 L = normalize(ray.interPoint - ray.pos);
                 float lightPdf = getLightPdf(light, ray.pos, L, ray.interPoint);
-                float brdfMis = powerHeuristic(brdfPdf, lightPdf);
+                float brdfMis = balancedHeuristic(brdfPdf * MIS_BRDF_MULT, lightPdf);
 
-                color += throughput * mat.emission * brdfMis;
+                color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
+                break;
             }
         }
+
+        ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
+        ray.interPoint += ray.surfaceNormal * 0.01;
 
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
@@ -129,9 +131,9 @@ layout(location = 3) out vec4 outVariance;
 void main()
 {
     InitRNG(gl_FragCoord.xy, frame * samplesPerPixel + totalSamples);
+    // COLOR_DEBUG = vec3(0);
 
     vec3 color = trace();
-
     vec3 finalColor;
     #ifdef BENCHMARK_BUILD
     {
@@ -151,7 +153,7 @@ void main()
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
 
-        // if (COLOR_DEBUG != vec3(0))
+        // if (COLOR_DEBUG != vec3(-1))
         //     newMean = COLOR_DEBUG;
 
         outMean = vec4(newMean, 1.0);
@@ -167,7 +169,7 @@ void main()
 
     outColor = vec4(finalColor, 1);
 
-    if (COLOR_DEBUG != vec3(0))
+    if (COLOR_DEBUG != vec3(-1))
         outColor = vec4(COLOR_DEBUG, 1);
     if (COLOR_HEAT != vec3(0))
         outColor.xyz += COLOR_HEAT;

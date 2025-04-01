@@ -163,3 +163,7 @@ float powerHeuristic(float pdf1, float pdf2)
     float b2 = pdf2 * pdf2;
     return a2 / (a2 + b2 + 0.0001);
 }
+float balancedHeuristic(float pdf1, float pdf2)
+{
+    return pdf1 / (pdf1 + pdf2 + 0.0001);
+}

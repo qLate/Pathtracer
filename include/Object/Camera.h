@@ -6,7 +6,7 @@
 class Camera : public Object
 {
 	glm::vec2 _ratio;
-	float _size, _focalDis, _lensRadius;
+	float _size = 1, _focalDis, _lensRadius;
 	Color _bgColor = Color::black();
 
 	Camera() = default;
