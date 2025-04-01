@@ -3,7 +3,7 @@ float ggxNormalDistribution(float NdotH, float roughness)
     if (roughness < 1e-4) return 1.0;
     float a2 = roughness * roughness;
     float d = NdotH * NdotH * (a2 - 1.0) + 1.0;
-    return a2 / (d * d * PI);
+    return a2 / (d * d * PI + 0.001);
 }
 float ggxSchlickMaskingTerm(float NdotL, float NdotV, float roughness)
 {
@@ -32,40 +32,22 @@ vec3 sampleGGXMicrofacet(vec3 N, float roughness, float r1, float r2)
     return normalize(H.x * T + H.y * B + H.z * N);
 }
 
-// vec3 sampleDiffuse(Ray ray, inout vec3 throughput, vec3 albedo, Material mat, int bounce)
-// {
-//     vec2 r = genRandoms(bounce);
-//     vec3 localDir = sampleHemisphereCosine(r.x, r.y);
-//     vec3 samp = worldToTangent(localDir, ray.surfaceNormal);
+vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, out float pdf)
+{
+    vec3 H = normalize(V + L);
+    float NdotV = clamp0(dot(N, V));
+    float NdotH = clamp0(dot(N, H));
+    float LdotH = clamp0(dot(L, H));
 
-//     throughput *= albedo;
-//     return samp;
-// }
+    float D = ggxNormalDistribution(NdotH, roughness);
+    float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
+    vec3 F = ggxSchlickFresnel(specColor, LdotH);
 
-// vec3 sampleGlossy(Ray ray, inout vec3 throughput, vec3 albedo, Material mat, int bounce)
-// {
-//     vec2 r = genRandoms(bounce);
-//     vec3 samp = sampleGGX(ray.surfaceNormal, -ray.dir, mat.roughness, r.x, r.y);
-
-//     float cosTheta = max(dot(ray.surfaceNormal, samp), 0.0);
-//     float pdf = 1;
-
-//     throughput *= albedo * cosTheta / pdf;
-//     return samp;
-// }
-
-// vec3 samplePureSpecular(Ray ray, inout vec3 throughput, vec3 albedo, Material mat, int bounce)
-// {
-//     vec3 samp = reflect(ray.dir, ray.surfaceNormal);
-
-//     throughput *= albedo;
-//     return samp;
-// }
-
-// vec3 sampleMaterial(Ray ray, inout vec3 throughput, vec3 albedo, Material mat, int bounce)
-// {
-//     if (mat.roughness == 1.0)
-//         return sampleDiffuse(ray, throughput, albedo, mat, bounce);
-//     else
-//         return sampleGlossy(ray, throughput, albedo, mat, bounce);
-// }
+    pdf = D * NdotH / (4.0 * LdotH + 0.001);
+    return (D * G * F) / (4.0 * NdotV * NdotL + 0.001);
+}
+vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor, out float pdf)
+{
+    vec3 brdfSpec = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);
+    return brdfSpec + diffColor / PI;
+}

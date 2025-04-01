@@ -156,3 +156,10 @@ vec3 sampleTriangleUniform(vec3 p0, vec3 p1, vec3 p2, float r1, float r2)
     float v = r2;
     return (1.0 - u) * p0 + (u * (1.0 - v)) * p1 + (u * v) * p2;
 }
+
+float powerHeuristic(float pdf1, float pdf2)
+{
+    float a2 = pdf1 * pdf1;
+    float b2 = pdf2 * pdf2;
+    return a2 / (a2 + b2 + 0.0001);
+}

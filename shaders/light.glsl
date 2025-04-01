@@ -16,13 +16,13 @@ vec2 genRandoms(int bounce)
     return vec2(r1, r2);
 }
 
-void sampleLight(int lightIndex, vec3 point, out vec3 lightDir, out vec3 radiance, out float dist)
+void sampleLight(int lightIndex, vec3 point, out vec3 L, out vec3 radiance, out float dist)
 {
     Light light = lights[lightIndex];
 
     if (light.lightType == LIGHT_TYPE_POINT)
     {
-        lightDir = normalize(light.pos - point);
+        L = normalize(light.pos - point);
         dist = length(light.pos - point);
 
         float distImpact = clamp1(pow(clamp0(1 - dist / light.properties1.y), 2));
@@ -37,48 +37,35 @@ void sampleLight(int lightIndex, vec3 point, out vec3 lightDir, out vec3 radianc
         calcGlobalTriVertices(tri, v0, v1, v2);
         vec3 sample_ = sampleTriangleUniform(v0, v1, v2, rand(), rand());
 
-        lightDir = normalize(sample_ - point);
+        L = normalize(sample_ - point);
         dist = length(sample_ - point);
 
         vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
-        float cosTerm = max(dot(-lightDir, lightNormal), 0.0);
+        float LNdotL = max(dot(-L, lightNormal), 0.0);
 
-        float pdf = 1.0 / light.properties1.y;
         Material mat = getMaterial(obj.materialIndex);
-        radiance = mat.emission * cosTerm / (dist * dist) / pdf;
+        radiance = mat.emission * LNdotL / (dist * dist) * light.properties1.y;
     }
-}
-
-vec3 ggxDirect(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 diffColor, vec3 specColor)
-{
-    vec3 H = normalize(V + L);
-    float NdotH = clamp0(dot(N, H));
-    float LdotH = clamp0(dot(L, H));
-    float NdotV = clamp0(dot(N, V));
-
-    float D = ggxNormalDistribution(NdotH, roughness);
-    float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
-    vec3 F = ggxSchlickFresnel(specColor, LdotH);
-
-    vec3 ggxTerm = (D * G * F) / (4.0 * NdotV + 0.001);
-    return ggxTerm + NdotL * diffColor / PI;
 }
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce)
 {
     if (lightCount == 0) return vec3(0);
 
-    vec3 lightDir, radiance;
+    vec3 L, radiance;
     float dist;
     int lightIndex = randInt(0, lightCount - 1);
-    sampleLight(lightIndex, P, lightDir, radiance, dist);
+    sampleLight(lightIndex, P, L, radiance, dist);
 
-    float cosTerm = max(dot(lightDir, N), 0.0);
-    if (cosTerm == 0) return vec3(0);
+    float NdotL = max(dot(L, N), 0.0);
+    if (NdotL == 0) return vec3(0);
 
-    Ray shadowRay = Ray(P, lightDir, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
+    Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
     float shadowMult = lightCount * (intersectWorld(shadowRay, true) ? 0.0 : 1.0);
-    return shadowMult * radiance * ggxDirect(N, lightDir, V, cosTerm, roughness, diffColor, specColor);
+
+    float pdf;
+    vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor, pdf);
+    return shadowMult * radiance * brdf * NdotL;
 }
 
 float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
@@ -89,14 +76,14 @@ float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
 }
 vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput)
 {
-    float prob = probToSampleDiffuse(diffColor, specColor);
-    if (rand() < prob)
+    float probDiff = probToSampleDiffuse(diffColor, specColor);
+    if (rand() < probDiff)
     {
         vec2 r = genRandoms(bounce);
         vec3 localDir = sampleHemisphereCosine(r.x, r.y);
         vec3 L = worldToTangent(localDir, N);
 
-        throughput *= diffColor / prob;
+        throughput *= diffColor / probDiff;
         return L;
     }
     else
@@ -106,24 +93,16 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
         vec3 L = normalize(reflect(-V, H));
 
         float NdotL = clamp0(dot(N, L));
-        float NdotV = clamp0(dot(N, V));
-        float NdotH = clamp0(dot(N, H));
-        float LdotH = clamp0(dot(L, H));
 
-        float D = ggxNormalDistribution(NdotH, roughness);
-        float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
-        vec3 F = ggxSchlickFresnel(specColor, LdotH);
-
-        vec3 ggxTerm = (D * G * F) / max(4.0 * NdotV, 0.001);
-
-        float ggxPDF = D * NdotH / max(4.0 * LdotH, 0.001);
-        if (ggxPDF < 0.001)
+        float pdf;
+        vec3 brdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);
+        if (pdf < 0.001)
         {
             throughput = vec3(0);
             return vec3(0);
         }
 
-        throughput *= ggxTerm / (ggxPDF * (1.0 - prob));
+        throughput *= NdotL * brdf / (pdf * (1.0 - probDiff));
         // throughput *= specColor * NdotL / (1 - prob);
         return L;
     }
@@ -131,7 +110,7 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
 
 vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L)
 {
-    vec3 specColor = mix(vec3(0.05), diffColor, metallic);
+    vec3 specColor = mix(vec3(0), diffColor, metallic);
     vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce);
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput);

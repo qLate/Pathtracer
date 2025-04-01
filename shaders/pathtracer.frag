@@ -61,7 +61,7 @@ vec3 castRay(Ray ray)
 
             if (bounce == 0)
                 color = clamp(color, 0, 1);
-            break;
+            // break;
         }
 
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
