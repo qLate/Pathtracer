@@ -82,8 +82,12 @@ vec3 castRay(Ray ray)
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
+        float roughness = mat.roughness;
+        if (bounce > 2 && roughness < 0.05)
+            roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3); // Regularize roughness
+
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, mat.roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
@@ -96,7 +100,6 @@ vec3 castRay(Ray ray)
             throughput /= p;
         }
     }
-
     return color;
 }
 
