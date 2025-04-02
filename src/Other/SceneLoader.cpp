@@ -115,6 +115,8 @@ void SceneLoader::loadScene(const std::string& path)
 		else if (type == "DirectionalLight")
 			new DirectionalLight(JsonUtility::fromJson<DirectionalLight>(objJson));
 	}
+
+	BufferController::updateLights();
 }
 void SceneLoader::saveSceneDialog()
 {

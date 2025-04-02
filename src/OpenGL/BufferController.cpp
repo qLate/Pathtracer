@@ -149,16 +149,20 @@ void BufferController::updateLights()
 		if (auto mesh = dynamic_cast<Mesh*>(graphicals[i]))
 		{
 			auto triangles = mesh->triangles();
+			if (triangles.empty()) continue;
+
+			int triStartIndex = std::ranges::find(Scene::triangles, triangles[0]) - Scene::triangles.begin();
 			for (int j = 0; j < triangles.size(); j++)
 			{
-				auto v0 = mesh->localToGlobalPos(triangles[j]->vertices()[0].pos);
-				auto v1 = mesh->localToGlobalPos(triangles[j]->vertices()[1].pos);
-				auto v2 = mesh->localToGlobalPos(triangles[j]->vertices()[2].pos);
+				auto tri = triangles[j];
+				auto v0 = mesh->localToGlobalPos(tri->vertices()[0].pos);
+				auto v1 = mesh->localToGlobalPos(tri->vertices()[1].pos);
+				auto v2 = mesh->localToGlobalPos(tri->vertices()[2].pos);
 				auto triArea = 0.5f * length(cross(v1 - v0, v2 - v0));
 
 				LightStruct lightStruct {};
 				lightStruct.lightType = 2;
-				lightStruct.properties1.x = j;
+				lightStruct.properties1.x = triStartIndex + j;
 				lightStruct.properties1.y = triArea;
 
 				data.push_back(lightStruct);

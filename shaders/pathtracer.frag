@@ -22,6 +22,8 @@ vec3 COLOR_HEAT = vec3(0);
 // ----------- SETTINGS -----------
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
+uniform bool misSampleLight = true;
+uniform bool misSampleBrdf = true;
 
 uniform vec2 pixelSize;
 uniform vec2 viewSize;
@@ -67,9 +69,9 @@ vec3 castRay(Ray ray)
 
                 vec3 L = normalize(ray.interPoint - ray.pos);
                 float lightPdf = getLightPdf(light, ray.pos, L, ray.interPoint);
-                float brdfMis = balancedHeuristic(brdfPdf * MIS_BRDF_MULT, lightPdf);
+                float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
-                color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
+                color += throughput * mat.emission * brdfMis;
                 break;
             }
         }
@@ -89,7 +91,7 @@ vec3 castRay(Ray ray)
         // Russian roulette
         if (bounce > 3)
         {
-            float p = clamp(maxv3(throughput), 0.05, 1.0);
+            float p = clamp(maxv3(throughput), 0.05, 0.95);
             if (rand() > p) break;
             throughput /= p;
         }

@@ -56,7 +56,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 			material->setColor(color);
 
 		auto roughness = material->roughness();
-		if (ImGui::LabeledSliderFloat("Roughness", roughness, 0.05f, 1.0f))
+		if (ImGui::LabeledSliderFloat("Roughness", roughness, 0.0f, 1.0f))
 			material->setDiffuseCoef(roughness);
 
 		auto metallic = material->metallic();

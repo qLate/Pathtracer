@@ -1,8 +1,8 @@
 #define FLT_MAX 3.402823466e+38
-#define FLT_MIN 1.175494351e-38
+#define FLT_MIN -3.402823466e+38
+#define EPSILON 1e-10
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
-#define PHI 1.61803398874
 
 // --- Random ---
 uvec4 seed;

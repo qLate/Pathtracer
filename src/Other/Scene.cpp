@@ -10,6 +10,7 @@
 #include "Triangle.h"
 #include "JsonUtility.h"
 #include "Renderer.h"
+#include "SceneLoader.h"
 
 #ifdef BENCHMARK_BUILD
 void SceneSetup::setupScene()
@@ -20,6 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	redGreenRoom();
+	//SceneLoader::loadScene("assets/scenes/sphere.json");
 }
 #endif
 
@@ -87,7 +89,7 @@ void SceneSetup::redGreenRoom()
 	floor->setSharedMaterial(whiteWallMat);
 	ceiling->setSharedMaterial(whiteWallMat);
 
-	sphere1->setMaterial({Color::skyblue(), true, tex, 0.1f});
+	sphere1->setMaterial({Color::skyblue(), true, tex, 0.001f});
 	cube1->setMaterial({Color::skyblue(), true, tex, 1}); // Assets::load<Texture>("assets/textures/cat.png")
 }
 

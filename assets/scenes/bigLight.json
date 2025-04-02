@@ -1,0 +1,160 @@
+{
+    "objects": [
+        {
+            "bgColor": [
+                0.5309734344482422,
+                0.5239251255989075,
+                0.5239251255989075,
+                1.0
+            ],
+            "classType": "Camera",
+            "focalDistance": 1.0,
+            "lensRadius": 0.0,
+            "pos": [
+                10.32054615020752,
+                -42.436336517333984,
+                3.0757558345794678
+            ],
+            "rot": [
+                0.9936687350273132,
+                -0.03383108600974083,
+                -0.0036454929504543543,
+                0.10707313567399979
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "size": 1.0
+        },
+        {
+            "classType": "Square",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "emission": [
+                    24.768707275390625,
+                    10.86337661743164,
+                    2.1919195652008057,
+                    14.166281700134277
+                ],
+                "lit": true,
+                "metallic": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "pos": [
+                0.0,
+                0.0,
+                10.099763870239258
+            ],
+            "rot": [
+                0.7071067094802856,
+                -0.7071068286895752,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                29.299999237060547,
+                29.298913955688477,
+                29.298913955688477
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "emission": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "lit": true,
+                "metallic": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "side": 5.0
+        },
+        {
+            "classType": "Sphere",
+            "material": {
+                "classType": "Material",
+                "color": [
+                    0.05752211809158325,
+                    0.05752211809158325,
+                    0.05752211809158325,
+                    1.0
+                ],
+                "diffuseCoef": 0.10400000214576721,
+                "emission": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "lit": true,
+                "metallic": 1.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            },
+            "pos": [
+                0.120208740234375,
+                2.0,
+                -5.22900390625
+            ],
+            "radius": 5.0,
+            "rot": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.2599998712539673,
+                1.2599998712539673,
+                1.2599998712539673
+            ],
+            "sharedMaterial": {
+                "classType": "Material",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "diffuseCoef": 1.0,
+                "emission": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "lit": true,
+                "metallic": 0.0,
+                "texture": {
+                    "classType": "Texture",
+                    "path": "assets/textures/core/default.png"
+                }
+            }
+        }
+    ]
+}

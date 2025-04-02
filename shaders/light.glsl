@@ -1,14 +1,14 @@
 vec2 genRandoms(int bounce)
 {
     float r1, r2;
-    // if (bounce == 0) // apply stratified sampling if first bounce
-    // {
-    //     int strata = int(ceil(sqrt(samplesPerPixel)));
-    //     int j = totalSamples % (strata * strata);
-    //     r1 = (j % strata + rand()) / strata;
-    //     r2 = (j / strata + rand()) / strata;
-    // }
-    // else
+    if (bounce == 0) // apply stratified sampling if first bounce
+    {
+        int strata = int(ceil(sqrt(samplesPerPixel)));
+        int j = totalSamples % (strata * strata);
+        r1 = (j % strata + rand()) / strata;
+        r2 = (j / strata + rand()) / strata;
+    }
+    else
     {
         r1 = rand();
         r2 = rand();
@@ -22,7 +22,7 @@ float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L,
     float LNdotL = max(dot(-L, lightNormal), 0.0);
 
     float dist = length(LP - P);
-    return dist * dist / (LNdotL * light.properties1.y + 0.001);
+    return dist * dist / max(LNdotL * light.properties1.y, EPSILON);
 }
 
 float getLightPdf(Light light, vec3 P, vec3 L, vec3 LP)
@@ -80,15 +80,15 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     int ind = randInt(0, lightCount - 1);
     sampleLight(ind, P, L, radiance, dist, lightPdf);
 
-    float NdotL = max(dot(L, N), 0.0);
-    if (NdotL == 0) return vec3(0);
+    float NdotL = clamp0(dot(L, N));
+    if (NdotL < 1e-5) return vec3(0);
 
     Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
     float shadowMult = (intersectWorld(shadowRay, true) ? 0.0 : 1.0);
     lightPdf /= lightCount;
 
     vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor);
-    return shadowMult * radiance * brdf * NdotL / (lightPdf + 0.001);
+    return shadowMult * radiance * brdf * NdotL / lightPdf;
 }
 
 float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
@@ -98,32 +98,40 @@ float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
     return lumDiff / (lumDiff + lumSpec);
 }
 
-vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput, out float brdfPdf)
+vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput, out float pdf)
 {
     vec2 r = genRandoms(bounce);
     float probDiff = probToSampleDiffuse(diffColor, specColor);
+
+    vec3 L_diff_local = sampleHemisphereCosine(r.x, r.y);
+    vec3 L_diff = worldToTangent(L_diff_local, N);
+    float NdotL = clamp0(dot(N, L_diff));
+    float diffPdf = NdotL / PI * probDiff;
+
+    vec3 H = sampleGGXMicrofacet(N, roughness, r.x, r.y);
+    vec3 L_spec = normalize(reflect(-V, H));
+    float specPdf = ggxSpecPdf(N, L_spec, V, roughness) * (1.0 - probDiff);
+    specPdf = max(specPdf, 0.0001);
+
+    pdf = diffPdf + specPdf;
+
     if (rand() < probDiff)
     {
-        vec3 localDir = sampleHemisphereCosine(r.x, r.y);
-        vec3 L = worldToTangent(localDir, N);
-        float NdotL = max(dot(N, L), 0.001);
-
-        brdfPdf = NdotL / PI * probDiff;
-
         throughput *= diffColor / probDiff;
-        return L;
+        return L_diff;
     }
     else
     {
-        vec3 H = sampleGGXMicrofacet(N, roughness, r.x, r.y);
-        vec3 L = normalize(reflect(-V, H));
-        float NdotL = max(dot(N, L), 0.001);
+        float NdotL = clamp0(dot(N, L_spec));
+        vec3 brdf = ggxSpecBRDF(N, L_spec, V, NdotL, roughness, specColor);
+        if (specPdf < 0.001)
+        {
+            throughput = vec3(0);
+            L_spec = vec3(0);
+        }
 
-        vec3 brdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, brdfPdf);
-        brdfPdf *= (1.0 - probDiff);
-
-        throughput *= brdf * NdotL / (brdfPdf + 0.001);
-        return L;
+        throughput *= brdf * NdotL / specPdf;
+        return L_spec;
     }
 }
 vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 L, out float brdfPdf)
@@ -134,12 +142,7 @@ vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float m
     vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf);
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
-    if (brdfPdf < 0.001)
-    {
-        throughput = vec3(0);
-        return vec3(0);
-    }
 
-    float lightMis = balancedHeuristic(lightPdf, brdfPdf * MIS_BRDF_MULT);
+    float lightMis = powerHeuristic(lightPdf, brdfPdf);
     return directLighting * lightMis;
 }

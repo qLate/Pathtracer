@@ -1,9 +1,10 @@
+#define MIN_ROUGHNESS 0.001
+
 float ggxNormalDistribution(float NdotH, float roughness)
 {
-    if (roughness < 1e-4) return 0.0;
     float a2 = roughness * roughness;
     float d = NdotH * NdotH * (a2 - 1.0) + 1.0;
-    return a2 / (d * d * PI + 0.001);
+    return a2 / max(d * d * PI, EPSILON);
 }
 float ggxSchlickMaskingTerm(float NdotL, float NdotV, float roughness)
 {
@@ -18,11 +19,10 @@ vec3 ggxSchlickFresnel(vec3 f0, float LdotH)
 }
 vec3 sampleGGXMicrofacet(vec3 N, float roughness, float r1, float r2)
 {
-    if (roughness < 1e-4) return N;
-
+    if (roughness < 0.02) return N;
     float a2 = roughness * roughness;
     float phi = TWO_PI * r1;
-    float cosTheta = sqrt(clamp0((1.0 - r2) / (1.0 + (a2 * a2 - 1.0) * r2)));
+    float cosTheta = sqrt(clamp0((1.0 - r2) / (1.0 + (a2 - 1.0) * r2)));
     float sinTheta = sqrt(clamp0(1.0 - cosTheta * cosTheta));
 
     vec3 H = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
@@ -32,8 +32,10 @@ vec3 sampleGGXMicrofacet(vec3 N, float roughness, float r1, float r2)
     return normalize(H.x * T + H.y * B + H.z * N);
 }
 
-vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, out float pdf)
+vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor)
 {
+    roughness = clamp(roughness, MIN_ROUGHNESS, 1.0);
+
     vec3 H = normalize(V + L);
     float NdotV = clamp0(dot(N, V));
     float NdotH = clamp0(dot(N, H));
@@ -43,18 +45,23 @@ vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 spec
     float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);
     vec3 F = ggxSchlickFresnel(specColor, LdotH);
 
-    pdf = (D * NdotH) / (4.0 * LdotH + 0.001);
-    return (D * G * F) / (4.0 * NdotV * NdotL + 0.001);
+    return (D * G * F) / max(4.0 * NdotV * NdotL, EPSILON);
 }
+
 vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor)
 {
-    float specPdf_unused;
-    vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, specPdf_unused);
+    vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor);
     return specBrdf + diffColor / PI;
 }
 
-vec3 ggxBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 specColor, vec3 diffColor, out float pdf)
+float ggxSpecPdf(vec3 N, vec3 L, vec3 V, float roughness)
 {
-    vec3 specBrdf = ggxSpecBRDF(N, L, V, NdotL, roughness, specColor, pdf);
-    return specBrdf + diffColor / PI;
+    roughness = clamp(roughness, MIN_ROUGHNESS, 1.0);
+
+    vec3 H = normalize(V + L);
+    float NdotH = clamp0(dot(N, H));
+    float LdotH = clamp0(dot(L, H));
+
+    float D = ggxNormalDistribution(NdotH, roughness);
+    return (D * NdotH) / max(4.0 * LdotH, EPSILON);
 }
