@@ -210,6 +210,16 @@ void WindowDrawer::drawInspector()
 				ImGui::LabeledSliderInt("Ray Bounces", bounces, 0, 10);
 				if (bounces != Renderer::maxRayBounces())
 					Renderer::setMaxRayBounces(bounces);
+
+				auto misSampleBrdf = Renderer::misSampleBrdf();
+				ImGui::LabeledCheckbox("Mis Sample Brdf", misSampleBrdf);
+				if (misSampleBrdf != Renderer::misSampleBrdf())
+					Renderer::setMisSampleBrdf(misSampleBrdf);
+
+				auto misSampleLight = Renderer::misSampleLight();
+				ImGui::LabeledCheckbox("Mis Sample Light", misSampleLight);
+				if (misSampleLight != Renderer::misSampleLight())
+					Renderer::setMisSampleLight(misSampleLight);
 			}
 		}
 	}

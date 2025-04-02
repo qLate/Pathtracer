@@ -108,8 +108,8 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
     float NdotL = clamp0(dot(N, L_diff));
     float diffPdf = NdotL / PI * probDiff;
 
-    vec3 H = sampleGGXMicrofacet(N, roughness, r.x, r.y);
-    vec3 L_spec = normalize(reflect(-V, H));
+    vec3 H_spec = sampleGGXMicrofacet(N, roughness, r.x, r.y);
+    vec3 L_spec = normalize(reflect(-V, H_spec));
     float specPdf = ggxSpecPdf(N, L_spec, V, roughness) * (1.0 - probDiff);
     specPdf = max(specPdf, 0.0001);
 
@@ -139,10 +139,10 @@ vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float m
     vec3 specColor = mix(vec3(0.05), diffColor, metallic);
 
     float lightPdf;
-    vec3 directLighting = throughput * getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf);
+    vec3 directLighting = throughput * (misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
 
-    float lightMis = powerHeuristic(lightPdf, brdfPdf);
+    float lightMis = powerHeuristic(lightPdf, misSampleBrdf ? brdfPdf : 0);
     return directLighting * lightMis;
 }

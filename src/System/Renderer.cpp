@@ -14,6 +14,8 @@ void Renderer::init()
 
 	setSPP(_samplesPerPixel);
 	setMaxRayBounces(_maxRayBounces);
+	setMisSampleBrdf(_misSampleBrdf);
+	setMisSampleLight(_misSampleLight);
 	resizeView(ImGuiHandler::INIT_RENDER_SIZE);
 }
 
@@ -105,6 +107,24 @@ void Renderer::setMaxRayBounces(int bounces)
 	_maxRayBounces = bounces;
 	_renderProgram->use();
 	_renderProgram->setInt("maxRayBounces", _maxRayBounces);
+
+	resetSamples();
+}
+void Renderer::setMisSampleBrdf(bool doSample)
+{
+	_misSampleBrdf = doSample;
+
+	_renderProgram->use();
+	_renderProgram->setBool("misSampleBrdf", doSample);
+
+	resetSamples();
+}
+void Renderer::setMisSampleLight(bool doSample)
+{
+	_misSampleLight = doSample;
+
+	_renderProgram->use();
+	_renderProgram->setBool("misSampleLight", doSample);
 
 	resetSamples();
 }

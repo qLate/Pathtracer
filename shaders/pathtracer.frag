@@ -63,15 +63,15 @@ vec3 castRay(Ray ray)
                 color = clamp(color, 0, 1);
                 break;
             }
-            else
+            else if (misSampleBrdf)
             {
                 Light light = findTriLight(hitTriIndex);
 
                 vec3 L = normalize(ray.interPoint - ray.pos);
-                float lightPdf = getLightPdf(light, ray.pos, L, ray.interPoint);
+                float lightPdf = misSampleLight ? getLightPdf(light, ray.pos, L, ray.interPoint) : 0;
                 float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
-                color += throughput * mat.emission * brdfMis;
+                color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
                 break;
             }
         }
@@ -91,7 +91,7 @@ vec3 castRay(Ray ray)
         // Russian roulette
         if (bounce > 3)
         {
-            float p = clamp(maxv3(throughput), 0.05, 0.95);
+            float p = clamp(maxv3(throughput), 0.05, 1.0);
             if (rand() > p) break;
             throughput /= p;
         }
