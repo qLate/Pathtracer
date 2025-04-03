@@ -62,7 +62,6 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         vec3 LP = sampleTriangleUniform(v0, v1, v2, rand(), rand());
         L = normalize(LP - P);
         dist = length(LP - P);
-        dist = min(dist, light.properties1.y);
 
         Material mat = getMaterial(obj.materialIndex);
         radiance = mat.emission;
@@ -200,6 +199,7 @@ vec3 getShading(vec3 N, vec3 V, vec3 P, vec3 diffColor, float roughness, float m
 
     float lightPdf;
     vec3 directLighting = throughput * (misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
+    directLighting = clampMax(directLighting, 10);
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
 

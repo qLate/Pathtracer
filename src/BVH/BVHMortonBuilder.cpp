@@ -32,7 +32,7 @@ void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
 {
 	int n = triangles.size();
 	buildGPU_morton(n);
-	buildGPU_buildTree(n);
+	buildGPU_tree(n);
 }
 void BVHMortonBuilder::buildGPU_morton(int n)
 {
@@ -58,7 +58,7 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 
 	radixSort->operator()(_ssboMortonCodes->id(), BufferController::ssboBVHTriIndices()->id(), n);
 }
-void BVHMortonBuilder::buildGPU_buildTree(int n)
+void BVHMortonBuilder::buildGPU_tree(int n)
 {
 	BufferController::ssboBVHNodes()->bind(6);
 	BufferController::ssboBVHTriIndices()->bind(7);

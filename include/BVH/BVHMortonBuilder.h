@@ -23,7 +23,7 @@ class BVHMortonBuilder : public BVHBuilder
 
 	static void buildGPU(const std::vector<Triangle*>& triangles);
 	static void buildGPU_morton(int n);
-	static void buildGPU_buildTree(int n);
+	static void buildGPU_tree(int n);
 
 	static void buildCPU(const std::vector<Triangle*>& triangles);
 	static void buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);

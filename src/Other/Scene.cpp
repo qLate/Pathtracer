@@ -20,8 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes/4spheres.scene");
+	redGreenRoom();
+	//SceneLoader::loadScene("assets/scenes/4spheres1.scene");
 }
 #endif
 

@@ -135,6 +135,35 @@ float clamp01(float x)
 {
     return clamp(x, 0.0, 1.0);
 }
+float clampMin(float x, float minVal)
+{
+    return max(x, minVal);
+}
+float clampMax(float x, float maxVal)
+{
+    return min(x, maxVal);
+}
+
+vec3 clamp0(vec3 x)
+{
+    return vec3(clamp0(x.x), clamp0(x.y), clamp0(x.z));
+}
+vec3 clamp1(vec3 x)
+{
+    return vec3(clamp1(x.x), clamp1(x.y), clamp1(x.z));
+}
+vec3 clamp01(vec3 x)
+{
+    return vec3(clamp01(x.x), clamp01(x.y), clamp01(x.z));
+}
+vec3 clampMin(vec3 x, float minVal)
+{
+    return vec3(clampMin(x.x, minVal), clampMin(x.y, minVal), clampMin(x.z, minVal));
+}
+vec3 clampMax(vec3 x, float maxVal)
+{
+    return vec3(clampMax(x.x, maxVal), clampMax(x.y, maxVal), clampMax(x.z, maxVal));
+}
 
 float luminance(vec3 color)
 {
