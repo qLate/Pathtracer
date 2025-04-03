@@ -60,9 +60,9 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         vec3 v0, v1, v2;
         calcGlobalTriVertices(tri, v0, v1, v2);
         vec3 LP = sampleTriangleUniform(v0, v1, v2, rand(), rand());
-
         L = normalize(LP - P);
         dist = length(LP - P);
+        dist = min(dist, light.properties1.y);
 
         Material mat = getMaterial(obj.materialIndex);
         radiance = mat.emission;
@@ -73,7 +73,10 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, out float lightPdf)
 {
-    if (lightCount == 0) return vec3(0);
+    if (lightCount == 0) {
+        lightPdf = 0;
+        return vec3(0);
+    }
 
     vec3 L, radiance;
     float dist;
@@ -81,10 +84,14 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     sampleLight(ind, P, L, radiance, dist, lightPdf);
 
     float NdotL = clamp0(dot(L, N));
-    if (NdotL < 1e-5) return vec3(0);
+    if (NdotL < 1e-5 || lightPdf > 1e15)
+    {
+        lightPdf = 0;
+        return vec3(0, 0, 0);
+    }
 
     Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
-    float shadowMult = (intersectWorld(shadowRay, true) ? 0.0 : 1.0);
+    float shadowMult = intersectWorld(shadowRay, true) ? 0.0 : 1.0;
     lightPdf /= lightCount;
 
     vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor);

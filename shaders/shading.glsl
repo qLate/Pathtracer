@@ -37,9 +37,9 @@ vec3 ggxSpecBRDF(vec3 N, vec3 L, vec3 V, float NdotL, float roughness, vec3 spec
     roughness = clamp(roughness, MIN_ROUGHNESS, 1.0);
 
     vec3 H = normalize(V + L);
-    float NdotV = clamp0(dot(N, V));
-    float NdotH = clamp0(dot(N, H));
-    float LdotH = clamp0(dot(L, H));
+    float NdotV = clamp01(dot(N, V));
+    float NdotH = clamp01(dot(N, H));
+    float LdotH = clamp01(dot(L, H));
 
     float D = ggxNormalDistribution(NdotH, roughness);
     float G = ggxSchlickMaskingTerm(NdotL, NdotV, roughness);

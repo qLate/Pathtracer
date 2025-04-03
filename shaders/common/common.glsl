@@ -17,6 +17,26 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
+#define UP vec3(0, 0, 1)
+#define DOWN vec3(0, 0, -1)
+#define LEFT vec3(-1, 0, 0)
+#define RIGHT vec3(1, 0, 0)
+#define FORWARD vec3(0, 1, 0)
+#define BACK vec3(0, -1, 0)
+#define ZERO vec3(0, 0, 0)
+#define ONE vec3(1, 1, 1)
+
+#define WHITE vec3(1, 1, 1)
+#define BLACK vec3(0, 0, 0)
+#define RED vec3(1, 0, 0)
+#define GREEN vec3(0, 1, 0)
+#define BLUE vec3(0, 0, 1)
+#define YELLOW vec3(1, 1, 0)
+#define CYAN vec3(0, 1, 1)
+#define MAGENTA vec3(1, 0, 1)
+#define GRAY vec3(0.5, 0.5, 0.5)
+#define DARK_GRAY vec3(0.2, 0.2, 0.2)
+
 vec3 COLOR_DEBUG = vec3(-1);
 
 struct Light

@@ -123,12 +123,12 @@ void SceneLoader::saveSceneDialog()
 	_isSelectingPath = true;
 
 	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
-	ifd::FileDialog::Instance().Save("SaveScene", "Save a scene file", "Scene file (*.json){.json},.*", dir);
+	ifd::FileDialog::Instance().Save("SaveScene", "Save a scene file", "Scene file (*.scene){.scene},.*", dir);
 }
 void SceneLoader::loadSceneDialog()
 {
 	_isSelectingPath = true;
 
 	auto dir = std::filesystem::current_path().concat("/assets/scenes/").string();
-	ifd::FileDialog::Instance().Open("OpenScene", "Open a scene file", "Scene file (*.json){.json},.*", false, dir);
+	ifd::FileDialog::Instance().Open("OpenScene", "Open a scene file", "Scene file (*.scene){.scene},.*", false, dir);
 }

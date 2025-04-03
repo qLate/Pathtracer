@@ -26,6 +26,9 @@ Graphical::~Graphical()
 {
 	if (!initialized()) return;
 
+	if (materialNoCopy()->emission() != Color::clear())
+		BufferController::markBufferForUpdate(BufferType::Lights);
+
 	auto ind = std::ranges::find(Scene::graphicals, this) - Scene::graphicals.begin();
 	std::erase(Scene::graphicals, this);
 	for (int i = ind; i < Scene::graphicals.size(); i++)

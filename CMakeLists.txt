@@ -32,6 +32,7 @@ include_directories(libs/imgui/include)
 include_directories(libs/rapidobj)
 include_directories(libs/gl-radix-sort)
 include_directories(libs/nlohmann)
+include_directories(libs/minipbrt)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
@@ -46,6 +47,7 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/ImFileDialog.cpp"
         "libs/imgui/src/ImGuizmo.cpp"
         "libs/glad/glad.c"
+        "libs/minipbrt/minipbrt.cpp"
 
         "include/Program.h"
         "src/Program.cpp"

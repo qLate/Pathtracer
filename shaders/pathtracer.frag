@@ -158,8 +158,8 @@ void main()
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
 
-        // if (COLOR_DEBUG != vec3(-1))
-        //     newMean = COLOR_DEBUG;
+        if (COLOR_DEBUG != vec3(-1))
+            newMean = COLOR_DEBUG;
 
         outMean = vec4(newMean, 1.0);
         outSqr = vec4(newSqr, 1.0);
@@ -174,8 +174,8 @@ void main()
 
     outColor = vec4(finalColor, 1);
 
-    if (COLOR_DEBUG != vec3(-1))
-        outColor = vec4(COLOR_DEBUG, 1);
+    // if (COLOR_DEBUG != vec3(-1))
+    //     outColor = vec4(COLOR_DEBUG, 1);
     if (COLOR_HEAT != vec3(0))
         outColor.xyz += COLOR_HEAT;
 }
