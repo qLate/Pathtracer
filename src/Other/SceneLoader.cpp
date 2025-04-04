@@ -9,7 +9,8 @@
 #include "Scene.h"
 #include "Model.h"
 #include "ObjectManipulator.h"
-
+#include "minipbrt.h"
+#include "SceneLoaderPbrt.h"
 
 void SceneLoader::update()
 {
@@ -90,6 +91,14 @@ void SceneLoader::loadScene(const std::string& path)
 
 	ObjectManipulator::deselectObject();
 
+	if (path.ends_with(".scene"))
+		loadSceneMyFormat(path);
+	else if (path.ends_with(".pbrt"))
+		loadScenePbrt(path);
+	BufferController::updateLights();
+}
+void SceneLoader::loadSceneMyFormat(const std::string& path)
+{
 	std::ifstream file(path);
 	nlohmann::json json;
 	file >> json;
@@ -118,6 +127,14 @@ void SceneLoader::loadScene(const std::string& path)
 
 	BufferController::updateLights();
 }
+
+void SceneLoader::loadScenePbrt(const std::string& path)
+{
+	SceneLoaderPbrt::loadScene(path);
+
+	BufferController::updateLights();
+}
+
 void SceneLoader::saveSceneDialog()
 {
 	_isSelectingPath = true;

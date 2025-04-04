@@ -16,8 +16,7 @@ class Tweener
 
 	static void update();
 
-	template <typename T>
-	static Tween* valueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter);
+	template <typename T> static Tween* valueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter);
 
 public:
 	static Tween* delayedCall(const std::function<void()>& function, float delay);
@@ -72,8 +71,7 @@ public:
 	friend class Tweener;
 };
 
-template <typename T>
-class ValueTo : public Tween
+template <typename T> class ValueTo : public Tween
 {
 	T _startValue;
 	T _endValue;
@@ -90,32 +88,27 @@ public:
 	friend class Tweener;
 };
 
-template <typename T>
-Tween* Tweener::valueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter)
+template <typename T> Tween* Tweener::valueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter)
 {
 	auto valueTo = new ValueTo<T>(startValue, endValue, time, setter);
 	_tweens.push_back(valueTo);
 	return valueTo;
 }
-template <typename T>
-ValueTo<T>::ValueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter): Tween(time), _startValue(startValue),
-                                                                                                 _endValue(endValue), _setter(setter) {}
+template <typename T> ValueTo<T>::ValueTo(T startValue, T endValue, float time, const std::function<void(T)>& setter): Tween(time), _startValue(startValue),
+	_endValue(endValue), _setter(setter) {}
 
-template <typename T>
-void ValueTo<T>::update(float deltaTime)
+template <typename T> void ValueTo<T>::update(float deltaTime)
 {
 	_setter(_startValue + (_endValue - _startValue) * Math::evaluateEase(_ease, _elapsed / _time));
 	Tween::update(deltaTime);
 }
-template <typename T>
-void ValueTo<T>::finish()
+template <typename T> void ValueTo<T>::finish()
 {
 	_setter(_endValue);
 	Tween::finish();
 }
 
-template <typename T>
-Tween* ValueTo<T>::from(T value)
+template <typename T> Tween* ValueTo<T>::from(T value)
 {
 	_startValue = value;
 	return this;

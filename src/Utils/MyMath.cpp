@@ -48,7 +48,7 @@ glm::vec3 Math::randomVectorInCircle(float radius)
 }
 glm::vec3 Math::randomVectorInRectangle(float sizeX, float sizeY)
 {
-	return {random(-sizeX, sizeX), random(-sizeY, sizeY), 0};
+	return { random(-sizeX, sizeX), random(-sizeY, sizeY), 0 };
 }
 glm::vec3 Math::randomVectorInSphere(float radius)
 {

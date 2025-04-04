@@ -135,7 +135,7 @@ void Renderer::resizeView(glm::ivec2 size)
 
 	_renderProgram->setFloat2("pixelSize", size);
 	if (Camera::instance)
-		Camera::instance->setRatio({size.x / (float)size.y, 1});
+		Camera::instance->setRatio(size.x / (float)size.y);
 	glViewport(0, 0, size.x, size.y);
 
 	resetSamples();

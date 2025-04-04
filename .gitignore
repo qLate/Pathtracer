@@ -18,3 +18,4 @@ CMakeSettings.json
 
 imgui.ini
 assets/models/skeleton.obj
+assets/scenes-pbrt/

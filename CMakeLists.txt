@@ -92,7 +92,7 @@ add_executable(${PROJECT_NAME}
         "src/Utils/MyMath.cpp"
         "src/Utils/Utils.cpp"
         "src/Utils/ImGuiExtensions.cpp"
-)
+ "src/Other/SceneLoaderPbrt.cpp" "include/Other/SceneLoaderPbrt.h")
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)
