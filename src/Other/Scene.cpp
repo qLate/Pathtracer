@@ -22,7 +22,7 @@ void SceneSetup::setupScene()
 {
 	//redGreenRoom();
 	SceneLoader::loadScene("assets/scenes-pbrt/buddhamesh.pbrt");
-}
+}	
 #endif
 
 void SceneSetup::museumScene()

@@ -10,7 +10,7 @@ class GLFrameBuffer;
 class Renderer
 {
 	inline static bool _renderOneByOne = false;
-	inline static int _samplesPerPixel = 16;
+	inline static int _samplesPerPixel = 1;
 	inline static bool _limitSamples = false;
 	inline static int _maxAccumSamples = 1000000;
 	inline static int _maxRayBounces = 6;
