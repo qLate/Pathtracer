@@ -3,6 +3,7 @@
 #include "BVH.h"
 #include "Graphical.h"
 #include "Light.h"
+#include "MyMath.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Triangle.h"
@@ -129,7 +130,7 @@ void BufferController::updateLights()
 		{
 			auto globalLight = (DirectionalLight*)light;
 			lightStruct.lightType = 0;
-			lightStruct.properties1.yzw = globalLight->rot() * glm::vec3(0, 0, -1);
+			lightStruct.properties1.yzw = globalLight->rot() * vec3::FORWARD;
 		}
 		else if (dynamic_cast<PointLight*>(light))
 		{
@@ -205,7 +206,7 @@ void BufferController::updateObjects()
 		{
 			auto plane = (Plane*)obj;
 			objectStruct.objType = 2;
-			objectStruct.properties.xyz = glm::vec3(0, 0, 1);
+			objectStruct.properties.xyz = vec3::UP;
 		}
 
 		data[i] = objectStruct;

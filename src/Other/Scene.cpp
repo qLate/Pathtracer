@@ -20,8 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/cornell-mlt.pbrt");
+	redGreenRoom();
+	//SceneLoader::loadScene("assets/scenes-pbrt/cornell-mlt.pbrt");
 }
 #endif
 
@@ -65,22 +65,22 @@ void SceneSetup::spiderScene()
 
 void SceneSetup::redGreenRoom()
 {
-	auto camera = new Camera({0, -30, 0});
-	//auto tex = Assets::load<Texture>("assets/textures/marble.jpg");
+	auto camera = new Camera({0, 0, 30});
+	camera->setRot(0, 180);
+
 	auto tex = Texture::defaultTex();
 
-	//auto light = new PointLight({0, 0, 8}, {255 / 255.0f, 236 / 255.0f, 156 / 255.0f}, 1, 35);
-	auto square = new Square({0, 0, 9.999f}, 5, {{-90 * DEG_TO_RAD, 0, 0}});
+	auto square = new Square({0, 9.999f, 0}, 5, {{-180 * DEG_TO_RAD, 0, 0}});
 	square->material()->setEmission(Color(255 / 255.0f, 236 * 0.7f / 255.0f, 156 * 0.7f / 255.0f) * 5);
 
-	auto wallLeft = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});
-	auto wallRight = new Square({10, 0, 0}, 20, {{0, 0, 90 * DEG_TO_RAD}});
-	auto wallBack = new Square({0, 10, 0}, 20, {{0, 0, 180 * DEG_TO_RAD}});
-	auto floor = new Square({0, 0, -10}, 20, {{90 * DEG_TO_RAD, 0, 0}});
-	auto ceiling = new Square({0, 0, 10}, 20, {{-90 * DEG_TO_RAD, 0, 0}});
+	auto wallLeft = new Square({10, 0, 0}, 20, {{0, 0, 90 * DEG_TO_RAD}});
+	auto wallRight = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});
+	auto wallBack = new Square({0, 0, -10}, 20, {{-90 * DEG_TO_RAD, 0, 0}});
+	auto floor = new Square({0, -10, 0}, 20, {{0, 0, 0}});
+	auto ceiling = new Square({0, 10, 0}, 20, {{-180 * DEG_TO_RAD, 0, 0}});
 
-	auto cube1 = new Cube(glm::vec3 {4, -4, -6.7}, 6.6f, {{0 * DEG_TO_RAD, 0 * DEG_TO_RAD, -28 * DEG_TO_RAD}});
-	auto sphere1 = new Sphere({-4, 2, -5}, 5);
+	auto cube1 = new Cube({-4, -6.7, 4}, 6.6f, {{0, 28 * DEG_TO_RAD, 0}});
+	auto sphere1 = new Sphere({4, -5, -2}, 5);
 
 	auto whiteWallMat = new Material(Color::white(), true, tex);
 	wallLeft->setMaterial({Color::red(), true, tex});
@@ -90,12 +90,13 @@ void SceneSetup::redGreenRoom()
 	ceiling->setSharedMaterial(whiteWallMat);
 
 	sphere1->setMaterial({Color::skyblue(), true, tex, 0.001f});
-	cube1->setMaterial({Color::skyblue(), true, tex, 1}); // Assets::load<Texture>("assets/textures/cat.png")
+	cube1->setMaterial({Color::skyblue(), true, tex, 1});
 }
+
 
 void SceneSetup::redGreenRoomOriginal()
 {
-	auto camera = new Camera({278, -800, 278}, 0.69f); // Z-up
+	auto camera = new Camera({278, -800, 278}, 0.69f);
 	auto tex = Texture::defaultTex();
 
 	auto white = new Material({0.73f, 0.73f, 0.73f}, true, tex);
@@ -158,13 +159,13 @@ void SceneSetup::kokuraScene()
 
 void SceneSetup::skeletonScene()
 {
-	auto camera = new Camera({-365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f});
+	auto camera = new Camera({-365.9f * 0.05f, 508.46f * 0.05f, -1406.9f * 0.05f});
 	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
 	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
 	auto model = Assets::load<Model>("assets/models/skeleton.obj");
-	auto obj = new Mesh(model, {}, {}, {0.05f, 0.05f, 0.05f});
+	auto obj = new Mesh(model, {}, {{-90 * DEG_TO_RAD, 0, 0}}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new PointLight({1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
 }
@@ -174,15 +175,16 @@ void SceneSetup::skeletonScene_benchmark()
 	Renderer::setSPP(1);
 	Renderer::setMaxRayBounces(0);
 
-	auto camera = new Camera({-365.9f * 0.05f, -1406.9f * 0.05f, 508.46f * 0.05f});
-	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
+	auto camera = new Camera({-36.30, 23.65, -43.04});
+	camera->setRot({0.933888f, {0.034, 0.355, -0.013}});
 	camera->setBgColor({0.0025f, 0.0025f, 0.0025f});
 	auto tex = Texture::defaultTex();
 
 	auto model = Assets::load<Model>("assets/models/skeleton.obj");
-	auto obj = new Mesh(model, {}, {}, {0.05f, 0.05f, 0.05f});
+	auto obj = new Mesh(model, {}, {{-90 * DEG_TO_RAD, 180 * DEG_TO_RAD, 0}}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
-	auto light = new PointLight({1460.3f, -1246.5f, 423.4f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 0.5f, FLT_MAX);
+	auto light = new DirectionalLight(normalize(glm::vec3(0, -1, 1)));
+	light->setRot({{20.39 * DEG_TO_RAD, -20.08 * DEG_TO_RAD, 14.33 * DEG_TO_RAD}});
 }
 
 void SceneSetup::spaceStationScene()

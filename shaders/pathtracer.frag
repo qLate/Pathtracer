@@ -106,15 +106,14 @@ vec3 castRay(Ray ray)
 vec3 trace()
 {
     vec3 right = cameraRotMat[0].xyz;
-    vec3 forward = cameraRotMat[1].xyz;
-    vec3 up = cameraRotMat[2].xyz;
+    vec3 up = cameraRotMat[1].xyz;
+    vec3 forward = cameraRotMat[2].xyz;
 
     vec3 lb = focalDistance * forward - 0.5 * viewSize.x * right - 0.5 * viewSize.y * up;
     float dx = viewSize.x / pixelSize.x;
     float dy = viewSize.y / pixelSize.y;
     float x = gl_FragCoord.x * dx;
     float y = gl_FragCoord.y * dy;
-    vec3 rayDir = normalize(lb + x * right + y * up);
 
     #ifdef BENCHMARK_BUILD
     vec2 jitter = vec2(0, 0);

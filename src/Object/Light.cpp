@@ -3,6 +3,7 @@
 #include "BufferController.h"
 #include "Graphical.h"
 #include "Material.h"
+#include "MyMath.h"
 #include "Scene.h"
 
 Light::Light(const glm::vec3& pos, const Color& color, float intensity) : Object(pos), _color(color), _intensity(intensity)
@@ -55,7 +56,7 @@ void Light::setIntensity(float intensity)
 	BufferController::markBufferForUpdate(BufferType::Lights);
 }
 
-PointLight::PointLight(glm::vec3 pos, Color color, float intensity, float dis) : Light(pos, color, intensity), _dis(dis) { }
+PointLight::PointLight(glm::vec3 pos, Color color, float intensity, float dis) : Light(pos, color, intensity), _dis(dis) {}
 PointLight::PointLight(const PointLight& orig) : PointLight(orig.pos(), orig.color(), orig.intensity(), orig.dis()) {}
 
 void PointLight::setDis(float dis)
@@ -67,13 +68,13 @@ void PointLight::setDis(float dis)
 
 DirectionalLight::DirectionalLight(glm::vec3 dir, Color color, float intensity) : Light(glm::vec3(), color, intensity)
 {
-	init(dir);
+	init(quatLookAt(-dir, vec3::FORWARD));
 }
 DirectionalLight::DirectionalLight(const DirectionalLight& orig) : Light(orig.pos(), orig.color(), orig.intensity())
 {
-	init(eulerAngles(orig.rot()));
+	init(orig.rot());
 }
-void DirectionalLight::init(glm::vec3 rot)
+void DirectionalLight::init(glm::quat rot)
 {
-	Object::setRot({radians(rot)});
+	Light::setRot(rot);
 }

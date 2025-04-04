@@ -17,12 +17,12 @@
 #define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 #define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
-#define UP vec3(0, 0, 1)
-#define DOWN vec3(0, 0, -1)
+#define UP vec3(0, 1, 0)
+#define DOWN vec3(0, -1, 0)
 #define LEFT vec3(-1, 0, 0)
 #define RIGHT vec3(1, 0, 0)
-#define FORWARD vec3(0, 1, 0)
-#define BACK vec3(0, -1, 0)
+#define FORWARD vec3(0, 0, 1)
+#define BACK vec3(0, 0, -1)
 #define ZERO vec3(0, 0, 0)
 #define ONE vec3(1, 1, 1)
 

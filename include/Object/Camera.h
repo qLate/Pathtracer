@@ -9,6 +9,8 @@ class Camera : public Object
 	float _fov = 53.13f, _lensRadius;
 	Color _bgColor = Color::black();
 
+	float _pitch = 0, _yaw = 0;
+
 	Camera() = default;
 
 public:
@@ -22,7 +24,10 @@ public:
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
+	void setRot(float pitch, float yaw);
 
+	float pitch() const { return _pitch; }
+    float yaw() const { return _yaw; }
 	float ratio() const { return _ratio; }
 	float fov() const { return _fov; }
 	float lensRadius() const { return _lensRadius; }

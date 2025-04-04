@@ -3,6 +3,7 @@
 #include "WindowDrawer.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "MyMath.h"
 #include "Triangle.h"
 
 Camera::Camera(glm::vec3 pos, float fov, float lensRadius) : Object(pos), _fov(fov), _lensRadius(lensRadius)
@@ -43,6 +44,18 @@ void Camera::setPos(glm::vec3 pos, bool notify)
 void Camera::setRot(glm::quat rot, bool notify)
 {
 	Object::setRot(rot, false);
+
+	_pitch = glm::pitch(rot);
+	_yaw = glm::yaw(rot);
+
+	Renderer::resetSamples();
+}
+void Camera::setRot(float pitch, float yaw)
+{
+	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(pitch), vec3::RIGHT), false);
+
+	_pitch = pitch;
+	_yaw = yaw;
 
 	Renderer::resetSamples();
 }
@@ -100,12 +113,12 @@ float Camera::getFocalDis() const
 }
 glm::mat4 Camera::getViewMatrix() const
 {
-	return lookAt(_pos, _pos + forward(), up());
+	return glm::lookAtLH(_pos, _pos + forward(), up());
 }
 glm::mat4 Camera::getProjectionMatrix() const
 {
 	float nearPlane = 0.1f;
-	return glm::infinitePerspective(glm::radians(_fov), _ratio, nearPlane);
+	return glm::infinitePerspectiveLH(glm::radians(_fov), _ratio, nearPlane);
 }
 
 glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const

@@ -72,15 +72,15 @@ void Object::translate(const glm::vec3& v)
 }
 void Object::rotate(const glm::vec3& degrees)
 {
-	setRot(glm::rotate(_rot, glm::radians(degrees.x), glm::vec3(0, 1, 0)));
+	setRot(glm::rotate(_rot, glm::radians(degrees.x), vec3::FORWARD));
 }
 
-glm::vec3 Object::forward() const { return _rot * glm::vec3(0, 1, 0); }
-glm::vec3 Object::backward() const { return _rot * glm::vec3(0, -1, 0); }
-glm::vec3 Object::up() const { return _rot * glm::vec3(0, 0, 1); }
-glm::vec3 Object::down() const { return _rot * glm::vec3(0, 0, -1); }
-glm::vec3 Object::left() const { return _rot * glm::vec3(-1, 0, 0); }
-glm::vec3 Object::right() const { return _rot * glm::vec3(1, 0, 0); }
+glm::vec3 Object::forward() const { return _rot * vec3::FORWARD; }
+glm::vec3 Object::backward() const { return _rot * vec3::BACKWARD; }
+glm::vec3 Object::up() const { return _rot * vec3::UP; }
+glm::vec3 Object::down() const { return _rot * vec3::DOWN; }
+glm::vec3 Object::left() const { return _rot * vec3::LEFT; }
+glm::vec3 Object::right() const { return _rot * vec3::RIGHT; }
 
 glm::vec3 Object::localToGlobalPos(const glm::vec3& localPos) const
 {

@@ -139,14 +139,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		auto rot = eulerAngles(camera->rot()) * RAD_TO_DEG;
+		float pitch = glm::clamp(camera->pitch() + dy * MOUSE_ROTATION_SPEED, -90.0f, 90.0f);
+		float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED;
 
-		auto newX = glm::clamp(rot.x - dy * MOUSE_ROTATION_SPEED, -90.0f, 90.0f);
-		auto newY = rot.y;
-		auto newZ = rot.z - dx * MOUSE_ROTATION_SPEED;
-
-		auto newRot = glm::vec3(newX, newY, newZ);
-		camera->setRot({newRot * DEG_TO_RAD});
+		camera->setRot(pitch, yaw);
 	}
 
 	if (event.type == SDL_MOUSEWHEEL)
