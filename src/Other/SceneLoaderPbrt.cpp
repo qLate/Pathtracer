@@ -53,7 +53,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 				decompose(transform, scale, rot, pos, skew, perspective);
 
 				auto cam = new Camera(pos, c->fov, c->lensradius);
-				cam->setRot(rot);
+				cam->setRot(pitch(rot), yaw(rot));
 			}
 			break;
 		}

@@ -45,14 +45,11 @@ void Camera::setRot(glm::quat rot, bool notify)
 {
 	Object::setRot(rot, false);
 
-	_pitch = glm::pitch(rot);
-	_yaw = glm::yaw(rot);
-
 	Renderer::resetSamples();
 }
 void Camera::setRot(float pitch, float yaw)
 {
-	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(pitch), vec3::RIGHT), false);
+	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(pitch), vec3::RIGHT));
 
 	_pitch = pitch;
 	_yaw = yaw;

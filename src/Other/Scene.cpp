@@ -20,8 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
-	//SceneLoader::loadScene("assets/scenes-pbrt/cornell-mlt.pbrt");
+	//redGreenRoom();
+	SceneLoader::loadScene("assets/scenes-pbrt/buddhamesh.pbrt");
 }
 #endif
 
