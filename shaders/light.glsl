@@ -48,9 +48,16 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         L = normalize(light.pos - P);
         dist = length(light.pos - P);
 
-        float distImpact = clamp1(pow(clamp0(1 - dist / light.properties1.y), 2));
+        float distImpact = 1 / (dist * dist);
         radiance = distImpact * light.color * light.properties1.x;
-        pdf = -1;
+        pdf = 1;
+    }
+    else if (light.lightType == LIGHT_TYPE_DIRECTIONAL)
+    {
+        L = -light.properties1.yzw;
+        dist = 1e10;
+        radiance = light.color * light.properties1.x;
+        pdf = 1;
     }
     else if (light.lightType == LIGHT_TYPE_TRIANGLE)
     {
@@ -72,7 +79,8 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, out float lightPdf)
 {
-    if (lightCount == 0) {
+    if (lightCount == 0)
+    {
         lightPdf = 0;
         return vec3(0);
     }
@@ -86,7 +94,7 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     if (NdotL < 1e-5 || lightPdf > 1e15)
     {
         lightPdf = 0;
-        return vec3(0, 0, 0);
+        return vec3(0);
     }
 
     Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);

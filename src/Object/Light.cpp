@@ -35,6 +35,12 @@ void Light::setPos(glm::vec3 pos, bool notify)
 
 	BufferController::markBufferForUpdate(BufferType::Lights);
 }
+void Light::setRot(glm::quat rot, bool notify)
+{
+	Object::setRot(rot, notify);
+
+	BufferController::markBufferForUpdate(BufferType::Lights);
+}
 
 void Light::setColor(const Color& color)
 {
@@ -59,9 +65,9 @@ void PointLight::setDis(float dis)
 	BufferController::markBufferForUpdate(BufferType::Lights);
 }
 
-DirectionalLight::DirectionalLight(glm::vec3 rot, Color color, float intensity) : Light(glm::vec3(), color, intensity)
+DirectionalLight::DirectionalLight(glm::vec3 dir, Color color, float intensity) : Light(glm::vec3(), color, intensity)
 {
-	init(rot);
+	init(dir);
 }
 DirectionalLight::DirectionalLight(const DirectionalLight& orig) : Light(orig.pos(), orig.color(), orig.intensity())
 {

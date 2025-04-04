@@ -17,6 +17,7 @@ public:
 	Camera(glm::vec3 pos, float fov = 53.13f, float lensRadius = 0);
 	Camera(const Camera& orig);
 	void init();
+
 	~Camera() override;
 
 	void setPos(glm::vec3 pos, bool notify = true) override;

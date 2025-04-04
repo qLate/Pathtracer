@@ -21,6 +21,7 @@ public:
 	float intensity() const { return _intensity; }
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
+	void setRot(glm::quat rot, bool notify) override;
 
 	void setColor(const Color& color);
 	void setIntensity(float intensity);
@@ -61,7 +62,7 @@ class DirectionalLight : public Light
 	DirectionalLight() = default;
 
 public:
-	DirectionalLight(glm::vec3 rot, Color color, float intensity);
+	DirectionalLight(glm::vec3 dir, Color color, float intensity);
 	DirectionalLight(const DirectionalLight& orig);
 	void init(glm::vec3 rot);
 

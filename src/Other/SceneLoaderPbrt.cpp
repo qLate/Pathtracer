@@ -6,7 +6,9 @@
 #include "Material.h"
 #include "minipbrt.h"
 #include "Model.h"
+#include "MyMath.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/matrix_decompose.hpp"
 
 void SceneLoaderPbrt::loadScene(const std::string& path)
 {
@@ -29,21 +31,28 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 			{
 				auto c = dynamic_cast<const minipbrt::PerspectiveCamera*>(scene->camera);
 
-				printf("frameaspectratio = %f\n", c->frameaspectratio);
-				printf("screenwindow     = [ %f, %f, %f, %f ]\n", c->screenwindow[0], c->screenwindow[1], c->screenwindow[2], c->screenwindow[3]);
-				printf("lensradius       = %f\n", c->lensradius);
-				printf("focaldistance    = %f\n", c->focaldistance);
-				printf("fov              = %f\n", c->fov);
-				printf("halffov          = %f\n", c->halffov);
+				auto transform = transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]));
 
-				auto transform = glm::make_mat4x4(&c->cameraToWorld.start[0][0]);
+				glm::mat4 yUpToZUp = rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
 
-				auto pos = glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
-				auto dir = glm::vec3(transform[2][0], transform[2][1], transform[2][2]);
-				auto up = glm::vec3(transform[1][0], transform[1][1], transform[1][2]);
-				auto rot = quatLookAt(dir, up);
+				// Apply rotation only to the upper-left 3x3 rotation part
+				glm::mat3 rotOnly = glm::mat3(transform);
+				rotOnly = glm::mat3(yUpToZUp) * rotOnly;
 
-				auto cam = new Camera(pos, 45.0f);
+				// Rebuild the final transform with adjusted rotation and original translation
+				transform = glm::mat4(1.0f);
+				transform = glm::mat4(rotOnly);                      // set new rotation
+				transform[3] = glm::vec4(glm::vec3(transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]))[3]), 1.0f); // restore original translation
+
+				glm::vec3 scale;
+				glm::quat rot;
+				glm::vec3 pos;
+				glm::vec3 skew;
+				glm::vec4 perspective;
+
+				decompose(transform, scale, rot, pos, skew, perspective);
+
+				auto cam = new Camera(pos, c->fov, c->lensradius);
 				cam->setRot(rot);
 			}
 			break;
@@ -139,11 +148,25 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	// === Load lights ===
 	for (auto light : scene->lights)
 	{
+		auto transform = transpose(glm::make_mat4x4(&light->lightToWorld.start[0][0]));
+		auto pos = glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
+
 		if (light->type() == minipbrt::LightType::Point)
 		{
 			auto pt = dynamic_cast<const minipbrt::PointLight*>(light);
-			auto radius = (pt->scale[0] + pt->scale[1] + pt->scale[2]) / 3;
-			new PointLight({pt->from[0], pt->from[1], pt->from[2]}, {pt->I[0], pt->I[1], pt->I[2]}, 1.0f, radius);
+			new PointLight(pos + glm::vec3(pt->from[0], pt->from[1], pt->from[2]), {pt->I[0], pt->I[1], pt->I[2]}, 1.0f, 1);
+		}
+		else if (light->type() == minipbrt::LightType::Distant)
+		{
+			auto dl = dynamic_cast<const minipbrt::DistantLight*>(light);
+
+			auto dir = glm::vec3(transform[2][0], transform[2][1], transform[2][2]);
+			new DirectionalLight(dir, {dl->L[0], dl->L[1], dl->L[2]}, 1.0f);
+		}
+		else if (light->type() == minipbrt::LightType::Infinite)
+		{
+			auto il = dynamic_cast<const minipbrt::InfiniteLight*>(light);
+			Camera::instance->setBgColor(Color(il->L[0], il->L[1], il->L[2]));
 		}
 	}
 

@@ -72,7 +72,7 @@ void Object::translate(const glm::vec3& v)
 }
 void Object::rotate(const glm::vec3& degrees)
 {
-	setRot(glm::quat(eulerAngles(_rot) + degrees * DEG_TO_RAD));
+	setRot(glm::rotate(_rot, glm::radians(degrees.x), glm::vec3(0, 1, 0)));
 }
 
 glm::vec3 Object::forward() const { return _rot * glm::vec3(0, 1, 0); }

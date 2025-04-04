@@ -3,7 +3,7 @@
 
 #include "utils.glsl"
 
-#define LIGHT_TYPE_GLOBAL 0
+#define LIGHT_TYPE_DIRECTIONAL 0
 #define LIGHT_TYPE_POINT 1
 #define LIGHT_TYPE_TRIANGLE 2
 
