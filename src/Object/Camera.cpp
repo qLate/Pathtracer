@@ -96,7 +96,7 @@ glm::vec3 Camera::getMouseDir() const
 
 float Camera::getFocalDis() const
 {
-	return 1.0f / tan(glm::radians(_fov) * 0.5f);
+	return 0.5f / tan(glm::radians(_fov) * 0.5f);
 }
 glm::mat4 Camera::getViewMatrix() const
 {
@@ -105,9 +105,7 @@ glm::mat4 Camera::getViewMatrix() const
 glm::mat4 Camera::getProjectionMatrix() const
 {
 	float nearPlane = 0.1f;
-	float farPlane = 10000.0f;
-
-	return glm::perspective(glm::radians(_fov), _ratio, nearPlane, farPlane);
+	return glm::infinitePerspective(glm::radians(_fov), _ratio, nearPlane);
 }
 
 glm::vec2 Camera::worldToViewportPos(const glm::vec3& worldPos) const

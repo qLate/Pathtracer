@@ -6,7 +6,7 @@
 class Camera : public Object
 {
 	float _ratio;
-	float _fov = 90, _lensRadius;
+	float _fov = 53.13f, _lensRadius;
 	Color _bgColor = Color::black();
 
 	Camera() = default;
@@ -14,7 +14,7 @@ class Camera : public Object
 public:
 	inline static Camera* instance = nullptr;
 
-	Camera(glm::vec3 pos, float fov = 90, float lensRadius = 0);
+	Camera(glm::vec3 pos, float fov = 53.13f, float lensRadius = 0);
 	Camera(const Camera& orig);
 	void init();
 	~Camera() override;

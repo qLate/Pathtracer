@@ -36,7 +36,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 				printf("fov              = %f\n", c->fov);
 				printf("halffov          = %f\n", c->halffov);
 
-				auto transform = glm::make_mat4x4(c->cameraToWorld.start);
+				auto transform = glm::make_mat4x4(&c->cameraToWorld.start[0][0]);
 
 				auto pos = glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
 				auto dir = glm::vec3(transform[2][0], transform[2][1], transform[2][2]);

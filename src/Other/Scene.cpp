@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	redGreenRoom();
-	//SceneLoader::loadScene("assets/scenes/4spheres1.scene");
+	//SceneLoader::loadScene("assets/scenes-pbrt/bunny.pbrt");
 }
 #endif
 

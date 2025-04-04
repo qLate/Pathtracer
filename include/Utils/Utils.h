@@ -34,6 +34,43 @@ public:
 	static float computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference);
 
 	static void copyToClipboard(const std::string& text);
+
+	template <class T> struct Flags
+	{
+		uint32_t value;
+
+		Flags() : value(0) {}
+		Flags(T val) : value(1u << static_cast<uint32_t>(val)) {}
+		Flags(uint32_t val) : value(val) {}
+		Flags(const Flags& other) : value(other.value) {}
+
+		Flags& operator =(const Flags& other)
+		{
+			value = other.value;
+			return *this;
+		}
+
+		void set(T val) { value |= (1u << static_cast<uint32_t>(val)); }
+		void clear(T val) { value &= ~(1u << static_cast<uint32_t>(val)); }
+		void toggle(T val) { value ^= (1u << static_cast<uint32_t>(val)); }
+
+		void setAll() { value = 0xFFFFFFFFu; }
+		void clearAll() { value = 0u; }
+		void toggleAll() { value = ~value; }
+
+		bool has(T val) const { return (value & 1u << static_cast<uint32_t>(val)) != 0u; }
+	};
+
+	//template <class T> Flags<T> operator|(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val | rhs.val); }
+	//template <class T> Flags<T> operator&(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val & rhs.val); }
+	//template <class T> Flags<T> operator^(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val ^ rhs.val); }
+	//template <class T> Flags<T> operator~(Flags<T> rhs) { return Flags<T>(~rhs.val); }
+
+	//template <class T> Flags<T> operator|(Flags<T> lhs, T rhs) { return lhs | Flags<T>(rhs); }
+	//template <class T> Flags<T> operator&(Flags<T> lhs, T rhs) { return lhs & Flags<T>(rhs); }
+	//template <class T> Flags<T> operator^(Flags<T> lhs, T rhs) { return lhs ^ Flags<T>(rhs); }
+
+	//template <class T> Flags<T> operator|(T lhs, T rhs) { return Flags<T>(lhs) | Flags<T>(rhs); }
 };
 
 template <typename T> bool Utils::hasFlag(T flags, T flag)
@@ -87,40 +124,3 @@ public:
 	void printElapsed(const std::string& msg = "");
 	void printElapsedFromLast(const std::string& msg = "");
 };
-
-template <class T> struct Flags
-{
-	uint32_t value;
-
-	Flags() : value(0) {}
-	Flags(T val) : value(1u << static_cast<uint32_t>(val)) {}
-	Flags(uint32_t val) : value(val) {}
-	Flags(const Flags& other) : value(other.value) {}
-
-	Flags& operator =(const Flags& other)
-	{
-		value = other.value;
-		return *this;
-	}
-
-	void set(T val) { value |= (1u << static_cast<uint32_t>(val)); }
-	void clear(T val) { value &= ~(1u << static_cast<uint32_t>(val)); }
-	void toggle(T val) { value ^= (1u << static_cast<uint32_t>(val)); }
-
-	void setAll() { value = 0xFFFFFFFFu; }
-	void clearAll() { value = 0u; }
-	void toggleAll() { value = ~value; }
-
-	bool has(T val) const { return (value & 1u << static_cast<uint32_t>(val)) != 0u; }
-};
-
-template <class T> Flags<T> operator |(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val | rhs.val); }
-template <class T> Flags<T> operator &(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val & rhs.val); }
-template <class T> Flags<T> operator ^(Flags<T> lhs, Flags<T> rhs) { return Flags<T>(lhs.val ^ rhs.val); }
-template <class T> Flags<T> operator ~(Flags<T> rhs) { return Flags<T>(~rhs.val); }
-
-template <class T> Flags<T> operator |(Flags<T> lhs, T rhs) { return lhs | Flags<T>(rhs); }
-template <class T> Flags<T> operator &(Flags<T> lhs, T rhs) { return lhs & Flags<T>(rhs); }
-template <class T> Flags<T> operator ^(Flags<T> lhs, T rhs) { return lhs ^ Flags<T>(rhs); }
-
-template <class T> Flags<T> operator |(T lhs, T rhs) { return Flags<T>(lhs) | Flags<T>(rhs); }
