@@ -8,6 +8,7 @@
 #include "minipbrt.h"
 #include "Model.h"
 #include "MyMath.h"
+#include "Renderer.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.hpp"
 
@@ -232,6 +233,9 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 		{
 			auto il = dynamic_cast<const minipbrt::InfiniteLight*>(light);
 			Camera::instance->setBgColor(Color(il->L[0], il->L[1], il->L[2]));
+			
+			auto tex = Assets::load<Texture>(il->mapname);
+			Renderer::renderProgram()->setHandle("envMap", tex->glTex()->getHandle());
 		}
 	}
 

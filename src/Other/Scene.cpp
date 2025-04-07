@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/bump-sphere.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt/bunny.pbrt");
 }	
 #endif
 
@@ -157,5 +157,5 @@ void SceneSetup::skeletonScene_benchmark()
 	auto obj = new Mesh(model, {}, {{-90 * DEG_TO_RAD, 180 * DEG_TO_RAD, 0}}, {0.05f, 0.05f, 0.05f});
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new DirectionalLight(normalize(glm::vec3(0, -1, 1)));
-	light->setRot({{20.39 * DEG_TO_RAD, -20.08 * DEG_TO_RAD, 14.33 * DEG_TO_RAD}});
+	light->setRot({{200.0 * DEG_TO_RAD, -20.08 * DEG_TO_RAD, 14.33 * DEG_TO_RAD}});
 }

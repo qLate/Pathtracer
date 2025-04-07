@@ -50,7 +50,7 @@ vec3 castRay(Ray ray)
         int hitTriIndex, _dummy;
         if (!intersectWorld(ray, false, hitTriIndex, _dummy))
         {
-            color += throughput * bgColor;
+            color += throughput * bgColor * sampleEnvMap(ray.dir);
             break;
         }
 

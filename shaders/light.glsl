@@ -16,6 +16,15 @@ vec2 genRandoms(int bounce)
     return vec2(r1, r2);
 }
 
+uniform sampler2D envMap;
+vec3 sampleEnvMap(vec3 dir)
+{
+    dir = normalize(dir);
+    float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
+    float v = acos(clamp(dir.y, -1.0, 1.0)) / PI;
+    return texture(envMap, vec2(u, v)).rgb;
+}
+
 float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L, vec3 LP)
 {
     vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
