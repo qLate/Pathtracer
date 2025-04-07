@@ -30,11 +30,8 @@ class SceneSetup
 	static void spiderScene();
 	static void redGreenRoom();
 	static void redGreenRoomOriginal();
-	static void minecraftHouseScene();
-	static void kokuraScene();
 	static void skeletonScene();
 	static void skeletonScene_benchmark();
-	static void spaceStationScene();
 
 	friend class Program;
 };

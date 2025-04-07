@@ -45,7 +45,7 @@ public:
 	static bool misSampleBrdf() { return _misSampleBrdf; }
 	static bool misSampleLight() { return _misSampleLight; }
 	static int totalSamples() { return _totalSamples; }
-	static UPtr<DefaultShaderProgram<RaytraceShader>>& renderProgram() { return _renderProgram; }
+	static DefaultShaderProgram<RaytraceShader>* renderProgram() { return _renderProgram.get(); }
 	static GLFrameBuffer* sceneViewFBO() { return _viewFBO.get(); }
 
 	static float renderTime() { return _renderTime; }

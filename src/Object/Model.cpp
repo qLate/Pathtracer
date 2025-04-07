@@ -3,8 +3,8 @@
 #include <fstream>
 
 #include "Debug.h"
+#include "MyMath.h"
 #include "rapidobj.hpp"
-#include "Utils.h"
 
 Model::Model(const std::filesystem::path& path) : _path(path.string())
 {
@@ -77,8 +77,8 @@ void Model::parseRapidobj(const std::filesystem::path& path)
 
 				if (uvIdx >= 0 && uvIdx < attributes.texcoords.size() / 2)
 				{
-					vertices[v].uvPos.x = Utils::mod(attributes.texcoords[uvIdx * 2 + 0], 1.0f);
-					vertices[v].uvPos.y = Utils::mod(attributes.texcoords[uvIdx * 2 + 1], 1.0f);
+					vertices[v].uvPos.x = Math::mod(attributes.texcoords[uvIdx * 2 + 0], 1.0f);
+					vertices[v].uvPos.y = Math::mod(attributes.texcoords[uvIdx * 2 + 1], 1.0f);
 				}
 			}
 
@@ -118,7 +118,7 @@ void Model::parseSelfWritten(const std::filesystem::path& path)
 		{
 			std::vector<float> uv;
 			while (ss >> token)
-				uv.push_back(Utils::mod(std::stof(token), 1.0f));
+				uv.push_back(Math::mod(std::stof(token), 1.0f));
 
 			vertexUVs.emplace_back(uv[0], uv[1]);
 		}

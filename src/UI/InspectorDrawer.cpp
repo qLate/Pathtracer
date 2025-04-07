@@ -77,7 +77,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (ImGui::Button("Set Texture"))
 		{
 			auto dir = std::filesystem::current_path().concat("/assets/textures/").string();
-			ifd::FileDialog::Instance().Open("Texture", "Open a texture file", "Image file (*.png;*.jpg;*.jpeg){.png,.jpg,.jpeg},.*", false, dir);
+			ifd::FileDialog::Instance().Open("Texture", "Open a texture file", "Image file (*.png;*.jpg;*.jpeg;*.exr){.png,.jpg,.jpeg,.exr},.*", false, dir);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Reset Texture"))

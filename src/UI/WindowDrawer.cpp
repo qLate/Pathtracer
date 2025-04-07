@@ -84,7 +84,7 @@ void WindowDrawer::drawMenuBar()
 			if (ImGui::MenuItem("New Point Light", "Tab"))
 				ObjectManipulator::selectObject(new PointLight(spawnPos, Color::white(), 1, 10));
 			if (ImGui::MenuItem("New Directional Light", "Tab"))
-				ObjectManipulator::selectObject(new DirectionalLight(spawnPos, Color::white(), 1));
+				ObjectManipulator::selectObject(new DirectionalLight({0, -1, 0}, Color::white(), 1));
 
 			ImGui::EndMenu();
 		}

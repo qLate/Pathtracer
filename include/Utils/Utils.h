@@ -10,6 +10,8 @@
 #include "glm/vec3.hpp"
 #include <windows.h>
 
+#include "glm/vec2.hpp"
+
 template <typename T> using UPtr = std::unique_ptr<T>;
 
 template <typename T> using SPtr = std::shared_ptr<T>;
@@ -20,10 +22,6 @@ using std::make_shared;
 class Utils
 {
 public:
-	static float round(float value, int decimals);
-	static int mod(int k, int n);
-	static float mod(float k, float n);
-
 	static std::string toBinary(int n, int bits = -1);
 	static std::string toString(float f, int decimals = 2);
 
@@ -34,6 +32,9 @@ public:
 	static float computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference);
 
 	static void copyToClipboard(const std::string& text);
+
+	static std::string toString(const glm::vec3& v, int precision = 2);
+	static std::string toString(const glm::vec2& v, int precision = 2);
 
 	template <class T> struct Flags
 	{

@@ -1,12 +1,8 @@
 #include "Utils.h"
 
 #include "glad.h"
+#include "MyMath.h"
 
-float Utils::round(float value, int decimals)
-{
-	float mult = powf(10, decimals);
-	return std::round(value * mult) / mult;
-}
 long long Utils::measureCallTime(void (*func)())
 {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -15,14 +11,6 @@ long long Utils::measureCallTime(void (*func)())
 	return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
-int Utils::mod(int k, int n)
-{
-	return (k % n + n) % n;
-}
-float Utils::mod(float k, float n)
-{
-	return fmod(fmod(k, n) + n, n);
-}
 std::string Utils::toBinary(int n, int bits)
 {
 	std::string r;
@@ -36,7 +24,7 @@ std::string Utils::toBinary(int n, int bits)
 }
 std::string Utils::toString(float f, int decimals)
 {
-	return std::to_string(round(f, decimals));
+	return std::to_string(Math::round(f, decimals));
 }
 
 float Utils::computeMSE(const std::vector<glm::vec3>& rendered, const std::vector<glm::vec3>& reference)
@@ -65,6 +53,17 @@ void Utils::copyToClipboard(const std::string& text)
 		SetClipboardData(CF_TEXT, hMem);
 		CloseClipboard();
 	}
+}
+
+std::string Utils::toString(const glm::vec3& v, int precision)
+{
+	auto mult = pow(10, precision);
+	return "(" + std::to_string(glm::round(v.x * mult) / mult) + ", " + std::to_string(glm::round(v.y * mult) / mult) + ", " + std::to_string(glm::round(v.z * mult) / mult) + ")";
+}
+std::string Utils::toString(const glm::vec2& v, int precision)
+{
+	auto mult = pow(10, precision);
+	return "(" + std::to_string(glm::round(v.x * mult) / mult) + ", " + std::to_string(glm::round(v.y * mult) / mult) + ")";
 }
 
 bool Timer::trigger()
@@ -113,11 +112,11 @@ float TimeMeasurer::measureSum()
 
 void TimeMeasurer::printElapsed(const std::string& msg)
 {
-	Debug::log(msg, std::format("{}", Utils::round(elapsed(), _decimals)), "ms");
+	Debug::log(msg, std::format("{}", Math::round(elapsed(), _decimals)), "ms");
 }
 void TimeMeasurer::printElapsedFromLast(const std::string& msg)
 {
-	Debug::log(msg, std::format("{}", Utils::round(elapsedFromLast(), _decimals)), "ms");
+	Debug::log(msg, std::format("{}", Math::round(elapsedFromLast(), _decimals)), "ms");
 }
 
 TimeMeasurerGL::TimeMeasurerGL(int decimals, bool doFinish): tm(decimals)

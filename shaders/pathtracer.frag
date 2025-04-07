@@ -76,7 +76,7 @@ vec3 castRay(Ray ray)
             }
         }
 
-        // ray.surfaceNormal = dot(ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
+        ray.surfaceNormal = dot(ray.surfaceNormalBase != vec3(0) ? ray.surfaceNormalBase : ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
         ray.interPoint += ray.surfaceNormal * 0.001;
 
         vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);

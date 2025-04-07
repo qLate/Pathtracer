@@ -23,6 +23,8 @@ class Texture
 	UPtr<GLTexture2D> _glTex;
 
 	bool readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
+	bool readImageExr(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
+
 	void initData(const std::vector<uint8_t>& image);
 
 	Texture(const std::filesystem::path& path);
@@ -30,6 +32,7 @@ class Texture
 	Texture() = default;
 
 public:
+	Texture(Color color);
 	~Texture();
 
 	static Texture* defaultTex();

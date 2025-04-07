@@ -45,6 +45,10 @@ namespace vec3
 class Math
 {
 public:
+	static float round(float value, int decimals);
+	static int mod(int k, int n);
+	static float mod(float k, float n);
+
 	static float det(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
 	static bool solveQuadratic(float a, float b, float c, float& x0, float& x1);
 	static float getLengthSquared(glm::vec3 v);
@@ -58,6 +62,5 @@ public:
 
 	static float evaluateEase(EaseType ease, float t);
 
-	static std::string toString(const glm::vec3& v, int precision = 2);
-	static std::string toString(const glm::vec2& v, int precision = 2);
+	static glm::quat flipDir(const glm::quat& original);
 };

@@ -33,6 +33,7 @@ include_directories(libs/rapidobj)
 include_directories(libs/gl-radix-sort)
 include_directories(libs/nlohmann)
 include_directories(libs/minipbrt)
+include_directories(libs/tinyexr)
 
 link_directories(libs/SDL2/lib/x64)
 enable_testing()
@@ -48,6 +49,8 @@ add_executable(${PROJECT_NAME}
         "libs/imgui/src/ImGuizmo.cpp"
         "libs/glad/glad.c"
         "libs/minipbrt/minipbrt.cpp"
+        "libs/tinyexr/tinyexr.cc"
+        "libs/tinyexr/miniz.c"
 
         "include/Program.h"
         "src/Program.cpp"
@@ -88,11 +91,12 @@ add_executable(${PROJECT_NAME}
         "src/Other/Scene.cpp"
         "src/Other/Tweener.cpp"
         "src/Other/SceneLoader.cpp"
+        "src/Other/SceneLoaderPbrt.cpp"
 
         "src/Utils/MyMath.cpp"
         "src/Utils/Utils.cpp"
         "src/Utils/ImGuiExtensions.cpp"
- "src/Other/SceneLoaderPbrt.cpp" "include/Other/SceneLoaderPbrt.h")
+)
 
 target_link_libraries(${PROJECT_NAME} SDL2main)
 target_link_libraries(${PROJECT_NAME} SDL2)

@@ -1,5 +1,6 @@
 #include "SceneLoaderPbrt.h"
 
+#include "Assets.h"
 #include "Camera.h"
 #include "Graphical.h"
 #include "Light.h"
@@ -33,17 +34,6 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 
 				auto transform = transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]));
 
-				glm::mat4 yUpToZUp = rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
-
-				// Apply rotation only to the upper-left 3x3 rotation part
-				glm::mat3 rotOnly = glm::mat3(transform);
-				rotOnly = glm::mat3(yUpToZUp) * rotOnly;
-
-				// Rebuild the final transform with adjusted rotation and original translation
-				transform = glm::mat4(1.0f);
-				transform = glm::mat4(rotOnly);                      // set new rotation
-				transform[3] = glm::vec4(glm::vec3(transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]))[3]), 1.0f); // restore original translation
-
 				glm::vec3 scale;
 				glm::quat rot;
 				glm::vec3 pos;
@@ -52,14 +42,49 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 
 				decompose(transform, scale, rot, pos, skew, perspective);
 
+				float pitch = glm::pitch(rot) * RAD_TO_DEG;
+				float yaw = glm::yaw(rot) * RAD_TO_DEG;
+				if (abs(pitch) > 90.0f)
+				{
+					pitch = Math::mod(pitch + 90.0f, 180.0f) - 90.0f;
+					yaw = 180 - yaw;
+				}
+
 				auto cam = new Camera(pos, c->fov, c->lensradius);
-				cam->setRot(pitch(rot), yaw(rot));
+				cam->setRot(pitch, yaw);
 			}
 			break;
 		}
 	}
 	else
 		Debug::logError("No camera found in the scene.");
+
+
+	std::vector<Texture*> parsedTextures;
+	parsedTextures.reserve(scene->textures.size());
+	for (auto tex : scene->textures)
+	{
+		Texture* parsedTex = nullptr;
+		switch (tex->type())
+		{
+			case minipbrt::TextureType::ImageMap:
+			{
+				auto texImg = dynamic_cast<const minipbrt::ImageMapTexture*>(tex);
+				parsedTex = Assets::load<Texture>(texImg->filename);
+				break;
+			}
+			case minipbrt::TextureType::Constant:
+			{
+				auto texConst = dynamic_cast<const minipbrt::ConstantTexture*>(tex);
+				parsedTex = new Texture(Color(texConst->value[0], texConst->value[1], texConst->value[2]));
+				break;
+			}
+			default:
+				Debug::logError("Unsupported texture type.");
+				break;
+		}
+		parsedTextures.push_back(parsedTex);
+	}
 
 	// === Load materials ===
 	std::vector<Material*> materials;
@@ -78,7 +103,10 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 			case minipbrt::MaterialType::Matte:
 			{
 				auto m = dynamic_cast<const minipbrt::MatteMaterial*>(mat);
-				baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				if (m->Kd.texture != minipbrt::kInvalidIndex)
+					tex = parsedTextures[m->Kd.texture];
+				else
+					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
 				break;
 			}
 			case minipbrt::MaterialType::Mirror:
@@ -103,52 +131,89 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 				roughness = 0.0f;
 				break;
 			}
+			case minipbrt::MaterialType::Plastic:
+			{
+				auto m = dynamic_cast<const minipbrt::PlasticMaterial*>(mat);
+				if (m->Kd.texture != minipbrt::kInvalidIndex)
+					tex = parsedTextures[m->Kd.texture];
+				else
+					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				roughness = m->roughness.value;
+				break;
+			}
 			default:
 				break;
 		}
-
 		materials.push_back(new Material(baseColor, lit, tex, roughness, metallic, emission));
 	}
 
 	// === Load triangle meshes ===
 	for (auto shape : scene->shapes)
 	{
-		if (shape->type() != minipbrt::ShapeType::TriangleMesh) continue;
-
-		auto mesh = dynamic_cast<const minipbrt::TriangleMesh*>(shape);
-		if (!mesh) continue;
-
-		auto points = mesh->P;
-		auto normals = mesh->N;
-		auto uvs = mesh->uv;
-		auto indices = mesh->indices;
-
-		auto numTris = mesh->num_indices / 3;
-		std::vector<BaseTriangle*> tris;
-		tris.reserve(numTris);
-		for (int i = 0; i < numTris; ++i)
+		Object* obj = nullptr;
+		switch (shape->type())
 		{
-			Vertex v[3];
-			for (int j = 0; j < 3; ++j)
+			case minipbrt::ShapeType::TriangleMesh:
 			{
-				auto idx = indices[i * 3 + j];
+				auto mesh = dynamic_cast<const minipbrt::TriangleMesh*>(shape);
+				if (!mesh) continue;
 
-				v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
-				if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
-				if (uvs) v[j].uvPos = {Utils::mod(uvs[2 * idx + 0], 1.0f), Utils::mod(uvs[2 * idx + 1], 1.0f)};
+				auto points = mesh->P;
+				auto normals = mesh->N;
+				auto uvs = mesh->uv;
+				auto indices = mesh->indices;
+
+				auto numTris = mesh->num_indices / 3;
+				std::vector<BaseTriangle*> tris;
+				tris.reserve(numTris);
+				for (int i = 0; i < numTris; ++i)
+				{
+					Vertex v[3];
+					for (int j = 0; j < 3; ++j)
+					{
+						auto idx = indices[i * 3 + j];
+
+						v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
+						if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
+						if (uvs) v[j].uvPos = {Math::mod(uvs[2 * idx + 0], 1.0f), Math::mod(uvs[2 * idx + 1], 1.0f)};
+					}
+
+					tris.push_back(new BaseTriangle(v[0], v[1], v[2]));
+				}
+
+				auto meshObj = new Mesh(new Model(tris));
+				meshObj->setSharedMaterial(materials[mesh->material]);
+
+				auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
+				meshObj->setTransform(transform);
+
+				obj = meshObj;
+				break;
 			}
+			case minipbrt::ShapeType::Sphere:
+			{
+				auto sphere = dynamic_cast<const minipbrt::Sphere*>(shape);
+				auto center = glm::vec3(shape->shapeToWorld.start[3][0], shape->shapeToWorld.start[3][1], shape->shapeToWorld.start[3][2]);
 
-			tris.push_back(new BaseTriangle(v[0], v[1], v[2]));
+				auto sphereObj = new Sphere(center, sphere->radius);
+				sphereObj->setSharedMaterial(materials[shape->material]);
+
+				obj = sphereObj;
+				break;
+			}
 		}
 
-		auto meshObj = new Mesh(new Model(tris));
-		meshObj->setSharedMaterial(materials[mesh->material]);
+		if (obj)
+		{
+			auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
+			obj->setTransform(transform);
+		}
 	}
 
 	// === Load lights ===
 	for (auto light : scene->lights)
 	{
-		auto transform = transpose(glm::make_mat4x4(&light->lightToWorld.start[0][0]));
+		auto transform = glm::make_mat4x4(&light->lightToWorld.start[0][0]);
 		auto pos = glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
 
 		if (light->type() == minipbrt::LightType::Point)

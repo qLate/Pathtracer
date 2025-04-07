@@ -62,6 +62,7 @@ bool intersectTriangle2(inout Ray ray, Triangle tri)
         ray.t = uvt.z;
         ray.materialIndex = obj.materialIndex;
         ray.surfaceNormal = getTriangleNormalAt(tri, uvt.x, uvt.y);
+        ray.surfaceNormalBase = normalize(cross(e1, e2));
         ray.interPoint = ray.pos + ray.dir * uvt.z;
 
         vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
@@ -92,9 +93,9 @@ bool intersectSphere(inout Ray ray, Object sphere)
     ray.surfaceNormal = normalize(ray.interPoint - sphere.pos.xyz);
     ray.materialIndex = sphere.materialIndex;
 
-    vec3 n = ray.surfaceNormal;
-    float u = atan(-n.x, n.y) / (2.0 * PI) + 0.5;
-    float v = -n.z * 0.5 + 0.5;
+    vec3 uvN = globalToLocalDir(ray.surfaceNormal, sphere);
+    float u = atan(uvN.z, uvN.x) / (2.0 * PI) + 0.5;
+    float v = uvN.y * 0.5 + 0.5;
     ray.uvPos = vec2(u, v);
 
     return true;
@@ -280,9 +281,9 @@ bool intersectWorld(inout Ray ray, bool castingShadows, inout int hitTriIndex, i
         hit = true;
     return hit;
 }
-bool intersectWorld(inout Ray ray, bool castingShadows = false)
-{
-    int hitTriIndex = -1;
-    int hitObjIndex = -1;
-    return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
+bool intersectWorld(inout Ray ray, bool castingShadows = false )
+    {
+int hitTriIndex = -1;
+int hitObjIndex = -1;
+return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
 }

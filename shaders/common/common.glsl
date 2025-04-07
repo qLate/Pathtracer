@@ -11,11 +11,8 @@
 #define OBJ_TYPE_SPHERE 1
 #define OBJ_TYPE_PLANE 2
 
-#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-
-#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
+#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec3(0), vec2(0)
+#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec3(0), vec2(0)
 
 #define UP vec3(0, 1, 0)
 #define DOWN vec3(0, -1, 0)
@@ -96,6 +93,7 @@ struct Ray
     float t;
     int materialIndex;
     vec3 surfaceNormal;
+    vec3 surfaceNormalBase;
     vec3 interPoint;
     vec2 uvPos;
 };
@@ -148,6 +146,15 @@ vec3 localToGlobal(vec3 pos, Object obj)
 vec3 localToGlobalDir(vec3 dir, Object obj)
 {
     return normalize((obj.transform * vec4(dir, 0.0f)).xyz);
+}
+
+vec3 globalToLocal(vec3 pos, Object obj)
+{
+    return (inverse(obj.transform) * vec4(pos, 1.0f)).xyz;
+}
+vec3 globalToLocalDir(vec3 dir, Object obj)
+{
+    return normalize((inverse(obj.transform) * vec4(dir, 0.0f)).xyz);
 }
 
 vec3 getTransformScale(mat4x4 mat) {

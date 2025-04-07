@@ -48,7 +48,9 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         L = normalize(light.pos - P);
         dist = length(light.pos - P);
 
-        float distImpact = 1 / (dist * dist);
+        float distImpact = light.properties1.y == -1 ?
+            1 / (dist * dist) :
+            clamp1(pow(clamp0(1 - dist / light.properties1.y), 2));
         radiance = distImpact * light.color * light.properties1.x;
         pdf = 1;
     }

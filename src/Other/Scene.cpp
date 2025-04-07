@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/buddhamesh.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt/bump-sphere.pbrt");
 }	
 #endif
 
@@ -130,33 +130,6 @@ void SceneSetup::redGreenRoomOriginal()
 	tallBox->setMaterial(*white);
 }
 
-
-void SceneSetup::minecraftHouseScene()
-{
-	auto camera = new Camera({38.40, 35.59, 7.97});
-	camera->setRot({0.38f, {-0.04f, -0.11f, 0.91f}});
-	camera->setBgColor({0.05f, 0.05f, 0.05f});
-	auto tex = Texture::defaultTex();
-
-	auto model = Assets::load<Model>("assets/models/minecraft.obj");
-	auto obj = new Mesh(model, {}, {{90 * DEG_TO_RAD, 0, 0}});
-	obj->setMaterial({Color::white(), true, tex, 1});
-	auto light = new PointLight({25, 25, 15}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
-}
-
-void SceneSetup::kokuraScene()
-{
-	auto camera = new Camera({177.24, 173.63, 35.03});
-	camera->setRot({0.38f, {0, 0, 0.92f}});
-	camera->setBgColor({0.05f, 0.05f, 0.05f});
-	auto tex = Texture::defaultTex();
-
-	auto model = Assets::load<Model>("assets/models/kokura.obj");
-	auto obj = new Mesh(model);
-	obj->setMaterial({Color::white(), false, tex, 1});
-	auto light = new PointLight {{177.24, 173.63, 100.03}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX};
-}
-
 void SceneSetup::skeletonScene()
 {
 	auto camera = new Camera({-365.9f * 0.05f, 508.46f * 0.05f, -1406.9f * 0.05f});
@@ -185,17 +158,4 @@ void SceneSetup::skeletonScene_benchmark()
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new DirectionalLight(normalize(glm::vec3(0, -1, 1)));
 	light->setRot({{20.39 * DEG_TO_RAD, -20.08 * DEG_TO_RAD, 14.33 * DEG_TO_RAD}});
-}
-
-void SceneSetup::spaceStationScene()
-{
-	auto camera = new Camera({-34.931564, 44.459042, 47.477470});
-	camera->setRot({0.28f, {-0.065754, 0.213367, -0.932158}});
-	camera->setBgColor({0.05f, 0.05f, 0.05f});
-	auto tex = Texture::defaultTex();
-
-	auto model = Assets::load<Model>("assets/models/spaceStationScene/Space Station Scene.obj");
-	auto obj = new Mesh(model, {}, glm::quat({90, 0, 0}));
-	obj->setMaterial({Color::white(), true, tex, 1});
-	auto light = new PointLight({-3.19f, 44.20f, 54.34f}, {255 / 255.0f, 255 / 255.0f, 255 / 255.0f}, 1, FLT_MAX);
 }

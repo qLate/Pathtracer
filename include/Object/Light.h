@@ -56,13 +56,19 @@ private:
 	friend class JsonUtility;
 };
 
+class PointLightPBR : public PointLight
+{
+public:
+	PointLightPBR(const glm::vec3& pos, const Color& color, float intensity);
+};
+
 
 class DirectionalLight : public Light
 {
 	DirectionalLight() = default;
 
 public:
-	DirectionalLight(glm::vec3 dir, Color color = Color::white() * 0.8f, float intensity = 1.0f);
+	DirectionalLight(glm::vec3 dir, Color color = Color::white(), float intensity = 1.0f);
 	DirectionalLight(const DirectionalLight& orig);
 	void init(glm::quat rot);
 

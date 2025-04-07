@@ -2,6 +2,20 @@
 
 #include <stdexcept>
 
+float Math::round(float value, int decimals)
+{
+	float mult = powf(10, decimals);
+	return std::round(value * mult) / mult;
+}
+int Math::mod(int k, int n)
+{
+	return (k % n + n) % n;
+}
+float Math::mod(float k, float n)
+{
+	return fmod(fmod(k, n) + n, n);
+}
+
 float Math::det(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3)
 {
 	const float x = v2[1] * v3[2] - v3[1] * v2[2];
@@ -48,7 +62,7 @@ glm::vec3 Math::randomVectorInCircle(float radius)
 }
 glm::vec3 Math::randomVectorInRectangle(float sizeX, float sizeY)
 {
-	return { random(-sizeX, sizeX), random(-sizeY, sizeY), 0 };
+	return {random(-sizeX, sizeX), random(-sizeY, sizeY), 0};
 }
 glm::vec3 Math::randomVectorInSphere(float radius)
 {
@@ -68,28 +82,23 @@ float Math::evaluateEase(EaseType ease, float t)
 {
 	switch (ease)
 	{
-	case EaseType::Linear: return t;
-	case EaseType::InQuad: return t * t;
-	case EaseType::InCubic: return t * t * t;
-	case EaseType::InQuart: return t * t * t * t;
-	case EaseType::OutQuad: return 1 - (float)pow(1 - t, 2);
-	case EaseType::OutCubic: return 1 - (float)pow(1 - t, 3);
-	case EaseType::OutQuart: return 1 - (float)pow(1 - t, 4);
-	case EaseType::InOutQuad: return t < 0.5 ? 2 * t * t : 1 - (float)pow(-2 * t + 2, 2) / 2;
-	case EaseType::InOutCubic: return t < 0.5 ? 4 * t * t * t : 1 - (float)pow(-2 * t + 2, 3) / 2;
-	case EaseType::InOutQuart: return t < 0.5 ? 8 * t * t * t * t : 1 - (float)pow(-2 * t + 2, 4) / 2;
+		case EaseType::Linear: return t;
+		case EaseType::InQuad: return t * t;
+		case EaseType::InCubic: return t * t * t;
+		case EaseType::InQuart: return t * t * t * t;
+		case EaseType::OutQuad: return 1 - (float)pow(1 - t, 2);
+		case EaseType::OutCubic: return 1 - (float)pow(1 - t, 3);
+		case EaseType::OutQuart: return 1 - (float)pow(1 - t, 4);
+		case EaseType::InOutQuad: return t < 0.5 ? 2 * t * t : 1 - (float)pow(-2 * t + 2, 2) / 2;
+		case EaseType::InOutCubic: return t < 0.5 ? 4 * t * t * t : 1 - (float)pow(-2 * t + 2, 3) / 2;
+		case EaseType::InOutQuart: return t < 0.5 ? 8 * t * t * t * t : 1 - (float)pow(-2 * t + 2, 4) / 2;
 	}
 
 	throw std::runtime_error("Unknown ease type.");
 }
 
-std::string Math::toString(const glm::vec3& v, int precision)
+glm::quat Math::flipDir(const glm::quat& original)
 {
-	auto mult = pow(10, precision);
-	return "(" + std::to_string(round(v.x * mult) / mult) + ", " + std::to_string(round(v.y * mult) / mult) + ", " + std::to_string(round(v.z * mult) / mult) + ")";
-}
-std::string Math::toString(const glm::vec2& v, int precision)
-{
-	auto mult = pow(10, precision);
-	return "(" + std::to_string(round(v.x * mult) / mult) + ", " + std::to_string(round(v.y * mult) / mult) + ")";
+	glm::quat flip = angleAxis(PI, vec3::UP);
+	return flip * original;
 }

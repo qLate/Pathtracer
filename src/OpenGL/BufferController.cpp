@@ -130,7 +130,7 @@ void BufferController::updateLights()
 		{
 			auto globalLight = (DirectionalLight*)light;
 			lightStruct.lightType = 0;
-			lightStruct.properties1.yzw = globalLight->rot() * vec3::FORWARD;
+			lightStruct.properties1.yzw = -(globalLight->rot() * vec3::FORWARD);
 		}
 		else if (dynamic_cast<PointLight*>(light))
 		{

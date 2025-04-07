@@ -66,9 +66,11 @@ void PointLight::setDis(float dis)
 	BufferController::markBufferForUpdate(BufferType::Lights);
 }
 
+PointLightPBR::PointLightPBR(const glm::vec3& pos, const Color& color, float intensity): PointLight(pos, color, intensity, -1) {}
+
 DirectionalLight::DirectionalLight(glm::vec3 dir, Color color, float intensity) : Light(glm::vec3(), color, intensity)
 {
-	init(quatLookAt(-dir, vec3::FORWARD));
+	init(normalize(quatLookAt(normalize(dir), vec3::FORWARD)));
 }
 DirectionalLight::DirectionalLight(const DirectionalLight& orig) : Light(orig.pos(), orig.color(), orig.intensity())
 {

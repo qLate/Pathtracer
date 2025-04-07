@@ -1,6 +1,7 @@
 #include "Material.h"
 
 #include <stb_image.h>
+#include <tinyexr.h>
 
 #include "BufferController.h"
 #include "Scene.h"
@@ -11,8 +12,26 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 	Scene::textures.push_back(this);
 
 	std::vector<uint8_t> image;
-	if (!readImage(image, path)) Debug::logError("Error loading texture: ", path);
+	if (!readImage(image, path))
+	{
+		Debug::logError("Error loading texture: ", path);
+		return;
+	}
 	initData(image);
+
+	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
+
+	BufferController::markBufferForUpdate(BufferType::Textures);
+}
+Texture::Texture(Color color) : _id(_nextAvailableId++)
+{
+	Scene::textures.push_back(this);
+
+	_width = 2;
+	_height = 2;
+
+	_data = new unsigned char[4 * sizeof(Color)];
+	memcpy(_data, &color, 4 * sizeof(Color));
 
 	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
 
@@ -35,13 +54,54 @@ Texture* Texture::defaultTex()
 bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
 {
 	int n;
+	if (path.extension() == ".exr")
+		return readImageExr(data_v, path);
+
 	unsigned char* data = stbi_load(path.string().c_str(), &_width, &_height, &n, STBI_rgb_alpha);
+
 	if (data != nullptr)
 		data_v = std::vector(data, data + _width * _height * 4);
 
 	stbi_image_free(data);
-	return data != nullptr;
+	return true;
 }
+bool Texture::readImageExr(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
+{
+	float* exrData = nullptr;
+	const char* err;
+
+	int ret = LoadEXR(&exrData, &_width, &_height, path.string().c_str(), &err);
+
+	if (ret != TINYEXR_SUCCESS && err)
+	{
+		fprintf(stderr, "ERR : %s\n", err);
+		FreeEXRErrorMessage(err);
+
+		return false;
+	}
+
+	data_v.resize(_width * _height * 4);
+	for (int i = 0; i < _width * _height; ++i)
+	{
+		float r = exrData[4 * i + 0];
+		float g = exrData[4 * i + 1];
+		float b = exrData[4 * i + 2];
+		float a = exrData[4 * i + 3];
+
+		r = powf(glm::clamp(r, 0.0f, 1.0f), 1.0f / 2.2f);
+		g = powf(glm::clamp(g, 0.0f, 1.0f), 1.0f / 2.2f);
+		b = powf(glm::clamp(b, 0.0f, 1.0f), 1.0f / 2.2f);
+		a = glm::clamp(a, 0.0f, 1.0f);
+
+		data_v[4 * i + 0] = r * 255.0f;
+		data_v[4 * i + 1] = g * 255.0f;
+		data_v[4 * i + 2] = b * 255.0f;
+		data_v[4 * i + 3] = a * 255.0f;
+	}
+
+	return true;
+}
+
 void Texture::initData(const std::vector<uint8_t>& image)
 {
 	_data = new unsigned char[_width * _height * 4];
@@ -65,8 +125,8 @@ Material* Material::debug()
 }
 
 Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission) : _id(_nextAvailableId++), _lit {lit}, _color {color},
-                                                                                                                  _texture {texture}, _emission {emission},
-                                                                                                                  _roughness {roughness}, _metallic {metallic}
+                                                                                                               _texture {texture}, _emission {emission},
+                                                                                                               _roughness {roughness}, _metallic {metallic}
 {
 	Scene::materials.push_back(this);
 
