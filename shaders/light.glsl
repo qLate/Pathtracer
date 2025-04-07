@@ -17,8 +17,11 @@ vec2 genRandoms(int bounce)
 }
 
 uniform sampler2D envMap;
+uniform bool useEnvMap = false;
 vec3 sampleEnvMap(vec3 dir)
 {
+    if (!useEnvMap) return vec3(0);
+
     dir = normalize(dir);
     float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
     float v = acos(clamp(dir.y, -1.0, 1.0)) / PI;

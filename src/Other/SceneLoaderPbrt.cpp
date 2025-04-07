@@ -236,6 +236,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 			Camera::instance->setBgColor(Color(il->L[0], il->L[1], il->L[2]));
 
 			auto tex = Assets::load<Texture>(il->mapname);
+			Renderer::renderProgram()->setBool("useEnvMap", true);
 			Renderer::renderProgram()->setHandle("envMap", tex->glTex()->getHandle());
 		}
 	}
