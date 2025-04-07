@@ -20,8 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/bunny.pbrt");
+	redGreenRoom();
+	//SceneLoader::loadScene("assets/scenes-pbrt/city-ao.pbrt");
 }	
 #endif
 

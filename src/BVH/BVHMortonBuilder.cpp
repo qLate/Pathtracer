@@ -64,6 +64,7 @@ void BVHMortonBuilder::buildGPU_tree(int n)
 	BufferController::ssboBVHTriIndices()->bind(7);
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboTriangles()->bindDefault();
+	BufferController::ssboObjects()->bindDefault();
 
 	_bvhBuild->setInt("objectCount", Scene::objects.size());
 

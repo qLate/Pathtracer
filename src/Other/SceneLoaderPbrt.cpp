@@ -183,7 +183,8 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 				}
 
 				auto meshObj = new Mesh(new Model(tris));
-				meshObj->setSharedMaterial(materials[mesh->material]);
+				if (mesh->material != minipbrt::kInvalidIndex)
+					meshObj->setSharedMaterial(materials[mesh->material]);
 
 				auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
 				meshObj->setTransform(transform);
@@ -233,7 +234,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 		{
 			auto il = dynamic_cast<const minipbrt::InfiniteLight*>(light);
 			Camera::instance->setBgColor(Color(il->L[0], il->L[1], il->L[2]));
-			
+
 			auto tex = Assets::load<Texture>(il->mapname);
 			Renderer::renderProgram()->setHandle("envMap", tex->glTex()->getHandle());
 		}

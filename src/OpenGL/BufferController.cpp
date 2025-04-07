@@ -13,7 +13,7 @@ void BufferController::init()
 	_uboTextures = make_unique<UBO>(TEXTURE_ALIGN, 1);
 	_uboMaterials = make_unique<UBO>(MATERIAL_ALIGN, 2);
 	_uboLights = make_unique<UBO>(LIGHT_ALIGN, 3);
-	_uboObjects = make_unique<UBO>(OBJECT_ALIGN, 4);
+	_ssboObjects = make_unique<SSBO>(OBJECT_ALIGN, 4);
 	_ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
 	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
@@ -21,7 +21,7 @@ void BufferController::init()
 	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	//_ssboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 }
 
 void BufferController::checkIfBufferUpdateRequired()
@@ -55,7 +55,7 @@ void BufferController::initBuffers()
 	_uboTextures->bindDefault();
 	_uboMaterials->bindDefault();
 	_uboLights->bindDefault();
-	_uboObjects->bindDefault();
+	_ssboObjects->bindDefault();
 	_ssboTriangles->bindDefault();
 	_ssboBVHNodes->bindDefault();
 	_ssboBVHTriIndices->bindDefault();
@@ -211,7 +211,8 @@ void BufferController::updateObjects()
 
 		data[i] = objectStruct;
 	}
-	_uboObjects->setSubData((float*)data.data(), data.size());
+	_ssboObjects->ensureDataCapacity(data.size());
+	_ssboObjects->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("objectCount", graphicals.size());
 	Renderer::resetSamples();
 }
@@ -234,7 +235,7 @@ void BufferController::updateTriangles()
 
 		data[i] = triangleStruct;
 	}
-	_ssboTriangles->ensureDataCapacity(triangles.size());
+	_ssboTriangles->ensureDataCapacity(data.size());
 	_ssboTriangles->setSubData((float*)data.data(), data.size());
 	Renderer::resetSamples();
 }

@@ -119,9 +119,9 @@ layout(std140, binding = 3) uniform Lights
 };
 
 uniform int objectCount;
-layout(std140, binding = 4) uniform Objects
+layout(std140, binding = 4) /*buffer*/ uniform Objects
 {
-    Object objects[1];
+    Object objects[];
 };
 
 layout(std140, binding = 5) /*buffer*/ uniform Triangles

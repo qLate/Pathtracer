@@ -32,7 +32,7 @@ class BufferController
 	inline static UPtr<UBO> _uboTextures;
 	inline static UPtr<UBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;
-	inline static UPtr<UBO> _uboObjects;
+	inline static UPtr<SSBO> _ssboObjects;
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
@@ -51,7 +51,7 @@ public:
 	static UPtr<UBO>& uboTexInfos() { return _uboTextures; }
 	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
 	static UPtr<UBO>& uboLights() { return _uboLights; }
-	static UPtr<UBO>& uboObjects() { return _uboObjects; }
+	static UPtr<SSBO>& ssboObjects() { return _ssboObjects; }
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
 	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
