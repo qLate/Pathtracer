@@ -24,10 +24,10 @@ public:
 
 	void setPos(glm::vec3 pos, bool notify = true) override;
 	void setRot(glm::quat rot, bool notify = true) override;
-	void setRot(float pitch, float yaw, float roll = -1);
+	void setRot(float pitch, float yaw, float roll);
 
 	float pitch() const { return _pitch; }
-    float yaw() const { return _yaw; }
+	float yaw() const { return _yaw; }
 	float roll() const { return _roll; }
 	float ratio() const { return _ratio; }
 	float fov() const { return _fov; }

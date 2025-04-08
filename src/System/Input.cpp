@@ -136,15 +136,31 @@ void Input::handleSDLEvent(const SDL_Event& event)
 
 	if (event.type == SDL_MOUSEMOTION && ImGuiHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
 	{
+		static glm::vec3 startUp = camera->up();
+
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
-		float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
+		if (dot(startUp, vec3::UP) > 1 / sqrt(2))
+		{
+			float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
+			float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
+			float roll = camera->roll();
 
-		pitch = glm::clamp(pitch, -89.99f, 89.99f);
+			pitch = glm::clamp(pitch, -89.99f, 89.99f);
 
-		camera->setRot(pitch, yaw);
+			camera->setRot(pitch, yaw, roll);
+		}
+		else if (dot(startUp, vec3::FORWARD) > 1 / sqrt(2))
+		{
+			float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
+			float yaw = camera->yaw();
+			float roll = camera->roll() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
+
+			pitch = glm::clamp(pitch, -179.99f, -0.01f);
+
+			camera->setRot(pitch, yaw, roll);
+		}
 	}
 
 	if (event.type == SDL_MOUSEWHEEL)

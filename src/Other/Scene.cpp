@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/microcity.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
 }
 #endif
 
@@ -66,7 +66,7 @@ void SceneSetup::spiderScene()
 void SceneSetup::redGreenRoom()
 {
 	auto camera = new Camera({0, 0, 30});
-	camera->setRot(0, 180);
+	camera->setRot(0, 180, 0);
 
 	auto tex = Texture::defaultTex();
 
