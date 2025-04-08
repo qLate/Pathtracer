@@ -11,7 +11,7 @@
 void BufferController::init()
 {
 	_uboTextures = make_unique<UBO>(TEXTURE_ALIGN, 1);
-	_uboMaterials = make_unique<UBO>(MATERIAL_ALIGN, 2);
+	_uboMaterials = make_unique<SSBO>(MATERIAL_ALIGN, 2);
 	_uboLights = make_unique<UBO>(LIGHT_ALIGN, 3);
 	_ssboObjects = make_unique<SSBO>(OBJECT_ALIGN, 4);
 	_ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
@@ -20,7 +20,7 @@ void BufferController::init()
 	_ssboPrimObjIndices = make_unique<SSBO>(PRIM_OBJ_INDICES_ALIGN, 8);
 
 	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	//_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	//_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 }
@@ -96,6 +96,7 @@ void BufferController::updateTexInfos()
 void BufferController::updateMaterials()
 {
 	auto materials = Scene::materials;
+	std::ranges::sort(materials, [](const Material* a, const Material* b) { return a->id() < b->id(); });
 	std::vector<MaterialStruct> data(materials.size());
 	#pragma omp parallel for
 	for (int i = 0; i < materials.size(); i++)
@@ -113,6 +114,7 @@ void BufferController::updateMaterials()
 
 		data[i] = materialStruct;
 	}
+	_uboMaterials->ensureDataCapacity(data.size());
 	_uboMaterials->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("materialCount", materials.size());
 	Renderer::resetSamples();

@@ -44,16 +44,20 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 
 				decompose(transform, scale, rot, pos, skew, perspective);
 
-				float pitch = glm::pitch(rot) * RAD_TO_DEG;
+				float pitch = glm::pitch(rot) * RAD_TO_DEG ;
 				float yaw = glm::yaw(rot) * RAD_TO_DEG;
-				if (abs(pitch) > 90.0f)
-				{
-					pitch = Math::mod(pitch + 90.0f, 180.0f) - 90.0f;
-					yaw = 180 - yaw;
-				}
+				float roll = glm::roll(rot) * RAD_TO_DEG;
+				//if (scale.x < 0.0f || scale.y < 0.0f || scale.z < 0.0f) yaw += 180;
+
+				//if (abs(pitch) > 90.0f)
+				//{
+				//	pitch = Math::mod(pitch + 90.0f, 180.0f) - 90.0f;
+				//	yaw = 180 - yaw;
+				//}
 
 				auto cam = new Camera(pos, c->fov, c->lensradius);
-				cam->setRot(pitch, yaw);
+				cam->setRot(pitch, yaw, roll);
+				cam->setScale(scale);
 			}
 			break;
 		}

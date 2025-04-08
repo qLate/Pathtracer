@@ -107,9 +107,9 @@ layout(std140, binding = 1) uniform Textures
 };
 
 uniform int materialCount;
-layout(std140, binding = 2) uniform Materials
+layout(std140, binding = 2) /*buffer*/ uniform Materials
 {
-    Material materials[5];
+    Material materials[];
 };
 
 uniform int lightCount;
@@ -129,15 +129,35 @@ layout(std140, binding = 5) /*buffer*/ uniform Triangles
     Triangle triangles[];
 };
 
-Material getMaterial(int id)
+Material findMaterial(int id)
 {
-    for (int i = 0; i < materialCount; i++)
+    int left = 0;
+    int right = materialCount - 1;
+
+    while (left <= right)
     {
-        if (materials[i].id == id)
-            return materials[i];
+        int split = (left + right) / 2;
+        int splitVal = materials[split].id;
+
+        if (splitVal < id)
+            left = split + 1;
+        else if (splitVal > id)
+            right = split - 1;
+        else
+            return materials[split];
     }
     return materials[0];
 }
+
+// Material findMaterial(int id)
+// {
+//     for (int i = 0; i < materialCount; i++)
+//     {
+//         if (materials[i].id == id)
+//             return materials[i];
+//     }
+//     return materials[0];
+// }
 
 vec3 localToGlobal(vec3 pos, Object obj)
 {

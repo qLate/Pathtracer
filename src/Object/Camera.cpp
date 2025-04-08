@@ -47,12 +47,14 @@ void Camera::setRot(glm::quat rot, bool notify)
 
 	Renderer::resetSamples();
 }
-void Camera::setRot(float pitch, float yaw)
+void Camera::setRot(float pitch, float yaw, float roll)
 {
-	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(pitch), vec3::RIGHT));
+	if (roll == -1) roll = _roll;
+	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(roll), vec3::FORWARD) * angleAxis(glm::radians(pitch), vec3::RIGHT));
 
 	_pitch = pitch;
 	_yaw = yaw;
+	_roll = roll;
 
 	Renderer::resetSamples();
 }
@@ -110,7 +112,7 @@ float Camera::getFocalDis() const
 }
 glm::mat4 Camera::getViewMatrix() const
 {
-	return glm::lookAtLH(_pos, _pos + forward(), up());
+	return inverse(getTransform());
 }
 glm::mat4 Camera::getProjectionMatrix() const
 {

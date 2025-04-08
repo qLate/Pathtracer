@@ -54,7 +54,7 @@ void Renderer::render()
 void Renderer::updateCameraUniforms()
 {
 	_renderProgram->setFloat3("cameraPos", Camera::instance->pos());
-	_renderProgram->setMatrix4X4("cameraRotMat", mat4_cast(Camera::instance->rot()));
+	_renderProgram->setMatrix4X4("cameraRotMat", Camera::instance->getTransform());
 }
 
 float Renderer::computeSampleVariance()

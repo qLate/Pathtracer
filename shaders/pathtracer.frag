@@ -60,7 +60,7 @@ vec3 castRay(Ray ray)
             break;
         }
 
-        Material mat = getMaterial(ray.materialIndex);
+        Material mat = findMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
         {
             if (bounce == 0)

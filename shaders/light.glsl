@@ -84,8 +84,7 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         L = normalize(LP - P);
         dist = length(LP - P);
 
-        Material mat = getMaterial(obj.materialIndex);
-        radiance = mat.emission;
+        radiance = findMaterial(obj.materialIndex).emission;
 
         pdf = getTriangleLightPdf(light, tri, obj, P, L, LP);
     }

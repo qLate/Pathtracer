@@ -31,7 +31,7 @@ class BufferController
 	static constexpr int PRIM_OBJ_INDICES_ALIGN = 1;
 
 	inline static UPtr<UBO> _uboTextures;
-	inline static UPtr<UBO> _uboMaterials;
+	inline static UPtr<SSBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;
 	inline static UPtr<SSBO> _ssboObjects;
 	inline static UPtr<SSBO> _ssboTriangles;
@@ -53,7 +53,7 @@ public:
 	static void bindBuffers();
 
 	static UPtr<UBO>& uboTexInfos() { return _uboTextures; }
-	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
+	static UPtr<SSBO>& uboMaterials() { return _uboMaterials; }
 	static UPtr<UBO>& uboLights() { return _uboLights; }
 	static UPtr<SSBO>& ssboObjects() { return _ssboObjects; }
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }

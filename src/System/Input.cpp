@@ -139,8 +139,10 @@ void Input::handleSDLEvent(const SDL_Event& event)
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		float pitch = glm::clamp(camera->pitch() + dy * MOUSE_ROTATION_SPEED, -90.0f, 90.0f);
-		float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED;
+		float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
+		float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
+
+		pitch = glm::clamp(pitch, -89.99f, 89.99f);
 
 		camera->setRot(pitch, yaw);
 	}
