@@ -58,12 +58,18 @@ void Utils::copyToClipboard(const std::string& text)
 std::string Utils::toString(const glm::vec3& v, int precision)
 {
 	auto mult = pow(10, precision);
-	return "(" + std::to_string(glm::round(v.x * mult) / mult) + ", " + std::to_string(glm::round(v.y * mult) / mult) + ", " + std::to_string(glm::round(v.z * mult) / mult) + ")";
+	return "(" + std::to_string(glm::round(v.x * mult) / mult) + ", " + std::to_string(glm::round(v.y * mult) / mult) + ", " + std::to_string(glm::round(v.z * mult) / mult) +
+		")";
 }
 std::string Utils::toString(const glm::vec2& v, int precision)
 {
 	auto mult = pow(10, precision);
 	return "(" + std::to_string(glm::round(v.x * mult) / mult) + ", " + std::to_string(glm::round(v.y * mult) / mult) + ")";
+}
+
+unsigned char Utils::toByte(float c)
+{
+	return (unsigned char)(glm::clamp(c, 0.0f, 1.0f) * 255.0f);
 }
 
 bool Timer::trigger()

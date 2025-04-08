@@ -157,7 +157,7 @@ void BufferController::updateLights()
 
 		if (auto mesh = dynamic_cast<Mesh*>(graphicals[i]))
 		{
-			auto triangles = mesh->triangles();
+			const auto& triangles = mesh->triangles();
 			if (triangles.empty()) continue;
 
 			int triStartIndex = std::ranges::find(Scene::triangles, triangles[0]) - Scene::triangles.begin();

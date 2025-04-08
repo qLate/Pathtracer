@@ -24,8 +24,7 @@ namespace ImGui
 
 	void ItemLabel(std::string_view title, ItemLabelFlag flags = ItemLabelFlag::Left);
 
-	template <typename Func, typename... Args>
-	bool LabeledInput(const char* label, Func func, int flags, Args&&... args)
+	template <bool includeId, typename Func, typename... Args> bool LabeledInput(const char* label, Func func, int flags,  Args&&... args)
 	{
 		if (flags & ImGuiInputTextFlags_ReadOnly)
 		{
@@ -36,13 +35,22 @@ namespace ImGui
 		ItemLabel(label);
 		SameLine();
 
+		auto id = "##" + std::string(label);
 		bool result = false;
-		if constexpr (std::is_same_v<decltype(func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags)), bool>)
+		if constexpr (includeId)
 		{
-			result = func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags);
+			if constexpr (std::is_same_v<decltype(func(id.c_str(), std::forward<Args>(args)..., flags)), bool>)
+				result = func(id.c_str(), std::forward<Args>(args)..., flags);
+			else
+				func(id.c_str(), std::forward<Args>(args)..., flags);
 		}
 		else
-			func((std::string("##") + label).c_str(), std::forward<Args>(args)..., flags);
+		{
+			if constexpr (std::is_same_v<decltype(func(std::forward<Args>(args)..., flags)), bool>)
+				result = func(std::forward<Args>(args)..., flags);
+			else
+				func(std::forward<Args>(args)..., flags);
+		}
 
 
 		if (flags & ImGuiInputTextFlags_ReadOnly)
@@ -53,8 +61,7 @@ namespace ImGui
 
 		return result;
 	}
-	template <typename Func, typename... Args>
-	bool LabeledInputNoFlags(const char* label, Func func, int flags, Args&&... args)
+	template <typename Func, typename... Args> bool LabeledInputNoFlags(const char* label, Func func, int flags, Args&&... args)
 	{
 		if (flags & ImGuiInputTextFlags_ReadOnly)
 		{

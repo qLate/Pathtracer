@@ -1,5 +1,6 @@
 #include "Graphical.h"
 
+#include "Assets.h"
 #include "BufferController.h"
 #include "Camera.h"
 #include "Scene.h"
@@ -109,8 +110,8 @@ void Mesh::removeTriangles()
 	auto triEnd = std::ranges::find(Scene::triangles, _triangles.back());
 	Scene::triangles.erase(triStart, triEnd + 1);
 
-	for (auto& t : _triangles)
-		delete t;
+	for (auto tri : _triangles)
+		delete tri;
 	_triangles.clear();
 
 	BufferController::markBufferForUpdate(BufferType::Triangles);

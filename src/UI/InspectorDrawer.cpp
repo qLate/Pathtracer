@@ -51,6 +51,11 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		auto material = target->materialNoCopy();
 		ImGui::LabeledInt("Material Id", material->id(), ImGuiInputTextFlags_ReadOnly);
 
+		if (!material->texture()->name().empty())
+			ImGui::LabeledText("Texture Name", material->texture()->name().c_str(), ImGuiInputTextFlags_ReadOnly);
+		if (!material->texture()->path().empty())
+			ImGui::LabeledText("Texture Path", material->texture()->path().c_str(), ImGuiInputTextFlags_ReadOnly);
+
 		auto color = material->color();
 		if (ImGui::LabeledColorEdit4("Color", &color[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
 			material->setColor(color);
@@ -118,8 +123,7 @@ void MeshInspectorDrawer::draw(Mesh* target)
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
-		auto triangles = target->triangles();
-		ImGui::LabeledInt("Triangle Count", triangles.size(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::LabeledInt("Triangle Count", target->triangles().size(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::Button("Set Model"))
 		{
 			auto dir = std::filesystem::current_path().concat("/assets/models/").string();

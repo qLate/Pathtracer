@@ -36,6 +36,8 @@ public:
 	static std::string toString(const glm::vec3& v, int precision = 2);
 	static std::string toString(const glm::vec2& v, int precision = 2);
 
+	static unsigned char toByte(float c);;
+
 	template <class T> struct Flags
 	{
 		uint32_t value;

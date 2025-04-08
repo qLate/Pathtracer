@@ -16,6 +16,7 @@ class Texture
 
 	int _id;
 	std::string _path;
+	std::string _name;
 
 	unsigned char* _data;
 	int _width = 0, _height = 0;
@@ -38,10 +39,14 @@ public:
 	static Texture* defaultTex();
 
 	int id() const { return _id; }
+	std::string path() const { return _path; }
+	std::string name() const { return _name; }
 	unsigned char* data() const { return _data; }
 	int width() const { return _width; }
 	int height() const { return _height; }
 	UPtr<GLTexture2D>& glTex() { return _glTex; }
+
+	void setName(const std::string& name) { _name = name; }
 
 	constexpr static auto properties();
 

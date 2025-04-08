@@ -31,7 +31,19 @@ Texture::Texture(Color color) : _id(_nextAvailableId++)
 	_height = 2;
 
 	_data = new unsigned char[4 * sizeof(Color)];
-	memcpy(_data, &color, 4 * sizeof(Color));
+
+	auto r = Utils::toByte(color.x);
+	auto g = Utils::toByte(color.y);
+	auto b = Utils::toByte(color.z);
+	auto a = Utils::toByte(color.w);
+
+	for (int i = 0; i < _width * _height; ++i)
+	{
+		_data[i * 4 + 0] = r;
+		_data[i * 4 + 1] = g;
+		_data[i * 4 + 2] = b;
+		_data[i * 4 + 3] = a;
+	}
 
 	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
 

@@ -15,6 +15,8 @@
 
 void SceneLoaderPbrt::loadScene(const std::string& path)
 {
+	TimeMeasurer tm;
+
 	minipbrt::Loader loader;
 	if (!loader.load(path.c_str()) || !loader.borrow_scene()->load_all_ply_meshes())
 	{
@@ -22,55 +24,69 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 		fprintf(stderr, "[%s, line %lld, column %lld] %s\n", err->filename(), err->line(), err->column(), err->message());
 		return;
 	}
+	tm.printElapsedFromLast("Scene loaded in ");
 
 	minipbrt::Scene* scene = loader.take_scene();
 
-	// === Load camera ===
-	if (scene->camera)
-	{
-		switch (scene->camera->type())
-		{
-			case minipbrt::CameraType::Perspective:
-			{
-				auto c = dynamic_cast<const minipbrt::PerspectiveCamera*>(scene->camera);
-
-				auto transform = transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]));
-
-				glm::vec3 scale;
-				glm::quat rot;
-				glm::vec3 pos;
-				glm::vec3 skew;
-				glm::vec4 perspective;
-
-				decompose(transform, scale, rot, pos, skew, perspective);
-
-				float pitch = glm::pitch(rot) * RAD_TO_DEG ;
-				float yaw = glm::yaw(rot) * RAD_TO_DEG;
-				float roll = glm::roll(rot) * RAD_TO_DEG;
-				//if (scale.x < 0.0f || scale.y < 0.0f || scale.z < 0.0f) yaw += 180;
-
-				//if (abs(pitch) > 90.0f)
-				//{
-				//	pitch = Math::mod(pitch + 90.0f, 180.0f) - 90.0f;
-				//	yaw = 180 - yaw;
-				//}
-
-				auto cam = new Camera(pos, c->fov, c->lensradius);
-				cam->setRot(pitch, yaw, roll);
-				cam->setScale(scale);
-			}
-			break;
-		}
-	}
-	else
-		Debug::logError("No camera found in the scene.");
-
+	loadScene_camera(scene);
+	tm.printElapsedFromLast("Camera loaded in ");
 
 	std::vector<Texture*> parsedTextures;
-	parsedTextures.reserve(scene->textures.size());
-	for (auto tex : scene->textures)
+	loadScene_textures(scene, parsedTextures);
+	tm.printElapsedFromLast("Textures loaded in ");
+
+	std::vector<Material*> materials;
+	loadScene_materials(scene, parsedTextures, materials);
+	tm.printElapsedFromLast("Materials loaded in ");
+
+	loadScene_shapes(scene, materials);
+	tm.printElapsedFromLast("Shapes loaded in ");
+
+	loadScene_lights(scene);
+	tm.printElapsedFromLast("Lights loaded in ");
+
+	delete scene;
+	if (Scene::triangles.empty())
+		new Cube({}, 0);
+}
+
+void SceneLoaderPbrt::loadScene_camera(minipbrt::Scene* scene)
+{
+	switch (scene->camera->type())
 	{
-		Texture* parsedTex = nullptr;
+		case minipbrt::CameraType::Perspective:
+		{
+			auto c = dynamic_cast<const minipbrt::PerspectiveCamera*>(scene->camera);
+
+			auto transform = transpose(glm::make_mat4x4(&c->cameraToWorld.start[0][0]));
+
+			glm::vec3 scale;
+			glm::quat rot;
+			glm::vec3 pos;
+			glm::vec3 skew;
+			glm::vec4 perspective;
+
+			decompose(transform, scale, rot, pos, skew, perspective);
+
+			float pitch = glm::pitch(rot) * RAD_TO_DEG;
+			float yaw = glm::yaw(rot) * RAD_TO_DEG;
+			float roll = glm::roll(rot) * RAD_TO_DEG;
+
+			auto cam = new Camera(pos, c->fov, c->lensradius);
+			cam->setRot(pitch, yaw, roll);
+			cam->setScale(scale);
+		}
+		break;
+	}
+}
+void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vector<Texture*>& parsedTextures)
+{
+	parsedTextures.reserve(scene->textures.size());
+	for (int i = 0; i < scene->textures.size(); i++)
+	{
+		auto tex = scene->textures[i];
+
+		Texture* parsedTex = Texture::defaultTex();
 		switch (tex->type())
 		{
 			case minipbrt::TextureType::ImageMap:
@@ -92,14 +108,16 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 				break;
 			}
 			default:
-				Debug::logError("Unsupported texture type.");
+				Debug::logError("!!! Unsupported texture type: ", static_cast<int>(tex->type()));
 				break;
 		}
+
+		parsedTex->setName(tex->name);
 		parsedTextures.push_back(parsedTex);
 	}
-
-	// === Load materials ===
-	std::vector<Material*> materials;
+}
+void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const std::vector<Texture*>& parsedTextures, std::vector<Material*>& materials)
+{
 	materials.reserve(scene->materials.size());
 	for (auto mat : scene->materials)
 	{
@@ -150,7 +168,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 					tex = parsedTextures[m->Kd.texture];
 				else
 					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
-				//roughness = m->roughness.value;
+				roughness = m->roughness.value;
 				break;
 			}
 			default:
@@ -158,72 +176,120 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 		}
 		materials.push_back(new Material(baseColor, lit, tex, roughness, metallic, emission));
 	}
+}
 
-	// === Load triangle meshes ===
-	for (auto shape : scene->shapes)
+void SceneLoaderPbrt::loadScene_shapes(const minipbrt::Scene* scene, const std::vector<Material*>& materials)
+{
+	#pragma omp parallel for
+	for (int shapeInd = 0; shapeInd < scene->shapes.size(); ++shapeInd)
 	{
-		Object* obj = nullptr;
-		switch (shape->type())
-		{
-			case minipbrt::ShapeType::TriangleMesh:
-			{
-				auto mesh = dynamic_cast<const minipbrt::TriangleMesh*>(shape);
-				if (!mesh) continue;
+		auto shape = scene->shapes[shapeInd];
 
-				auto points = mesh->P;
-				auto normals = mesh->N;
-				auto uvs = mesh->uv;
-				auto indices = mesh->indices;
-
-				auto numTris = mesh->num_indices / 3;
-				std::vector<BaseTriangle*> tris;
-				tris.reserve(numTris);
-				for (int i = 0; i < numTris; ++i)
-				{
-					Vertex v[3];
-					for (int j = 0; j < 3; ++j)
-					{
-						auto idx = indices[i * 3 + j];
-
-						v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
-						if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
-						if (uvs) v[j].uvPos = {Math::mod(uvs[2 * idx + 0], 1.0f), Math::mod(uvs[2 * idx + 1], 1.0f)};
-					}
-
-					tris.push_back(new BaseTriangle(v[0], v[1], v[2]));
-				}
-
-				auto meshObj = new Mesh(new Model(tris));
-				if (mesh->material != minipbrt::kInvalidIndex)
-					meshObj->setSharedMaterial(materials[mesh->material]);
-
-				auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
-				meshObj->setTransform(transform);
-
-				obj = meshObj;
-				break;
-			}
-			case minipbrt::ShapeType::Sphere:
-			{
-				auto sphere = dynamic_cast<const minipbrt::Sphere*>(shape);
-				auto center = glm::vec3(shape->shapeToWorld.start[3][0], shape->shapeToWorld.start[3][1], shape->shapeToWorld.start[3][2]);
-
-				auto sphereObj = new Sphere(center, sphere->radius);
-				sphereObj->setSharedMaterial(materials[shape->material]);
-
-				obj = sphereObj;
-				break;
-			}
-		}
-
-		if (obj)
+		auto obj = spawnObjectFromShape(shape, materials);
+		if (obj != nullptr)
 		{
 			auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
 			obj->setTransform(transform);
 		}
 	}
 
-	// === Load lights ===
+	int c = 0;
+	for (const auto* inst : scene->instances)
+	{
+		if (c++ > 100) return;
+		auto obj = scene->objects[inst->object];
+
+		glm::mat4 objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));
+		glm::mat4 instToWorld = transpose(glm::make_mat4x4(&inst->instanceToWorld.start[0][0]));
+
+		for (uint32_t i = 0; i < obj->numShapes; ++i)
+		{
+			auto shape = scene->shapes[obj->firstShape + i];
+			auto spawned = spawnObjectFromShape(shape, materials);
+			if (!spawned) continue;
+
+			glm::mat4 shapeToWorld = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
+			glm::mat4 finalTransform = instToWorld * objToInst * shapeToWorld;
+
+			spawned->setTransform(finalTransform);
+		}
+	}
+}
+Object* SceneLoaderPbrt::spawnObjectFromShape(minipbrt::Shape* shape, const std::vector<Material*>& materials)
+{
+	static std::mutex mutex;
+
+	Object* obj = nullptr;
+	switch (shape->type())
+	{
+		case minipbrt::ShapeType::TriangleMesh:
+		{
+			obj = spawnObjectFromShape_triMesh(materials, shape, mutex);
+			break;
+		}
+		case minipbrt::ShapeType::Sphere:
+		{
+			auto sphere = dynamic_cast<const minipbrt::Sphere*>(shape);
+			auto center = glm::vec3(shape->shapeToWorld.start[3][0], shape->shapeToWorld.start[3][1], shape->shapeToWorld.start[3][2]);
+
+			auto sphereObj = new Sphere(center, sphere->radius);
+			sphereObj->setSharedMaterial(materials[shape->material]);
+
+			obj = sphereObj;
+			break;
+		}
+		default:
+		{
+			Debug::logError("!!! Unsupported shape type: ", static_cast<int>(shape->type()));
+			break;
+		}
+	}
+
+	return obj;
+}
+Mesh* SceneLoaderPbrt::spawnObjectFromShape_triMesh(const std::vector<Material*>& materials, const minipbrt::Shape* shape, std::mutex& mutex)
+{
+	auto mesh = dynamic_cast<const minipbrt::TriangleMesh*>(shape);
+
+	auto points = mesh->P;
+	auto normals = mesh->N;
+	auto uvs = mesh->uv;
+	auto indices = mesh->indices;
+
+	auto numTris = mesh->num_indices / 3;
+	std::vector<BaseTriangle*> tris(numTris);
+
+	#pragma omp parallel for
+	for (int i = 0; i < numTris; ++i)
+	{
+		Vertex v[3];
+		for (int j = 0; j < 3; ++j)
+		{
+			auto idx = indices[i * 3 + j];
+
+			v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
+			if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
+			if (uvs) v[j].uvPos = {Math::mod(uvs[2 * idx + 0], 1.0f), Math::mod(uvs[2 * idx + 1], 1.0f)};
+		}
+
+		tris[i] = new BaseTriangle(v[0], v[1], v[2]);
+	}
+
+	mutex.lock();
+	auto meshObj = new Mesh(new Model(tris));
+	mutex.unlock();
+
+	if (mesh->material != minipbrt::kInvalidIndex)
+		meshObj->setSharedMaterial(materials[mesh->material]);
+
+	auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
+	meshObj->setTransform(transform);
+
+	return meshObj;
+}
+
+void SceneLoaderPbrt::loadScene_lights(minipbrt::Scene* scene)
+{
 	for (auto light : scene->lights)
 	{
 		auto transform = glm::make_mat4x4(&light->lightToWorld.start[0][0]);
@@ -256,9 +322,4 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	{
 		auto dl = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
 	}
-
-	delete scene;
-
-	if (Scene::triangles.empty())
-		new Cube({}, 0);
 }
