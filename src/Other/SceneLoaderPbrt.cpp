@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "MyMath.h"
 #include "Renderer.h"
+#include "Scene.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.hpp"
 
@@ -70,14 +71,20 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 		{
 			case minipbrt::TextureType::ImageMap:
 			{
-				auto texImg = dynamic_cast<const minipbrt::ImageMapTexture*>(tex);
-				parsedTex = Assets::load<Texture>(texImg->filename);
+				auto t = dynamic_cast<const minipbrt::ImageMapTexture*>(tex);
+				parsedTex = Assets::load<Texture>(t->filename);
 				break;
 			}
 			case minipbrt::TextureType::Constant:
 			{
-				auto texConst = dynamic_cast<const minipbrt::ConstantTexture*>(tex);
-				parsedTex = new Texture(Color(texConst->value[0], texConst->value[1], texConst->value[2]));
+				auto t = dynamic_cast<const minipbrt::ConstantTexture*>(tex);
+				parsedTex = new Texture(Color(t->value[0], t->value[1], t->value[2]));
+				break;
+			}
+			case minipbrt::TextureType::Scale:
+			{
+				auto t = dynamic_cast<const minipbrt::ScaleTexture*>(tex);
+				parsedTex = parsedTextures[t->tex1.texture];
 				break;
 			}
 			default:
@@ -139,7 +146,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 					tex = parsedTextures[m->Kd.texture];
 				else
 					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
-				roughness = m->roughness.value;
+				//roughness = m->roughness.value;
 				break;
 			}
 			default:
@@ -247,4 +254,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	}
 
 	delete scene;
+
+	if (Scene::triangles.empty())
+		new Cube({}, 0);
 }

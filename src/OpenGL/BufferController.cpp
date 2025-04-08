@@ -17,11 +17,12 @@ void BufferController::init()
 	_ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
 	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
+	_ssboPrimObjIndices = make_unique<SSBO>(PRIM_OBJ_INDICES_ALIGN, 8);
 
 	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	//_ssboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	//_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 }
 
 void BufferController::checkIfBufferUpdateRequired()
@@ -52,13 +53,7 @@ void BufferController::markBufferForUpdate(BufferType bufferType)
 
 void BufferController::initBuffers()
 {
-	_uboTextures->bindDefault();
-	_uboMaterials->bindDefault();
-	_uboLights->bindDefault();
-	_ssboObjects->bindDefault();
-	_ssboTriangles->bindDefault();
-	_ssboBVHNodes->bindDefault();
-	_ssboBVHTriIndices->bindDefault();
+	bindBuffers();
 
 	updateTexInfos();
 	updateMaterials();
@@ -67,6 +62,17 @@ void BufferController::initBuffers()
 	updateObjects();
 
 	_buffersForUpdate = BufferType::None;
+}
+void BufferController::bindBuffers()
+{
+	_uboTextures->bindDefault();
+	_uboMaterials->bindDefault();
+	_uboLights->bindDefault();
+	_ssboObjects->bindDefault();
+	_ssboTriangles->bindDefault();
+	_ssboBVHNodes->bindDefault();
+	_ssboBVHTriIndices->bindDefault();
+	_ssboPrimObjIndices->bindDefault();
 }
 
 void BufferController::updateTexInfos()
@@ -180,6 +186,8 @@ void BufferController::updateObjects()
 {
 	auto graphicals = Scene::graphicals;
 	std::vector<ObjectStruct> data(graphicals.size());
+	std::vector<float> primIndicesData;
+	std::mutex mutex;
 	#pragma omp parallel for
 	for (int i = 0; i < graphicals.size(); i++)
 	{
@@ -191,10 +199,12 @@ void BufferController::updateObjects()
 		objectStruct.pos = glm::vec4(obj->pos(), 0);
 		objectStruct.transform = obj->getTransform();
 
+		bool isPrim = true;
 		if (dynamic_cast<Mesh*>(obj) != nullptr)
 		{
 			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
+			isPrim = false;
 		}
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
 		{
@@ -210,10 +220,23 @@ void BufferController::updateObjects()
 		}
 
 		data[i] = objectStruct;
+
+		if (isPrim)
+		{
+			mutex.lock();
+			primIndicesData.push_back(i);
+			mutex.unlock();
+		}
 	}
 	_ssboObjects->ensureDataCapacity(data.size());
 	_ssboObjects->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("objectCount", graphicals.size());
+
+	_lastPrimObjCount = primIndicesData.size();
+	_ssboPrimObjIndices->ensureDataCapacity(primIndicesData.size());
+	_ssboPrimObjIndices->setSubData(primIndicesData.data(), primIndicesData.size());
+	Renderer::renderProgram()->fragShader()->setInt("primObjCount", primIndicesData.size());
+
 	Renderer::resetSamples();
 }
 

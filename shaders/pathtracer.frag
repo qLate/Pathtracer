@@ -12,6 +12,12 @@ layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
     int triIndices[];
 };
 
+uniform int primObjCount = 0;
+layout(std430, binding = 8) /*buffer*/ uniform PrimitiveObjectsIndices
+{
+    float primObjIndices[];
+};
+
 out vec4 outColor;
 vec3 COLOR_HEAT = vec3(0);
 

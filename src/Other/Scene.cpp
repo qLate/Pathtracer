@@ -21,8 +21,8 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	redGreenRoom();
-	//SceneLoader::loadScene("assets/scenes-pbrt/city-ao.pbrt");
-}	
+	//SceneLoader::loadScene("assets/scenes-pbrt/microcity.pbrt");
+}
 #endif
 
 void SceneSetup::museumScene()

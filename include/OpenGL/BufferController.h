@@ -10,7 +10,7 @@
 
 enum class BufferType
 {
-	None,
+	None = 0,
 	Textures = 1,
 	Materials = 2,
 	Lights = 4,
@@ -28,6 +28,7 @@ class BufferController
 	static constexpr int TRIANGLE_ALIGN = 28;
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
+	static constexpr int PRIM_OBJ_INDICES_ALIGN = 1;
 
 	inline static UPtr<UBO> _uboTextures;
 	inline static UPtr<UBO> _uboMaterials;
@@ -36,8 +37,10 @@ class BufferController
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
+	inline static UPtr<SSBO> _ssboPrimObjIndices;
 
 	inline static BufferType _buffersForUpdate;
+	inline static int _lastPrimObjCount;
 
 	static void init();
 
@@ -47,6 +50,7 @@ public:
 	static void initBuffers();
 
 	static void markBufferForUpdate(BufferType bufferType);
+	static void bindBuffers();
 
 	static UPtr<UBO>& uboTexInfos() { return _uboTextures; }
 	static UPtr<UBO>& uboMaterials() { return _uboMaterials; }
@@ -55,6 +59,9 @@ public:
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
 	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
+	static UPtr<SSBO>& ssboPrimObjIndices() { return _ssboPrimObjIndices; }
+
+	static float lastPrimObjCount() { return _lastPrimObjCount; }
 
 	static void updateTexInfos();
 	static void updateMaterials();

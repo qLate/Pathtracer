@@ -157,14 +157,16 @@ vec3 globalToLocalDir(vec3 dir, Object obj)
     return normalize((inverse(obj.transform) * vec4(dir, 0.0f)).xyz);
 }
 
-vec3 getTransformScale(mat4x4 mat) {
+vec3 getTransformScale(mat4x4 mat)
+{
     vec3 scale;
     for (int i = 0; i < 3; i++)
         scale[i] = sqrt(mat[i][0] * mat[i][0] + mat[i][1] * mat[i][1] + mat[i][2] * mat[i][2]);
     return scale;
 }
 
-mat4x4 getTransformRotation(mat4x4 mat) {
+mat4x4 getTransformRotation(mat4x4 mat)
+{
     mat4x4 rotMat = mat4x4(1.0);
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
@@ -180,7 +182,8 @@ vec3 getTriangleCenter(Triangle tri)
     return (p0 + p1 + p2) * 0.33333333f;
 }
 
-void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound) {
+void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound)
+{
     vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.info.y)]);
     vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.info.y)]);
     vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.info.y)]);

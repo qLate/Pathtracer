@@ -241,7 +241,8 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
             {
                 for (int i = int(node.min.w); i < node.min.w + node.max.w; i++)
                 {
-                    if (intersectTriangle2(ray, triangles[triIndices[i]])) {
+                    if (intersectTriangle2(ray, triangles[triIndices[i]]))
+                    {
                         hitTriIndex = triIndices[i];
 
                         if (castingShadows) return true;
@@ -250,9 +251,8 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows, inout int hitTriIndex)
             }
             curr = node.links.x;
         }
-        else {
+        else
             curr = node.links.y;
-        }
     }
     return ray.surfaceNormal != vec3(0);
 }
@@ -265,11 +265,11 @@ bool intersectBVHTree(inout Ray ray, bool castingShadows)
 bool intersectWorld(inout Ray ray, bool castingShadows, inout int hitTriIndex, inout int hitObjIndex)
 {
     bool hit = false;
-    for (int objInd = 0; objInd < objectCount; objInd++)
+    for (int i = 0; i < primObjCount; i++)
     {
-        if (objects[objInd].objType == 0) continue;
-
-        if (intersectDefaultObj(ray, objects[objInd])) {
+        int objInd = int(primObjIndices[i].x);
+        if (intersectDefaultObj(ray, objects[objInd]))
+        {
             hit = true;
             hitObjIndex = objInd;
 
@@ -281,9 +281,10 @@ bool intersectWorld(inout Ray ray, bool castingShadows, inout int hitTriIndex, i
         hit = true;
     return hit;
 }
-bool intersectWorld(inout Ray ray, bool castingShadows = false )
-    {
-int hitTriIndex = -1;
-int hitObjIndex = -1;
-return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
+
+bool intersectWorld(inout Ray ray, bool castingShadows)
+{
+    int hitTriIndex = -1;
+    int hitObjIndex = -1;
+    return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
 }

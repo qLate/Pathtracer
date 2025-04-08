@@ -25,6 +25,7 @@ void Renderer::render()
 	_renderProgram->use();
 
 	updateCameraUniforms();
+	BufferController::bindBuffers();
 
 	_renderProgram->setInt("frame", _frame);
 	_renderProgram->setInt("sampleFrame", _sampleFrame);

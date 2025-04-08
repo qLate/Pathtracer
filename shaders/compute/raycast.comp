@@ -14,6 +14,12 @@ layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
     int triIndices[];
 };
 
+uniform int primObjCount = 0;
+layout(std430, binding = 8) /*buffer*/ uniform PrimitiveObjectsIndices
+{
+    float primObjIndices[];
+};
+
 #include "intersection.glsl"
 
 uniform vec3 rayPos;
@@ -31,7 +37,8 @@ struct RaycastHit
     bool hitLight;
 };
 
-layout(std140, binding = 20) /*buffer*/ uniform SSBO {
+layout(std140, binding = 20) /*buffer*/ uniform SSBO
+{
     RaycastHit hit;
 };
 
@@ -55,7 +62,8 @@ void main()
     intersectWorld(ray, false, hitTriIndex, hitObjIndex);
 
     bool hitLight = false;
-    if (doIntersectLights) {
+    if (doIntersectLights)
+    {
         if (intersectLights(ray, hitObjIndex))
             hitLight = true;
     }
