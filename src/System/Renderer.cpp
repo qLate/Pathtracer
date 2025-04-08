@@ -35,7 +35,11 @@ void Renderer::render()
 	#endif
 
 	glBindVertexArray(_renderProgram->fragShader()->vaoScreen()->id());
-	TimeMeasurerGL tm;
+
+	GLuint query;
+	glGenQueries(1, &query);
+
+	glBeginQuery(GL_TIME_ELAPSED, query);
 	int n = _renderOneByOne ? 1 : _samplesPerPixel;
 	for (int i = 0; i < n; i++)
 	{
@@ -45,7 +49,12 @@ void Renderer::render()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	_renderTime = tm.elapsedFromLast();
+	glEndQuery(GL_TIME_ELAPSED);
+
+	GLuint64 elapsedTime = 0;
+	glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsedTime);
+	_renderTime = elapsedTime / 1000000.0f;
+
 	glBindVertexArray(0);
 
 	_frame++;
@@ -62,8 +71,6 @@ float Renderer::computeSampleVariance()
 	#ifdef BENCHMARK_BUILD
 	return 0;
 	#else
-	auto meanData = _accumMeanTex->readData<glm::vec3>();
-	auto sqrData = _accumSqrTex->readData<glm::vec3>();
 	auto varianceData = _varianceTex->readData<glm::vec3>();
 
 	float varianceSum = 0;

@@ -185,6 +185,14 @@ void SceneLoaderPbrt::loadScene_shapes(const minipbrt::Scene* scene, const std::
 	{
 		auto shape = scene->shapes[shapeInd];
 
+		bool isPartOfPrefab = false;
+		for (auto obj : scene->objects)
+		{
+			if (obj->firstShape <= shapeInd && obj->firstShape + obj->numShapes > shapeInd)
+				isPartOfPrefab = true;
+		}
+		if (isPartOfPrefab) continue;
+
 		auto obj = spawnObjectFromShape(shape, materials);
 		if (obj != nullptr)
 		{
@@ -192,11 +200,10 @@ void SceneLoaderPbrt::loadScene_shapes(const minipbrt::Scene* scene, const std::
 			obj->setTransform(transform);
 		}
 	}
-
-	int c = 0;
+	int count = 0;
 	for (const auto* inst : scene->instances)
 	{
-		if (c++ > 100) return;
+		if (count++ > 3000) return;
 		auto obj = scene->objects[inst->object];
 
 		glm::mat4 objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));
