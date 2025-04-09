@@ -103,7 +103,6 @@ void SceneSetup::redGreenRoomOriginal()
 	auto green = new Material({0.12f, 0.45f, 0.15f}, true, tex);
 	auto lightMat = new Material(Color::white(), true, tex);
 	lightMat->setEmission(Color(1.0f, 1.0f, 1.0f) * 15);
-	//lightMat->setEmission(Color(1.0f, 0.925f, 0.61f) * 30);
 
 	auto light = new Square({277.5f, 277.5f, 554.5}, 1.0f, {{-90 * DEG_TO_RAD, 0, 0}}); // center first
 	light->setScale({130, 1, 105});

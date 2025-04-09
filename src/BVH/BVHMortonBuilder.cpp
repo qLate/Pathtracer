@@ -46,7 +46,6 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_ssboMortonCodes->ensureDataCapacity(n);
 	_ssboMinMaxBound->clear();
 	_ssboBVHTriIndices->ensureDataCapacity(n);
-	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - 1);
 
 	_bvhMorton->use();
 	_bvhMorton->setInt("n", n);
@@ -66,6 +65,8 @@ void BVHMortonBuilder::buildGPU_tree(int n)
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboTriangles()->bindDefault();
 	BufferController::ssboObjects()->bindDefault();
+
+	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - 1);
 
 	_bvhBuild->setInt("objectCount", Scene::objects.size());
 

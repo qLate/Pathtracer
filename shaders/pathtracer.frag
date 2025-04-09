@@ -70,9 +70,10 @@ vec3 castRay(Ray ray)
             else if (misSampleBrdf)
             {
                 Light light = findTriLight(ray.hitTriIndex);
+                Object obj = objects[ray.hitObjIndex];
 
                 vec3 L = normalize(ray.hitPoint - ray.pos);
-                float lightPdf = misSampleLight ? getLightPdf(light, ray.pos, L, ray.hitPoint) : 0;
+                float lightPdf = misSampleLight ? getLightPdf(light, obj, ray.pos, L, ray.hitPoint) : 0;
                 float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
                 color += clamp(throughput, 0, 1) * mat.emission * brdfMis;

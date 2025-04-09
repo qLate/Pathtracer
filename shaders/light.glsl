@@ -37,7 +37,7 @@ float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L,
     return dist * dist / max(LNdotL * light.properties1.y, EPSILON);
 }
 
-float getLightPdf(Light light, vec3 P, vec3 L, vec3 LP)
+float getLightPdf(Light light, Object obj, vec3 P, vec3 L, vec3 LP)
 {
     if (light.lightType == LIGHT_TYPE_POINT)
     {
@@ -46,7 +46,6 @@ float getLightPdf(Light light, vec3 P, vec3 L, vec3 LP)
     else if (light.lightType == LIGHT_TYPE_TRIANGLE)
     {
         Triangle tri = triangles[int(light.properties1.x)];
-        Object obj = objects[int(tri.info.y)];
         return getTriangleLightPdf(light, tri, obj, P, L, LP);
     }
     return -1;
@@ -114,7 +113,7 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
     float shadowMult = intersectWorld(shadowRay, true) ? 0.0 : 1.0;
     lightPdf /= lightCount;
-    
+
     vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor);
     return shadowMult * radiance * brdf * NdotL / lightPdf;
 }
