@@ -1,10 +1,10 @@
 bool intersectTriangle(inout Ray ray, int triIndex)
 {
     Triangle tri = triangles[triIndex];
-    Object obj = objects[int(tri.info.y)];
-    vec3 v0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
-    vec3 v1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
-    vec3 v2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
+
+    vec3 v0 = tri.vertices[0].posU.xyz;
+    vec3 v1 = tri.vertices[1].posU.xyz;
+    vec3 v2 = tri.vertices[2].posU.xyz;
 
     vec3 p0 = v0;
     vec3 e1 = v1 - v0;
@@ -22,10 +22,11 @@ bool intersectTriangle(inout Ray ray, int triIndex)
     uvt.xyz = uvt.xyz / det;
     uvt.w = 1.0 - uvt.x - uvt.y;
 
-    if (all(greaterThanEqual(uvt, vec4(-0.00001))) && (uvt.z < ray.t && uvt.z <= ray.maxDis)) {
+    if (all(greaterThanEqual(uvt, vec4(-0.00001))) && (uvt.z < ray.t))
+    {
         ray.t = uvt.z;
-        ray.materialIndex = obj.materialIndex;
         ray.uv = vec2(uvt.x, uvt.y);
+        ray.hitPoint = ray.pos + ray.dir * uvt.z;
 
         return true;
     }
@@ -39,10 +40,10 @@ vec3 getTriangleNormalAt(Object obj, Triangle tri, float u, float v)
     vec3 norm3 = tri.vertices[2].normalV.xyz;
     return localToGlobalDir(normalize((1 - u - v) * norm1 + u * norm2 + v * norm3), obj);
 }
-void calcTriIntersectionValues(inout Ray ray, int hitTriIndex)
+void calcTriIntersectionValues(inout Ray ray)
 {
-    Triangle tri = triangles[hitTriIndex];
-    Object obj = objects[int(tri.info.y)];
+    Triangle tri = triangles[ray.hitTriIndex];
+    Object obj = objects[ray.hitObjIndex];
 
     vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
     vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
@@ -57,7 +58,45 @@ void calcTriIntersectionValues(inout Ray ray, int hitTriIndex)
     vec3 baseNorm = normalize(cross(v1 - v0, v2 - v0));
     ray.surfaceNormal = dot(baseNorm != vec3(0) ? baseNorm : norm, ray.dir) < 0 ? norm : -norm;
 
-    ray.interPoint = ray.pos + ray.dir * ray.t + ray.surfaceNormal * 0.001;
+    ray.hitPoint += ray.surfaceNormal * 0.001;
+}
+
+bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
+{
+    vec3 rayPos = ray.pos;
+    vec3 rayDir = ray.dir;
+    float rayT = ray.t;
+
+    ray.pos = globalToLocal(rayPos, obj);
+    ray.dir = globalToLocalDir(rayDir, obj);
+
+    vec3 tVec = rayPos + rayDir * ray.t;
+    vec3 tVecLocal = globalToLocal(tVec, obj);
+    ray.t = length(tVecLocal - ray.pos);
+
+    bool hit = false;
+    for (int i = int(obj.properties.x); i < obj.properties.x + obj.properties.y; i++)
+    {
+        if (intersectTriangle(ray, i))
+        {
+            hit = true;
+            ray.hitTriIndex = i;
+
+            if (castingShadows) break;
+        }
+    }
+
+    if (hit)
+    {
+        ray.hitPoint = localToGlobal(ray.hitPoint, obj);
+        ray.t = length(ray.hitPoint - rayPos);
+    }
+    else
+        ray.t = rayT;
+
+    ray.pos = rayPos;
+    ray.dir = rayDir;
+    return hit;
 }
 
 bool intersectSphere(inout Ray ray, Object sphere)
@@ -71,12 +110,11 @@ bool intersectSphere(inout Ray ray, Object sphere)
     float c = abs(dot(inter, inter)) - sphere.properties.x * objScale.x * objScale.x;
 
     if (!solveQuadratic(a, b, c, x0, x1)) return false;
-    if (x0 <= 0 || x0 >= ray.t || x0 >= ray.maxDis) return false;
+    if (x0 <= 0 || x0 >= ray.t) return false;
 
     ray.t = x0;
-    ray.interPoint = ray.pos + x0 * dir;
-    ray.surfaceNormal = normalize(ray.interPoint - sphere.pos.xyz);
-    ray.materialIndex = sphere.materialIndex;
+    ray.hitPoint = ray.pos + x0 * dir;
+    ray.surfaceNormal = normalize(ray.hitPoint - sphere.pos.xyz);
 
     vec3 uvN = globalToLocalDir(ray.surfaceNormal, sphere);
     float u = atan(uvN.z, uvN.x) / (2.0 * PI) + 0.5;
@@ -96,10 +134,10 @@ bool intersectLight(inout Ray ray, Light light, float radius)
     float c = abs(dot(inter, inter)) - radius * radius;
 
     if (!solveQuadratic(a, b, c, x0, x1)) return false;
-    if (x0 <= 0 || x0 >= ray.t || x0 >= ray.maxDis) return false;
+    if (x0 <= 0 || x0 >= ray.t) return false;
 
     ray.t = x0;
-    ray.interPoint = ray.pos + x0 * dir;
+    ray.hitPoint = ray.pos + x0 * dir;
     ray.surfaceNormal = vec3(1, 0, 0);
 
     return true;
@@ -114,12 +152,11 @@ bool intersectPlane(inout Ray ray, Object plane)
 
     vec3 dir = plane.pos.xyz - ray.pos;
     float t = -dot(normal, dir) / denom;
-    if (t >= ray.t || t <= 0 || t >= ray.maxDis) return false;
+    if (t >= ray.t || t <= 0) return false;
 
     ray.t = t;
-    ray.interPoint = ray.pos + t * ray.dir;
+    ray.hitPoint = ray.pos + t * ray.dir;
     ray.surfaceNormal = dot(ray.dir, normal) < 0 ? normal : -normal;
-    ray.materialIndex = plane.materialIndex;
 
     return true;
 }
@@ -159,10 +196,9 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
                         abs(min_.x - point.x) <= width || abs(max_.x - point.x) <= width)))
         {
             ray.surfaceNormal = vec3(0, 0, 1);
-            ray.interPoint = point;
+            ray.hitPoint = point;
             ray.uv = vec2(0.01);
             ray.t = t;
-            ray.materialIndex = 2; // Gizmo material
             return true;
         }
     }
@@ -201,20 +237,32 @@ bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax,
     return true;
 }
 
-bool intersectDefaultObj(inout Ray ray, Object obj)
+bool intersectObj(inout Ray ray, Object obj, bool castingShadows)
 {
-    if (obj.objType == OBJ_TYPE_SPHERE)
+    if (obj.objType == OBJ_TYPE_MESH)
     {
-        if (intersectSphere(ray, obj)) return true;
+        if (intersectMesh(ray, obj, castingShadows)) return true;
+    }
+    else if (obj.objType == OBJ_TYPE_SPHERE)
+    {
+        if (intersectSphere(ray, obj))
+        {
+            ray.hitTriIndex = -1;
+            return true;
+        }
     }
     else if (obj.objType == OBJ_TYPE_PLANE)
     {
-        if (intersectPlane(ray, obj)) return true;
+        if (intersectPlane(ray, obj))
+        {
+            ray.hitTriIndex = -1;
+            return true;
+        }
     }
     return false;
 }
 
-bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows, inout int hitTriIndex)
+bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
 {
     bool hit = false;
     int curr = rootNode;
@@ -229,7 +277,7 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows, inout int hi
                 if (intersectTriangle(ray, triInd))
                 {
                     hit = true;
-                    hitTriIndex = triInd;
+                    ray.hitTriIndex = triInd;
 
                     if (castingShadows) return true;
                 }
@@ -242,29 +290,19 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows, inout int hi
     return hit;
 }
 
-bool intersectWorld(inout Ray ray, bool castingShadows, inout int hitTriIndex, inout int hitObjIndex)
+bool intersectWorld(inout Ray ray, bool castingShadows)
 {
     bool hit = false;
-    for (int i = 0; i < primObjCount; i++)
+    for (int i = 0; i < objectCount; i++)
     {
-        int objInd = int(primObjIndices[i].x);
-        if (intersectDefaultObj(ray, objects[objInd]))
+        if (intersectObj(ray, objects[i], castingShadows))
         {
             hit = true;
-            hitObjIndex = objInd;
+            ray.hitObjIndex = i;
 
             if (castingShadows) return true;
         }
     }
 
-    if (intersectBVH(0, ray, castingShadows, hitTriIndex))
-        hit = true;
     return hit;
-}
-
-bool intersectWorld(inout Ray ray, bool castingShadows)
-{
-    int hitTriIndex = -1;
-    int hitObjIndex = -1;
-    return intersectWorld(ray, castingShadows, hitTriIndex, hitObjIndex);
 }

@@ -66,6 +66,6 @@ class BVHBuilder
 public:
 	virtual ~BVHBuilder() = default;
 
-	virtual void build(const std::vector<Triangle*>& triangles) = 0;
-	virtual void rebuild(const std::vector<Triangle*>& triangles) { build(triangles); }
+	virtual void build() = 0;
+	virtual void rebuild() { build(); }
 };

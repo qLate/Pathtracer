@@ -11,8 +11,8 @@
 #define OBJ_TYPE_SPHERE 1
 #define OBJ_TYPE_PLANE 2
 
-#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
-#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
+#define RAY_DEFAULT_ARGS FLT_MAX, vec3(0), vec3(0), vec2(0), -1, -1
+#define RAY_DEFAULT_ARGS_WO_DIST vec3(0), vec3(0), vec2(0), -1, -1
 
 #define UP vec3(0, 1, 0)
 #define DOWN vec3(0, -1, 0)
@@ -89,12 +89,11 @@ struct BVHNode
 struct Ray
 {
     vec3 pos, dir;
-    float maxDis;
     float t;
-    int materialIndex;
     vec3 surfaceNormal;
-    vec3 interPoint;
+    vec3 hitPoint;
     vec2 uv;
+    int hitObjIndex, hitTriIndex;
 };
 
 // ----------- BUFFERS -----------
@@ -162,14 +161,14 @@ vec3 localToGlobal(vec3 pos, Object obj)
 {
     return (obj.transform * vec4(pos, 1.0f)).xyz;
 }
-vec3 localToGlobalDir(vec3 dir, Object obj)
-{
-    return normalize((obj.transform * vec4(dir, 0.0f)).xyz);
-}
-
 vec3 globalToLocal(vec3 pos, Object obj)
 {
     return (inverse(obj.transform) * vec4(pos, 1.0f)).xyz;
+}
+
+vec3 localToGlobalDir(vec3 dir, Object obj)
+{
+    return normalize((obj.transform * vec4(dir, 0.0f)).xyz);
 }
 vec3 globalToLocalDir(vec3 dir, Object obj)
 {
@@ -211,9 +210,8 @@ void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound)
     maxBound = max(max(p0, p1), p2) + vec3(0.0001);
 }
 
-void calcGlobalTriVertices(Triangle tri, out vec3 p0, out vec3 p1, out vec3 p2)
+void calcGlobalTriVertices(Triangle tri, Object obj, out vec3 p0, out vec3 p1, out vec3 p2)
 {
-    Object obj = objects[int(tri.info.y)];
     p0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
     p1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
     p2 = localToGlobal(tri.vertices[2].posU.xyz, obj);

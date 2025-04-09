@@ -2,18 +2,31 @@
 
 #include <fstream>
 
+#include "BufferController.h"
 #include "Debug.h"
 #include "MyMath.h"
 #include "rapidobj.hpp"
+#include "Scene.h"
 
 Model::Model(const std::filesystem::path& path) : _path(path.string())
 {
 	parse(path);
+
+	init();
 }
 Model::Model(const Model& other) : _path(other._path)
 {
 	parse(std::filesystem::path(_path));
+
+	init();
 }
+
+void Model::init()
+{
+	Scene::baseTriangles.insert(Scene::baseTriangles.end(), this->_baseTriangles.begin(), this->_baseTriangles.end());
+	BufferController::markBufferForUpdate(BufferType::Triangles);
+}
+
 void Model::parse(const std::filesystem::path& path)
 {
 	parseRapidobj(path);
@@ -22,18 +35,29 @@ void Model::parse(const std::filesystem::path& path)
 Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
 {
 	_baseTriangles = baseTriangles;
+
+	init();
 }
-Model::Model(const std::vector<glm::vec3>& points)
+
+Model::~Model()
 {
-	if (points.size() < 2) throw std::exception("Points should be at least of size 3");
-	for (int i = 2; i < points.size(); i++)
-		_baseTriangles.push_back(new BaseTriangle({points[0], points[i - 1], points[i]}));
+	auto fromInd = std::ranges::find(Scene::baseTriangles, _baseTriangles[0]);
+	auto toInd = std::ranges::find(Scene::baseTriangles, _baseTriangles.back());
+	if (toInd - fromInd >= _baseTriangles.size()) throw std::exception("Base triangles weren't contiguous in memory.");
+	Scene::baseTriangles.erase(fromInd, toInd + 1);
+
+	for (auto& triangle : _baseTriangles)
+		delete triangle;
 }
 
 void Model::setBvhValues(int bvhNodeStart, int bvhNodeCount)
 {
 	_bvhNodeStart = bvhNodeStart;
 	_bvhNodeCount = bvhNodeCount;
+}
+int Model::triStartIndex() const
+{
+	return std::ranges::find(Scene::baseTriangles, _baseTriangles[0]) - Scene::baseTriangles.begin();
 }
 
 void Model::parseRapidobj(const std::filesystem::path& path)

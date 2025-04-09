@@ -46,7 +46,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	tm.printElapsedFromLast("Lights loaded in ");
 
 	delete scene;
-	if (Scene::triangles.empty())
+	if (Scene::baseTriangles.empty())
 		new Cube({}, 0);
 }
 

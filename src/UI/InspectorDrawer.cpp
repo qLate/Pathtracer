@@ -123,7 +123,7 @@ void MeshInspectorDrawer::draw(Mesh* target)
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
-		ImGui::LabeledInt("Triangle Count", target->triangles().size(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::LabeledInt("Triangle Count", target->model()->baseTriangles().size(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::Button("Set Model"))
 		{
 			auto dir = std::filesystem::current_path().concat("/assets/models/").string();

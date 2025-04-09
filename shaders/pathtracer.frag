@@ -48,18 +48,17 @@ vec3 castRay(Ray ray)
     float brdfPdf = 1;
     for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
-        int hitTriIndex = -1, hitObjIndex = -1;
-        if (!intersectWorld(ray, false, hitTriIndex, hitObjIndex))
+        if (!intersectWorld(ray, false))
         {
             color += throughput * bgColor * sampleEnvMap(ray.dir);
             color = clamp(color, 0, 1);
             break;
         }
 
-        if (hitTriIndex != -1)
-            calcTriIntersectionValues(ray, hitTriIndex);
+        if (ray.hitTriIndex != -1)
+            calcTriIntersectionValues(ray);
 
-        Material mat = findMaterial(ray.materialIndex);
+        Material mat = findMaterial(objects[ray.hitObjIndex].materialIndex);
         if (length(mat.emission) > 0)
         {
             if (bounce == 0)
@@ -70,10 +69,10 @@ vec3 castRay(Ray ray)
             }
             else if (misSampleBrdf)
             {
-                Light light = findTriLight(hitTriIndex);
+                Light light = findTriLight(ray.hitTriIndex);
 
-                vec3 L = normalize(ray.interPoint - ray.pos);
-                float lightPdf = misSampleLight ? getLightPdf(light, ray.pos, L, ray.interPoint) : 0;
+                vec3 L = normalize(ray.hitPoint - ray.pos);
+                float lightPdf = misSampleLight ? getLightPdf(light, ray.pos, L, ray.hitPoint) : 0;
                 float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
                 color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
@@ -89,10 +88,10 @@ vec3 castRay(Ray ray)
             roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3); // Regularize roughness
 
         vec3 bounceDir;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.interPoint, albedo, roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
 
         if (length(throughput) < 0.01) break;
-        ray = Ray(ray.interPoint, bounceDir, RAY_DEFAULT_ARGS);
+        ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);
 
         // Russian roulette
         if (bounce > 3)

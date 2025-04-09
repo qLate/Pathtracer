@@ -23,19 +23,19 @@ class BVHMortonBuilder : public BVHBuilder
 	inline static UPtr<SSBO> _ssboMortonCodes;
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
 
-	static void buildGPU(const std::vector<Triangle*>& triangles);
+	static void buildGPU();
 	static void buildGPU_morton(int n);
 	static void buildGPU_tree(int n);
 
-	static void buildCPU(const std::vector<Triangle*>& triangles);
-	static void buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
-	static void buildCPU_recordTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes);
-	static void buildCPU_buildInternal(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
-	static void buildCPU_buildLeavesAndLinks(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated);
-	static void buildCPU_calcBoxesBottomUp(int n);
+	//static void buildCPU();
+	//static void buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
+	//static void buildCPU_recordTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes);
+	//static void buildCPU_buildInternal(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
+	//static void buildCPU_buildLeavesAndLinks(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated);
+	//static void buildCPU_calcBoxesBottomUp(int n);
 
 public:
 	BVHMortonBuilder();
 
-	void build(const std::vector<Triangle*>& triangles) override;
+	void build() override;
 };

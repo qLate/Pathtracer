@@ -12,11 +12,11 @@ void BVH::init()
 
 void BVH::buildBVH()
 {
-	builder->build(Scene::triangles);
+	builder->build();
 }
 void BVH::rebuildBVH()
 {
- 	builder->rebuild(Scene::triangles);
+ 	builder->rebuild();
 }
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)

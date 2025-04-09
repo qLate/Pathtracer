@@ -79,7 +79,7 @@ void BufferController::updateTexInfos()
 	{
 		auto tex = textures[i];
 
-		TextureStruct texInfoStruct {};
+		TextureStruct texInfoStruct{};
 		texInfoStruct.handle = tex->glTex()->getHandle();
 
 		data[i] = texInfoStruct;
@@ -98,7 +98,7 @@ void BufferController::updateMaterials()
 	{
 		auto mat = materials[i];
 
-		MaterialStruct materialStruct {};
+		MaterialStruct materialStruct{};
 		materialStruct.color = mat->color().xyz;
 		materialStruct.id = mat->id();
 		materialStruct.lit = mat->lit();
@@ -124,7 +124,7 @@ void BufferController::updateLights()
 	{
 		auto light = lights[i];
 
-		LightStruct lightStruct {};
+		LightStruct lightStruct{};
 		lightStruct.pos = light->pos();
 		lightStruct.color = light->color();
 		lightStruct.properties1.x = light->intensity();
@@ -152,10 +152,10 @@ void BufferController::updateLights()
 
 		if (auto mesh = dynamic_cast<Mesh*>(graphicals[i]))
 		{
-			const auto& triangles = mesh->triangles();
+			const auto& triangles = mesh->model()->baseTriangles();
 			if (triangles.empty()) continue;
 
-			int triStartIndex = std::ranges::find(Scene::triangles, triangles[0]) - Scene::triangles.begin();
+			int triStartIndex = mesh->model()->triStartIndex();
 			for (int j = 0; j < triangles.size(); j++)
 			{
 				auto tri = triangles[j];
@@ -164,10 +164,9 @@ void BufferController::updateLights()
 				auto v2 = mesh->localToGlobalPos(tri->vertices()[2].pos);
 				auto triArea = 0.5f * length(cross(v1 - v0, v2 - v0));
 
-				LightStruct lightStruct {};
+				LightStruct lightStruct{};
 				lightStruct.lightType = 2;
-				lightStruct.properties1.x = triStartIndex + j;
-				lightStruct.properties1.y = triArea;
+				lightStruct.properties1.xyz = {triStartIndex + j, triArea, i};
 
 				data.push_back(lightStruct);
 			}
@@ -191,9 +190,9 @@ void BufferController::updateObjects()
 		if (graphicals[i] == nullptr) continue;
 		auto obj = graphicals[i];
 
-		ObjectStruct objectStruct {};
-		objectStruct.materialIndex = obj->materialNoCopy()->id();
-		objectStruct.pos = glm::vec4(obj->pos(), 0);
+		ObjectStruct objectStruct{};
+		objectStruct.materialId = obj->materialNoCopy()->id();
+		objectStruct.pos = {obj->pos(), 0};
 		objectStruct.transform = obj->getTransform();
 
 		bool isPrim = true;
@@ -201,7 +200,7 @@ void BufferController::updateObjects()
 		{
 			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
-			objectStruct.properties.xy = glm::vec2(mesh->model()->bvhNodeStart(), mesh->model()->bvhNodeCount());
+			objectStruct.properties = {mesh->model()->triStartIndex(), mesh->model()->baseTriangles().size(), mesh->model()->bvhNodeStart(), mesh->model()->bvhNodeCount()};
 			isPrim = false;
 		}
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
@@ -240,19 +239,19 @@ void BufferController::updateObjects()
 
 void BufferController::updateTriangles()
 {
-	auto triangles = Scene::triangles;
+	auto triangles = Scene::baseTriangles;
 	std::vector<TriangleStruct> data(triangles.size());
 	#pragma omp parallel for
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		auto triangle = triangles[i];
-		TriangleStruct triangleStruct {};
+		TriangleStruct triangleStruct{};
 		for (int k = 0; k < 3; ++k)
 		{
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices()[k].pos, triangle->vertices()[k].uvPos.x);
 			triangleStruct.vertices[k].normalV = glm::vec4(triangle->vertices()[k].normal, triangle->vertices()[k].uvPos.y);
 		}
-		triangleStruct.info = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexId(), 0, 0);
+		//triangleStruct.info = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexId(), 0, 0);
 
 		data[i] = triangleStruct;
 	}

@@ -29,10 +29,9 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 	ComputeShaderProgram::dispatch({1, 1, 1});
 	RaycastHitStruct result = _resultSSBO->readData<RaycastHitStruct>(1)[0];
 
-	bool hit = result.normal != glm::vec3(0);
-	auto triangle = result.triIndex != -1 ? Scene::triangles[result.triIndex] : nullptr;
+	bool hit = result.objIndex != -1;
 	auto hitObj = result.objIndex != -1 ? result.hitLight ? (Object*)Scene::lights[result.objIndex] : (Object*)Scene::graphicals[result.objIndex] : nullptr;
-	auto finalObj = triangle == nullptr || result.hitLight ? hitObj : (Graphical*)triangle->mesh();
+	auto triangle = result.triIndex != -1 ? Scene::baseTriangles[result.triIndex] : nullptr;
 
-	return {hit, result.pos, result.normal, result.uv, finalObj, triangle, result.hitLight};
+	return {hit, result.pos, result.normal, result.uv, hitObj, triangle, result.hitLight};
 }

@@ -53,15 +53,14 @@ void main()
 {
     Ray ray = Ray(rayPos, rayDir, rayMaxDis, RAY_DEFAULT_ARGS_WO_DIST);
 
-    int hitTriIndex = -1, hitObjIndex = -1;
-    intersectWorld(ray, false, hitTriIndex, hitObjIndex);
+    intersectWorld(ray, false);
 
     bool hitLight = false;
     if (doIntersectLights)
     {
-        if (intersectLights(ray, hitObjIndex))
+        if (intersectLights(ray, ray.hitObjIndex))
             hitLight = true;
     }
 
-    hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uv, hitObjIndex, hitTriIndex, hitLight);
+    hit = RaycastHit(ray.hitPoint, ray.surfaceNormal, ray.uv, ray.hitObjIndex, ray.hitTriIndex, hitLight);
 }

@@ -20,16 +20,21 @@ class Model
 	void parseSelfWritten(const std::filesystem::path& path);
 	Model(const Model& other);
 
+	void init();
+
 public:
 	Model(const std::vector<BaseTriangle*>& baseTriangles);
-	Model(const std::vector<glm::vec3>& points);
 	Model() = default;
+
+	~Model();
 
 	std::vector<BaseTriangle*> baseTriangles() const { return _baseTriangles; }
 	int bvhNodeStart() const { return _bvhNodeStart; }
 	int bvhNodeCount() const { return _bvhNodeCount; }
 
 	void setBvhValues(int bvhNodeStart, int bvhNodeCount);
+
+	int triStartIndex() const;
 
 	constexpr static auto properties();
 

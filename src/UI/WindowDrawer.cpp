@@ -153,13 +153,13 @@ void WindowDrawer::displayStats(bool barVisible)
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3fms)\n"
-	            "%zu Triangles\n"
+	            "%zu Base Triangles\n"
 	            "Total samples: %d\n"
 	            "Variance: %.3f (x1000)\n"
 	            "Render time: %.3fms\n"
 	            "Efficiency: %.3f\n",
 	            currFPS, 1000.0f / currFPS,
-	            Scene::triangles.size(),
+	            Scene::baseTriangles.size(),
 	            totalSamples,
 	            currVariance * 1000,
 	            renderTime,

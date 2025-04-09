@@ -91,43 +91,14 @@ Mesh::Mesh(const Mesh& orig) : Graphical(orig), _model(orig._model)
 {
 	init(orig._model);
 }
-void Mesh::init(const Model* model)
+void Mesh::init(Model* model)
 {
 	setModel(model);
 }
 
-Mesh::~Mesh()
+void Mesh::setModel(Model* model)
 {
-	if (!initialized()) return;
-
-	removeTriangles();
-}
-void Mesh::removeTriangles()
-{
-	if (_triangles.empty()) return;
-
-	auto triStart = std::ranges::find(Scene::triangles, _triangles[0]);
-	auto triEnd = std::ranges::find(Scene::triangles, _triangles.back());
-	Scene::triangles.erase(triStart, triEnd + 1);
-
-	for (auto tri : _triangles)
-		delete tri;
-	_triangles.clear();
-
-	BufferController::markBufferForUpdate(BufferType::Triangles);
-}
-
-void Mesh::setModel(const Model* model)
-{
-	removeTriangles();
-	if (model == nullptr) return;
-
-	_triangles.reserve(model->baseTriangles().size());
-	for (auto& t : model->baseTriangles())
-		_triangles.push_back(new Triangle(t, this));
-
-	Scene::triangles.insert(Scene::triangles.end(), this->_triangles.begin(), this->_triangles.end());
-	BufferController::markBufferForUpdate(BufferType::Triangles);
+	_model = model;
 }
 
 Square::Square() : _side(0)
@@ -148,10 +119,10 @@ Model* Square::getBaseModel()
 	auto p3 = glm::vec3(1 / 2.0f, 0, 1 / 2.0f);
 	auto p4 = glm::vec3(1 / 2.0f, 0, -1 / 2.0f);
 
-	Vertex vertex1 {p1, {0, 0}};
-	Vertex vertex2 {p2, {1, 0}};
-	Vertex vertex3 {p3, {1, 1}};
-	Vertex vertex4 {p4, {0, 1}};
+	Vertex vertex1{p1, {0, 0}};
+	Vertex vertex2{p2, {1, 0}};
+	Vertex vertex3{p3, {1, 1}};
+	Vertex vertex4{p4, {0, 1}};
 
 	std::vector<BaseTriangle*> baseTris;
 	baseTris.push_back(new BaseTriangle(vertex1, vertex2, vertex3));

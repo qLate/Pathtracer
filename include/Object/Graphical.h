@@ -5,6 +5,7 @@
 
 #include "Object.h"
 #include "Material.h"
+#include "Model.h"
 #include "Triangle.h"
 
 class BVHNode;
@@ -50,22 +51,18 @@ class Mesh : public Graphical
 {
 protected:
 	Model* _model;
-	std::vector<Triangle*> _triangles;
 
 	Mesh() = default;
 
-	void init(const Model* model);
-	void removeTriangles();
+	void init(Model* model);
 
 public:
 	Mesh(Model* model, glm::vec3 pos = {}, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
 	Mesh(const Mesh& orig);
-	~Mesh() override;
 
 	Model* model() const { return _model; }
-	std::vector<Triangle*> triangles() const { return _triangles; }
 
-	void setModel(const Model* model);
+	void setModel(Model* model);
 
 	constexpr static auto properties();
 

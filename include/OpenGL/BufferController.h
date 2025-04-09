@@ -98,7 +98,7 @@ private:
 	struct ObjectStruct
 	{
 		int objType;
-		int materialIndex;
+		int materialId;
 		glm::vec2 _pad;
 		glm::vec4 pos;
 		glm::mat4x4 transform;

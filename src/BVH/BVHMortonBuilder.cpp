@@ -24,14 +24,14 @@ BVHMortonBuilder::BVHMortonBuilder()
 	_ssboMinMaxBound->setDataCapacity(1);
 }
 
-void BVHMortonBuilder::build(const std::vector<Triangle*>& triangles)
+void BVHMortonBuilder::build()
 {
-	buildGPU(triangles);
+	buildGPU();
 }
 
-void BVHMortonBuilder::buildGPU(const std::vector<Triangle*>& triangles)
+void BVHMortonBuilder::buildGPU()
 {
-	int n = triangles.size();
+	int n = Scene::baseTriangles.size();
 	buildGPU_morton(n);
 	buildGPU_tree(n);
 }
@@ -85,160 +85,160 @@ void BVHMortonBuilder::buildGPU_tree(int n)
 	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-
-static auto& nodes = BVH::nodes;
-static auto& originalTriIndices = BVH::originalTriIndices;
-
-void BVHMortonBuilder::buildCPU(const std::vector<Triangle*>& triangles)
-{
-	nodes.clear();
-
-	std::vector<std::pair<uint32_t, int>> sortedCodes;
-	buildCPU_morton(triangles, sortedCodes);
-	buildCPU_recordTriIndices(triangles, sortedCodes);
-	buildCPU_buildInternal(triangles, sortedCodes);
-}
-void BVHMortonBuilder::buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
-{
-	auto centers = std::vector<glm::vec3>(triangles.size());
-#pragma omp parallel for
-	for (int i = 0; i < triangles.size(); i++)
-		centers[i] = triangles[i]->getCenter();
-
-	auto mortonCodes = MortonCodes::generateMortonCodes(centers);
-
-	sortedCodes = std::vector<std::pair<uint32_t, int>>(triangles.size());
-#pragma omp parallel for
-	for (int i = 0; i < triangles.size(); i++)
-		sortedCodes[i] = {mortonCodes[i], i};
-
-	std::sort(std::execution::par_unseq, sortedCodes.begin(), sortedCodes.end(), [](auto a, auto b) { return a.first < b.first; });
-}
-
-void BVHMortonBuilder::buildCPU_recordTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes)
-{
-	originalTriIndices.resize(triangles.size());
-#pragma omp parallel for
-	for (int i = 0; i < triangles.size(); i++)
-		originalTriIndices[i] = sortedCodes[i].second;
-}
-
-void BVHMortonBuilder::buildCPU_buildInternal(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
-{
-	int n = sortedCodes.size();
-	auto prevSize = nodes.size();
-	nodes.resize(2 * n - 1);
-#pragma omp parallel for
-	for (int i = prevSize; i < 2 * n - 1; i++)
-		nodes[i] = new BVHNode();
-
-	auto lcp = [&sortedCodes, &n](int i, int j)
-	{
-		if (i < 0 || i >= n || j < 0 || j >= n) return -1;
-		return std::countl_zero(sortedCodes[i].first ^ sortedCodes[j].first);
-	};
-
-#pragma omp parallel for
-	for (int i = 0; i < n - 1; i++)
-	{
-		int dir = glm::sign(lcp(i, i + 1) - lcp(i, i - 1));
-		int minPrefix = lcp(i, i - dir);
-
-		int l_max = 2;
-		while (lcp(i, i + l_max * dir) > minPrefix)
-			l_max *= 2;
-
-		int l = 0;
-		for (int step = l_max / 2; step > 0; step /= 2)
-		{
-			if (lcp(i, i + (l + step) * dir) > minPrefix)
-				l += step;
-		}
-		int j = i + l * dir;
-
-		// Handle duplicate codes
-		if (dir == 0)
-			while (lcp(i, j) == lcp(i, j + 1))
-				j++;
-
-		int split;
-		if (sortedCodes[i].first == sortedCodes[j].first)
-			split = std::min(i, j);
-		else
-		{
-			int delta = lcp(i, j);
-			int s = 0;
-			int t = abs(j - i);
-			for (int div = 2; t * 2 / div > 0; div *= 2)
-			{
-				int t_ = ceil(t / (float)div);
-				if (lcp(i, i + (s + t_) * dir) > delta)
-					s += t_;
-			}
-			split = i + s * dir + std::min(dir, 0);
-		}
-
-		auto left = std::min(i, j) == split ? split + (n - 1) : split;
-		auto right = std::max(i, j) == split + 1 ? split + 1 + (n - 1) : split + 1;
-
-		nodes[i]->left = left;
-		nodes[i]->right = right;
-		nodes[left]->parent = i;
-		nodes[right]->parent = i;
-	}
-
-#pragma omp parallel for
-	for (int i = 0; i < n - 1; i++)
-	{
-		int left = nodes[i]->left;
-		int right = nodes[i]->right;
-
-		nodes[i]->hitNext = left;
-		nodes[left]->missNext = right;
-
-		if (nodes[i]->parent != -1)
-		{
-			int curr = right;
-			do
-			{
-				curr = nodes[curr]->parent;
-				if (nodes[curr]->parent == -1)
-				{
-					nodes[right]->missNext = -1;
-					break;
-				}
-				nodes[right]->missNext = nodes[nodes[curr]->parent]->right;
-			}
-			while (nodes[right]->missNext == curr);
-		}
-
-		if (left >= n - 1) nodes[left]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, left - (n - 1), left - (n - 1));
-		if (right >= n - 1) nodes[right]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, right - (n - 1), right - (n - 1));
-	}
-
-	buildCPU_calcBoxesBottomUp(n);
-}
-
-void BVHMortonBuilder::buildCPU_buildLeavesAndLinks(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
-{
-	if (calculated[nodeInd]->fetch_add(1) == 0) return;
-
-	auto node = nodes[nodeInd];
-	auto left = nodes[node->left];
-	auto right = nodes[node->right];
-	node->box = AABB::getUnitedBox(left->box, right->box);
-
-	if (node->parent != -1)
-		buildCPU_buildLeavesAndLinks(node->parent, calculated);
-}
-void BVHMortonBuilder::buildCPU_calcBoxesBottomUp(int n)
-{
-	std::vector<std::unique_ptr<std::atomic<int>>> calculated(n - 1);
-#pragma omp parallel for
-	for (int i = 0; i < n - 1; i++)
-		calculated[i] = std::make_unique<std::atomic<int>>(0);
-
-#pragma omp parallel for
-	for (int i = 0; i < n; i++)
-		buildCPU_buildLeavesAndLinks(nodes[i + n - 1]->parent, calculated);
-}
+//
+//static auto& nodes = BVH::nodes;
+//static auto& originalTriIndices = BVH::originalTriIndices;
+//
+//void BVHMortonBuilder::buildCPU(const std::vector<Triangle*>& triangles)
+//{
+//	nodes.clear();
+//
+//	std::vector<std::pair<uint32_t, int>> sortedCodes;
+//	buildCPU_morton(triangles, sortedCodes);
+//	buildCPU_recordTriIndices(triangles, sortedCodes);
+//	buildCPU_buildInternal(triangles, sortedCodes);
+//}
+//void BVHMortonBuilder::buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
+//{
+//	auto centers = std::vector<glm::vec3>(triangles.size());
+//#pragma omp parallel for
+//	for (int i = 0; i < triangles.size(); i++)
+//		centers[i] = triangles[i]->getCenter();
+//
+//	auto mortonCodes = MortonCodes::generateMortonCodes(centers);
+//
+//	sortedCodes = std::vector<std::pair<uint32_t, int>>(triangles.size());
+//#pragma omp parallel for
+//	for (int i = 0; i < triangles.size(); i++)
+//		sortedCodes[i] = {mortonCodes[i], i};
+//
+//	std::sort(std::execution::par_unseq, sortedCodes.begin(), sortedCodes.end(), [](auto a, auto b) { return a.first < b.first; });
+//}
+//
+//void BVHMortonBuilder::buildCPU_recordTriIndices(const std::vector<Triangle*>& triangles, const std::vector<std::pair<uint32_t, int>>& sortedCodes)
+//{
+//	originalTriIndices.resize(triangles.size());
+//#pragma omp parallel for
+//	for (int i = 0; i < triangles.size(); i++)
+//		originalTriIndices[i] = sortedCodes[i].second;
+//}
+//
+//void BVHMortonBuilder::buildCPU_buildInternal(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes)
+//{
+//	int n = sortedCodes.size();
+//	auto prevSize = nodes.size();
+//	nodes.resize(2 * n - 1);
+//#pragma omp parallel for
+//	for (int i = prevSize; i < 2 * n - 1; i++)
+//		nodes[i] = new BVHNode();
+//
+//	auto lcp = [&sortedCodes, &n](int i, int j)
+//	{
+//		if (i < 0 || i >= n || j < 0 || j >= n) return -1;
+//		return std::countl_zero(sortedCodes[i].first ^ sortedCodes[j].first);
+//	};
+//
+//#pragma omp parallel for
+//	for (int i = 0; i < n - 1; i++)
+//	{
+//		int dir = glm::sign(lcp(i, i + 1) - lcp(i, i - 1));
+//		int minPrefix = lcp(i, i - dir);
+//
+//		int l_max = 2;
+//		while (lcp(i, i + l_max * dir) > minPrefix)
+//			l_max *= 2;
+//
+//		int l = 0;
+//		for (int step = l_max / 2; step > 0; step /= 2)
+//		{
+//			if (lcp(i, i + (l + step) * dir) > minPrefix)
+//				l += step;
+//		}
+//		int j = i + l * dir;
+//
+//		// Handle duplicate codes
+//		if (dir == 0)
+//			while (lcp(i, j) == lcp(i, j + 1))
+//				j++;
+//
+//		int split;
+//		if (sortedCodes[i].first == sortedCodes[j].first)
+//			split = std::min(i, j);
+//		else
+//		{
+//			int delta = lcp(i, j);
+//			int s = 0;
+//			int t = abs(j - i);
+//			for (int div = 2; t * 2 / div > 0; div *= 2)
+//			{
+//				int t_ = ceil(t / (float)div);
+//				if (lcp(i, i + (s + t_) * dir) > delta)
+//					s += t_;
+//			}
+//			split = i + s * dir + std::min(dir, 0);
+//		}
+//
+//		auto left = std::min(i, j) == split ? split + (n - 1) : split;
+//		auto right = std::max(i, j) == split + 1 ? split + 1 + (n - 1) : split + 1;
+//
+//		nodes[i]->left = left;
+//		nodes[i]->right = right;
+//		nodes[left]->parent = i;
+//		nodes[right]->parent = i;
+//	}
+//
+//#pragma omp parallel for
+//	for (int i = 0; i < n - 1; i++)
+//	{
+//		int left = nodes[i]->left;
+//		int right = nodes[i]->right;
+//
+//		nodes[i]->hitNext = left;
+//		nodes[left]->missNext = right;
+//
+//		if (nodes[i]->parent != -1)
+//		{
+//			int curr = right;
+//			do
+//			{
+//				curr = nodes[curr]->parent;
+//				if (nodes[curr]->parent == -1)
+//				{
+//					nodes[right]->missNext = -1;
+//					break;
+//				}
+//				nodes[right]->missNext = nodes[nodes[curr]->parent]->right;
+//			}
+//			while (nodes[right]->missNext == curr);
+//		}
+//
+//		if (left >= n - 1) nodes[left]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, left - (n - 1), left - (n - 1));
+//		if (right >= n - 1) nodes[right]->setLeaf([&triangles, &sortedCodes](int k) { return triangles[sortedCodes[k].second]; }, right - (n - 1), right - (n - 1));
+//	}
+//
+//	buildCPU_calcBoxesBottomUp(n);
+//}
+//
+//void BVHMortonBuilder::buildCPU_buildLeavesAndLinks(int nodeInd, const std::vector<std::unique_ptr<std::atomic<int>>>& calculated)
+//{
+//	if (calculated[nodeInd]->fetch_add(1) == 0) return;
+//
+//	auto node = nodes[nodeInd];
+//	auto left = nodes[node->left];
+//	auto right = nodes[node->right];
+//	node->box = AABB::getUnitedBox(left->box, right->box);
+//
+//	if (node->parent != -1)
+//		buildCPU_buildLeavesAndLinks(node->parent, calculated);
+//}
+//void BVHMortonBuilder::buildCPU_calcBoxesBottomUp(int n)
+//{
+//	std::vector<std::unique_ptr<std::atomic<int>>> calculated(n - 1);
+//#pragma omp parallel for
+//	for (int i = 0; i < n - 1; i++)
+//		calculated[i] = std::make_unique<std::atomic<int>>(0);
+//
+//#pragma omp parallel for
+//	for (int i = 0; i < n; i++)
+//		buildCPU_buildLeavesAndLinks(nodes[i + n - 1]->parent, calculated);
+//}

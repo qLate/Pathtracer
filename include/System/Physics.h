@@ -3,9 +3,9 @@
 #include "ShaderProgram.h"
 #include "Utils.h"
 
+class BaseTriangle;
 class Object;
 class SSBO;
-class Triangle;
 
 struct RaycastHit
 {
@@ -14,7 +14,7 @@ struct RaycastHit
 	glm::vec3 normal;
 	glm::vec2 uv;
 	Object* object;
-	Triangle* triangle;
+	BaseTriangle* triangle;
 	bool hitLight;
 };
 

@@ -93,7 +93,6 @@ void SceneSetup::redGreenRoom()
 	cube1->setMaterial({Color::skyblue(), true, tex, 1});
 }
 
-
 void SceneSetup::redGreenRoomOriginal()
 {
 	auto camera = new Camera({278, -800, 278}, 0.69f);
