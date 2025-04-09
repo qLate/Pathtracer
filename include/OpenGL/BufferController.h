@@ -67,6 +67,7 @@ public:
 
 	friend class RaytraceShader;
 	friend class Program;
+	friend class BVHMortonBuilder;
 
 private:
 	struct TextureStruct

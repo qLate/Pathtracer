@@ -12,7 +12,7 @@ class Model
 	std::string _path;
 	std::vector<BaseTriangle*> _baseTriangles;
 
-	int _bvhNodeStart = -1, _bvhNodeCount = -1;
+	int _bvhRootNode = -1;
 
 	Model(const std::filesystem::path& path);
 	void parse(const std::filesystem::path& path);
@@ -29,10 +29,9 @@ public:
 	~Model();
 
 	std::vector<BaseTriangle*> baseTriangles() const { return _baseTriangles; }
-	int bvhNodeStart() const { return _bvhNodeStart; }
-	int bvhNodeCount() const { return _bvhNodeCount; }
+	int bvhRootNode() const { return _bvhRootNode; }
 
-	void setBvhValues(int bvhNodeStart, int bvhNodeCount);
+	void setBvhRootNode(int bvhRootNode);
 
 	int triStartIndex() const;
 

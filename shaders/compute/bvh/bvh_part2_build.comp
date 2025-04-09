@@ -22,19 +22,16 @@ layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
 uniform int n = -1;
 uniform int nodeOffset = 0;
 
-#define NODE(i) nodes[(i) + nodeOffset]
-#define CODE(i) mortonCodes[(i) + nodeOffset]
-
 int lcp(uint i, uint j)
 {
     if (i < 0 || i >= n || j < 0 || j >= n) return -1;
-    return 31 - findMSB(CODE(i) ^ CODE(j));
+    return 31 - findMSB(mortonCodes[i] ^ mortonCodes[j]);
 }
 
 void buildInnerNodes(int i)
 {
     if (i >= n - 1) return;
-    if (i == 0) NODE(i).values.w = -1;
+    if (i == 0) nodes[i + nodeOffset].values.w = -1;
 
     int dir = int(sign(lcp(i, i + 1) - lcp(i, i - 1)));
     int minPrefix = lcp(i, i - dir);
@@ -44,7 +41,8 @@ void buildInnerNodes(int i)
         l_max *= 4;
 
     int l = 0;
-    for (int step = l_max / 2; step > 0; step /= 2) {
+    for (int step = l_max / 2; step > 0; step /= 2)
+    {
         if (lcp(i, i + (l + step) * dir) > minPrefix)
             l += step;
     }
@@ -55,13 +53,15 @@ void buildInnerNodes(int i)
             j++;
 
     int split;
-    if (CODE(i) == CODE(j))
+    if (mortonCodes[i] == mortonCodes[j])
         split = min(i, j);
-    else {
+    else
+    {
         int delta = lcp(i, j);
         int s = 0;
         int t = abs(j - i);
-        for (int div = 2; t * 2 / div > 0; div *= 2) {
+        for (int div = 2; t * 2 / div > 0; div *= 2)
+        {
             int t_ = int(ceil(t / float(div)));
             if (lcp(i, i + (s + t_) * dir) > delta)
                 s += t_;
@@ -72,76 +72,90 @@ void buildInnerNodes(int i)
     int left = min(i, j) == split ? split + (n - 1) : split;
     int right = max(i, j) == split + 1 ? split + 1 + (n - 1) : split + 1;
 
-    NODE(i).values.xy = ivec2(left, right);
-    NODE(left).values.w = i;
-    NODE(right).values.w = i;
+    nodes[i + nodeOffset].values.xy = ivec2(left + nodeOffset, right + nodeOffset);
+    nodes[left + nodeOffset].values.w = i + nodeOffset;
+    nodes[right + nodeOffset].values.w = i + nodeOffset;
+}
+
+void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound)
+{
+    vec3 p0 = tri.vertices[0].posU.xyz;
+    vec3 p1 = tri.vertices[1].posU.xyz;
+    vec3 p2 = tri.vertices[2].posU.xyz;
+
+    minBound = min(min(p0, p1), p2) - vec3(0.0001);
+    maxBound = max(max(p0, p1), p2) + vec3(0.0001);
 }
 
 void setLeaf(int i)
 {
-    uint origInd = triIndices[i - (n - 1)];
-    calcTriangleBox(triangles[origInd], NODE(i).min.xyz, NODE(i).max.xyz);
-    NODE(i).min.w = origInd;
-    // NODE(i).max.w = 1;
-    NODE(i).values.z = 1;
-    NODE(i).links.x = NODE(i).links.y;
+    uint origInd = triIndices[i - (n - 1) - nodeOffset];
+    calcTriangleBox(triangles[origInd], nodes[i].min.xyz, nodes[i].max.xyz);
+    nodes[i].min.w = origInd;
+    // nodes[i].max.w = 1;
+    nodes[i].values.z = 1;
+    nodes[i].links.x = nodes[i].links.y;
 }
 
 void buildLinksAndLeafs(int i)
 {
     if (i >= n - 1) return;
 
-    int left = int(NODE(i).values.x);
-    int right = int(NODE(i).values.y);
-    int parent = int(NODE(i).values.w);
+    int left = int(nodes[i + nodeOffset].values.x);
+    int right = int(nodes[i + nodeOffset].values.y);
+    int parent = int(nodes[i + nodeOffset].values.w);
 
-    NODE(i).links.x = left;
-    NODE(left).links.y = right;
+    nodes[i + nodeOffset].links.x = left;
+    nodes[left].links.y = right;
 
-    if (parent != -1) {
+    if (parent != -1)
+    {
         int curr = right;
         do {
-            curr = int(NODE(curr).values.w);
-            if (int(NODE(curr).values.w) == -1)
+            curr = int(nodes[curr].values.w);
+            if (int(nodes[curr].values.w) == -1)
             {
-                NODE(right).links.y = -1;
+                nodes[right].links.y = -1;
                 break;
             }
-            NODE(right).links.y = NODE(int(NODE(curr).values.w)).values.y;
+            nodes[right].links.y = nodes[int(nodes[curr].values.w)].values.y;
         }
-        while (int(NODE(right).links.y) == curr);
+        while (int(nodes[right].links.y) == curr);
     }
 
-    if (left >= n - 1) setLeaf(left);
-    if (right >= n - 1) setLeaf(right);
+    if (left >= n - 1 + nodeOffset) setLeaf(left);
+    if (right >= n - 1 + nodeOffset) setLeaf(right);
 }
 
 void calcBoxes(int i)
 {
     if (i >= n) return;
 
-    int curr = NODE(i + n - 1).values.w;
+    int curr = nodes[i + n - 1 + nodeOffset].values.w;
     while (curr != -1)
     {
-        if (atomicAdd(NODE(curr).links.z, 1) == 0) return;
+        if (atomicAdd(nodes[curr].links.z, 1) == 0) return;
 
-        BVHNode node = NODE(curr);
-        node.min.xyz = min(NODE(node.values.x).min.xyz, NODE(node.values.y).min.xyz);
-        node.max.xyz = max(NODE(node.values.x).max.xyz, NODE(node.values.y).max.xyz);
-        NODE(curr) = node;
+        BVHNode node = nodes[curr];
+        node.min.xyz = min(nodes[node.values.x].min.xyz, nodes[node.values.y].min.xyz);
+        node.max.xyz = max(nodes[node.values.x].max.xyz, nodes[node.values.y].max.xyz);
+        nodes[curr] = node;
 
-        curr = NODE(curr).values.w;
+        curr = nodes[curr].values.w;
     }
 }
 
 uniform int pass = -1;
+
 void main()
 {
     int gid = int(gl_GlobalInvocationID.x);
     if (pass == 0)
     {
-        if (gid >= n) return;
-        NODE(gid).links = ivec4(-1, -1, 0, 0);
+        if (gid >= 2 * n - 1) return;
+        nodes[gid + nodeOffset].min.w = -1;
+        nodes[gid + nodeOffset].values = ivec4(-1, -1, 0, -1);
+        nodes[gid + nodeOffset].links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)
         buildInnerNodes(gid);

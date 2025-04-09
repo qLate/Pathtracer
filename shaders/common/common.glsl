@@ -33,8 +33,19 @@
 #define MAGENTA vec3(1, 0, 1)
 #define GRAY vec3(0.5, 0.5, 0.5)
 #define DARK_GRAY vec3(0.2, 0.2, 0.2)
+#define PURPLE vec3(0.5, 0, 0.5)
 
 vec3 COLOR_DEBUG = vec3(-1);
+
+void red() {
+    COLOR_DEBUG = RED;
+}
+void green() {
+    COLOR_DEBUG = GREEN;
+}
+void blue() {
+    COLOR_DEBUG = BLUE;
+}
 
 struct Light
 {
@@ -122,6 +133,7 @@ layout(std140, binding = 4) /*buffer*/ uniform Objects
     Object objects[];
 };
 
+uniform int triCount;
 layout(std140, binding = 5) /*buffer*/ uniform Triangles
 {
     Triangle triangles[];
@@ -190,24 +202,6 @@ mat4x4 getTransformRotation(mat4x4 mat)
         for (int j = 0; j < 3; j++)
             rotMat[i][j] = mat[i][j];
     return rotMat;
-}
-
-vec3 getTriangleCenter(Triangle tri)
-{
-    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.info.y)]);
-    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.info.y)]);
-    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.info.y)]);
-    return (p0 + p1 + p2) * 0.33333333f;
-}
-
-void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound)
-{
-    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, objects[int(tri.info.y)]);
-    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, objects[int(tri.info.y)]);
-    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, objects[int(tri.info.y)]);
-
-    minBound = min(min(p0, p1), p2) - vec3(0.0001);
-    maxBound = max(max(p0, p1), p2) + vec3(0.0001);
 }
 
 void calcGlobalTriVertices(Triangle tri, Object obj, out vec3 p0, out vec3 p1, out vec3 p2)

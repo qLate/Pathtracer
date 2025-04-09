@@ -98,7 +98,10 @@ void Mesh::init(Model* model)
 
 void Mesh::setModel(Model* model)
 {
+	if (model == _model) return;
 	_model = model;
+
+	BufferController::markBufferForUpdate(BufferType::Objects);
 }
 
 Square::Square() : _side(0)

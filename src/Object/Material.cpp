@@ -122,7 +122,7 @@ void Texture::initData(const std::vector<uint8_t>& image)
 
 Material* Material::defaultLit()
 {
-	static Material instance(Color::white(), true);
+	static Material instance(Color::gray(), true);
 	return &instance;
 }
 Material* Material::defaultUnlit()

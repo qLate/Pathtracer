@@ -11,7 +11,8 @@ layout(std140, binding = 6) /*buffer*/ uniform TriangleCenters
     vec3 centers[];
 };
 
-layout(std140, binding = 7) /*buffer*/ uniform MinMax {
+layout(std140, binding = 7) /*buffer*/ uniform MinMax
+{
     ivec3 globalMinInt;
     ivec3 globalMaxInt;
 };
@@ -29,7 +30,7 @@ layout(std430, binding = 9) /*buffer*/ uniform BVHTriIndices
 /*shared*/ vec3 localMin[256];
 /*shared*/ vec3 localMax[256];
 
-void computeBounds(uint gid, vec3 value)
+void computeBounds(vec3 value)
 {
     uint lid = gl_LocalInvocationID.x;
     uint groupSize = gl_WorkGroupSize.x;
@@ -87,9 +88,18 @@ void generateMortonCode(uint gid)
     mortonCodes[gid] = computeMortonCode(centers[gid], boundMin, boundMax);
 }
 
-uniform int n = -1;
+vec3 getTriangleCenter(Triangle tri)
+{
+    vec3 p0 = tri.vertices[0].posU.xyz;
+    vec3 p1 = tri.vertices[1].posU.xyz;
+    vec3 p2 = tri.vertices[2].posU.xyz;
+    return (p0 + p1 + p2) * 0.33333333f;
+}
 
+uniform int n = -1;
+uniform int triOffset = 0;
 uniform int pass = -1;
+
 void main()
 {
     int gid = int(gl_GlobalInvocationID.x);
@@ -97,13 +107,13 @@ void main()
 
     if (pass == 0)
     {
-        vec3 triCenter = getTriangleCenter(triangles[gid]);
-        computeBounds(gid, triCenter);
+        vec3 triCenter = getTriangleCenter(triangles[gid + triOffset]);
+        computeBounds(triCenter);
         centers[gid] = triCenter;
     }
     else if (pass == 1)
     {
         generateMortonCode(gid);
-        triIndices[gid] = gid;
+        triIndices[gid] = gid + triOffset;
     }
 }

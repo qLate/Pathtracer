@@ -46,6 +46,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	tm.printElapsedFromLast("Lights loaded in ");
 
 	delete scene;
+
 	if (Scene::baseTriangles.empty())
 		new Cube({}, 0);
 }
@@ -203,7 +204,8 @@ void SceneLoaderPbrt::loadScene_shapes(const minipbrt::Scene* scene, const std::
 	int count = 0;
 	for (const auto* inst : scene->instances)
 	{
-		if (count++ > 100) return;
+		count++;
+		if (count > 100) continue;
 		auto obj = scene->objects[inst->object];
 
 		glm::mat4 objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));

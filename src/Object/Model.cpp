@@ -23,6 +23,8 @@ Model::Model(const Model& other) : _path(other._path)
 
 void Model::init()
 {
+	Scene::models.push_back(this);
+
 	Scene::baseTriangles.insert(Scene::baseTriangles.end(), this->_baseTriangles.begin(), this->_baseTriangles.end());
 	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
@@ -41,6 +43,8 @@ Model::Model(const std::vector<BaseTriangle*>& baseTriangles)
 
 Model::~Model()
 {
+	std::erase(Scene::models, this);
+
 	auto fromInd = std::ranges::find(Scene::baseTriangles, _baseTriangles[0]);
 	auto toInd = std::ranges::find(Scene::baseTriangles, _baseTriangles.back());
 	if (toInd - fromInd >= _baseTriangles.size()) throw std::exception("Base triangles weren't contiguous in memory.");
@@ -50,10 +54,9 @@ Model::~Model()
 		delete triangle;
 }
 
-void Model::setBvhValues(int bvhNodeStart, int bvhNodeCount)
+void Model::setBvhRootNode(int bvhRootNode)
 {
-	_bvhNodeStart = bvhNodeStart;
-	_bvhNodeCount = bvhNodeCount;
+	_bvhRootNode = bvhRootNode;
 }
 int Model::triStartIndex() const
 {

@@ -20,21 +20,16 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
-	//SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
+	//redGreenRoom();
+	SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
 }
 #endif
 
-void SceneSetup::museumScene()
+void SceneSetup::emptyScene()
 {
-	auto camera = new Camera({9.09, -4.37, 2.47});
-	camera->setRot({0.83f, 0.05f, 0.036f, 0.54f});
-	auto tex = Texture::defaultTex();
-
-	auto model = Assets::load<Model>("assets/models/museum1.obj");
-	auto obj = new Mesh(model);
-	obj->setMaterial({Color::white(), true, tex});
-	auto light = new PointLight({-5.56, -0.19, 14.79}, {255 / 255.0f, 255 / 255.0f, 255.0 / 255.0f}, 1.3f, FLT_MAX);
+	auto camera = new Camera({ 0, 0, 30 });
+	camera->setBgColor(Color::gray());
+	camera->setRot(0, 180, 0);
 }
 
 void SceneSetup::churchScene()
@@ -132,7 +127,6 @@ void SceneSetup::skeletonScene()
 {
 	auto camera = new Camera({-365.9f * 0.05f, 508.46f * 0.05f, -1406.9f * 0.05f});
 	camera->setRot({0.98f, {-0.072f, 0.012f, -0.17f}});
-	camera->setBgColor({0.05f, 0.05f, 0.05f});
 	auto tex = Texture::defaultTex();
 
 	auto model = Assets::load<Model>("assets/models/skeleton.obj");

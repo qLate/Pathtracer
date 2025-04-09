@@ -24,8 +24,6 @@ class BVHMortonBuilder : public BVHBuilder
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
 
 	static void buildGPU();
-	static void buildGPU_morton(int n);
-	static void buildGPU_tree(int n);
 
 	//static void buildCPU();
 	//static void buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);

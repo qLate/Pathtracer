@@ -31,13 +31,13 @@ void BufferController::checkIfBufferUpdateRequired()
 		updateMaterials();
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Lights))
 		updateLights();
+	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles))
+	{
+		updateTriangles();
+		BVH::rebuildBVH();
+	}
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Objects))
 		updateObjects();
-	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles))
-		updateTriangles();
-
-	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles | BufferType::Objects))
-		BVH::rebuildBVH();
 
 	_buffersForUpdate = BufferType::None;
 }
@@ -200,7 +200,10 @@ void BufferController::updateObjects()
 		{
 			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
-			objectStruct.properties = {mesh->model()->triStartIndex(), mesh->model()->baseTriangles().size(), mesh->model()->bvhNodeStart(), mesh->model()->bvhNodeCount()};
+			if (mesh->model() != nullptr)
+				objectStruct.properties = {mesh->model()->triStartIndex(), mesh->model()->baseTriangles().size(), mesh->model()->bvhRootNode(), 0};
+			else
+				objectStruct.properties.xyz = {-1, -1, -1};
 			isPrim = false;
 		}
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
@@ -257,5 +260,7 @@ void BufferController::updateTriangles()
 	}
 	_ssboTriangles->ensureDataCapacity(data.size());
 	_ssboTriangles->setSubData((float*)data.data(), data.size());
+	Renderer::renderProgram()->fragShader()->setInt("triCount", triangles.size());
+
 	Renderer::resetSamples();
 }

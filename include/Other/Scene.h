@@ -2,6 +2,7 @@
 
 #include <vector>
 
+class Model;
 class BaseTriangle;
 class Material;
 class Light;
@@ -20,13 +21,14 @@ public:
 
 	inline static std::vector<Material*> materials{};
 	inline static std::vector<Texture*> textures{};
+	inline static std::vector<Model*> models{};
 };
 
 class SceneSetup
 {
 	static void setupScene();
 
-	static void museumScene();
+	static void emptyScene();
 	static void churchScene();
 	static void spiderScene();
 	static void redGreenRoom();

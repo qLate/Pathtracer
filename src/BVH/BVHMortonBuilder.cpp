@@ -4,6 +4,7 @@
 
 #include "BufferController.h"
 #include "GLObject.h"
+#include "Model.h"
 #include "MortonCodes.h"
 #include "Scene.h"
 #include "ShaderProgram.h"
@@ -32,58 +33,74 @@ void BVHMortonBuilder::build()
 void BVHMortonBuilder::buildGPU()
 {
 	int n = Scene::baseTriangles.size();
-	buildGPU_morton(n);
-	buildGPU_tree(n);
-}
-void BVHMortonBuilder::buildGPU_morton(int n)
-{
-	_ssboTriCenters->bind(6);
-	_ssboMinMaxBound->bind(7);
-	_ssboMortonCodes->bind(8);
-	_ssboBVHTriIndices->bind(9);
+	auto models = Scene::models;
+	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - models.size());
 
-	_ssboTriCenters->ensureDataCapacity(n);
-	_ssboMortonCodes->ensureDataCapacity(n);
-	_ssboMinMaxBound->clear();
-	_ssboBVHTriIndices->ensureDataCapacity(n);
+	int nodeOffset = 0;
+	int triOffset = 0;
+	for (int i = 0; i < models.size(); i++)
+	{
+		auto model = models[i];
 
-	_bvhMorton->use();
-	_bvhMorton->setInt("n", n);
+		int n_ = model->baseTriangles().size();
+		if (n_ <= 4)
+		{
+			nodeOffset += 2 * n_ - 1;
+			triOffset += n_;
+			continue;
+		}
+		model->setBvhRootNode(nodeOffset);
 
-	_bvhMorton->setInt("pass", 0);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		// Part 1
+		_ssboTriCenters->bind(6);
+		_ssboMinMaxBound->bind(7);
+		_ssboMortonCodes->bind(8);
+		_ssboBVHTriIndices->bind(9);
 
-	_bvhMorton->setInt("pass", 1);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		_ssboTriCenters->ensureDataCapacity(n_);
+		_ssboMortonCodes->ensureDataCapacity(n_);
+		_ssboMinMaxBound->clear();
+		_ssboBVHTriIndices->ensureDataCapacity(n_);
 
-	radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n);
-}
-void BVHMortonBuilder::buildGPU_tree(int n)
-{
-	BufferController::ssboBVHNodes()->bind(6);
-	_ssboBVHTriIndices->bind(7);
-	_ssboMortonCodes->bind(8);
-	BufferController::ssboTriangles()->bindDefault();
-	BufferController::ssboObjects()->bindDefault();
+		_bvhMorton->use();
+		_bvhMorton->setInt("n", n_);
+		_bvhMorton->setInt("triOffset", triOffset);
 
-	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - 1);
+		_bvhMorton->setInt("pass", 0);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	_bvhBuild->setInt("objectCount", Scene::objects.size());
+		_bvhMorton->setInt("pass", 1);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	_bvhBuild->use();
-	_bvhBuild->setInt("n", n);
+		radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n_);
 
-	_bvhBuild->setInt("pass", 0);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		// Part 2
+		BufferController::ssboTriangles()->bindDefault();
+		BufferController::ssboBVHNodes()->bind(6);
+		_ssboBVHTriIndices->bind(7);
+		_ssboMortonCodes->bind(8);
 
-	_bvhBuild->setInt("pass", 1);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		_bvhBuild->use();
+		_bvhBuild->setInt("n", n_);
+		_bvhBuild->setInt("nodeOffset", nodeOffset);
 
-	_bvhBuild->setInt("pass", 2);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		_bvhBuild->setInt("pass", 0);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	_bvhBuild->setInt("pass", 3);
-	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		_bvhBuild->setInt("pass", 1);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+		_bvhBuild->setInt("pass", 2);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+		_bvhBuild->setInt("pass", 3);
+		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+		nodeOffset += 2 * n_ - 1;
+		triOffset += n_;
+	}
+
+	BufferController::updateObjects();
 }
 
 //

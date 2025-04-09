@@ -61,6 +61,8 @@ void calcTriIntersectionValues(inout Ray ray)
     ray.hitPoint += ray.surfaceNormal * 0.001;
 }
 
+bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows);
+
 bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
 {
     vec3 rayPos = ray.pos;
@@ -75,14 +77,24 @@ bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
     ray.t = length(tVecLocal - ray.pos);
 
     bool hit = false;
-    for (int i = int(obj.properties.x); i < obj.properties.x + obj.properties.y; i++)
-    {
-        if (intersectTriangle(ray, i))
-        {
-            hit = true;
-            ray.hitTriIndex = i;
 
-            if (castingShadows) break;
+    int rootNode = int(obj.properties.z);
+    if (rootNode != -1)
+    {
+        if (intersectBVH(rootNode, ray, castingShadows))
+            hit = true;
+    }
+    else
+    {
+        for (int i = int(obj.properties.x); i < obj.properties.x + obj.properties.y; i++)
+        {
+            if (intersectTriangle(ray, i))
+            {
+                hit = true;
+                ray.hitTriIndex = i;
+
+                if (castingShadows) break;
+            }
         }
     }
 
@@ -266,6 +278,7 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
 {
     bool hit = false;
     int curr = rootNode;
+    int c = 0;
     while (curr != -1)
     {
         BVHNode node = nodes[curr];
@@ -286,6 +299,12 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
         }
         else
             curr = node.links.y;
+
+        if (triCount != 0 && c++ >= triCount * 2)
+        {
+            COLOR_DEBUG = GREEN;
+            break;
+        }
     }
     return hit;
 }
@@ -304,5 +323,7 @@ bool intersectWorld(inout Ray ray, bool castingShadows)
         }
     }
 
+    // if (intersectBVH(0, ray, castingShadows))
+    //     hit = true;
     return hit;
 }
