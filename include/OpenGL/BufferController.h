@@ -16,7 +16,6 @@ enum class BufferType
 	Lights = 4,
 	Objects = 8,
 	Triangles = 16,
-	BVHNodes = 32,
 };
 
 class BufferController
@@ -27,7 +26,6 @@ class BufferController
 	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 28;
 	static constexpr int BVH_NODE_ALIGN = 16;
-	static constexpr int BVH_TRI_INDICES_ALIGN = 1;
 	static constexpr int PRIM_OBJ_INDICES_ALIGN = 1;
 
 	inline static UPtr<UBO> _uboTextures;
@@ -36,7 +34,6 @@ class BufferController
 	inline static UPtr<SSBO> _ssboObjects;
 	inline static UPtr<SSBO> _ssboTriangles;
 	inline static UPtr<SSBO> _ssboBVHNodes;
-	inline static UPtr<SSBO> _ssboBVHTriIndices;
 	inline static UPtr<SSBO> _ssboPrimObjIndices;
 
 	inline static BufferType _buffersForUpdate;
@@ -58,7 +55,6 @@ public:
 	static UPtr<SSBO>& ssboObjects() { return _ssboObjects; }
 	static UPtr<SSBO>& ssboTriangles() { return _ssboTriangles; }
 	static UPtr<SSBO>& ssboBVHNodes() { return _ssboBVHNodes; }
-	static UPtr<SSBO>& ssboBVHTriIndices() { return _ssboBVHTriIndices; }
 	static UPtr<SSBO>& ssboPrimObjIndices() { return _ssboPrimObjIndices; }
 
 	static float lastPrimObjCount() { return _lastPrimObjCount; }
@@ -68,7 +64,6 @@ public:
 	static void updateLights();
 	static void updateObjects();
 	static void updateTriangles();
-	static void updateBVHNodes();
 
 	friend class RaytraceShader;
 	friend class Program;
@@ -119,7 +114,7 @@ private:
 		};
 
 		VertexStruct vertices[3];
-		glm::vec4 materialIndex;
+		glm::vec4 info;
 	};
 
 	struct BVHNodeStruct

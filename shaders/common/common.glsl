@@ -11,8 +11,8 @@
 #define OBJ_TYPE_SPHERE 1
 #define OBJ_TYPE_PLANE 2
 
-#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec3(0), vec2(0)
-#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec3(0), vec2(0)
+#define RAY_DEFAULT_ARGS FLT_MAX, FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
+#define RAY_DEFAULT_ARGS_WO_DIST FLT_MAX, -1, vec3(0), vec3(0), vec2(0)
 
 #define UP vec3(0, 1, 0)
 #define DOWN vec3(0, -1, 0)
@@ -75,13 +75,13 @@ struct Vertex
 struct Triangle
 {
     Vertex vertices[3];
-    vec4 info; // materialIndex, meshIndex, baseTriIndex
+    vec4 info; // materialIndex, meshIndex, interpolateNormals
 };
 
 struct BVHNode
 {
-    vec4 min; // min, trianglesStart
-    vec4 max; // max, triangleCount
+    vec4 min; // min, triIndex
+    vec4 max; // max
     ivec4 values; // left, right, isLeaf, parent
     ivec4 links; // hit, miss, boxCalculated
 };
@@ -93,9 +93,8 @@ struct Ray
     float t;
     int materialIndex;
     vec3 surfaceNormal;
-    vec3 surfaceNormalBase;
     vec3 interPoint;
-    vec2 uvPos;
+    vec2 uv;
 };
 
 // ----------- BUFFERS -----------

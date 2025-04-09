@@ -203,7 +203,7 @@ void SceneLoaderPbrt::loadScene_shapes(const minipbrt::Scene* scene, const std::
 	int count = 0;
 	for (const auto* inst : scene->instances)
 	{
-		if (count++ > 3000) return;
+		if (count++ > 100) return;
 		auto obj = scene->objects[inst->object];
 
 		glm::mat4 objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));
@@ -319,9 +319,12 @@ void SceneLoaderPbrt::loadScene_lights(minipbrt::Scene* scene)
 			auto il = dynamic_cast<const minipbrt::InfiniteLight*>(light);
 			Camera::instance->setBgColor(Color(il->L[0], il->L[1], il->L[2]));
 
-			auto tex = Assets::load<Texture>(il->mapname);
-			Renderer::renderProgram()->setBool("useEnvMap", true);
-			Renderer::renderProgram()->setHandle("envMap", tex->glTex()->getHandle());
+			if (il->mapname != nullptr)
+			{
+				auto tex = Assets::load<Texture>(il->mapname);
+				Renderer::renderProgram()->setBool("useEnvMap", true);
+				Renderer::renderProgram()->setHandle("envMap", tex->glTex()->getHandle());
+			}
 		}
 	}
 

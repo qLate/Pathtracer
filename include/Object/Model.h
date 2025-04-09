@@ -12,6 +12,8 @@ class Model
 	std::string _path;
 	std::vector<BaseTriangle*> _baseTriangles;
 
+	int _bvhNodeStart = -1, _bvhNodeCount = -1;
+
 	Model(const std::filesystem::path& path);
 	void parse(const std::filesystem::path& path);
 	void parseRapidobj(const std::filesystem::path& path);
@@ -24,6 +26,10 @@ public:
 	Model() = default;
 
 	std::vector<BaseTriangle*> baseTriangles() const { return _baseTriangles; }
+	int bvhNodeStart() const { return _bvhNodeStart; }
+	int bvhNodeCount() const { return _bvhNodeCount; }
+
+	void setBvhValues(int bvhNodeStart, int bvhNodeCount);
 
 	constexpr static auto properties();
 

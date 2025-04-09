@@ -19,6 +19,7 @@ BVHMortonBuilder::BVHMortonBuilder()
 	_ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
 	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
 	_ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
+	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN);
 
 	_ssboMinMaxBound->setDataCapacity(1);
 }
@@ -39,12 +40,12 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_ssboTriCenters->bind(6);
 	_ssboMinMaxBound->bind(7);
 	_ssboMortonCodes->bind(8);
-	BufferController::ssboBVHTriIndices()->bind(9);
+	_ssboBVHTriIndices->bind(9);
 
 	_ssboTriCenters->ensureDataCapacity(n);
 	_ssboMortonCodes->ensureDataCapacity(n);
 	_ssboMinMaxBound->clear();
-	BufferController::ssboBVHTriIndices()->ensureDataCapacity(n);
+	_ssboBVHTriIndices->ensureDataCapacity(n);
 	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - 1);
 
 	_bvhMorton->use();
@@ -56,12 +57,12 @@ void BVHMortonBuilder::buildGPU_morton(int n)
 	_bvhMorton->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	radixSort->operator()(_ssboMortonCodes->id(), BufferController::ssboBVHTriIndices()->id(), n);
+	radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n);
 }
 void BVHMortonBuilder::buildGPU_tree(int n)
 {
 	BufferController::ssboBVHNodes()->bind(6);
-	BufferController::ssboBVHTriIndices()->bind(7);
+	_ssboBVHTriIndices->bind(7);
 	_ssboMortonCodes->bind(8);
 	BufferController::ssboTriangles()->bindDefault();
 	BufferController::ssboObjects()->bindDefault();

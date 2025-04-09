@@ -62,6 +62,7 @@ public:
 	Mesh(const Mesh& orig);
 	~Mesh() override;
 
+	Model* model() const { return _model; }
 	std::vector<Triangle*> triangles() const { return _triangles; }
 
 	void setModel(const Model* model);

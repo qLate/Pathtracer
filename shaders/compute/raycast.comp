@@ -9,13 +9,8 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
     BVHNode nodes[];
 };
 
-layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
-{
-    int triIndices[];
-};
-
 uniform int primObjCount = 0;
-layout(std430, binding = 8) /*buffer*/ uniform PrimitiveObjectsIndices
+layout(std430, binding = 7) /*buffer*/ uniform PrimitiveObjectsIndices
 {
     float primObjIndices[];
 };
@@ -68,5 +63,5 @@ void main()
             hitLight = true;
     }
 
-    hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uvPos, hitObjIndex, hitTriIndex, hitLight);
+    hit = RaycastHit(ray.interPoint, ray.surfaceNormal, ray.uv, hitObjIndex, hitTriIndex, hitLight);
 }

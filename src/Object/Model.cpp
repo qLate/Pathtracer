@@ -30,6 +30,12 @@ Model::Model(const std::vector<glm::vec3>& points)
 		_baseTriangles.push_back(new BaseTriangle({points[0], points[i - 1], points[i]}));
 }
 
+void Model::setBvhValues(int bvhNodeStart, int bvhNodeCount)
+{
+	_bvhNodeStart = bvhNodeStart;
+	_bvhNodeCount = bvhNodeCount;
+}
+
 void Model::parseRapidobj(const std::filesystem::path& path)
 {
 	using namespace rapidobj;

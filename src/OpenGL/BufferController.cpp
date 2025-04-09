@@ -3,6 +3,7 @@
 #include "BVH.h"
 #include "Graphical.h"
 #include "Light.h"
+#include "Model.h"
 #include "MyMath.h"
 #include "Renderer.h"
 #include "Scene.h"
@@ -16,13 +17,10 @@ void BufferController::init()
 	_ssboObjects = make_unique<SSBO>(OBJECT_ALIGN, 4);
 	_ssboTriangles = make_unique<SSBO>(TRIANGLE_ALIGN, 5);
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
-	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN, 7);
-	_ssboPrimObjIndices = make_unique<SSBO>(PRIM_OBJ_INDICES_ALIGN, 8);
+	_ssboPrimObjIndices = make_unique<SSBO>(PRIM_OBJ_INDICES_ALIGN, 7);
 
 	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	//_uboMaterials->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	//_uboObjects->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
 }
 
 void BufferController::checkIfBufferUpdateRequired()
@@ -37,8 +35,6 @@ void BufferController::checkIfBufferUpdateRequired()
 		updateObjects();
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles))
 		updateTriangles();
-	if (Utils::hasFlag(_buffersForUpdate, BufferType::BVHNodes))
-		updateBVHNodes();
 
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Triangles | BufferType::Objects))
 		BVH::rebuildBVH();
@@ -71,7 +67,6 @@ void BufferController::bindBuffers()
 	_ssboObjects->bindDefault();
 	_ssboTriangles->bindDefault();
 	_ssboBVHNodes->bindDefault();
-	_ssboBVHTriIndices->bindDefault();
 	_ssboPrimObjIndices->bindDefault();
 }
 
@@ -206,6 +201,7 @@ void BufferController::updateObjects()
 		{
 			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
+			objectStruct.properties.xy = glm::vec2(mesh->model()->bvhNodeStart(), mesh->model()->bvhNodeCount());
 			isPrim = false;
 		}
 		else if (dynamic_cast<Sphere*>(obj) != nullptr)
@@ -256,41 +252,11 @@ void BufferController::updateTriangles()
 			triangleStruct.vertices[k].posU = glm::vec4(triangle->vertices()[k].pos, triangle->vertices()[k].uvPos.x);
 			triangleStruct.vertices[k].normalV = glm::vec4(triangle->vertices()[k].normal, triangle->vertices()[k].uvPos.y);
 		}
-		triangleStruct.materialIndex = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexId(), 0, 0);
+		triangleStruct.info = glm::vec4(triangle->mesh()->materialNoCopy()->id(), triangle->mesh()->indexId(), 0, 0);
 
 		data[i] = triangleStruct;
 	}
 	_ssboTriangles->ensureDataCapacity(data.size());
 	_ssboTriangles->setSubData((float*)data.data(), data.size());
-	Renderer::resetSamples();
-}
-
-void BufferController::updateBVHNodes()
-{
-	auto nodes = BVH::nodes;
-	std::vector<BVHNodeStruct> data1(nodes.size());
-	#pragma omp parallel for
-	for (int i = 0; i < nodes.size(); i++)
-	{
-		const auto& node = nodes[i];
-		BVHNodeStruct bvhNodeStruct {};
-		bvhNodeStruct.min = glm::vec4(node->box.min_, node->leafTrianglesStart);
-		bvhNodeStruct.max = glm::vec4(node->box.max_, node->leafTriangleCount);
-		bvhNodeStruct.values = glm::ivec4(node->left, node->right, node->isLeaf, node->parent);
-		bvhNodeStruct.links = glm::ivec4(node->hitNext, node->missNext, 0, 0);
-
-		data1[i] = bvhNodeStruct;
-	}
-	_ssboBVHNodes->setData((float*)data1.data(), data1.size());
-
-	// Update triangle indices
-	auto indices = BVH::originalTriIndices;
-	std::vector<uint32_t> data2(indices.size());
-	#pragma omp parallel for
-	for (int i = 0; i < indices.size(); i++)
-		data2[i] = indices[i];
-	_ssboBVHTriIndices->ensureDataCapacity(indices.size());
-	_ssboBVHTriIndices->setSubData((float*)data2.data(), data2.size());
-
 	Renderer::resetSamples();
 }

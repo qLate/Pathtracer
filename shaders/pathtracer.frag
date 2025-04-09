@@ -7,13 +7,8 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
     BVHNode nodes[];
 };
 
-layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
-{
-    int triIndices[];
-};
-
 uniform int primObjCount = 0;
-layout(std430, binding = 8) /*buffer*/ uniform PrimitiveObjectsIndices
+layout(std430, binding = 7) /*buffer*/ uniform PrimitiveObjectsIndices
 {
     float primObjIndices[];
 };
@@ -53,13 +48,16 @@ vec3 castRay(Ray ray)
     float brdfPdf = 1;
     for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
-        int hitTriIndex, _dummy;
-        if (!intersectWorld(ray, false, hitTriIndex, _dummy))
+        int hitTriIndex = -1, hitObjIndex = -1;
+        if (!intersectWorld(ray, false, hitTriIndex, hitObjIndex))
         {
             color += throughput * bgColor * sampleEnvMap(ray.dir);
             color = clamp(color, 0, 1);
             break;
         }
+
+        if (hitTriIndex != -1)
+            calcTriIntersectionValues(ray, hitTriIndex);
 
         Material mat = findMaterial(ray.materialIndex);
         if (length(mat.emission) > 0)
@@ -83,10 +81,7 @@ vec3 castRay(Ray ray)
             }
         }
 
-        ray.surfaceNormal = dot(ray.surfaceNormalBase != vec3(0) ? ray.surfaceNormalBase : ray.surfaceNormal, ray.dir) < 0 ? ray.surfaceNormal : -ray.surfaceNormal;
-        ray.interPoint += ray.surfaceNormal * 0.001;
-
-        vec2 uv = vec2(ray.uvPos.x, 1 - ray.uvPos.y);
+        vec2 uv = vec2(ray.uv.x, 1 - ray.uv.y);
         vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
 
         float roughness = mat.roughness;
@@ -164,8 +159,8 @@ void main()
         vec3 newSqr = mix(prevSqr, color * color, 1.0 / (totalSamples + 1));
         vec3 variance = newSqr - newMean * newMean;
 
-        if (COLOR_DEBUG != vec3(-1))
-            newMean = COLOR_DEBUG;
+        // if (COLOR_DEBUG != vec3(-1))
+        //     newMean = COLOR_DEBUG;
 
         outMean = vec4(newMean, 1.0);
         outSqr = vec4(newSqr, 1.0);
@@ -180,8 +175,8 @@ void main()
 
     outColor = vec4(finalColor, 1);
 
-    // if (COLOR_DEBUG != vec3(-1))
-    //     outColor = vec4(COLOR_DEBUG, 1);
+    if (COLOR_DEBUG != vec3(-1))
+        outColor = vec4(COLOR_DEBUG, 1);
     if (COLOR_HEAT != vec3(0))
         outColor.xyz += COLOR_HEAT;
 }

@@ -20,17 +20,21 @@ layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
 };
 
 uniform int n = -1;
+uniform int nodeOffset = 0;
+
+#define NODE(i) nodes[(i) + nodeOffset]
+#define CODE(i) mortonCodes[(i) + nodeOffset]
 
 int lcp(uint i, uint j)
 {
     if (i < 0 || i >= n || j < 0 || j >= n) return -1;
-    return 31 - findMSB(mortonCodes[i] ^ mortonCodes[j]);
+    return 31 - findMSB(CODE(i) ^ CODE(j));
 }
 
 void buildInnerNodes(int i)
 {
     if (i >= n - 1) return;
-    if (i == 0) nodes[i].values.w = -1;
+    if (i == 0) NODE(i).values.w = -1;
 
     int dir = int(sign(lcp(i, i + 1) - lcp(i, i - 1)));
     int minPrefix = lcp(i, i - dir);
@@ -46,13 +50,12 @@ void buildInnerNodes(int i)
     }
     int j = i + l * dir;
 
-    // Handle duplicate codes
     if (dir == 0)
         while (lcp(i, j) == lcp(i, j + 1))
             j++;
 
     int split;
-    if (mortonCodes[i] == mortonCodes[j])
+    if (CODE(i) == CODE(j))
         split = min(i, j);
     else {
         int delta = lcp(i, j);
@@ -69,42 +72,44 @@ void buildInnerNodes(int i)
     int left = min(i, j) == split ? split + (n - 1) : split;
     int right = max(i, j) == split + 1 ? split + 1 + (n - 1) : split + 1;
 
-    nodes[i].values.xy = ivec2(left, right);
-    nodes[left].values.w = i;
-    nodes[right].values.w = i;
+    NODE(i).values.xy = ivec2(left, right);
+    NODE(left).values.w = i;
+    NODE(right).values.w = i;
 }
 
 void setLeaf(int i)
 {
-    calcTriangleBox(triangles[triIndices[i - (n - 1)]], nodes[i].min.xyz, nodes[i].max.xyz);
-    nodes[i].min.w = i - (n - 1);
-    nodes[i].max.w = 1;
-    nodes[i].values.z = 1;
-    nodes[i].links.x = nodes[i].links.y;
+    uint origInd = triIndices[i - (n - 1)];
+    calcTriangleBox(triangles[origInd], NODE(i).min.xyz, NODE(i).max.xyz);
+    NODE(i).min.w = origInd;
+    // NODE(i).max.w = 1;
+    NODE(i).values.z = 1;
+    NODE(i).links.x = NODE(i).links.y;
 }
+
 void buildLinksAndLeafs(int i)
 {
     if (i >= n - 1) return;
 
-    int left = int(nodes[i].values.x);
-    int right = int(nodes[i].values.y);
-    int parent = int(nodes[i].values.w);
+    int left = int(NODE(i).values.x);
+    int right = int(NODE(i).values.y);
+    int parent = int(NODE(i).values.w);
 
-    nodes[i].links.x = left;
-    nodes[left].links.y = right;
+    NODE(i).links.x = left;
+    NODE(left).links.y = right;
 
     if (parent != -1) {
         int curr = right;
         do {
-            curr = int(nodes[curr].values.w);
-            if (int(nodes[curr].values.w) == -1)
+            curr = int(NODE(curr).values.w);
+            if (int(NODE(curr).values.w) == -1)
             {
-                nodes[right].links.y = -1;
+                NODE(right).links.y = -1;
                 break;
             }
-            nodes[right].links.y = nodes[int(nodes[curr].values.w)].values.y;
+            NODE(right).links.y = NODE(int(NODE(curr).values.w)).values.y;
         }
-        while (int(nodes[right].links.y) == curr);
+        while (int(NODE(right).links.y) == curr);
     }
 
     if (left >= n - 1) setLeaf(left);
@@ -115,17 +120,17 @@ void calcBoxes(int i)
 {
     if (i >= n) return;
 
-    int curr = nodes[i + n - 1].values.w;
+    int curr = NODE(i + n - 1).values.w;
     while (curr != -1)
     {
-        if (atomicAdd(nodes[curr].links.z, 1) == 0) return;
+        if (atomicAdd(NODE(curr).links.z, 1) == 0) return;
 
-        BVHNode node = nodes[curr];
-        node.min.xyz = min(nodes[node.values.x].min.xyz, nodes[node.values.y].min.xyz);
-        node.max.xyz = max(nodes[node.values.x].max.xyz, nodes[node.values.y].max.xyz);
-        nodes[curr] = node;
+        BVHNode node = NODE(curr);
+        node.min.xyz = min(NODE(node.values.x).min.xyz, NODE(node.values.y).min.xyz);
+        node.max.xyz = max(NODE(node.values.x).max.xyz, NODE(node.values.y).max.xyz);
+        NODE(curr) = node;
 
-        curr = nodes[curr].values.w;
+        curr = NODE(curr).values.w;
     }
 }
 
@@ -136,13 +141,12 @@ void main()
     if (pass == 0)
     {
         if (gid >= n) return;
-        nodes[gid].links = ivec4(-1, -1, 0, 0);
+        NODE(gid).links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)
         buildInnerNodes(gid);
     else if (pass == 2)
         buildLinksAndLeafs(gid);
-    else if (pass == 3) {
+    else if (pass == 3)
         calcBoxes(gid);
-    }
 }
