@@ -49,12 +49,11 @@ void BVHMortonBuilder::buildGPU()
 		auto model = models[i];
 
 		int n_ = model->baseTriangles().size();
-		if (n_ < MIN_BOTTOM_LEVEL_TRI_COUNT)
-		{
-			//nodeOffset += 2 * n_ - 1;
-			primOffset += n_;
-			continue;
-		}
+		//if (n_ < MIN_BOTTOM_LEVEL_TRI_COUNT)
+		//{
+		//	primOffset += n_;
+		//	continue;
+		//}
 		model->setBvhRootNode(nodeOffset);
 
 		buildCompute_morton(primOffset, n_, false);
@@ -72,17 +71,11 @@ void BVHMortonBuilder::buildGPU()
 
 void BVHMortonBuilder::buildTopLevel()
 {
-	int n = Scene::baseTriangles.size();
-	//int nodeOffset = 2 * n - Scene::models.size();
-
 	int topLevelPrimCount = Scene::graphicals.size();
 	buildCompute_morton(0, topLevelPrimCount, true);
 	buildCompute_tree(_topLevelStartIndex, topLevelPrimCount, true);
 
 	BufferController::setBVHRootNode(_topLevelStartIndex);
-
-	int nodeCount = 2 * n - Scene::models.size() + 2 * topLevelPrimCount - 1;
-	auto nodeData2 = BufferController::ssboBVHNodes()->readData<BufferController::BVHNodeStruct>(nodeCount);
 }
 
 void BVHMortonBuilder::buildCompute_morton(int primOffset, int n_, bool isTopLevel)

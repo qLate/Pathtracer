@@ -77,26 +77,26 @@ bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
     ray.t = length(tVecLocal - ray.pos);
 
     bool hit = false;
-
     int rootNode = int(obj.properties.z);
     if (rootNode != -1)
-    {
+    {   
         if (intersectBVHBottom(rootNode, ray, castingShadows))
             hit = true;
     }
-    else
-    {
-        for (int i = int(obj.properties.x); i < obj.properties.x + obj.properties.y; i++)
-        {
-            if (intersectTriangle(ray, i))
-            {
-                hit = true;
-                ray.hitTriIndex = i;
+    // else
+    // {
+    //     COLOR_DEBUG = RED;
+    //     for (int i = int(obj.properties.x); i < obj.properties.x + obj.properties.y; i++)
+    //     {
+    //         if (intersectTriangle(ray, i))
+    //         {
+    //             hit = true;
+    //             ray.hitTriIndex = i;
 
-                if (castingShadows) break;
-            }
-        }
-    }
+    //             if (castingShadows) break;
+    //         }
+    //     }
+    // }
 
     if (hit)
     {

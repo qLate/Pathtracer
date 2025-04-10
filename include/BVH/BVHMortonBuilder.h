@@ -8,7 +8,7 @@
 class BVHMortonBuilder : public BVHBuilder
 {
 	static constexpr int SHADER_GROUP_SIZE = 32;
-	static constexpr int MIN_BOTTOM_LEVEL_TRI_COUNT = 3;
+	//static constexpr int MIN_BOTTOM_LEVEL_TRI_COUNT = 3;
 
 	static constexpr int TRI_CENTER_ALIGN = 4;
 	static constexpr int MORTON_ALIGN = 1;
