@@ -24,6 +24,7 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 	_raycastProgram->setInt("objectCount", Scene::graphicals.size());
 	_raycastProgram->setInt("primObjCount", BufferController::lastPrimObjCount());
 	_raycastProgram->setInt("lightCount", Scene::lights.size());
+	_raycastProgram->setInt("triCount", Scene::baseTriangles.size());
 	_raycastProgram->setBool("doIntersectLights", WindowDrawer::showIcons());
 	_raycastProgram->setInt("bvhRootNode", BufferController::bvhRootNode());
 

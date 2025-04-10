@@ -90,8 +90,8 @@ void localToGlobalBox(vec3 localMin, vec3 localMax, Object obj, out vec3 globalM
     corners[6] = localToGlobal(vec3(localMin.x, localMax.y, localMax.z), obj);
     corners[7] = localToGlobal(vec3(localMax.x, localMax.y, localMax.z), obj);
 
-    vec3 newMin = corners[0];
-    vec3 newMax = corners[0];
+    globalMin = corners[0];
+    globalMax = corners[0];
     for (int i = 1; i < 8; ++i)
     {
         globalMin = min(globalMin, corners[i]);
@@ -167,7 +167,12 @@ void setLeaf(int i)
 
 void buildLinksAndLeafs(int i)
 {
-    if (i >= n - 1) return;
+    if (i >= n - 1)
+    {
+        if (n == 1 && i == 0)
+            setLeaf(i + nodeOffset);
+        return;
+    }
 
     int left = int(nodes[i + nodeOffset].values.x);
     int right = int(nodes[i + nodeOffset].values.y);

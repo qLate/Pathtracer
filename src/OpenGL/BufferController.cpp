@@ -114,7 +114,7 @@ void BufferController::updateMaterials()
 	}
 	_uboMaterials->ensureDataCapacity(data.size());
 	_uboMaterials->setSubData((float*)data.data(), data.size());
-	Renderer::renderProgram()->fragShader()->setInt("materialCount", materials.size());
+	Renderer::renderProgram()->fragShader()->setInt("materialCount", data.size());
 	Renderer::resetSamples();
 }
 
@@ -233,7 +233,7 @@ void BufferController::updateObjects()
 	}
 	_ssboObjects->ensureDataCapacity(data.size());
 	_ssboObjects->setSubData((float*)data.data(), data.size());
-	Renderer::renderProgram()->fragShader()->setInt("objectCount", graphicals.size());
+	Renderer::renderProgram()->fragShader()->setInt("objectCount", data.size());
 
 	_lastPrimObjCount = primIndicesData.size();
 	_ssboPrimObjIndices->ensureDataCapacity(primIndicesData.size());
@@ -263,7 +263,7 @@ void BufferController::updateTriangles()
 	}
 	_ssboTriangles->ensureDataCapacity(data.size());
 	_ssboTriangles->setSubData((float*)data.data(), data.size());
-	Renderer::renderProgram()->fragShader()->setInt("triCount", triangles.size());
+	Renderer::renderProgram()->fragShader()->setInt("triCount", data.size());
 
 	Renderer::resetSamples();
 }

@@ -27,9 +27,11 @@ void SceneSetup::setupScene()
 
 void SceneSetup::emptyScene()
 {
-	auto camera = new Camera({ 0, 0, 30 });
+	auto camera = new Camera({0, 0, 30});
 	camera->setBgColor(Color::gray());
 	camera->setRot(0, 180, 0);
+
+	auto cube1 = new Cube({-40, -6.7, 4}, 6.6f, {{0, 28 * DEG_TO_RAD, 0}});
 }
 
 void SceneSetup::churchScene()
