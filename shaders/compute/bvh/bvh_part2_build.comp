@@ -19,19 +19,9 @@ layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
     uint mortonCodes[];
 };
 
-struct BVHL1Primitive
-{
-    int index;
-    bool isNode;
-};
-layout(std430, binding = 9) /*buffer*/ uniform BVHL1Primitives
-{
-    BVHL1Primitive l1Primitives[];
-};
-
 uniform int n = -1;
 uniform int nodeOffset = 0;
-uniform bool isLevel1 = false;
+uniform bool isTopLevel = false;
 
 int lcp(uint i, uint j)
 {
@@ -88,42 +78,70 @@ void buildInnerNodes(int i)
     nodes[right + nodeOffset].values.w = i + nodeOffset;
 }
 
+void localToGlobalBox(vec3 localMin, vec3 localMax, Object obj, out vec3 globalMin, out vec3 globalMax)
+{
+    vec3 corners[8];
+    corners[0] = localToGlobal(vec3(localMin.x, localMin.y, localMin.z), obj);
+    corners[1] = localToGlobal(vec3(localMax.x, localMin.y, localMin.z), obj);
+    corners[2] = localToGlobal(vec3(localMin.x, localMax.y, localMin.z), obj);
+    corners[3] = localToGlobal(vec3(localMax.x, localMax.y, localMin.z), obj);
+    corners[4] = localToGlobal(vec3(localMin.x, localMin.y, localMax.z), obj);
+    corners[5] = localToGlobal(vec3(localMax.x, localMin.y, localMax.z), obj);
+    corners[6] = localToGlobal(vec3(localMin.x, localMax.y, localMax.z), obj);
+    corners[7] = localToGlobal(vec3(localMax.x, localMax.y, localMax.z), obj);
+
+    vec3 newMin = corners[0];
+    vec3 newMax = corners[0];
+    for (int i = 1; i < 8; ++i)
+    {
+        globalMin = min(globalMin, corners[i]);
+        globalMax = max(globalMax, corners[i]);
+    }
+}
+
 void calcBox(int ind, out vec3 minBound, out vec3 maxBound)
 {
-    if (isLevel1)
+    if (isTopLevel)
     {
-        if (l1Primitives[ind].isNode)
+        Object obj = objects[ind];
+        if (obj.objType == OBJ_TYPE_MESH)
         {
-            minBound = nodes[ind].min.xyz;
-            maxBound = nodes[ind].max.xyz;
-        }
-        else
-        {
-            Object obj = objects[l1Primitives[ind].index];
-            if (obj.objType == OBJ_TYPE_SPHERE)
+            if (obj.properties.z != -1)
             {
-                vec3 center = obj.pos.xyz;
-                float radius = obj.properties.x;
+                BVHNode rootNode = nodes[int(obj.properties.z)];
+                vec3 localMin = rootNode.min.xyz;
+                vec3 localMax = rootNode.max.xyz;
 
-                minBound = center - vec3(radius);
-                maxBound = center + vec3(radius);
+                vec3 globalMin, globalMax;
+                localToGlobalBox(localMin, localMax, obj, globalMin, globalMax);
+
+                minBound = globalMin - vec3(0.0001);
+                maxBound = globalMax + vec3(0.0001);
             }
-            // else if (obj.objType == OBJ_TYPE_MESH)
-            // {
-            //     minBound = vec3(FLT_MAX);
-            //     maxBound = vec3(FLT_MIN);
+            else
+            {
+                minBound = vec3(FLT_MAX);
+                maxBound = vec3(FLT_MIN);
 
-            //     for (int j = int(obj.properties.x); j < obj.properties.x + obj.properties.y; j++)
-            //     {
-            //         Triangle tri = triangles[j];
-            //         vec3 p0 = tri.vertices[0].posU.xyz;
-            //         vec3 p1 = tri.vertices[1].posU.xyz;
-            //         vec3 p2 = tri.vertices[2].posU.xyz;
+                for (int j = int(obj.properties.x); j < obj.properties.x + obj.properties.y; j++)
+                {
+                    Triangle tri = triangles[j];
+                    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
+                    vec3 p1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
+                    vec3 p2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
 
-            //         minBound = min(minBound, min(min(p0, p1), p2) - vec3(0.0001));
-            //         maxBound = max(maxBound, max(max(p0, p1), p2) + vec3(0.0001));
-            //     }
-            // }
+                    minBound = min(minBound, min(min(p0, p1), p2) - vec3(0.0001));
+                    maxBound = max(maxBound, max(max(p0, p1), p2) + vec3(0.0001));
+                }
+            }
+        }
+        else if (obj.objType == OBJ_TYPE_SPHERE)
+        {
+            vec3 center = obj.pos.xyz;
+            float radius = obj.properties.x * getTransformScale(obj.transform).x;
+
+            minBound = center - vec3(radius);
+            maxBound = center + vec3(radius);
         }
     }
     else
@@ -204,10 +222,7 @@ void main()
     {
         if (gid >= 2 * n - 1) return;
         nodes[gid + nodeOffset].min.w = -1;
-        if (isLevel1)
-            nodes[gid + nodeOffset].max.w = gid >= n - 1 ? l1Primitives[gid - (n - 1)].isNode ? 1 : 0 : -1;
-        else
-            nodes[gid + nodeOffset].max.w = -1;
+        nodes[gid + nodeOffset].max.w = isTopLevel ? 1 : 0;
         nodes[gid + nodeOffset].links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)

@@ -31,6 +31,7 @@ public:
 
 	static void buildBVH();
 	static void rebuildBVH();
+	static void rebuildTopLevelBVH();
 };
 
 class AABB
@@ -67,5 +68,6 @@ public:
 	virtual ~BVHBuilder() = default;
 
 	virtual void build() = 0;
+	virtual void buildTopLevel() {}
 	virtual void rebuild() { build(); }
 };

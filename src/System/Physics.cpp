@@ -25,6 +25,7 @@ RaycastHit Physics::raycast(glm::vec3 pos, glm::vec3 dir, float maxDis)
 	_raycastProgram->setInt("primObjCount", BufferController::lastPrimObjCount());
 	_raycastProgram->setInt("lightCount", Scene::lights.size());
 	_raycastProgram->setBool("doIntersectLights", WindowDrawer::showIcons());
+	_raycastProgram->setInt("bvhRootNode", BufferController::bvhRootNode());
 
 	ComputeShaderProgram::dispatch({1, 1, 1});
 	RaycastHitStruct result = _resultSSBO->readData<RaycastHitStruct>(1)[0];

@@ -37,7 +37,10 @@ void BufferController::checkIfBufferUpdateRequired()
 		BVH::rebuildBVH();
 	}
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Objects))
+	{
 		updateObjects();
+		BVH::rebuildTopLevelBVH();
+	}
 
 	_buffersForUpdate = BufferType::None;
 }
@@ -263,4 +266,11 @@ void BufferController::updateTriangles()
 	Renderer::renderProgram()->fragShader()->setInt("triCount", triangles.size());
 
 	Renderer::resetSamples();
+}
+void BufferController::setBVHRootNode(int bvhRootNode)
+{
+	_bvhRootNode = bvhRootNode;
+
+	Renderer::renderProgram()->use();
+	Renderer::renderProgram()->setInt("bvhRootNode", bvhRootNode);
 }

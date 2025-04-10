@@ -8,7 +8,7 @@
 class BVHMortonBuilder : public BVHBuilder
 {
 	static constexpr int SHADER_GROUP_SIZE = 32;
-	static constexpr int MIN_TRI_L2_COUNT = 0;
+	static constexpr int MIN_TRI_L2_COUNT = 3;
 
 	static constexpr int TRI_CENTER_ALIGN = 4;
 	static constexpr int MORTON_ALIGN = 1;
@@ -26,12 +26,9 @@ class BVHMortonBuilder : public BVHBuilder
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
 	inline static UPtr<SSBO> _ssboBVHL1Primitives;
 
-	static void buildGPU();
-	static void buildCompute_morton(int primOffset, int n_, bool isLevel1);
-	static void buildCompute_tree(int nodeOffset, int n_, bool isLevel1);
-
-	static int countL1Primitives();
-	static void writeL1Primitives(int& l1PrimCount);
+	void buildGPU();
+	static void buildCompute_morton(int primOffset, int n_, bool isTopLevel);
+	static void buildCompute_tree(int nodeOffset, int n_, bool isTopLevel);
 
 	//static void buildCPU();
 	//static void buildCPU_morton(const std::vector<Triangle*>& triangles, std::vector<std::pair<uint32_t, int>>& sortedCodes);
@@ -44,6 +41,9 @@ public:
 	BVHMortonBuilder();
 
 	void build() override;
+	void buildTopLevel() override;
+
+	friend class BufferController;
 
 private:
 	struct BVHL1Primitive

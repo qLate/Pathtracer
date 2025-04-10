@@ -92,7 +92,7 @@ struct Triangle
 struct BVHNode
 {
     vec4 min; // min, triIndex
-    vec4 max; // max, isLevel1
+    vec4 max; // max, isTopLevel
     ivec4 values; // left, right, isLeaf, parent
     ivec4 links; // hit, miss, boxCalculated
 };

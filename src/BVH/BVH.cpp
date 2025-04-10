@@ -18,6 +18,10 @@ void BVH::rebuildBVH()
 {
  	builder->rebuild();
 }
+void BVH::rebuildTopLevelBVH()
+{
+	builder->buildTopLevel();
+}
 
 AABB AABB::getUnitedBox(const AABB& box1, const AABB& box2)
 {

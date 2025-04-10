@@ -61,7 +61,7 @@ void calcTriIntersectionValues(inout Ray ray)
     ray.hitPoint += ray.surfaceNormal * 0.001;
 }
 
-bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows);
+bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows);
 
 bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
 {
@@ -81,7 +81,7 @@ bool intersectMesh(inout Ray ray, Object obj, bool castingShadows)
     int rootNode = int(obj.properties.z);
     if (rootNode != -1)
     {
-        if (intersectBVH(rootNode, ray, castingShadows))
+        if (intersectBVHBottom(rootNode, ray, castingShadows))
             hit = true;
     }
     else
@@ -274,7 +274,7 @@ bool intersectObj(inout Ray ray, Object obj, bool castingShadows)
     return false;
 }
 
-bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
+bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows)
 {
     bool hit = false;
     int curr = rootNode;
@@ -309,22 +309,43 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
     return hit;
 }
 
+bool intersectBVHTop(int rootNode, inout Ray ray, bool castingShadows)
+{
+    bool hit = false;
+    int curr = rootNode;
+    int c = 0;
+    while (curr != -1)
+    {
+        BVHNode node = nodes[curr];
+        if (intersectsAABB(ray, node.min, node.max, 0, FLT_MAX, castingShadows))
+        {
+            if (node.values.z == 1)
+            {
+                int objInd = int(node.min.w);
+                if (intersectObj(ray, objects[objInd], castingShadows))
+                {
+                    hit = true;
+                    ray.hitObjIndex = objInd;
+
+                    if (castingShadows) return true;
+                }
+            }
+            curr = node.links.x;
+        }
+        else
+            curr = node.links.y;
+
+        if (triCount != 0 && c++ >= triCount * 2)
+        {
+            COLOR_DEBUG = GREEN;
+            break;
+        }
+    }
+    return hit;
+}
+
 uniform int bvhRootNode;
 bool intersectWorld(inout Ray ray, bool castingShadows)
 {
-    bool hit = false;
-    // for (int i = 0; i < objectCount; i++)
-    // {
-    //     if (intersectObj(ray, objects[i], castingShadows))
-    //     {
-    //         hit = true;
-    //         ray.hitObjIndex = i;
-
-    //         if (castingShadows) return true;
-    //     }
-    // }
-
-    if (intersectBVH(bvhRootNode, ray, castingShadows))
-        hit = true;
-    return hit;
+    return intersectBVHTop(bvhRootNode, ray, castingShadows);
 }

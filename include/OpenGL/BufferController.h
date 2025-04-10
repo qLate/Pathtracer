@@ -39,6 +39,8 @@ class BufferController
 	inline static BufferType _buffersForUpdate;
 	inline static int _lastPrimObjCount;
 
+	inline static int _bvhRootNode;
+
 	static void init();
 
 	static void checkIfBufferUpdateRequired();
@@ -64,6 +66,9 @@ public:
 	static void updateLights();
 	static void updateObjects();
 	static void updateTriangles();
+
+	static void setBVHRootNode(int bvhRootNode);
+	static int bvhRootNode() { return _bvhRootNode; }
 
 	friend class RaytraceShader;
 	friend class Program;
