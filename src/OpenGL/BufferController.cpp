@@ -110,7 +110,13 @@ void BufferController::updateMaterials()
 		materialStruct.texIndex = mat->texture()->id();
 		materialStruct.emission = mat->emission().xyz;
 		if (mat->opacityTexture()) materialStruct.opacityTexIndex = mat->opacityTexture()->id();
+		materialStruct.specColor = mat->specColor().xyz;
 		materialStruct.opacity = mat->opacity();
+		if (auto windyTex = dynamic_cast<WindyTexture*>(mat->texture()))
+		{
+			materialStruct.windyScale = windyTex->scale();
+			materialStruct.windyStrength = windyTex->strength();
+		}
 
 		data[i] = materialStruct;
 	}

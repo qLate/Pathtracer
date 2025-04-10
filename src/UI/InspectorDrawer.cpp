@@ -70,6 +70,17 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (ImGui::LabeledSliderFloat("Metallic", metallic, 0.0f, 1.0f))
 			material->setMetallic(metallic);
 
+		if (auto windy = dynamic_cast<WindyTexture*>(material->texture()))
+		{
+			auto scale = windy->scale();
+            if (ImGui::LabeledSliderFloat("Windy Scale", scale, 0.0f, 1.0f))
+				windy->setScale(scale);
+
+			auto strength = windy->strength();
+            if (ImGui::LabeledSliderFloat("Windy Strength", strength, 0.0f, 100.0f))
+                windy->setStrength(strength);
+		}
+
 		auto emission = material->emission();
 		if (ImGui::LabeledColorEdit4("Emission", &emission[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
 			material->setEmission(emission);

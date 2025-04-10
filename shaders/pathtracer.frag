@@ -60,13 +60,18 @@ vec3 castRay(Ray ray)
         if (ray.hitTriIndex != -1)
             calcTriIntersectionValues(ray);
 
+        Material mat = findMaterial(objects[ray.hitObjIndex].materialIndex);
+        vec2 uv = vec2(ray.uv.x, 1.0 - ray.uv.y);
+
+        // Bump mapping
+        if (mat.windyScale != -1)
+            ray.surfaceNormal = windyBumpNormal(ray.hitPoint, ray.surfaceNormal, mat.windyScale, mat.windyStrength);
+
+        ray.hitPoint += ray.surfaceNormal * 0.001;
+
         // Fog
         float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
         color += throughput * fogColor * fogFactor;
-
-        // Material
-        Material mat = findMaterial(objects[ray.hitObjIndex].materialIndex);
-        vec2 uv = vec2(ray.uv.x, 1.0 - ray.uv.y);
 
         // Opacity
         float opacity = mat.opacity;
@@ -111,7 +116,8 @@ vec3 castRay(Ray ray)
         // Shade
         vec3 bounceDir;
         vec3 albedo = texture(textures[int(mat.texIndex)], uv).xyz * mat.color;
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
+        vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
+        color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);

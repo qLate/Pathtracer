@@ -39,6 +39,7 @@ class SceneSetup
 	static void redGreenRoomOriginal();
 	static void skeletonScene();
 	static void skeletonScene_benchmark();
+	static void ecosysScene();
 
 	friend class Program;
 };

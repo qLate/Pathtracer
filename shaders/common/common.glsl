@@ -65,7 +65,10 @@ struct Material
     int texIndex;
     vec3 emission;
     int opacityTexIndex;
+    vec3 specColor;
     float opacity;
+    float windyScale;
+    float windyStrength;
 };
 
 struct Object

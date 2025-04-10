@@ -120,6 +120,17 @@ void Texture::initData(const std::vector<uint8_t>& image)
 	memcpy(_data, image.data(), _width * _height * 4);
 }
 
+void WindyTexture::setScale(float scale)
+{
+	_scale = scale;
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void WindyTexture::setStrength(float strength)
+{
+	_strength = strength;
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+
 Material* Material::defaultLit()
 {
 	static Material instance(Color::gray(), true);
@@ -136,8 +147,9 @@ Material* Material::debug()
 	return &instance;
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission, float opacity, Texture* opacityTexture) : _id(_nextAvailableId++),
-	_lit{lit}, _color{color}, _texture{texture}, _emission{emission}, _opacity{opacity}, _opacityTexture{opacityTexture}, _roughness{roughness}, _metallic{metallic}
+Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission, float opacity, Texture* opacityTexture, Color specColor) :
+	_id(_nextAvailableId++), _lit{lit}, _color{color}, _specColor{specColor}, _texture{texture}, _emission{emission}, _opacity{opacity}, _opacityTexture{opacityTexture},
+	_roughness{roughness}, _metallic{metallic}
 {
 	Scene::materials.push_back(this);
 
@@ -162,12 +174,24 @@ void Material::setColor(const Color& color)
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }
+void Material::setSpecColor(const Color& specColor)
+{
+	_emission = specColor;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
 void Material::setTexture(Texture* texture)
 {
 	_texture = texture;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 	BufferController::markBufferForUpdate(BufferType::Textures);
+}
+void Material::setOpacity(float opacity)
+{
+	_opacity = opacity;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
 }
 void Material::setOpacityTexture(Texture* texture)
 {

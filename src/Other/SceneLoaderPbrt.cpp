@@ -114,7 +114,7 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 			case minipbrt::TextureType::Windy:
 			{
 				auto t = dynamic_cast<const minipbrt::WindyTexture*>(tex);
-				parsedTex = new Texture(Color::white());
+				parsedTex = new WindyTexture(Color::white(), t->scale * 6.0f, 60.0f);
 
 				break;
 			}
@@ -136,6 +136,7 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 		auto mat = scene->materials[i];
 
 		auto baseColor = Color::white();
+		auto specColor = Color::clear();
 		auto lit = true;
 		auto roughness = 1.0f;
 		auto metallic = 0.0f;
@@ -160,6 +161,10 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				auto m = dynamic_cast<const minipbrt::MirrorMaterial*>(mat);
 				baseColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
 				roughness = 0.0f;
+				metallic = 1.0f;
+
+				if (m->bumpmap != minipbrt::kInvalidIndex)
+					tex = parsedTextures[m->bumpmap];
 				break;
 			}
 			case minipbrt::MaterialType::Metal:
@@ -173,7 +178,7 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 			case minipbrt::MaterialType::Glass:
 			{
 				auto m = dynamic_cast<const minipbrt::GlassMaterial*>(mat);
-				baseColor = Color(m->Kt.value[0], m->Kt.value[1], m->Kt.value[2]);
+				baseColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
 				roughness = 0.0f;
 				break;
 			}
@@ -184,6 +189,7 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 					tex = parsedTextures[m->Kd.texture];
 				else
 					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 				roughness = m->roughness.value;
 				break;
 			}
@@ -194,6 +200,7 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 					tex = parsedTextures[m->Kd.texture];
 				else
 					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 
 				if (m->opacity.texture != minipbrt::kInvalidIndex)
 					opacityTex = parsedTextures[m->opacity.texture];
@@ -207,7 +214,10 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				break;
 		}
 
-		materials[i] = new Material(baseColor, lit, tex, roughness, metallic, emission, opacity, opacityTex);
+		if (mat->bumpmap != minipbrt::kInvalidIndex)
+			int x = 1;
+
+		materials[i] = new Material(baseColor, lit, tex, roughness, metallic, emission, opacity, opacityTex, specColor);
 	}
 }
 

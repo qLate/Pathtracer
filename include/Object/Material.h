@@ -34,7 +34,7 @@ class Texture
 
 public:
 	Texture(Color color);
-	~Texture();
+	virtual ~Texture();
 
 	static Texture* defaultTex();
 
@@ -54,6 +54,21 @@ public:
 	friend class JsonUtility;
 };
 
+class WindyTexture : public Texture
+{
+	float _scale;
+	float _strength;
+
+public:
+	WindyTexture(const Color& color, float scale, float strength = 0.1f) : Texture(color), _scale(scale), _strength(strength) {}
+
+	float scale() const { return _scale; }
+	float strength() const { return _strength; }
+
+	void setScale(float scale);
+	void setStrength(float strength);
+};
+
 class Material
 {
 	inline static int _nextAvailableId = 0;
@@ -61,6 +76,7 @@ class Material
 	int _id;
 	bool _lit;
 	Color _color;
+	Color _specColor = Color::clear();
 	Texture* _texture;
 	Color _emission;
 	float _opacity;
@@ -75,7 +91,7 @@ public:
 	static Material* debug();
 
 	Material(Color color, bool lit, Texture* texture, float roughness = 1, float metallic = 0, Color emission = Color::clear(), float opacity = 1,
-	         Texture* opacityTexture = nullptr);
+	         Texture* opacityTexture = nullptr, Color specColor = Color::clear());
 	Material(Color color = Color::white(), bool lit = true);
 	Material(const Material& material);
 	~Material();
@@ -83,6 +99,7 @@ public:
 	int id() const { return _id; }
 	bool lit() const { return _lit; }
 	Color color() const { return _color; }
+	Color specColor() const { return _specColor; }
 	Texture* texture() const { return _texture; }
 	float opacity() const { return _opacity; }
 	Texture* opacityTexture() const { return _opacityTexture; }
@@ -92,7 +109,9 @@ public:
 
 	void setLit(bool lit);
 	void setColor(const Color& color);
+	void setSpecColor(const Color& specColor);
 	void setTexture(Texture* texture);
+	void setOpacity(float opacity);
 	void setOpacityTexture(Texture* texture);
 	void setDiffuseCoef(float diffuseCoef);
 	void setMetallic(float metallic);

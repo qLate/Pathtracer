@@ -22,7 +22,7 @@ class BufferController
 {
 	static constexpr int TEXTURE_ALIGN = 4;
 	static constexpr int LIGHT_ALIGN = 12;
-	static constexpr int MATERIAL_ALIGN = 16;
+	static constexpr int MATERIAL_ALIGN = 20;
 	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 28;
 	static constexpr int BVH_NODE_ALIGN = 16;
@@ -91,8 +91,11 @@ private:
 		int texIndex;
 		glm::vec3 emission;
 		int opacityTexIndex = -1;
+		glm::vec3 specColor;
 		float opacity;
-		glm::vec3 _pad;
+		float windyScale = -1;
+		float windyStrength = -1;
+		glm::vec2 _pad;
 	};
 
 	struct LightStruct

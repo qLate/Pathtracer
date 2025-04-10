@@ -1396,7 +1396,7 @@ namespace minipbrt {
   
 
   struct WindyTexture : public Texture3D {
-    // not documented
+    float scale    = 1.0f;
 
     virtual ~WindyTexture() override {}
     virtual TextureType type() const override { return TextureType::Windy; }

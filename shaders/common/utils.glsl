@@ -207,3 +207,63 @@ float average(vec4 v)
 {
     return (v.x + v.y + v.z + v.w) * 0.25;
 }
+
+float perlin_hash(vec3 p)
+{
+    return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
+}
+vec3 perlin_fade(vec3 t)
+{
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+}
+float perlin(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+
+    float n000 = perlin_hash(i + vec3(0, 0, 0));
+    float n001 = perlin_hash(i + vec3(0, 0, 1));
+    float n010 = perlin_hash(i + vec3(0, 1, 0));
+    float n011 = perlin_hash(i + vec3(0, 1, 1));
+    float n100 = perlin_hash(i + vec3(1, 0, 0));
+    float n101 = perlin_hash(i + vec3(1, 0, 1));
+    float n110 = perlin_hash(i + vec3(1, 1, 0));
+    float n111 = perlin_hash(i + vec3(1, 1, 1));
+
+    vec3 u = perlin_fade(f);
+
+    return mix(
+        mix(
+            mix(n000, n100, u.x),
+            mix(n010, n110, u.x), u.y),
+        mix(
+            mix(n001, n101, u.x),
+            mix(n011, n111, u.x), u.y),
+        u.z);
+}
+
+float windyTurbulence(vec3 p, int octaves)
+{
+    float sum = 0.0;
+    float amp = 1.0;
+    float freq = 1.0;
+    for (int i = 0; i < octaves; ++i)
+    {
+        sum += abs(perlin(p * freq)) * amp;
+        freq *= 2.0;
+        amp *= 0.5;
+    }
+    return sum;
+}
+float windyBump(vec3 p, float scale)
+{
+    return windyTurbulence(p * scale, 6);
+}
+vec3 windyBumpNormal(vec3 p, vec3 normal, float scale, float strength)
+{
+    float h = windyBump(p, scale);
+    float dx = windyBump(p + vec3(0.001, 0, 0), scale) - h;
+    float dy = windyBump(p + vec3(0, 0.001, 0), scale) - h;
+    float dz = windyBump(p + vec3(0, 0, 0.001), scale) - h;
+    vec3 grad = vec3(dx, dy, dz);
+    return normalize(normal + grad * strength);
+}

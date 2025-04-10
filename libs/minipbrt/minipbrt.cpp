@@ -6885,7 +6885,7 @@ namespace minipbrt {
     case TextureType::Windy:
       {
         WindyTexture* windy = new WindyTexture();
-        // Not sure...?
+        float_param("scale", &windy->scale);
         texture = windy;
       }
       break;

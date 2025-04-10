@@ -48,7 +48,7 @@ Model::~Model()
 
 	auto fromInd = std::ranges::find(Scene::baseTriangles, _baseTriangles[0]);
 	auto toInd = std::ranges::find(Scene::baseTriangles, _baseTriangles.back());
-	if (toInd - fromInd >= _baseTriangles.size()) throw std::exception("Base triangles weren't contiguous in memory.");
+	if (toInd - fromInd >= _baseTriangles.size()) Debug::logError("Base triangles weren't contiguous in memory.");
 	for (auto it = fromInd; it!= toInd; ++it)
 		*it = nullptr;
 
