@@ -31,7 +31,10 @@ void SceneSetup::emptyScene()
 	camera->setBgColor(Color::gray());
 	camera->setRot(0, 180, 0);
 
-	auto cube1 = new Cube({-40, -6.7, 4}, 6.6f, {{0, 28 * DEG_TO_RAD, 0}});
+	//auto cube1 = new Cube({-4, -6.7, 4}, 6.6f, {{0, 28 * DEG_TO_RAD, 0}});
+	auto wallLeft = new Square({10, 0, 0}, 20, {{0, 0, 90 * DEG_TO_RAD}});
+	auto wallRight = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});
+	auto wallBack = new Square({0, 0, -10}, 20, {{-90 * DEG_TO_RAD, 0, 0}});
 }
 
 void SceneSetup::churchScene()

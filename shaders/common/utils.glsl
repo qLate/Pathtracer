@@ -100,6 +100,10 @@ float maxv3(vec3 v)
 {
     return max(max(v.x, v.y), v.z);
 }
+float minv3(vec3 v)
+{
+    return min(min(v.x, v.y), v.z);
+}
 
 vec3 sampleHemisphereUniform(float r1, float r2)
 {

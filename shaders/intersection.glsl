@@ -300,7 +300,7 @@ bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows)
         else
             curr = node.links.y;
 
-        if (triCount != 0 && c++ >= triCount * 2)
+        if (c++ >= triCount * 2 + 100)
         {
             COLOR_DEBUG = GREEN;
             break;
@@ -309,10 +309,11 @@ bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows)
     return hit;
 }
 
-bool intersectBVHTop(int rootNode, inout Ray ray, bool castingShadows)
+uniform int bvhRootNode;
+bool intersectBVHTop(inout Ray ray, bool castingShadows)
 {
     bool hit = false;
-    int curr = rootNode;
+    int curr = bvhRootNode;
     int c = 0;
     while (curr != -1)
     {
@@ -335,7 +336,7 @@ bool intersectBVHTop(int rootNode, inout Ray ray, bool castingShadows)
         else
             curr = node.links.y;
 
-        if (triCount != 0 && c++ >= triCount * 2)
+        if (c++ >= triCount * 2 + 100)
         {
             COLOR_DEBUG = GREEN;
             break;
@@ -344,8 +345,7 @@ bool intersectBVHTop(int rootNode, inout Ray ray, bool castingShadows)
     return hit;
 }
 
-uniform int bvhRootNode;
 bool intersectWorld(inout Ray ray, bool castingShadows)
 {
-    return intersectBVHTop(bvhRootNode, ray, castingShadows);
+    return intersectBVHTop(ray, castingShadows);
 }

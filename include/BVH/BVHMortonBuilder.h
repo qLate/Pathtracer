@@ -26,6 +26,8 @@ class BVHMortonBuilder : public BVHBuilder
 	inline static UPtr<SSBO> _ssboBVHTriIndices;
 	inline static UPtr<SSBO> _ssboBVHL1Primitives;
 
+	inline static int _topLevelStartIndex = -1;
+
 	void buildGPU();
 	static void buildCompute_morton(int primOffset, int n_, bool isTopLevel);
 	static void buildCompute_tree(int nodeOffset, int n_, bool isTopLevel);
