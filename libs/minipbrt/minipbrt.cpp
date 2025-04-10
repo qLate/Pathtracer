@@ -5861,6 +5861,9 @@ namespace minipbrt {
         if (ok && float_vector_param("uv", ParamType::Float, &count, &trianglemesh->uv, true)) {
           ok = count == trianglemesh->num_vertices * 2;
         }
+        else if (ok && float_vector_param("st", ParamType::Float, &count, &trianglemesh->uv, true)) {
+            ok = count == trianglemesh->num_vertices * 2;
+        }
         texture_param("alpha", TextureData::Float, &trianglemesh->alpha);
         texture_param("shadowalpha", TextureData::Float, &trianglemesh->shadowalpha);
         shape = trianglemesh;

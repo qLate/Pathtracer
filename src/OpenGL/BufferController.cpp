@@ -106,9 +106,11 @@ void BufferController::updateMaterials()
 		materialStruct.id = mat->id();
 		materialStruct.lit = mat->lit();
 		materialStruct.roughness = mat->roughness();
-		materialStruct.textureIndex = mat->texture()->id();
-		materialStruct.emission = mat->emission().xyz;
 		materialStruct.metallic = mat->metallic();
+		materialStruct.texIndex = mat->texture()->id();
+		materialStruct.emission = mat->emission().xyz;
+		if (mat->opacityTexture()) materialStruct.opacityTexIndex = mat->opacityTexture()->id();
+		materialStruct.opacity = mat->opacity();
 
 		data[i] = materialStruct;
 	}
@@ -241,6 +243,7 @@ void BufferController::updateObjects()
 	Renderer::renderProgram()->fragShader()->setInt("primObjCount", primIndicesData.size());
 
 	Renderer::resetSamples();
+	Scene::updateTriangleCount();
 }
 
 void BufferController::updateTriangles()

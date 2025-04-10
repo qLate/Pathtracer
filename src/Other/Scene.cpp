@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//redGreenRoom();
-	SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
+	ecosysScene();
 }
 #endif
 
@@ -155,4 +155,22 @@ void SceneSetup::skeletonScene_benchmark()
 	obj->setMaterial({Color::white(), true, tex, 1});
 	auto light = new DirectionalLight(normalize(glm::vec3(0, -1, 1)));
 	light->setRot({{200.0 * DEG_TO_RAD, -20.08 * DEG_TO_RAD, 14.33 * DEG_TO_RAD}});
+}
+void SceneSetup::ecosysScene()
+{
+	SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
+	Renderer::setFogIntensity(0.005f);
+	Renderer::setFogColor({0.568f, 0.645f, 0.621f});
+}
+
+void Scene::updateTriangleCount()
+{
+	triangleCount = 0;
+	for (auto& obj : graphicals)
+	{
+		auto mesh = dynamic_cast<Mesh*>(obj);
+		if (!mesh) continue;
+
+		triangleCount += mesh->model()->baseTriangles().size();
+	}
 }

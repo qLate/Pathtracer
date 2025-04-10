@@ -12,11 +12,13 @@
 
 void ObjectInspectorDrawer::draw(Object* target)
 {
-	const char* name = "Transform";
+	const char* name = "Object";
 	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
 	ImGui::PushID(name);
 	{
 		ImGui::LabeledInt("Object Id", target->id(), ImGuiInputTextFlags_ReadOnly);
+		if (!target->name().empty())
+			ImGui::LabeledText("Name", target->name().c_str(), ImGuiInputTextFlags_ReadOnly);
 
 		auto transform = target->getTransform();
 

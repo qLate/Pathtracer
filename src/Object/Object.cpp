@@ -27,6 +27,10 @@ void Object::destroy(const Object* object)
 	delete object;
 }
 
+void Object::setName(const std::string& name)
+{
+	this->_name = name;
+}
 void Object::setPos(glm::vec3 pos, bool notify)
 {
 	this->_pos = pos;

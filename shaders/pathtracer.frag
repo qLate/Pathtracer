@@ -23,6 +23,8 @@ vec3 COLOR_HEAT = vec3(0);
 // ----------- SETTINGS -----------
 uniform int maxRayBounces;
 uniform int samplesPerPixel;
+uniform float fogIntensity;
+uniform vec3 fogColor;
 uniform bool misSampleLight = true;
 uniform bool misSampleBrdf = true;
 
@@ -58,7 +60,27 @@ vec3 castRay(Ray ray)
         if (ray.hitTriIndex != -1)
             calcTriIntersectionValues(ray);
 
+        // Fog
+        float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
+        color += throughput * fogColor * fogFactor;
+
+        // Material
         Material mat = findMaterial(objects[ray.hitObjIndex].materialIndex);
+        vec2 uv = vec2(ray.uv.x, 1.0 - ray.uv.y);
+
+        // Opacity
+        float opacity = mat.opacity;
+        if (mat.opacityTexIndex != -1)
+            opacity *= average(texture(textures[mat.opacityTexIndex], uv));
+
+        if (opacity < 1)
+        {
+            ray = Ray(ray.hitPoint + ray.dir * 0.001, ray.dir, RAY_DEFAULT_ARGS);
+            throughput *= 1 - opacity;
+            continue;
+        }
+
+        // Emissive material hit
         if (length(mat.emission) > 0)
         {
             if (bounce == 0)
@@ -81,14 +103,14 @@ vec3 castRay(Ray ray)
             }
         }
 
-        vec2 uv = vec2(ray.uv.x, 1 - ray.uv.y);
-        vec3 albedo = texture(textures[int(mat.textureIndex)], uv).xyz * mat.color;
-
+        // Regularize roughness
         float roughness = mat.roughness;
         if (bounce > 2 && roughness < 0.05)
-            roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3); // Regularize roughness
+            roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3);
 
+        // Shade
         vec3 bounceDir;
+        vec3 albedo = texture(textures[int(mat.texIndex)], uv).xyz * mat.color;
         color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, roughness, mat.metallic, bounce, throughput, bounceDir, brdfPdf);
 
         if (length(throughput) < 0.01) break;
@@ -102,6 +124,7 @@ vec3 castRay(Ray ray)
             throughput /= p;
         }
     }
+
     return color;
 }
 

@@ -63,6 +63,8 @@ class Material
 	Color _color;
 	Texture* _texture;
 	Color _emission;
+	float _opacity;
+	Texture* _opacityTexture = nullptr;
 
 	float _roughness = 1;
 	float _metallic = 0;
@@ -72,7 +74,8 @@ public:
 	static Material* defaultUnlit();
 	static Material* debug();
 
-	Material(Color color, bool lit, Texture* texture, float roughness = 1, float metallic = 0, Color emission = Color::clear());
+	Material(Color color, bool lit, Texture* texture, float roughness = 1, float metallic = 0, Color emission = Color::clear(), float opacity = 1,
+	         Texture* opacityTexture = nullptr);
 	Material(Color color = Color::white(), bool lit = true);
 	Material(const Material& material);
 	~Material();
@@ -81,6 +84,8 @@ public:
 	bool lit() const { return _lit; }
 	Color color() const { return _color; }
 	Texture* texture() const { return _texture; }
+	float opacity() const { return _opacity; }
+	Texture* opacityTexture() const { return _opacityTexture; }
 	float roughness() const { return _roughness; }
 	float metallic() const { return _metallic; }
 	Color emission() const { return _emission; }
@@ -88,8 +93,10 @@ public:
 	void setLit(bool lit);
 	void setColor(const Color& color);
 	void setTexture(Texture* texture);
+	void setOpacityTexture(Texture* texture);
 	void setDiffuseCoef(float diffuseCoef);
 	void setMetallic(float metallic);
+	void setRoughness(float roughness);
 	void setEmission(const Color& emission);
 
 	constexpr static auto properties();

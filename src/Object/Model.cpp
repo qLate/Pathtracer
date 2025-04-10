@@ -25,6 +25,7 @@ void Model::init()
 {
 	Scene::models.push_back(this);
 
+	_triStartIndex = Scene::baseTriangles.size();
 	Scene::baseTriangles.insert(Scene::baseTriangles.end(), this->_baseTriangles.begin(), this->_baseTriangles.end());
 	BufferController::markBufferForUpdate(BufferType::Triangles);
 }
@@ -48,7 +49,8 @@ Model::~Model()
 	auto fromInd = std::ranges::find(Scene::baseTriangles, _baseTriangles[0]);
 	auto toInd = std::ranges::find(Scene::baseTriangles, _baseTriangles.back());
 	if (toInd - fromInd >= _baseTriangles.size()) throw std::exception("Base triangles weren't contiguous in memory.");
-	Scene::baseTriangles.erase(fromInd, toInd + 1);
+	for (auto it = fromInd; it!= toInd; ++it)
+		*it = nullptr;
 
 	for (auto& triangle : _baseTriangles)
 		delete triangle;
@@ -57,10 +59,6 @@ Model::~Model()
 void Model::setBvhRootNode(int bvhRootNode)
 {
 	_bvhRootNode = bvhRootNode;
-}
-int Model::triStartIndex() const
-{
-	return std::ranges::find(Scene::baseTriangles, _baseTriangles[0]) - Scene::baseTriangles.begin();
 }
 
 void Model::parseRapidobj(const std::filesystem::path& path)

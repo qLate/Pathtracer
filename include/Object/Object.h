@@ -12,6 +12,7 @@ class Object
 
 	bool _initialized = false;
 	int _id;
+	std::string _name;
 
 protected:
 	glm::vec3 _pos;
@@ -30,10 +31,12 @@ public:
 
 	bool initialized() const { return _initialized; }
 	int id() const { return _id; }
+	std::string name() const { return _name; }
 	glm::vec3 pos() const { return _pos; }
 	glm::quat rot() const { return _rot; }
 	glm::vec3 scale() const { return _scale; }
 
+	void setName(const std::string& name);
 	virtual void setPos(glm::vec3 pos, bool notify = true);
 	virtual void setRot(glm::quat rot, bool notify = true);
 	virtual void setScale(glm::vec3 scale, bool notify = true);

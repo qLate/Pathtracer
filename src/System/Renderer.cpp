@@ -14,6 +14,8 @@ void Renderer::init()
 
 	setSPP(_samplesPerPixel);
 	setMaxRayBounces(_maxRayBounces);
+	setFogIntensity(_fogIntensity);
+	setFogColor(_fogColor);
 	setMisSampleBrdf(_misSampleBrdf);
 	setMisSampleLight(_misSampleLight);
 	resizeView(ImGuiHandler::INIT_RENDER_SIZE);
@@ -117,6 +119,22 @@ void Renderer::setMaxRayBounces(int bounces)
 	_renderProgram->setInt("maxRayBounces", _maxRayBounces);
 
 	resetSamples();
+}
+void Renderer::setFogIntensity(float intensity)
+{
+	_fogIntensity = intensity;
+    _renderProgram->use();
+    _renderProgram->setFloat("fogIntensity", intensity);
+
+    resetSamples();
+}
+void Renderer::setFogColor(Color color)
+{
+	_fogColor = color;
+    _renderProgram->use();
+    _renderProgram->setFloat3("fogColor", color);
+
+    resetSamples();
 }
 void Renderer::setMisSampleBrdf(bool doSample)
 {

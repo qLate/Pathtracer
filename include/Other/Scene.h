@@ -22,6 +22,10 @@ public:
 	inline static std::vector<Material*> materials{};
 	inline static std::vector<Texture*> textures{};
 	inline static std::vector<Model*> models{};
+
+	inline static int triangleCount = -1;
+
+	static void updateTriangleCount();
 };
 
 class SceneSetup

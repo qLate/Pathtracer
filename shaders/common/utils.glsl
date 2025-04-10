@@ -3,6 +3,8 @@
 #define EPSILON 1e-10
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
+#define DEG_TO_RAD 0.0174532925199432957
+#define RAD_TO_DEG 57.295779513082320876
 
 // --- Random ---
 uvec4 seed;
@@ -199,4 +201,9 @@ float powerHeuristic(float pdf1, float pdf2)
 float balancedHeuristic(float pdf1, float pdf2)
 {
     return pdf1 / (pdf1 + pdf2 + 0.0001);
+}
+
+float average(vec4 v)
+{
+    return (v.x + v.y + v.z + v.w) * 0.25;
 }

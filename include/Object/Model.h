@@ -12,6 +12,7 @@ class Model
 	std::string _path;
 	std::vector<BaseTriangle*> _baseTriangles;
 
+	int _triStartIndex = -1;
 	int _bvhRootNode = -1;
 
 	Model(const std::filesystem::path& path);
@@ -33,7 +34,7 @@ public:
 
 	void setBvhRootNode(int bvhRootNode);
 
-	int triStartIndex() const;
+	int triStartIndex() const { return _triStartIndex;  }
 
 	constexpr static auto properties();
 

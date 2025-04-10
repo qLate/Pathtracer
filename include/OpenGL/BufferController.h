@@ -22,7 +22,7 @@ class BufferController
 {
 	static constexpr int TEXTURE_ALIGN = 4;
 	static constexpr int LIGHT_ALIGN = 12;
-	static constexpr int MATERIAL_ALIGN = 12;
+	static constexpr int MATERIAL_ALIGN = 16;
 	static constexpr int OBJECT_ALIGN = 28;
 	static constexpr int TRIANGLE_ALIGN = 28;
 	static constexpr int BVH_NODE_ALIGN = 16;
@@ -88,9 +88,11 @@ private:
 		bool lit;
 		float roughness;
 		float metallic;
-		int textureIndex;
+		int texIndex;
 		glm::vec3 emission;
-		float _pad;
+		int opacityTexIndex = -1;
+		float opacity;
+		glm::vec3 _pad;
 	};
 
 	struct LightStruct

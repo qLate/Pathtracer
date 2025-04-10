@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Color.h"
 #include "glm/vec2.hpp"
 #include "RaytraceShader.h"
 #include "ShaderProgram.h"
@@ -14,6 +15,8 @@ class Renderer
 	inline static bool _limitSamples = false;
 	inline static int _maxAccumSamples = 1000000;
 	inline static int _maxRayBounces = 6;
+	inline static float _fogIntensity = 0;
+	inline static Color _fogColor = {0.568f, 0.645f, 0.621f};
 
 	inline static bool _misSampleBrdf = true;
 	inline static bool _misSampleLight = true;
@@ -42,6 +45,8 @@ public:
 	static int samplesPerPixel() { return _samplesPerPixel; }
 	static int maxAccumSamples() { return _maxAccumSamples; }
 	static int maxRayBounces() { return _maxRayBounces; }
+	static float fogIntensity() { return _fogIntensity; }
+	static Color fogColor() { return _fogColor; }
 	static bool misSampleBrdf() { return _misSampleBrdf; }
 	static bool misSampleLight() { return _misSampleLight; }
 	static int totalSamples() { return _totalSamples; }
@@ -54,6 +59,8 @@ public:
 	static void setSPP(int samples);
 	static void setMaxAccumSamples(int maxAccumSamples);
 	static void setMaxRayBounces(int bounces);
+	static void setFogIntensity(float intensity);
+	static void setFogColor(Color color);
 	static void setMisSampleBrdf(bool doSample);
 	static void setMisSampleLight(bool doSample);
 

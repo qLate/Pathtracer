@@ -18,11 +18,12 @@ vec2 genRandoms(int bounce)
 
 uniform sampler2D envMap;
 uniform bool useEnvMap = false;
+uniform mat4x4 envMapToWorld = mat4(1.0);
 vec3 sampleEnvMap(vec3 dir)
 {
     if (!useEnvMap) return vec3(1);
 
-    dir = normalize(dir);
+    dir = normalize((envMapToWorld * vec4(dir, 0)).xyz);
     float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
     float v = acos(clamp(dir.y, -1.0, 1.0)) / PI;
     return texture(envMap, vec2(u, v)).rgb;

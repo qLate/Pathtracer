@@ -136,9 +136,8 @@ Material* Material::debug()
 	return &instance;
 }
 
-Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission) : _id(_nextAvailableId++), _lit {lit}, _color {color},
-                                                                                                               _texture {texture}, _emission {emission},
-                                                                                                               _roughness {roughness}, _metallic {metallic}
+Material::Material(Color color, bool lit, Texture* texture, float roughness, float metallic, Color emission, float opacity, Texture* opacityTexture) : _id(_nextAvailableId++),
+	_lit{lit}, _color{color}, _texture{texture}, _emission{emission}, _opacity{opacity}, _opacityTexture{opacityTexture}, _roughness{roughness}, _metallic{metallic}
 {
 	Scene::materials.push_back(this);
 
@@ -170,6 +169,13 @@ void Material::setTexture(Texture* texture)
 	BufferController::markBufferForUpdate(BufferType::Materials);
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
+void Material::setOpacityTexture(Texture* texture)
+{
+	_opacityTexture = texture;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+	BufferController::markBufferForUpdate(BufferType::Textures);
+}
 void Material::setDiffuseCoef(float diffuseCoef)
 {
 	_roughness = diffuseCoef;
@@ -179,6 +185,12 @@ void Material::setDiffuseCoef(float diffuseCoef)
 void Material::setMetallic(float metallic)
 {
 	_metallic = metallic;
+
+	BufferController::markBufferForUpdate(BufferType::Materials);
+}
+void Material::setRoughness(float roughness)
+{
+	_roughness = roughness;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }

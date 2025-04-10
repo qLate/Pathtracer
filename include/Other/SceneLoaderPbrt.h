@@ -12,9 +12,10 @@ class SceneLoaderPbrt
 	static void loadScene_textures(const minipbrt::Scene* scene, std::vector<Texture*>& parsedTextures);
 	static void loadScene_materials(const minipbrt::Scene* scene, const std::vector<Texture*>& parsedTextures, std::vector<Material*>& materials);
 
-	static void loadScene_shapes(const minipbrt::Scene* scene, const std::vector<Material*>& materials);
-	static Object* spawnObjectFromShape(minipbrt::Shape* shape, const std::vector<Material*>& materials);
-	static Mesh* spawnObjectFromShape_triMesh(const std::vector<Material*>& materials, const minipbrt::Shape* shape, std::mutex& mutex);
+	static void loadScene_objects(const minipbrt::Scene* scene, const std::vector<Material*>& materials);
+	static std::vector<BaseTriangle*> loadModelTriangles(const minipbrt::TriangleMesh* mesh);
+	static std::vector<Model*> loadScene_objects_loadModels(const minipbrt::Scene* scene);
+	static Graphical* spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, Model* model);
 
 	static void loadScene_lights(minipbrt::Scene* scene);
 

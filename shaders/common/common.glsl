@@ -62,9 +62,10 @@ struct Material
     bool lit;
     float roughness;
     float metallic;
-    int textureIndex;
+    int texIndex;
     vec3 emission;
-    float _pad;
+    int opacityTexIndex;
+    float opacity;
 };
 
 struct Object

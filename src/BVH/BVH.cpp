@@ -1,7 +1,6 @@
 #include "BVH.h"
 
 #include "BVHMortonBuilder.h"
-#include "Scene.h"
 #include "Triangle.h"
 #include "Utils.h"
 

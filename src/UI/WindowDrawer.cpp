@@ -153,13 +153,13 @@ void WindowDrawer::displayStats(bool barVisible)
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3fms)\n"
-	            "%zu Base Triangles\n"
+	            "%d Base Triangles\n"
 	            "Total samples: %d\n"
 	            "Variance: %.3f (x1000)\n"
 	            "Render time: %.3fms\n"
 	            "Efficiency: %.3f\n",
 	            currFPS, 1000.0f / currFPS,
-	            Scene::baseTriangles.size(),
+	            Scene::triangleCount,
 	            totalSamples,
 	            currVariance * 1000,
 	            renderTime,
@@ -210,6 +210,15 @@ void WindowDrawer::drawInspector()
 				ImGui::LabeledSliderInt("Ray Bounces", bounces, 0, 10);
 				if (bounces != Renderer::maxRayBounces())
 					Renderer::setMaxRayBounces(bounces);
+
+				auto fogIntensity = Renderer::fogIntensity();
+				ImGui::LabeledSliderFloat("Fog Intensity", fogIntensity, 0, 0.05f);
+				if (fogIntensity != Renderer::fogIntensity())
+					Renderer::setFogIntensity(fogIntensity);
+
+				auto fogColor = Renderer::fogColor();
+				if (ImGui::LabeledColorEdit3("Fog Color", (float*)&fogColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_Float))
+					Renderer::setFogColor(fogColor);
 
 				auto misSampleBrdf = Renderer::misSampleBrdf();
 				ImGui::LabeledCheckbox("Mis Sample Brdf", misSampleBrdf);

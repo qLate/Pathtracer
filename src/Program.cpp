@@ -58,6 +58,8 @@ void Program::init()
 	tm.printElapsedFromLast("Buffers init in ");
 
 	BVH::buildBVH();
+	tm.printElapsedFromLast("BVH built in ");
+
 	tm.printElapsed("Total init in ");
 }
 
