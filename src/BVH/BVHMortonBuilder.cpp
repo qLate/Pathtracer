@@ -4,8 +4,10 @@
 
 #include "BufferController.h"
 #include "GLObject.h"
+#include "Graphical.h"
 #include "Model.h"
 #include "MortonCodes.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "ShaderProgram.h"
 #include "Triangle.h"
@@ -21,6 +23,7 @@ BVHMortonBuilder::BVHMortonBuilder()
 	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
 	_ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
 	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN);
+	_ssboBVHL1Primitives = make_unique<SSBO>(BVH_L1_PRIMITIVES_ALIGN);
 
 	_ssboMinMaxBound->setDataCapacity(1);
 }
@@ -34,73 +37,173 @@ void BVHMortonBuilder::buildGPU()
 {
 	int n = Scene::baseTriangles.size();
 	auto models = Scene::models;
-	BufferController::ssboBVHNodes()->ensureDataCapacity(2 * n - models.size());
+
+	int l1PrimCount = countL1Primitives();
+
+	int nodeCount = 2 * n - models.size() + 2 * l1PrimCount - 1;
+	BufferController::ssboBVHNodes()->ensureDataCapacity(nodeCount);
 
 	int nodeOffset = 0;
-	int triOffset = 0;
+	int primOffset = 0;
 	for (int i = 0; i < models.size(); i++)
 	{
 		auto model = models[i];
 
 		int n_ = model->baseTriangles().size();
-		if (n_ <= 4)
+		if (n_ < MIN_TRI_L2_COUNT)
 		{
 			nodeOffset += 2 * n_ - 1;
-			triOffset += n_;
+			primOffset += n_;
 			continue;
 		}
 		model->setBvhRootNode(nodeOffset);
 
-		// Part 1
-		_ssboTriCenters->bind(6);
-		_ssboMinMaxBound->bind(7);
-		_ssboMortonCodes->bind(8);
-		_ssboBVHTriIndices->bind(9);
-
-		_ssboTriCenters->ensureDataCapacity(n_);
-		_ssboMortonCodes->ensureDataCapacity(n_);
-		_ssboMinMaxBound->clear();
-		_ssboBVHTriIndices->ensureDataCapacity(n_);
-
-		_bvhMorton->use();
-		_bvhMorton->setInt("n", n_);
-		_bvhMorton->setInt("triOffset", triOffset);
-
-		_bvhMorton->setInt("pass", 0);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-		_bvhMorton->setInt("pass", 1);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-		radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n_);
-
-		// Part 2
-		BufferController::ssboTriangles()->bindDefault();
-		BufferController::ssboBVHNodes()->bind(6);
-		_ssboBVHTriIndices->bind(7);
-		_ssboMortonCodes->bind(8);
-
-		_bvhBuild->use();
-		_bvhBuild->setInt("n", n_);
-		_bvhBuild->setInt("nodeOffset", nodeOffset);
-
-		_bvhBuild->setInt("pass", 0);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-		_bvhBuild->setInt("pass", 1);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-		_bvhBuild->setInt("pass", 2);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
-
-		_bvhBuild->setInt("pass", 3);
-		ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+		buildCompute_morton(primOffset, n_, false);
+		buildCompute_tree(nodeOffset, n_, false);
 
 		nodeOffset += 2 * n_ - 1;
-		triOffset += n_;
+		primOffset += n_;
 	}
+	auto nodeData1 = BufferController::ssboBVHNodes()->readData<BufferController::BVHNodeStruct>(nodeCount);
+
+	writeL1Primitives(l1PrimCount);
+
+	buildCompute_morton(0, l1PrimCount, true);
+	buildCompute_tree(nodeOffset, l1PrimCount, true);
+
+	Renderer::renderProgram()->use();
+	Renderer::renderProgram()->setInt("bvhRootNode", 0);
 
 	BufferController::updateObjects();
+
+	auto nodeData2 = BufferController::ssboBVHNodes()->readData<BufferController::BVHNodeStruct>(nodeCount);
+}
+
+void BVHMortonBuilder::buildCompute_morton(int primOffset, int n_, bool isLevel1)
+{
+	_ssboTriCenters->bind(6);
+	_ssboMinMaxBound->bind(7);
+	_ssboMortonCodes->bind(8);
+	_ssboBVHTriIndices->bind(9);
+	BufferController::ssboBVHNodes()->bind(10);
+
+	_ssboTriCenters->ensureDataCapacity(n_);
+	_ssboMortonCodes->ensureDataCapacity(n_);
+	_ssboMinMaxBound->clear();
+	_ssboBVHTriIndices->ensureDataCapacity(n_);
+
+	_bvhMorton->use();
+	_bvhMorton->setInt("n", n_);
+	_bvhMorton->setInt("primOffset", primOffset);
+	_bvhBuild->setBool("isLevel1", isLevel1);
+
+	_bvhMorton->setInt("pass", 0);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	_bvhMorton->setInt("pass", 1);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n_);
+}
+void BVHMortonBuilder::buildCompute_tree(int nodeOffset, int n_, bool isLevel1)
+{
+	BufferController::ssboTriangles()->bindDefault();
+	BufferController::ssboBVHNodes()->bind(6);
+	_ssboBVHTriIndices->bind(7);
+	_ssboMortonCodes->bind(8);
+
+	_bvhBuild->use();
+	_bvhBuild->setInt("n", n_);
+	_bvhBuild->setInt("nodeOffset", nodeOffset);
+	_bvhBuild->setBool("isLevel1", isLevel1);
+
+	_bvhBuild->setInt("pass", 0);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	_bvhBuild->setInt("pass", 1);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	_bvhBuild->setInt("pass", 2);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+
+	_bvhBuild->setInt("pass", 3);
+	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+}
+int BVHMortonBuilder::countL1Primitives()
+{
+	int count = 0;
+    auto models = Scene::models;
+    for (int i = 0; i < models.size(); i++)
+    {
+        if (models[i]->baseTriangles().size() < MIN_TRI_L2_COUNT) continue;
+        count++;
+    }
+
+    auto objects = Scene::objects;
+    for (int i = 0; i < objects.size(); i++)
+    {
+        auto object = objects[i];
+
+        bool ok = false;
+        if (dynamic_cast<Sphere*>(object))
+        	ok = true;
+        if (auto mesh = dynamic_cast<Mesh*>(object))
+        {
+            if (mesh->model()->baseTriangles().size() < MIN_TRI_L2_COUNT)
+                ok = true;
+        }
+
+        if (!ok) continue;
+        count++;
+    }
+
+    return count;
+}
+
+void BVHMortonBuilder::writeL1Primitives(int& l1PrimCount)
+{
+	std::vector<BVHL1Primitive> prims;
+
+	auto models = Scene::models;
+	for (int i = 0; i < models.size(); i++)
+	{
+		auto model = models[i];
+		if (model->bvhRootNode() == -1) continue;
+
+		BVHL1Primitive prim{};
+		prim.index = model->bvhRootNode();
+		prim.isNode = true;
+
+		prims.push_back(prim);
+	}
+
+	auto objects = Scene::objects;
+	for (int i = 0; i < objects.size(); i++)
+	{
+		auto object = objects[i];
+
+		bool ok = false;
+		if (dynamic_cast<Sphere*>(object))
+			ok = true;
+		if (auto mesh = dynamic_cast<Mesh*>(object))
+		{
+			if (mesh->model()->bvhRootNode() == -1)
+				ok = true;
+		}
+
+		if (!ok) continue;
+
+		BVHL1Primitive prim{};
+		prim.index = i;
+		prim.isNode = false;
+
+		prims.push_back(prim);
+	}
+
+	_ssboBVHL1Primitives->ensureDataCapacity(prims.size());
+	_ssboBVHL1Primitives->setSubData((float*)prims.data(), prims.size());
+
+	l1PrimCount = prims.size();
 }
 
 //

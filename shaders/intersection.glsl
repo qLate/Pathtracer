@@ -119,7 +119,7 @@ bool intersectSphere(inout Ray ray, Object sphere)
     float a = dot(dir, dir);
     float b = dot(dir + dir, inter);
     vec3 objScale = getTransformScale(sphere.transform);
-    float c = abs(dot(inter, inter)) - sphere.properties.x * objScale.x * objScale.x;
+    float c = abs(dot(inter, inter)) - sphere.properties.x * sphere.properties.x * objScale.x * objScale.x;
 
     if (!solveQuadratic(a, b, c, x0, x1)) return false;
     if (x0 <= 0 || x0 >= ray.t) return false;
@@ -309,21 +309,22 @@ bool intersectBVH(int rootNode, inout Ray ray, bool castingShadows)
     return hit;
 }
 
+uniform int bvhRootNode;
 bool intersectWorld(inout Ray ray, bool castingShadows)
 {
     bool hit = false;
-    for (int i = 0; i < objectCount; i++)
-    {
-        if (intersectObj(ray, objects[i], castingShadows))
-        {
-            hit = true;
-            ray.hitObjIndex = i;
+    // for (int i = 0; i < objectCount; i++)
+    // {
+    //     if (intersectObj(ray, objects[i], castingShadows))
+    //     {
+    //         hit = true;
+    //         ray.hitObjIndex = i;
 
-            if (castingShadows) return true;
-        }
-    }
+    //         if (castingShadows) return true;
+    //     }
+    // }
 
-    // if (intersectBVH(0, ray, castingShadows))
-    //     hit = true;
+    if (intersectBVH(bvhRootNode, ray, castingShadows))
+        hit = true;
     return hit;
 }

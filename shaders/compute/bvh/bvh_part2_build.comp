@@ -9,9 +9,9 @@ layout(std140, binding = 6) /*buffer*/ uniform BVHNodes
     BVHNode nodes[];
 };
 
-layout(std430, binding = 7) /*buffer*/ uniform BVHTriIndices
+layout(std430, binding = 7) /*buffer*/ uniform Indices
 {
-    uint triIndices[];
+    uint indices[];
 };
 
 layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
@@ -19,8 +19,19 @@ layout(std430, binding = 8) /*buffer*/ uniform MortonCodes
     uint mortonCodes[];
 };
 
+struct BVHL1Primitive
+{
+    int index;
+    bool isNode;
+};
+layout(std430, binding = 9) /*buffer*/ uniform BVHL1Primitives
+{
+    BVHL1Primitive l1Primitives[];
+};
+
 uniform int n = -1;
 uniform int nodeOffset = 0;
+uniform bool isLevel1 = false;
 
 int lcp(uint i, uint j)
 {
@@ -77,22 +88,61 @@ void buildInnerNodes(int i)
     nodes[right + nodeOffset].values.w = i + nodeOffset;
 }
 
-void calcTriangleBox(Triangle tri, out vec3 minBound, out vec3 maxBound)
+void calcBox(int ind, out vec3 minBound, out vec3 maxBound)
 {
-    vec3 p0 = tri.vertices[0].posU.xyz;
-    vec3 p1 = tri.vertices[1].posU.xyz;
-    vec3 p2 = tri.vertices[2].posU.xyz;
+    if (isLevel1)
+    {
+        if (l1Primitives[ind].isNode)
+        {
+            minBound = nodes[ind].min.xyz;
+            maxBound = nodes[ind].max.xyz;
+        }
+        else
+        {
+            Object obj = objects[l1Primitives[ind].index];
+            if (obj.objType == OBJ_TYPE_SPHERE)
+            {
+                vec3 center = obj.pos.xyz;
+                float radius = obj.properties.x;
 
-    minBound = min(min(p0, p1), p2) - vec3(0.0001);
-    maxBound = max(max(p0, p1), p2) + vec3(0.0001);
+                minBound = center - vec3(radius);
+                maxBound = center + vec3(radius);
+            }
+            // else if (obj.objType == OBJ_TYPE_MESH)
+            // {
+            //     minBound = vec3(FLT_MAX);
+            //     maxBound = vec3(FLT_MIN);
+
+            //     for (int j = int(obj.properties.x); j < obj.properties.x + obj.properties.y; j++)
+            //     {
+            //         Triangle tri = triangles[j];
+            //         vec3 p0 = tri.vertices[0].posU.xyz;
+            //         vec3 p1 = tri.vertices[1].posU.xyz;
+            //         vec3 p2 = tri.vertices[2].posU.xyz;
+
+            //         minBound = min(minBound, min(min(p0, p1), p2) - vec3(0.0001));
+            //         maxBound = max(maxBound, max(max(p0, p1), p2) + vec3(0.0001));
+            //     }
+            // }
+        }
+    }
+    else
+    {
+        Triangle tri = triangles[ind];
+        vec3 p0 = tri.vertices[0].posU.xyz;
+        vec3 p1 = tri.vertices[1].posU.xyz;
+        vec3 p2 = tri.vertices[2].posU.xyz;
+
+        minBound = min(min(p0, p1), p2) - vec3(0.0001);
+        maxBound = max(max(p0, p1), p2) + vec3(0.0001);
+    }
 }
 
 void setLeaf(int i)
 {
-    uint origInd = triIndices[i - (n - 1) - nodeOffset];
-    calcTriangleBox(triangles[origInd], nodes[i].min.xyz, nodes[i].max.xyz);
+    int origInd = int(indices[i - (n - 1) - nodeOffset]);
+    calcBox(origInd, nodes[i].min.xyz, nodes[i].max.xyz);
     nodes[i].min.w = origInd;
-    // nodes[i].max.w = 1;
     nodes[i].values.z = 1;
     nodes[i].links.x = nodes[i].links.y;
 }
@@ -154,7 +204,10 @@ void main()
     {
         if (gid >= 2 * n - 1) return;
         nodes[gid + nodeOffset].min.w = -1;
-        nodes[gid + nodeOffset].values = ivec4(-1, -1, 0, -1);
+        if (isLevel1)
+            nodes[gid + nodeOffset].max.w = gid >= n - 1 ? l1Primitives[gid - (n - 1)].isNode ? 1 : 0 : -1;
+        else
+            nodes[gid + nodeOffset].max.w = -1;
         nodes[gid + nodeOffset].links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)

@@ -74,7 +74,7 @@ struct Object
     vec2 _pad;
     vec4 pos;
     mat4x4 transform;
-    vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radiusSquared) : Plane(normal)]
+    vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radius) : Plane(normal)]
 };
 
 struct Vertex
@@ -92,7 +92,7 @@ struct Triangle
 struct BVHNode
 {
     vec4 min; // min, triIndex
-    vec4 max; // max
+    vec4 max; // max, isLevel1
     ivec4 values; // left, right, isLeaf, parent
     ivec4 links; // hit, miss, boxCalculated
 };

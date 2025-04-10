@@ -210,7 +210,7 @@ void BufferController::updateObjects()
 		{
 			auto sphere = (Sphere*)obj;
 			objectStruct.objType = 1;
-			objectStruct.properties.x = sphere->radius() * sphere->radius();
+			objectStruct.properties.x = sphere->radius();
 		}
 		else if (dynamic_cast<Plane*>(obj) != nullptr)
 		{
