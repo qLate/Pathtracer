@@ -20,8 +20,9 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	//ecosysScene();
-	SceneLoader::loadScene("assets/scenes-pbrt/bunny.pbrt");
+	ecosysScene();
+	//SceneLoader::loadScene("assets/scenes-pbrt/city-env.pbrt");
+	//emptyScene();
 }
 #endif
 
@@ -33,8 +34,6 @@ void SceneSetup::emptyScene()
 
 	//auto cube1 = new Cube({-4, -6.7, 4}, 6.6f, {{0, 28 * DEG_TO_RAD, 0}});
 	auto wallLeft = new Square({10, 0, 0}, 20, {{0, 0, 90 * DEG_TO_RAD}});
-	auto wallRight = new Square({-10, 0, 0}, 20, {{0, 0, -90 * DEG_TO_RAD}});
-	auto wallBack = new Square({0, 0, -10}, 20, {{-90 * DEG_TO_RAD, 0, 0}});
 }
 
 void SceneSetup::churchScene()

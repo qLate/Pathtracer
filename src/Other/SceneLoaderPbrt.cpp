@@ -247,11 +247,10 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 			spawned->setName(scene->objects[shape->object]->name);
 	}
 
-	int count = 0;
-	for (const auto* inst : scene->instances)
+	for (int instInd = 0; instInd < scene->instances.size(); ++instInd)
 	{
-		count++;
-		//if (count > 100) continue;
+		if (instInd > 6) continue;
+		auto inst = scene->instances[instInd];
 		auto obj = scene->objects[inst->object];
 
 		auto objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));

@@ -19,11 +19,10 @@ BVHMortonBuilder::BVHMortonBuilder()
 	_bvhBuild = make_unique<ComputeShaderProgram>("shaders/compute/bvh/bvh_part2_build.comp");
 	radixSort = make_unique<glu::RadixSort>();
 
-	_ssboTriCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
+	_ssboCenters = make_unique<SSBO>(TRI_CENTER_ALIGN);
 	_ssboMinMaxBound = make_unique<SSBO>(MIN_MAX_BOUND_ALIGN);
 	_ssboMortonCodes = make_unique<SSBO>(MORTON_ALIGN);
-	_ssboBVHTriIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN);
-	_ssboBVHL1Primitives = make_unique<SSBO>(BVH_L1_PRIMITIVES_ALIGN);
+	_ssboBVHIndices = make_unique<SSBO>(BVH_TRI_INDICES_ALIGN);
 
 	_ssboMinMaxBound->setDataCapacity(1);
 }
@@ -49,11 +48,11 @@ void BVHMortonBuilder::buildGPU()
 		auto model = models[i];
 
 		int n_ = model->baseTriangles().size();
-		//if (n_ < MIN_BOTTOM_LEVEL_TRI_COUNT)
-		//{
-		//	primOffset += n_;
-		//	continue;
-		//}
+		if (n_ < MIN_BOTTOM_LEVEL_TRI_COUNT)
+		{
+			primOffset += n_;
+			continue;
+		}
 		model->setBvhRootNode(nodeOffset);
 
 		buildCompute_morton(primOffset, n_, false);
@@ -75,27 +74,30 @@ void BVHMortonBuilder::buildTopLevel()
 	buildCompute_morton(0, topLevelPrimCount, true);
 	buildCompute_tree(_topLevelStartIndex, topLevelPrimCount, true);
 
+	auto centers = _ssboCenters->readData<glm::vec4>(topLevelPrimCount);
+	auto codes = _ssboMortonCodes->readData<uint32_t>(topLevelPrimCount);
+
 	BufferController::setBVHRootNode(_topLevelStartIndex);
 }
 
 void BVHMortonBuilder::buildCompute_morton(int primOffset, int n_, bool isTopLevel)
 {
-	_ssboTriCenters->bind(6);
+	_ssboCenters->bind(6);
 	_ssboMinMaxBound->bind(7);
 	_ssboMortonCodes->bind(8);
-	_ssboBVHTriIndices->bind(9);
+	_ssboBVHIndices->bind(9);
 	BufferController::ssboBVHNodes()->bind(10);
 	BufferController::ssboObjects()->bindDefault();
 
-	_ssboTriCenters->ensureDataCapacity(n_);
+	_ssboCenters->ensureDataCapacity(n_);
 	_ssboMortonCodes->ensureDataCapacity(n_);
 	_ssboMinMaxBound->clear();
-	_ssboBVHTriIndices->ensureDataCapacity(n_);
+	_ssboBVHIndices->ensureDataCapacity(n_);
 
 	_bvhMorton->use();
 	_bvhMorton->setInt("n", n_);
 	_bvhMorton->setInt("primOffset", primOffset);
-	_bvhBuild->setBool("isTopLevel", isTopLevel);
+	_bvhMorton->setBool("isTopLevel", isTopLevel);
 
 	_bvhMorton->setInt("pass", 0);
 	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
@@ -103,14 +105,14 @@ void BVHMortonBuilder::buildCompute_morton(int primOffset, int n_, bool isTopLev
 	_bvhMorton->setInt("pass", 1);
 	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
-	radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHTriIndices->id(), n_);
+	radixSort->operator()(_ssboMortonCodes->id(), _ssboBVHIndices->id(), n_);
 }
 void BVHMortonBuilder::buildCompute_tree(int nodeOffset, int n_, bool isTopLevel)
 {
 	BufferController::ssboTriangles()->bindDefault();
 	BufferController::ssboObjects()->bindDefault();
 	BufferController::ssboBVHNodes()->bind(6);
-	_ssboBVHTriIndices->bind(7);
+	_ssboBVHIndices->bind(7);
 	_ssboMortonCodes->bind(8);
 
 	_bvhBuild->use();

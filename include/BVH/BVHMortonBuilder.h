@@ -8,7 +8,7 @@
 class BVHMortonBuilder : public BVHBuilder
 {
 	static constexpr int SHADER_GROUP_SIZE = 32;
-	//static constexpr int MIN_BOTTOM_LEVEL_TRI_COUNT = 3;
+	static constexpr int MIN_BOTTOM_LEVEL_TRI_COUNT = 3;
 
 	static constexpr int TRI_CENTER_ALIGN = 4;
 	static constexpr int MORTON_ALIGN = 1;
@@ -20,11 +20,10 @@ class BVHMortonBuilder : public BVHBuilder
 	inline static UPtr<ComputeShaderProgram> _bvhBuild;
 	inline static UPtr<glu::RadixSort> radixSort;
 
-	inline static UPtr<SSBO> _ssboTriCenters;
+	inline static UPtr<SSBO> _ssboCenters;
 	inline static UPtr<SSBO> _ssboMinMaxBound;
 	inline static UPtr<SSBO> _ssboMortonCodes;
-	inline static UPtr<SSBO> _ssboBVHTriIndices;
-	inline static UPtr<SSBO> _ssboBVHL1Primitives;
+	inline static UPtr<SSBO> _ssboBVHIndices;
 
 	inline static int _topLevelStartIndex = -1;
 

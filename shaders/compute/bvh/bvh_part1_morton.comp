@@ -122,7 +122,8 @@ void main()
             if (obj.properties.z != -1)
             {
                 BVHNode rootNode = nodes[int(obj.properties.z)];
-                center = (rootNode.min.xyz + rootNode.max.xyz) * 0.5f;
+                vec3 nodeCenter = (rootNode.min.xyz + rootNode.max.xyz) * 0.5f;
+                center = localToGlobal(nodeCenter, obj);
             }
             else
                 center = obj.pos.xyz;
