@@ -81,6 +81,8 @@ void WindowDrawer::drawMenuBar()
 				ObjectManipulator::selectObject(new Square(spawnPos, 2));
 			if (ImGui::MenuItem("New Plane", "Tab"))
 				ObjectManipulator::selectObject(new Plane(spawnPos));
+			if (ImGui::MenuItem("New Disk", "Tab"))
+				ObjectManipulator::selectObject(new Disk(spawnPos, 2));
 			if (ImGui::MenuItem("New Point Light", "Tab"))
 				ObjectManipulator::selectObject(new PointLight(spawnPos, Color::white(), 1, 10));
 			if (ImGui::MenuItem("New Directional Light", "Tab"))

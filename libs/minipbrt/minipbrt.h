@@ -241,7 +241,7 @@ namespace minipbrt {
   //
 
   enum class AreaLightType {
-    Diffuse,
+      Diffuse,
   };
 
 

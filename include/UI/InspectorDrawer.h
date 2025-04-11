@@ -1,5 +1,6 @@
 #pragma once
 
+class Disk;
 class PointLight;
 class Light;
 class Mesh;
@@ -23,6 +24,12 @@ class SphereInspectorDrawer
 {
 public:
 	static void draw(Sphere* target);
+};
+
+class DiskInspectorDrawer
+{
+public:
+	static void draw(Disk* target);
 };
 
 class MeshInspectorDrawer

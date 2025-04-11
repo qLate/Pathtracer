@@ -113,6 +113,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 	}
 	ImGui::PopID();
 }
+
 void SphereInspectorDrawer::draw(Sphere* target)
 {
 	GraphicalInspectorDrawer::draw(target);
@@ -126,6 +127,21 @@ void SphereInspectorDrawer::draw(Sphere* target)
 			target->setRadius(radius);
 	}
 	ImGui::PopID();
+}
+
+void DiskInspectorDrawer::draw(Disk* target)
+{
+	GraphicalInspectorDrawer::draw(target);
+
+    const char* name = "Disk";
+    if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
+    ImGui::PushID(name);
+    {
+        auto radius = target->radius();
+        if (ImGui::LabeledFloat("Radius", radius))
+            target->setRadius(radius);
+    }
+    ImGui::PopID();
 }
 
 void MeshInspectorDrawer::draw(Mesh* target)

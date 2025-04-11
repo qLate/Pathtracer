@@ -143,6 +143,19 @@ void calcBox(int ind, out vec3 minBound, out vec3 maxBound)
             minBound = center - vec3(radius);
             maxBound = center + vec3(radius);
         }
+        else if (obj.objType == OBJ_TYPE_DISK)
+        {
+            vec3 center = obj.pos.xyz;
+            float radius = obj.properties.x * getTransformScale(obj.transform).x;
+
+            vec3 p1 = localToGlobal(vec3(radius, 0, radius), obj);
+            vec3 p2 = localToGlobal(vec3(-radius, 0, radius), obj);
+            vec3 p3 = localToGlobal(vec3(radius, 0, -radius), obj);
+            vec3 p4 = localToGlobal(vec3(-radius, 0, -radius), obj);
+
+            minBound = min(min(p1, p2), min(p3, p4)) - vec3(0.0001);
+            maxBound = max(max(p1, p2), max(p3, p4)) + vec3(0.0001);
+        }
     }
     else
     {

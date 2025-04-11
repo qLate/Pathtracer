@@ -202,5 +202,15 @@ void Sphere::setRadius(float radius)
 	BufferController::markBufferForUpdate(BufferType::Objects);
 }
 
+Disk::Disk(glm::vec3 pos, float radius, glm::quat rot, glm::vec3 scale) : Graphical(pos, rot, scale), _radius(radius) {}
+Disk::Disk(const Disk& orig) : Graphical(orig), _radius(orig._radius) {}
+
+void Disk::setRadius(float radius)
+{
+	_radius = radius;
+
+    BufferController::markBufferForUpdate(BufferType::Objects);
+}
+
 Plane::Plane(glm::vec3 pos, glm::vec3 rot) : Graphical(pos, rot) {}
 Plane::Plane(const Plane& orig) : Graphical(orig) {}

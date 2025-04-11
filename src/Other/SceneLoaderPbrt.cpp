@@ -9,7 +9,6 @@
 #include "Model.h"
 #include "MyMath.h"
 #include "Renderer.h"
-#include "Scene.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.hpp"
 
@@ -27,7 +26,7 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	}
 	tm.printElapsedFromLast("   Scene loaded in ");
 
-	minipbrt::Scene* scene = loader.take_scene();
+	auto scene = loader.take_scene();
 
 	loadScene_camera(scene);
 	tm.printElapsedFromLast("   Camera loaded in ");
@@ -40,17 +39,13 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	loadScene_materials(scene, parsedTextures, materials);
 	tm.printElapsedFromLast("   Materials loaded in ");
 
-	loadScene_objects(scene, materials);
-	tm.printElapsedFromLast("   Shapes loaded in ");
-
 	loadScene_lights(scene);
 	tm.printElapsedFromLast("   Lights loaded in ");
 
+	loadScene_objects(scene, materials);
+	tm.printElapsedFromLast("   Shapes loaded in ");
+
 	delete scene;
-
-	if (Scene::baseTriangles.empty())
-		new Cube({}, 0);
-
 	tm.printElapsed("PBRT scene loaded in ");
 }
 
@@ -238,14 +233,14 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 		}
 		if (isInstanced) continue;
 
-		auto obj = spawnObjectFromShape(shape, materials, models[shapeInd]);
-		if (obj == nullptr) continue;
+		auto spawned = spawnObjectFromShape(shape, materials, models[shapeInd], scene);
+		if (!spawned) continue;
 
 		auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
-		obj->setTransform(transform);
+		spawned->setTransform(transform);
 
 		if (shape->object != minipbrt::kInvalidIndex)
-			obj->setName(scene->objects[shape->object]->name);
+			spawned->setName(scene->objects[shape->object]->name);
 	}
 
 	int count = 0;
@@ -261,7 +256,7 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 		for (uint32_t i = 0; i < obj->numShapes; ++i)
 		{
 			auto shape = scene->shapes[obj->firstShape + i];
-			auto spawned = spawnObjectFromShape(shape, materials, models[obj->firstShape + i]);
+			auto spawned = spawnObjectFromShape(shape, materials, models[obj->firstShape + i], scene);
 			if (!spawned) continue;
 
 			auto shapeToWorld = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
@@ -315,7 +310,7 @@ std::vector<BaseTriangle*> SceneLoaderPbrt::loadModelTriangles(const minipbrt::T
 	return tris;
 }
 
-Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, Model* model)
+Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, Model* model, const minipbrt::Scene* scene)
 {
 	Graphical* obj = nullptr;
 	switch (shape->type())
@@ -331,10 +326,16 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			obj = new Sphere({0, 0, 0}, sphere->radius);
 			break;
 		}
+		case minipbrt::ShapeType::Disk:
+		{
+			auto disk = dynamic_cast<const minipbrt::Disk*>(shape);
+			obj = new Disk({0, 0, 0}, disk->radius);
+			break;
+		}
 		default:
 		{
 			Debug::logError("!!! Unsupported shape type: ", static_cast<int>(shape->type()));
-			break;
+			return nullptr;
 		}
 	}
 
@@ -343,6 +344,20 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 
 	if (shape->material != minipbrt::kInvalidIndex)
 		obj->setSharedMaterial(materials[shape->material]);
+
+	if (shape->areaLight != minipbrt::kInvalidIndex)
+	{
+		auto areaLight = dynamic_cast<const minipbrt::AreaLight*>(scene->areaLights[shape->areaLight]);
+		switch (areaLight->type())
+		{
+			case minipbrt::AreaLightType::Diffuse:
+			{
+				auto l = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
+				obj->material()->setEmission({l->L[0], l->L[1], l->L[2]});
+				break;
+			}
+		}
+	}
 
 	return obj;
 }
@@ -383,10 +398,5 @@ void SceneLoaderPbrt::loadScene_lights(minipbrt::Scene* scene)
 				Renderer::renderProgram()->setMatrix4X4("envMapToWorld", rotateY * toYUp * envMapToWorld);
 			}
 		}
-	}
-
-	for (auto areaLight : scene->areaLights)
-	{
-		auto dl = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
 	}
 }

@@ -69,10 +69,6 @@ vec3 castRay(Ray ray)
 
         ray.hitPoint += ray.surfaceNormal * 0.001;
 
-        // Fog
-        float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
-        color += throughput * fogColor * fogFactor;
-
         // Opacity
         float opacity = mat.opacity;
         if (mat.opacityTexIndex != -1)
@@ -113,9 +109,15 @@ vec3 castRay(Ray ray)
         if (bounce > 2 && roughness < 0.05)
             roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3);
 
+        // Fog
+        float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
+        vec3 fogImpact = fogColor * fogFactor;
+
         // Shade
         vec3 bounceDir;
         vec3 albedo = texture(textures[int(mat.texIndex)], uv).xyz * mat.color;
+        albedo += fogImpact;
+
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
         color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
 

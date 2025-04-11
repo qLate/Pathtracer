@@ -6,10 +6,12 @@
 #define LIGHT_TYPE_DIRECTIONAL 0
 #define LIGHT_TYPE_POINT 1
 #define LIGHT_TYPE_TRIANGLE 2
+#define LIGHT_TYPE_DISK 3
 
 #define OBJ_TYPE_MESH 0
 #define OBJ_TYPE_SPHERE 1
 #define OBJ_TYPE_PLANE 2
+#define OBJ_TYPE_DISK 3
 
 #define RAY_DEFAULT_ARGS FLT_MAX, vec3(0), vec3(0), vec2(0), -1, -1
 #define RAY_DEFAULT_ARGS_WO_DIST vec3(0), vec3(0), vec2(0), -1, -1
@@ -50,9 +52,9 @@ void blue() {
 struct Light
 {
     vec3 pos;
-    int lightType; // 0 - global, 1 - point
+    int lightType;
     vec3 color;
-    vec4 properties1; // intensity, [PointLight(distance), GlobalLight(dirX, dirY, dirZ), TriangleLight(triIndex, area)]
+    vec4 properties1; // intensity
 };
 
 struct Material
@@ -78,7 +80,7 @@ struct Object
     vec2 _pad;
     vec4 pos;
     mat4x4 transform;
-    vec4 properties; // [Mesh(trianglesStart, triangleCount) : Sphere(radius) : Plane(normal)]
+    vec4 properties;
 };
 
 struct Vertex

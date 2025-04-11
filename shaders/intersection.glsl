@@ -134,6 +134,30 @@ bool intersectSphere(inout Ray ray, Object sphere)
     return true;
 }
 
+bool intersectDisk(inout Ray ray, Object disk)
+{
+    vec3 normal = localToGlobalDir(vec3(0, 1, 0), disk);
+    float denom = -dot(normal, ray.dir);
+    if (denom == 0) return false;
+
+    vec3 dir = disk.pos.xyz - ray.pos;
+    float t = -dot(normal, dir) / denom;
+    if (t >= ray.t || t <= 0) return false;
+
+    vec3 hitPoint = ray.pos + t * ray.dir;
+    vec3 inter = hitPoint - disk.pos.xyz;
+    float dist2 = dot(inter, inter);
+    vec3 objScale = getTransformScale(disk.transform);
+    float radius2 = disk.properties.x * disk.properties.x * objScale.x * objScale.x;
+    if (dist2 > radius2) return false;
+
+    ray.t = t;
+    ray.hitPoint = hitPoint;
+    ray.surfaceNormal = dot(ray.dir, normal) < 0 ? normal : -normal;
+
+    return true;
+}
+
 bool intersectLight(inout Ray ray, Light light, float radius)
 {
     float x0, x1;
@@ -216,7 +240,7 @@ bool intersectAABBForGizmo(inout Ray ray, vec4 min_, vec4 max_)
     return false;
 }
 
-bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax, bool castingShadows, bool preventHeat = false)
+bool intersectsAABB(inout Ray ray, vec4 min_, vec4 max_, float tMin, float tMax, bool castingShadows, bool preventHeat)
 {
     #ifdef SHOW_BVH_BOXES
     if (!castingShadows && !preventHeat)
@@ -269,6 +293,14 @@ bool intersectObj(inout Ray ray, Object obj, bool castingShadows)
             return true;
         }
     }
+    else if (obj.objType == OBJ_TYPE_DISK)
+    {
+        if (intersectDisk(ray, obj))
+        {
+            ray.hitTriIndex = -1;
+            return true;
+        }
+    }
     return false;
 }
 
@@ -316,7 +348,7 @@ bool intersectBVHTop(inout Ray ray, bool castingShadows)
     while (curr != -1)
     {
         BVHNode node = nodes[curr];
-        if (intersectsAABB(ray, node.min, node.max, 0, FLT_MAX, castingShadows))
+        if (intersectsAABB(ray, node.min, node.max, 0, FLT_MAX, castingShadows, false))
         {
             if (node.values.z == 1)
             {

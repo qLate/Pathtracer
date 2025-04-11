@@ -31,11 +31,21 @@ vec3 sampleEnvMap(vec3 dir)
 
 float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L, vec3 LP)
 {
-    vec3 lightNormal = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
-    float LNdotL = max(dot(-L, lightNormal), 0.0);
+    vec3 LN = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
+    float LNdotL = max(dot(-L, LN), 0.0);
 
     float dist = length(LP - P);
     return dist * dist / max(LNdotL * light.properties1.y, EPSILON);
+}
+float getDiskLightPdf(Light light, Object obj, vec3 P, vec3 L, vec3 LP)
+{
+    vec3 LN = localToGlobalDir(vec3(0, 1, 0), obj);
+    float LNdotL = max(dot(-L, LN), 0.0);
+
+    float dist = length(LP - P);
+    float radius = obj.properties.x * getTransformScale(obj.transform).x;
+    float area = PI * radius * radius;
+    return dist * dist / max(LNdotL * area, EPSILON);
 }
 
 float getLightPdf(Light light, Object obj, vec3 P, vec3 L, vec3 LP)
@@ -48,6 +58,10 @@ float getLightPdf(Light light, Object obj, vec3 P, vec3 L, vec3 LP)
     {
         Triangle tri = triangles[int(light.properties1.x)];
         return getTriangleLightPdf(light, tri, obj, P, L, LP);
+    }
+    else if (light.lightType == LIGHT_TYPE_DISK)
+    {
+        return getDiskLightPdf(light, obj, P, L, LP);
     }
     return -1;
 }
@@ -88,6 +102,19 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         radiance = findMaterial(obj.materialIndex).emission;
 
         pdf = getTriangleLightPdf(light, tri, obj, P, L, LP);
+    }
+    else if (light.lightType == LIGHT_TYPE_DISK)
+    {
+        Object obj = objects[int(light.properties1.x)];
+        float radius = obj.properties.x * getTransformScale(obj.transform).x;
+
+        vec3 circlePoint = sampleCircleCosine(rand(), rand());
+        vec3 LP = localToGlobal(circlePoint * radius, obj);
+        L = normalize(LP - P);
+        dist = length(LP - P);
+
+        radiance = findMaterial(obj.materialIndex).emission;
+        pdf = getDiskLightPdf(light, obj, P, L, LP);
     }
 }
 

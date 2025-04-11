@@ -107,6 +107,25 @@ float minv3(vec3 v)
     return min(min(v.x, v.y), v.z);
 }
 
+vec3 sampleCircleUniform(float r1, float r2)
+{
+    float r = sqrt(r1);
+    float phi = TWO_PI * r2;
+
+    float x = r * cos(phi);
+    float y = r * sin(phi);
+    return vec3(x, y, 0.0);
+}
+vec3 sampleCircleCosine(float r1, float r2)
+{
+    float r = sqrt(r1);
+    float phi = TWO_PI * r2;
+
+    float x = r * cos(phi);
+    float y = r * sin(phi);
+    return vec3(x, y, sqrt(max(1.0 - r1, 0)));
+}
+
 vec3 sampleHemisphereUniform(float r1, float r2)
 {
     float r = sqrt(max(1.0 - r1 * r1, 0));

@@ -140,6 +140,28 @@ private:
 	friend class JsonUtility;
 };
 
+class Disk final : public Graphical
+{
+	float _radius;
+
+	Disk() = default;
+
+public:
+	Disk(glm::vec3 pos, float radius, glm::quat rot = {}, glm::vec3 scale = {1, 1, 1});
+	Disk(const Disk& orig);
+
+	float radius() const { return _radius; }
+	void setRadius(float radius);
+
+	constexpr static auto properties();
+
+private:
+	Disk* clone_internal() const override { return new Disk(*this); }
+	void drawInspector() override { return DiskInspectorDrawer::draw(this); }
+
+	friend class JsonUtility;
+};
+
 
 class Plane final : public Graphical
 {
@@ -209,6 +231,15 @@ constexpr auto Sphere::properties()
 	);
 }
 
+constexpr auto Disk::properties()
+{
+	return std::tuple_cat(
+		Graphical::properties(),
+		std::make_tuple(
+			JsonUtility::property(&Disk::_radius, "radius")
+		)
+	);
+}
 constexpr auto Plane::properties()
 {
 	return std::tuple_cat(

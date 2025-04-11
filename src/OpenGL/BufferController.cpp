@@ -140,15 +140,13 @@ void BufferController::updateLights()
 		lightStruct.color = light->color();
 		lightStruct.properties1.x = light->intensity();
 
-		if (dynamic_cast<DirectionalLight*>(light) != nullptr)
+		if (auto globalLight = dynamic_cast<DirectionalLight*>(light))
 		{
-			auto globalLight = (DirectionalLight*)light;
 			lightStruct.lightType = 0;
 			lightStruct.properties1.yzw = -(globalLight->rot() * vec3::FORWARD);
 		}
-		else if (dynamic_cast<PointLight*>(light))
+		else if (auto pointLight = dynamic_cast<PointLight*>(light))
 		{
-			auto pointLight = (PointLight*)light;
 			lightStruct.lightType = 1;
 			lightStruct.properties1.y = pointLight->dis();
 		}
@@ -182,6 +180,14 @@ void BufferController::updateLights()
 				data.push_back(lightStruct);
 			}
 		}
+		else if (auto disk = dynamic_cast<Disk*>(graphicals[i]))
+		{
+			LightStruct lightStruct{};
+			lightStruct.lightType = 3;
+			lightStruct.properties1.x = i;
+
+			data.push_back(lightStruct);
+		}
 	}
 
 	_uboLights->setSubData((float*)data.data(), data.size());
@@ -207,9 +213,8 @@ void BufferController::updateObjects()
 		objectStruct.transform = obj->getTransform();
 
 		bool isPrim = true;
-		if (dynamic_cast<Mesh*>(obj) != nullptr)
+		if (auto mesh = dynamic_cast<Mesh*>(obj))
 		{
-			auto mesh = (Mesh*)obj;
 			objectStruct.objType = 0;
 			if (mesh->model() != nullptr)
 				objectStruct.properties = {mesh->model()->triStartIndex(), mesh->model()->baseTriangles().size(), mesh->model()->bvhRootNode(), 0};
@@ -217,17 +222,20 @@ void BufferController::updateObjects()
 				objectStruct.properties.xyz = {-1, -1, -1};
 			isPrim = false;
 		}
-		else if (dynamic_cast<Sphere*>(obj) != nullptr)
+		else if (auto sphere = dynamic_cast<Sphere*>(obj))
 		{
-			auto sphere = (Sphere*)obj;
 			objectStruct.objType = 1;
 			objectStruct.properties.x = sphere->radius();
 		}
-		else if (dynamic_cast<Plane*>(obj) != nullptr)
+		else if (auto plane = dynamic_cast<Plane*>(obj))
 		{
-			auto plane = (Plane*)obj;
 			objectStruct.objType = 2;
 			objectStruct.properties.xyz = vec3::UP;
+		}
+		else if (auto disk = dynamic_cast<Disk*>(obj))
+		{
+			objectStruct.objType = 3;
+			objectStruct.properties.x = disk->radius();
 		}
 
 		data[i] = objectStruct;
