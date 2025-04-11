@@ -49,6 +49,13 @@ void blue() {
     COLOR_DEBUG = BLUE;
 }
 
+void debug(float val) {
+    COLOR_DEBUG = vec3(val, 0, 0);
+}
+void debug(vec3 val) {
+    COLOR_DEBUG = val;
+}
+
 struct Light
 {
     vec3 pos;

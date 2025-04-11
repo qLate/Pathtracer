@@ -99,8 +99,8 @@ vec3 castRay(Ray ray)
                 float lightPdf = misSampleLight ? getLightPdf(light, obj, ray.pos, L, ray.hitPoint) : 0;
                 float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
-                color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
-                color = clamp(color, 0, 1);
+                color += throughput * mat.emission * brdfMis;
+                if (misSampleLight) color = clamp(color, 0, 1);
                 break;
             }
         }
@@ -117,7 +117,9 @@ vec3 castRay(Ray ray)
         vec3 oldThroughput = throughput;
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
         vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
-        color += oldThroughput * radiance;
+
+        if (misSampleBrdf) color += clamp01(oldThroughput * radiance);
+        else color += oldThroughput * radiance;
 
         // Fog
         float trans = exp(-fogIntensity * ray.t);

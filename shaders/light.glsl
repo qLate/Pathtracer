@@ -39,7 +39,7 @@ float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L,
 }
 float getDiskLightPdf(Light light, Object obj, vec3 P, vec3 L, vec3 LP)
 {
-    vec3 LN = localToGlobalDir(vec3(0, 1, 0), obj);
+    vec3 LN = localToGlobalDir(vec3(0, -1, 0), obj);
     float LNdotL = max(dot(-L, LN), 0.0);
 
     float dist = length(LP - P);
@@ -243,8 +243,8 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
 vec3 getRadiance(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput, out vec3 L, out float brdfPdf)
 {
     float lightPdf;
-    vec3 directLighting = /*throughput * */(misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
-    directLighting = clampMax(directLighting, 1);
+    vec3 directLighting = /*throughput * */ (misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
+    // directLighting = clampMax(directLighting, 1);
 
     L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
 

@@ -176,7 +176,7 @@ void Material::setColor(const Color& color)
 }
 void Material::setSpecColor(const Color& specColor)
 {
-	_emission = specColor;
+	_specColor = specColor;
 
 	BufferController::markBufferForUpdate(BufferType::Materials);
 }

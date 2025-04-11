@@ -70,6 +70,10 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (ImGui::LabeledSliderFloat("Metallic", metallic, 0.0f, 1.0f))
 			material->setMetallic(metallic);
 
+		auto specColor = material->specColor();
+		if (ImGui::LabeledColorEdit4("Specular Color", &specColor[0], ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float))
+			material->setSpecColor(specColor);
+
 		if (auto windy = dynamic_cast<WindyTexture*>(material->texture()))
 		{
 			auto scale = windy->scale();

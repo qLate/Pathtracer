@@ -154,7 +154,8 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 			case minipbrt::MaterialType::Mirror:
 			{
 				auto m = dynamic_cast<const minipbrt::MirrorMaterial*>(mat);
-				baseColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
+				baseColor = Color::black();
+				specColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
 				roughness = 0.0f;
 				metallic = 1.0f;
 
@@ -208,9 +209,6 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				Debug::logError("!!! Unsupported material type: ", static_cast<int>(mat->type()));
 				break;
 		}
-
-		if (mat->bumpmap != minipbrt::kInvalidIndex)
-			int x = 1;
 
 		materials[i] = new Material(baseColor, lit, tex, roughness, metallic, emission, opacity, opacityTex, specColor);
 	}
@@ -353,7 +351,8 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			case minipbrt::AreaLightType::Diffuse:
 			{
 				auto l = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
-				obj->material()->setEmission({l->L[0], l->L[1], l->L[2]});
+				auto emissionColor = Color(l->L[0], l->L[1], l->L[2]);
+				obj->material()->setEmission(emissionColor * obj->material()->color());
 				break;
 			}
 		}
