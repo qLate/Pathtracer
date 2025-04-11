@@ -100,6 +100,7 @@ vec3 castRay(Ray ray)
                 float brdfMis = powerHeuristic(brdfPdf, lightPdf);
 
                 color += clamp(throughput, 0, 1) * mat.emission * brdfMis;
+                color = clamp(color, 0, 1);
                 break;
             }
         }
@@ -109,17 +110,18 @@ vec3 castRay(Ray ray)
         if (bounce > 2 && roughness < 0.05)
             roughness = mix(roughness, 0.2, float(bounce - 2) * 0.3);
 
-        // Fog
-        float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
-        vec3 fogImpact = fogColor * fogFactor;
-
-        // Shade
         vec3 bounceDir;
         vec3 albedo = texture(textures[int(mat.texIndex)], uv).xyz * mat.color;
-        albedo += fogImpact;
 
+        // Shade
+        vec3 oldThroughput = throughput;
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
-        color += getShading(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
+        vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
+        color += oldThroughput * radiance;
+
+        // Fog
+        float trans = exp(-fogIntensity * ray.t);
+        color += oldThroughput * fogColor * (1 - trans);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);

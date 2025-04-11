@@ -20,7 +20,7 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	redGreenRoom();
+	ecosysScene();
 }
 #endif
 
