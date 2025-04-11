@@ -20,7 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	ecosysScene();
+	//ecosysScene();
+	SceneLoader::loadScene("assets/scenes-pbrt/bunny.pbrt");
 }
 #endif
 
