@@ -81,8 +81,6 @@ vec3 castRay(Ray ray)
         if (mat.windyScale != -1)
             ray.surfaceNormal = windyBumpNormal(ray.hitPoint, ray.surfaceNormal, mat.windyScale, mat.windyStrength);
 
-        ray.hitPoint += ray.surfaceNormal * 0.001;
-
         // Fog
         float fogFactor = 1.0 - exp(-fogIntensity * ray.t);
         color += throughput * fogColor * fogFactor;
@@ -92,12 +90,14 @@ vec3 castRay(Ray ray)
         if (mat.opacityTexIndex != -1)
             opacity *= average(texture(textures[mat.opacityTexIndex], uv));
 
-        if (opacity < 1)
+        if (opacity < 1 && rand() > opacity)
         {
             ray = Ray(ray.hitPoint + ray.dir * 0.001, ray.dir, RAY_DEFAULT_ARGS);
-            throughput *= 1 - opacity;
+            bounce--;
             continue;
         }
+
+        ray.hitPoint += ray.surfaceNormal * 0.001;
 
         // Emissive material hit
         if (length(mat.emission) > 0)
@@ -220,7 +220,7 @@ void main()
     #endif
 
     // gamma correction
-    finalColor = linearToGamma(finalColor);
+    // finalColor = linearToGamma(finalColor);
 
     outColor = vec4(finalColor, 1);
 

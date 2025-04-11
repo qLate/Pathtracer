@@ -120,6 +120,11 @@ void Texture::initData(const std::vector<uint8_t>& image)
 	memcpy(_data, image.data(), _width * _height * 4);
 }
 
+Color Texture::colorAt(int x, int y) const
+{
+	int i = (y * _width + x) * 4;
+    return Color(_data[i + 0] / 255.0f, _data[i + 1] / 255.0f, _data[i + 2] / 255.0f, _data[i + 3] / 255.0f);
+}
 void WindyTexture::setScale(float scale)
 {
 	_scale = scale;

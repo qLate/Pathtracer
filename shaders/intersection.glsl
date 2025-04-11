@@ -56,7 +56,8 @@ void calcTriIntersectionValues(inout Ray ray)
 
     vec3 norm = getTriangleNormalAt(obj, tri, ray.uv.x, ray.uv.y);
     vec3 baseNorm = normalize(cross(v1 - v0, v2 - v0));
-    ray.surfaceNormal = dot(baseNorm != vec3(0) ? baseNorm : norm, ray.dir) < 0 ? norm : -norm;
+    // ray.surfaceNormal = dot(baseNorm != vec3(0) ? baseNorm : norm, ray.dir) < 0 ? norm : -norm;
+    ray.surfaceNormal = dot(norm, ray.dir) < 0 ? norm : -norm;
 }
 
 bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows);

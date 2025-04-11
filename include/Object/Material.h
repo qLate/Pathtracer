@@ -48,6 +48,8 @@ public:
 
 	void setName(const std::string& name) { _name = name; }
 
+	Color colorAt(int x, int y) const;
+
 	constexpr static auto properties();
 
 	friend class Assets;

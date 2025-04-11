@@ -120,6 +120,9 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 
 		if (parsedTex)
 			parsedTex->setName(tex->name);
+
+		if (parsedTex->name() == std::string("grass-specular"))
+			int x = 1;
 		parsedTextures.push_back(parsedTex);
 	}
 }
@@ -185,7 +188,10 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 					tex = parsedTextures[m->Kd.texture];
 				else
 					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
-				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
+				if (m->Ks.texture != minipbrt::kInvalidIndex)
+					specColor = parsedTextures[m->Ks.texture]->colorAt(0, 0);
+				else
+					specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 				roughness = m->roughness.value;
 				break;
 			}
@@ -245,7 +251,7 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 	for (const auto* inst : scene->instances)
 	{
 		count++;
-		if (count > 100) continue;
+		//if (count > 100) continue;
 		auto obj = scene->objects[inst->object];
 
 		auto objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));
