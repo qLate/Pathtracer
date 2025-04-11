@@ -120,7 +120,7 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
     {
         L = sampleSphereUniform(rand(), rand());
         dist = 1e10;
-        radiance = sampleEnvMap(L) * light.properties1.x;
+        radiance = sampleEnvMap(L) * light.color;
         pdf = 1 / (4 * PI);
     }
     else

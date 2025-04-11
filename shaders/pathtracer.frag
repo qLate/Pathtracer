@@ -47,7 +47,8 @@ vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
     vec3 throughput = vec3(1);
-    float brdfPdf = 1;
+    
+    float lastBrdfPdf = 1;
     for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
         if (!intersectWorld(ray, false))
@@ -58,7 +59,7 @@ vec3 castRay(Ray ray)
             {
                 vec3 envColor = sampleEnvMap(ray.dir);
                 float envPdf = 1 / (4 * PI);
-                float brdfMis = powerHeuristic(brdfPdf, envPdf);
+                float brdfMis = powerHeuristic(lastBrdfPdf, envPdf);
 
                 color += throughput * bgColor * envColor * brdfMis;
                 if (misSampleLight) color = clamp(color, 0, 1);
@@ -76,19 +77,24 @@ vec3 castRay(Ray ray)
         if (mat.windyScale != -1)
             ray.surfaceNormal = windyBumpNormal(ray.hitPoint, ray.surfaceNormal, mat.windyScale, mat.windyStrength);
 
-        ray.hitPoint += ray.surfaceNormal * 0.001;
+        // Fog
+        float trans = exp(-fogIntensity * ray.t);
+        color += throughput * fogColor * (1 - trans);
 
         // Opacity
         float opacity = mat.opacity;
         if (mat.opacityTexIndex != -1)
             opacity *= average(texture(textures[mat.opacityTexIndex], uv));
 
-        if (opacity < 1)
+        if (opacity < 1 && rand() < opacity)
         {
             ray = Ray(ray.hitPoint + ray.dir * 0.001, ray.dir, RAY_DEFAULT_ARGS);
             throughput *= 1 - opacity;
+            bounce--;
             continue;
         }
+
+        ray.hitPoint += ray.surfaceNormal * 0.001;
 
         // Emissive material hit
         if (length(mat.emission) > 0)
@@ -106,7 +112,7 @@ vec3 castRay(Ray ray)
 
                 vec3 L = normalize(ray.hitPoint - ray.pos);
                 float lightPdf = misSampleLight ? getLightPdf(light, obj, ray.pos, L, ray.hitPoint) : 0;
-                float brdfMis = powerHeuristic(brdfPdf, lightPdf);
+                float brdfMis = powerHeuristic(lastBrdfPdf, lightPdf);
 
                 color += throughput * mat.emission * brdfMis;
                 if (misSampleLight) color = clamp(color, 0, 1);
@@ -125,14 +131,10 @@ vec3 castRay(Ray ray)
         // Shade
         vec3 oldThroughput = throughput;
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
-        vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, brdfPdf);
+        vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, lastBrdfPdf);
 
         if (misSampleBrdf) color += clamp01(oldThroughput * radiance);
         else color += oldThroughput * radiance;
-
-        // Fog
-        float trans = exp(-fogIntensity * ray.t);
-        color += oldThroughput * fogColor * (1 - trans);
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);
