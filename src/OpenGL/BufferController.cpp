@@ -156,14 +156,14 @@ void BufferController::updateLights()
 	}
 
 	// Environmental light
-	if (Camera::instance->bgColor() != Color::black())
-	{
-		LightStruct lightStruct{};
-		lightStruct.lightType = 99;
-		lightStruct.color = Camera::instance->bgColor();
+	//if (Camera::instance->bgColor() != Color::black())
+	//{
+	//	LightStruct lightStruct{};
+	//	lightStruct.lightType = 99;
+	//	lightStruct.color = Camera::instance->bgColor();
 
-		data.push_back(lightStruct);
-	}
+	//	data.insert(data.begin(), lightStruct);
+	//}
 
 	// Emissive objects
 	auto graphicals = Scene::graphicals;
@@ -192,14 +192,14 @@ void BufferController::updateLights()
 				data.push_back(lightStruct);
 			}
 		}
-		//else if (auto disk = dynamic_cast<Disk*>(graphicals[i]))
-		//{
-		//	LightStruct lightStruct{};
-		//	lightStruct.lightType = 3;
-		//	lightStruct.properties1.x = i;
+		else if (auto disk = dynamic_cast<Disk*>(graphicals[i]))
+		{
+			LightStruct lightStruct{};
+			lightStruct.lightType = 3;
+			lightStruct.properties1.x = i;
 
-		//	data.push_back(lightStruct);
-		//}
+			data.push_back(lightStruct);
+		}
 	}
 
 	_uboLights->setSubData((float*)data.data(), data.size());

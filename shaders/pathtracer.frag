@@ -47,14 +47,22 @@ vec3 castRay(Ray ray)
 {
     vec3 color = vec3(0);
     vec3 throughput = vec3(1);
-    
+
     float lastBrdfPdf = 1;
+    bool isSpecBounce = false;
     for (int bounce = 0; bounce <= maxRayBounces; bounce++)
     {
         if (!intersectWorld(ray, false))
         {
-            if (bounce == 0)
-                color = bgColor * sampleEnvMap(ray.dir);
+            bool isSamplingEnvLight = lightCount > 0 && lights[0].lightType == LIGHT_TYPE_ENVIRONMENTAL;
+            if (!isSamplingEnvLight || bounce == 0)
+            {
+                if (bounce == 0 || isSpecBounce)
+                {
+                    color = throughput * bgColor * sampleEnvMap(ray.dir);
+                    color = clamp(color, 0, 1);
+                }
+            }
             else if (misSampleBrdf)
             {
                 vec3 envColor = sampleEnvMap(ray.dir);
@@ -77,16 +85,16 @@ vec3 castRay(Ray ray)
         if (mat.windyScale != -1)
             ray.surfaceNormal = windyBumpNormal(ray.hitPoint, ray.surfaceNormal, mat.windyScale, mat.windyStrength);
 
-        // Fog
-        float trans = exp(-fogIntensity * ray.t);
-        color += throughput * fogColor * (1 - trans);
-
         // Opacity
         float opacity = mat.opacity;
         if (mat.opacityTexIndex != -1)
             opacity *= average(texture(textures[mat.opacityTexIndex], uv));
 
-        if (opacity < 1 && rand() < opacity)
+        // Fog
+        float trans = exp(-fogIntensity * ray.t);
+        color += throughput * fogColor * (1 - trans);
+
+        if (opacity < 1 && rand() > opacity)
         {
             ray = Ray(ray.hitPoint + ray.dir * 0.001, ray.dir, RAY_DEFAULT_ARGS);
             throughput *= 1 - opacity;
@@ -135,6 +143,8 @@ vec3 castRay(Ray ray)
 
         if (misSampleBrdf) color += clamp01(oldThroughput * radiance);
         else color += oldThroughput * radiance;
+
+        isSpecBounce = dot(bounceDir, reflect(ray.dir, ray.surfaceNormal)) > 0.999;
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);

@@ -123,8 +123,6 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         radiance = sampleEnvMap(L) * light.color;
         pdf = 1 / (4 * PI);
     }
-    else
-        red();
 }
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, out float lightPdf)
