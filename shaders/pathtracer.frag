@@ -52,8 +52,17 @@ vec3 castRay(Ray ray)
     {
         if (!intersectWorld(ray, false))
         {
-            color += throughput * bgColor * sampleEnvMap(ray.dir);
-            color = clamp(color, 0, 1);
+            if (bounce == 0)
+                color = bgColor * sampleEnvMap(ray.dir);
+            else if (misSampleBrdf)
+            {
+                vec3 envColor = sampleEnvMap(ray.dir);
+                float envPdf = 1 / (4 * PI);
+                float brdfMis = powerHeuristic(brdfPdf, envPdf);
+
+                color += throughput * bgColor * envColor * brdfMis;
+                if (misSampleLight) color = clamp(color, 0, 1);
+            }
             break;
         }
 

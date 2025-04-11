@@ -1,6 +1,7 @@
 #include "BufferController.h"
 
 #include "BVH.h"
+#include "Camera.h"
 #include "Graphical.h"
 #include "Light.h"
 #include "Model.h"
@@ -154,6 +155,17 @@ void BufferController::updateLights()
 		data[i] = lightStruct;
 	}
 
+	// Environmental light
+	if (Camera::instance->bgColor() != Color::black())
+	{
+		LightStruct lightStruct{};
+		lightStruct.lightType = 99;
+		lightStruct.color = Camera::instance->bgColor();
+
+		data.push_back(lightStruct);
+	}
+
+	// Emissive objects
 	auto graphicals = Scene::graphicals;
 	for (int i = 0; i < graphicals.size(); i++)
 	{

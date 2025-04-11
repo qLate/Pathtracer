@@ -116,6 +116,15 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         radiance = findMaterial(obj.materialIndex).emission;
         pdf = getDiskLightPdf(light, obj, P, L, LP);
     }
+    else if (light.lightType == LIGHT_TYPE_ENVIRONMENTAL)
+    {
+        L = sampleSphereUniform(rand(), rand());
+        dist = 1e10;
+        radiance = sampleEnvMap(L) * light.properties1.x;
+        pdf = 1 / (4 * PI);
+    }
+    else
+        red();
 }
 
 vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, out float lightPdf)

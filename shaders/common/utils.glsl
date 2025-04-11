@@ -148,6 +148,17 @@ vec3 sampleHemisphereCosine(float r1, float r2)
     return vec3(x, y, z);
 }
 
+vec3 sampleSphereUniform(float r1, float r2)
+{
+    float r = sqrt(r1);
+    float phi = TWO_PI * r2;
+
+    float x = r * cos(phi);
+    float y = r * sin(phi);
+    float z = sqrt(max(1.0 - r1, 0));
+    return vec3(x, y, z);
+}
+
 float clamp0(float x)
 {
     return max(x, 0.0);

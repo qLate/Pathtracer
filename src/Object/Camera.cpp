@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include "BufferController.h"
 #include "WindowDrawer.h"
 #include "Input.h"
 #include "Renderer.h"
@@ -82,6 +83,8 @@ void Camera::setBgColor(Color color)
 	_bgColor = color;
 	Renderer::renderProgram()->setFloat3("bgColor", _bgColor);
 	Renderer::resetSamples();
+
+	BufferController::markBufferForUpdate(BufferType::Lights);
 }
 
 glm::vec3 Camera::getScreenCenter() const
