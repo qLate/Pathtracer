@@ -249,7 +249,7 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 
 	for (int instInd = 0; instInd < scene->instances.size(); ++instInd)
 	{
-		if (instInd > 6) continue;
+		//if (instInd > 100) continue;
 		auto inst = scene->instances[instInd];
 		auto obj = scene->objects[inst->object];
 

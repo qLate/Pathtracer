@@ -240,7 +240,7 @@ void main()
     {
         if (gid >= 2 * n - 1) return;
         nodes[gid + nodeOffset].min.w = -1;
-        nodes[gid + nodeOffset].max.w = -1;
+        nodes[gid + nodeOffset].max.w = isTopLevel ? 1 : 0;
         nodes[gid + nodeOffset].links = ivec4(-1, -1, 0, 0);
     }
     else if (pass == 1)

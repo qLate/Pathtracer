@@ -41,7 +41,7 @@ void BVHMortonBuilder::buildGPU()
 	int nodeCount = 2 * n - models.size() + 2 * topLevelPrimCount - 1 + 1000;
 	BufferController::ssboBVHNodes()->ensureDataCapacity(nodeCount);
 
-	int nodeOffset = 0;
+	int nodeOffset = 2 * topLevelPrimCount + 1000;
 	int primOffset = 0;
 	for (int i = 0; i < models.size(); i++)
 	{
@@ -64,7 +64,7 @@ void BVHMortonBuilder::buildGPU()
 
 	BufferController::updateObjects();
 
-	_topLevelStartIndex = nodeOffset;
+	_topLevelStartIndex = 0;
 	buildTopLevel();
 }
 
@@ -73,9 +73,6 @@ void BVHMortonBuilder::buildTopLevel()
 	int topLevelPrimCount = Scene::graphicals.size();
 	buildCompute_morton(0, topLevelPrimCount, true);
 	buildCompute_tree(_topLevelStartIndex, topLevelPrimCount, true);
-
-	auto centers = _ssboCenters->readData<glm::vec4>(topLevelPrimCount);
-	auto codes = _ssboMortonCodes->readData<uint32_t>(topLevelPrimCount);
 
 	BufferController::setBVHRootNode(_topLevelStartIndex);
 }
@@ -121,16 +118,16 @@ void BVHMortonBuilder::buildCompute_tree(int nodeOffset, int n_, bool isTopLevel
 	_bvhBuild->setBool("isTopLevel", isTopLevel);
 
 	_bvhBuild->setInt("pass", 0);
-	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({(2 * n_ - 1) / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 1);
-	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({(2 * n_ - 1) / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 2);
-	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({(2 * n_ - 1) / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 
 	_bvhBuild->setInt("pass", 3);
-	ComputeShaderProgram::dispatch({n_ / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
+	ComputeShaderProgram::dispatch({(2 * n_ - 1) / SHADER_GROUP_SIZE + 1, 1, 1}, GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 //
