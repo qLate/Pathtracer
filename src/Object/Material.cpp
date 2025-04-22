@@ -20,6 +20,7 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 	initData(image);
 
 	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
+	_glTex->setWrapMode(GL_REPEAT);
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
@@ -120,6 +121,10 @@ void Texture::initData(const std::vector<uint8_t>& image)
 	memcpy(_data, image.data(), _width * _height * 4);
 }
 
+void Texture::setWrapMode(GLint wrapMode) const
+{
+	_glTex->setWrapMode(wrapMode);
+}
 Color Texture::colorAt(int x, int y) const
 {
 	int i = (y * _width + x) * 4;

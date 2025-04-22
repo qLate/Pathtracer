@@ -92,6 +92,13 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 			{
 				auto t = dynamic_cast<const minipbrt::ImageMapTexture*>(tex);
 				parsedTex = Assets::load<Texture>(t->filename);
+
+				GLint wrapMode = 0;
+				if (t->wrap == minipbrt::WrapMode::Clamp) wrapMode = GL_CLAMP_TO_EDGE;
+				else if (t->wrap == minipbrt::WrapMode::Repeat) wrapMode = GL_REPEAT;
+				else if (t->wrap == minipbrt::WrapMode::Black) wrapMode = GL_ZERO;
+
+				parsedTex->setWrapMode(wrapMode);
 				break;
 			}
 			case minipbrt::TextureType::Constant:
@@ -329,7 +336,7 @@ std::vector<BaseTriangle*> SceneLoaderPbrt::loadModelTriangles(const minipbrt::T
 			auto idx = indices[i * 3 + j];
 
 			v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
-			if (normals) v[j].normal = normalize(glm::vec3(normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]));
+			if (normals) v[j].normal = glm::vec3(normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]);
 			if (uvs) v[j].uvPos = {uvs[2 * idx + 0], uvs[2 * idx + 1]};
 		}
 

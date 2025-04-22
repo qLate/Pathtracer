@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "glad.h"
+#include "minipbrt.h"
 #include "glm/vec2.hpp"
 
 class Texture;
@@ -120,6 +121,7 @@ public:
 	std::vector<T> readData() const;
 
 	uint64_t getHandle() const;
+	void setWrapMode(GLint wrapMode) const;
 };
 
 

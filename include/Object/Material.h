@@ -47,6 +47,7 @@ public:
 	UPtr<GLTexture2D>& glTex() { return _glTex; }
 
 	void setName(const std::string& name) { _name = name; }
+	void setWrapMode(GLint wrapMode) const;
 
 	Color colorAt(int x, int y) const;
 

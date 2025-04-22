@@ -167,6 +167,13 @@ uint64_t GLTexture2D::getHandle() const
 		glMakeTextureHandleResidentARB(handle);
 	return handle;
 }
+void GLTexture2D::setWrapMode(GLint wrapMode) const
+{
+	glBindTexture(GL_TEXTURE_2D, _id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : _width(width), _height(height), _layers(layers)
 {
