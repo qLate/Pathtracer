@@ -31,18 +31,18 @@ void SceneLoaderPbrt::loadScene(const std::string& path)
 	loadScene_camera(scene);
 	tm.printElapsedFromLast("   Camera loaded in ");
 
-	std::vector<Texture*> parsedTextures;
-	loadScene_textures(scene, parsedTextures);
+	std::vector<Texture*> textures;
+	loadScene_textures(scene, textures);
 	tm.printElapsedFromLast("   Textures loaded in ");
 
 	std::vector<Material*> materials;
-	loadScene_materials(scene, parsedTextures, materials);
+	loadScene_materials(scene, textures, materials);
 	tm.printElapsedFromLast("   Materials loaded in ");
 
 	loadScene_lights(scene);
 	tm.printElapsedFromLast("   Lights loaded in ");
 
-	loadScene_objects(scene, materials);
+	loadScene_objects(scene, materials, textures);
 	tm.printElapsedFromLast("   Shapes loaded in ");
 
 	delete scene;
@@ -112,8 +112,7 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 			case minipbrt::TextureType::Windy:
 			{
 				auto t = dynamic_cast<const minipbrt::WindyTexture*>(tex);
-				parsedTex = new WindyTexture(Color::white(), t->scale * 6.0f, 60.0f);
-
+				parsedTex = new WindyTexture(Color::white(), t->scale * 6, 60.0f);
 				break;
 			}
 			default:
@@ -225,7 +224,10 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 			case minipbrt::MaterialType::Translucent:
 			{
 				auto m = dynamic_cast<const minipbrt::TranslucentMaterial*>(mat);
-				baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				if (m->Kd.texture != minipbrt::kInvalidIndex)
+					tex = parsedTextures[m->Kd.texture];
+				else
+					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
 				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 				roughness = m->roughness.value;
 				opacity = 1.0f - m->transmit.value[0];
@@ -240,11 +242,10 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 	}
 }
 
-void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std::vector<Material*>& materials)
+void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std::vector<Material*>& materials, const std::vector<Texture*>& textures)
 {
 	auto models = loadScene_objects_loadModels(scene);
 
-	//#pragma omp parallel for
 	for (int shapeInd = 0; shapeInd < scene->shapes.size(); ++shapeInd)
 	{
 		auto shape = scene->shapes[shapeInd];
@@ -257,7 +258,7 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 		}
 		if (isInstanced) continue;
 
-		auto spawned = spawnObjectFromShape(shape, materials, models[shapeInd], scene);
+		auto spawned = spawnObjectFromShape(shape, materials, textures, models[shapeInd], scene);
 		if (!spawned) continue;
 
 		auto transform = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
@@ -267,19 +268,20 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 			spawned->setName(scene->objects[shape->object]->name);
 	}
 
+	// Spawn instances
 	for (int instInd = 0; instInd < scene->instances.size(); ++instInd)
 	{
-		//if (instInd > 100) continue;
+		//if (instInd < 155000) continue;
 		auto inst = scene->instances[instInd];
 		auto obj = scene->objects[inst->object];
 
 		auto objToInst = transpose(glm::make_mat4x4(&obj->objectToInstance.start[0][0]));
 		auto instToWorld = transpose(glm::make_mat4x4(&inst->instanceToWorld.start[0][0]));
 
-		for (uint32_t i = 0; i < obj->numShapes; ++i)
+		for (int i = 0; i < obj->numShapes; ++i)
 		{
 			auto shape = scene->shapes[obj->firstShape + i];
-			auto spawned = spawnObjectFromShape(shape, materials, models[obj->firstShape + i], scene);
+			auto spawned = spawnObjectFromShape(shape, materials, textures, models[obj->firstShape + i], scene);
 			if (!spawned) continue;
 
 			auto shapeToWorld = transpose(glm::make_mat4x4(&shape->shapeToWorld.start[0][0]));
@@ -288,6 +290,9 @@ void SceneLoaderPbrt::loadScene_objects(const minipbrt::Scene* scene, const std:
 			spawned->setTransform(finalTransform);
 			spawned->setName(obj->name);
 		}
+
+		if (inst->areaLight != minipbrt::kInvalidIndex)
+			Debug::log("Area light detected on instance of object: ", obj->name);
 	}
 }
 
@@ -324,8 +329,8 @@ std::vector<BaseTriangle*> SceneLoaderPbrt::loadModelTriangles(const minipbrt::T
 			auto idx = indices[i * 3 + j];
 
 			v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
-			if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
-			if (uvs) v[j].uvPos = {Math::mod(uvs[2 * idx + 0], 1.0f), Math::mod(uvs[2 * idx + 1], 1.0f)};
+			if (normals) v[j].normal = normalize(glm::vec3(normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]));
+			if (uvs) v[j].uvPos = {uvs[2 * idx + 0], uvs[2 * idx + 1]};
 		}
 
 		tris[i] = new BaseTriangle(v[0], v[1], v[2]);
@@ -333,7 +338,8 @@ std::vector<BaseTriangle*> SceneLoaderPbrt::loadModelTriangles(const minipbrt::T
 	return tris;
 }
 
-Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, Model* model, const minipbrt::Scene* scene)
+Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, const std::vector<Texture*>& textures, Model* model,
+                                                 const minipbrt::Scene* scene)
 {
 	Graphical* obj = nullptr;
 	switch (shape->type())
@@ -368,6 +374,12 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 	if (shape->material != minipbrt::kInvalidIndex)
 		obj->setSharedMaterial(materials[shape->material]);
 
+	if (auto triMesh = dynamic_cast<const minipbrt::TriangleMesh*>(shape))
+	{
+		if (triMesh->alpha != minipbrt::kInvalidIndex)
+			obj->material()->setOpacityTexture(textures[triMesh->alpha]);
+	}
+
 	if (shape->areaLight != minipbrt::kInvalidIndex)
 	{
 		auto areaLight = dynamic_cast<const minipbrt::AreaLight*>(scene->areaLights[shape->areaLight]);
@@ -376,9 +388,8 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			case minipbrt::AreaLightType::Diffuse:
 			{
 				auto l = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
-				auto emissionColor = Color(l->L[0], l->L[1], l->L[2]);
-				obj->material()->setEmission(emissionColor * obj->materialNoCopy()->color());
-				obj->setScale(glm::vec3(l->scale[0], l->scale[1], l->scale[2]));
+				auto emissionColor = Color(l->L[0] * l->scale[0], l->L[1] * l->scale[1], l->L[2] * l->scale[2]);
+				obj->material()->setEmission(emissionColor /** obj->materialNoCopy()->color()*/);
 				break;
 			}
 		}

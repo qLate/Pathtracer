@@ -21,7 +21,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//ecosysScene();
-	SceneLoader::loadScene("assets/scenes-pbrt/sanmiguel.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt-v3/sanmiguel/sanmiguel.pbrt");
 }
 #endif
 
@@ -156,7 +156,7 @@ void SceneSetup::skeletonScene_benchmark()
 }
 void SceneSetup::ecosysScene()
 {
-	SceneLoader::loadScene("assets/scenes-pbrt/plants-dusk.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt-v3/ecosys/ecosys.pbrt");
 	Renderer::setFogIntensity(0.005f);
 	Renderer::setFogColor({0.568f, 0.645f, 0.621f});
 }

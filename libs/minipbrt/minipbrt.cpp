@@ -2258,7 +2258,7 @@ namespace minipbrt {
 
   static const char* kActiveTransformValues[] = { "StartTime", "EndTime", "All", nullptr };
   static const char* kShapeTypes[] = { "cone", "curve", "cylinder", "disk", "hyperboloid", "paraboloid", "sphere", "trianglemesh", "heightfield", "loopsubdiv", "nurbs", "plymesh", nullptr };
-  static const char* kAreaLightTypes[] = { "area", nullptr};
+  static const char* kAreaLightTypes[] = { "diffuse", nullptr};
   static const char* kLightTypes[] = { "distant", "goniometric", "infinite", "point", "projection", "spot", nullptr };
   static const char* kMaterialTypes[] = { "disney", "fourier", "glass", "hair", "kdsubsurface", "matte", "metal", "mirror", "mix", "none", "plastic", "substrate", "subsurface", "translucent", "uber", "", nullptr };
   static const char* kTextureDataTypes[] = { "float", "spectrum", "color", nullptr };

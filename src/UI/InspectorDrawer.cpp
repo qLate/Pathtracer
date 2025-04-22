@@ -77,12 +77,12 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 		if (auto windy = dynamic_cast<WindyTexture*>(material->texture()))
 		{
 			auto scale = windy->scale();
-            if (ImGui::LabeledSliderFloat("Windy Scale", scale, 0.0f, 1.0f))
+			if (ImGui::LabeledSliderFloat("Windy Scale", scale, 0.0f, 1.0f))
 				windy->setScale(scale);
 
 			auto strength = windy->strength();
-            if (ImGui::LabeledSliderFloat("Windy Strength", strength, 0.0f, 100.0f))
-                windy->setStrength(strength);
+			if (ImGui::LabeledSliderFloat("Windy Strength", strength, 0.0f, 100.0f))
+				windy->setStrength(strength);
 		}
 
 		auto emission = material->emission();
@@ -137,15 +137,15 @@ void DiskInspectorDrawer::draw(Disk* target)
 {
 	GraphicalInspectorDrawer::draw(target);
 
-    const char* name = "Disk";
-    if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
-    ImGui::PushID(name);
-    {
-        auto radius = target->radius();
-        if (ImGui::LabeledFloat("Radius", radius))
-            target->setRadius(radius);
-    }
-    ImGui::PopID();
+	const char* name = "Disk";
+	if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen)) return;
+	ImGui::PushID(name);
+	{
+		auto radius = target->radius();
+		if (ImGui::LabeledFloat("Radius", radius))
+			target->setRadius(radius);
+	}
+	ImGui::PopID();
 }
 
 void MeshInspectorDrawer::draw(Mesh* target)
@@ -163,6 +163,19 @@ void MeshInspectorDrawer::draw(Mesh* target)
 			auto dir = std::filesystem::current_path().concat("/assets/models/").string();
 			ifd::FileDialog::Instance().Open("Model", "Open a model file", "Model file (*.obj){.obj},.*", false, dir);
 		}
+
+		//int c = 0;
+		//for (const auto& tri : target->model()->baseTriangles())
+		//{
+		//	ImGui::PushID(c++);
+		//	auto norm1 = target->getTransform() * glm::vec4(tri->vertices()[0].normal, 0);
+		//	auto norm2 = target->getTransform() * glm::vec4(tri->vertices()[1].normal, 0);
+		//	auto norm3 = target->getTransform() * glm::vec4(tri->vertices()[2].normal, 0);
+		//	ImGui::LabeledInputFloat3("Vertex 0 Normal", &norm1.x, ImGuiInputTextFlags_ReadOnly);
+		//	ImGui::LabeledInputFloat3("Vertex 1 Normal", &norm2.x, ImGuiInputTextFlags_ReadOnly);
+		//	ImGui::LabeledInputFloat3("Vertex 2 Normal", &norm3.x, ImGuiInputTextFlags_ReadOnly);
+		//	ImGui::PopID();
+		//}
 
 		if (ifd::FileDialog::Instance().IsDone("Model"))
 		{

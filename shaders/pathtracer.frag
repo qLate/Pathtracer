@@ -96,7 +96,7 @@ vec3 castRay(Ray ray)
             bounce--;
             continue;
         }
-        
+
         ray.hitPoint += ray.surfaceNormal * 0.001;
 
         // Emissive material hit

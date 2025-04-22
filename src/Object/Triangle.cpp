@@ -8,7 +8,7 @@ BaseTriangle::BaseTriangle(Vertex v1, Vertex v2, Vertex v3) : _vertices({v1, v2,
 {
 	for (auto& v : _vertices)
 	{
-		if (v.normal == glm::vec3(0, 0, 0) || abs(dot(v.normal, normalize(v2.pos - v1.pos))) > 0.9999f)
+		if (v.normal == glm::vec3(0, 0, 0) || abs(dot(v.normal, _localNormal)) < 0.01f)
 			v.normal = _localNormal;
 	}
 }

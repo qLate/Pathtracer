@@ -62,7 +62,7 @@ class WindyTexture : public Texture
 	float _strength;
 
 public:
-	WindyTexture(const Color& color, float scale, float strength = 0.1f) : Texture(color), _scale(scale), _strength(strength) {}
+	WindyTexture(const Color& color, float scale, float strength) : Texture(color), _scale(scale), _strength(strength) {}
 
 	float scale() const { return _scale; }
 	float strength() const { return _strength; }

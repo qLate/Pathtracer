@@ -33,12 +33,12 @@ bool intersectTriangle(inout Ray ray, int triIndex)
     return false;
 }
 
-vec3 getTriangleNormalAt(Object obj, Triangle tri, float u, float v)
+vec3 getTriangleNormalAt(Triangle tri, float u, float v)
 {
     vec3 norm1 = tri.vertices[0].normalV.xyz;
     vec3 norm2 = tri.vertices[1].normalV.xyz;
     vec3 norm3 = tri.vertices[2].normalV.xyz;
-    return localToGlobalDir(normalize((1 - u - v) * norm1 + u * norm2 + v * norm3), obj);
+    return normalize((1 - u - v) * norm1 + u * norm2 + v * norm3);
 }
 void calcTriIntersectionValues(inout Ray ray)
 {
@@ -50,12 +50,8 @@ void calcTriIntersectionValues(inout Ray ray)
     vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
     ray.uv = uv0 + ray.uv.x * (uv1 - uv0) + ray.uv.y * (uv2 - uv0);
 
-    vec3 v0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
-    vec3 v1 = localToGlobal(tri.vertices[1].posU.xyz, obj);
-    vec3 v2 = localToGlobal(tri.vertices[2].posU.xyz, obj);
-
-    vec3 norm = getTriangleNormalAt(obj, tri, ray.uv.x, ray.uv.y);
-    ray.surfaceNormal = dot(norm, ray.dir) < 0 ? norm : -norm;
+    vec3 norm = localToGlobalDir(getTriangleNormalAt(tri, ray.uv.x, ray.uv.y), obj);
+    ray.surfaceNormal = dot(norm, ray.dir) <= 0 ? norm : -norm;
 }
 
 bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows);
