@@ -45,13 +45,13 @@ void calcTriIntersectionValues(inout Ray ray)
     Triangle tri = triangles[ray.hitTriIndex];
     Object obj = objects[ray.hitObjIndex];
 
+    vec3 norm = localToGlobalDir(getTriangleNormalAt(tri, ray.uv.x, ray.uv.y), obj);
+    ray.surfaceNormal = dot(norm, ray.dir) <= 0 ? norm : -norm;
+
     vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
     vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
     vec2 uv2 = vec2(tri.vertices[2].posU.w, tri.vertices[2].normalV.w);
     ray.uv = uv0 + ray.uv.x * (uv1 - uv0) + ray.uv.y * (uv2 - uv0);
-
-    vec3 norm = localToGlobalDir(getTriangleNormalAt(tri, ray.uv.x, ray.uv.y), obj);
-    ray.surfaceNormal = dot(norm, ray.dir) <= 0 ? norm : -norm;
 }
 
 bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows);
