@@ -336,7 +336,7 @@ std::vector<BaseTriangle*> SceneLoaderPbrt::loadModelTriangles(const minipbrt::T
 			auto idx = indices[i * 3 + j];
 
 			v[j].pos = {points[3 * idx + 0], points[3 * idx + 1], points[3 * idx + 2]};
-			if (normals) v[j].normal = normalize(glm::vec3(normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]));
+			if (normals) v[j].normal = {normals[3 * idx + 0], normals[3 * idx + 1], normals[3 * idx + 2]};
 			if (uvs) v[j].uvPos = {uvs[2 * idx + 0], uvs[2 * idx + 1]};
 		}
 

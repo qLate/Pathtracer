@@ -7,7 +7,6 @@
 #include "Model.h"
 #include "MyMath.h"
 #include "SDLHandler.h"
-#include "Triangle.h"
 #include "JsonUtility.h"
 #include "Renderer.h"
 #include "SceneLoader.h"
@@ -21,7 +20,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//ecosysScene();
-	SceneLoader::loadScene("assets/scenes-pbrt-v3/sanmiguel/sanmiguel.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt-v3/sanmiguel/sanmiguel_cam1.pbrt");
 }
 #endif
 

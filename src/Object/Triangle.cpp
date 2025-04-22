@@ -8,8 +8,10 @@ BaseTriangle::BaseTriangle(Vertex v1, Vertex v2, Vertex v3) : _vertices({v1, v2,
 {
 	for (auto& v : _vertices)
 	{
-		if (v.normal == glm::vec3(0, 0, 0)/* || abs(dot(v.normal, _localNormal)) < 0.01f*/)
+		if (v.normal == glm::vec3(0, 0, 0) || abs(dot(v.normal, _localNormal)) < 0.01f)
 			v.normal = _localNormal;
+		else
+			v.normal = normalize(v.normal);
 	}
 }
 void BaseTriangle::setUVs(glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3)

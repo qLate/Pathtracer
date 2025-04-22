@@ -45,8 +45,14 @@ void calcTriIntersectionValues(inout Ray ray)
     Triangle tri = triangles[ray.hitTriIndex];
     Object obj = objects[ray.hitObjIndex];
 
+    vec3 p0 = localToGlobal(tri.vertices[0].posU.xyz, obj);
+    vec3 e1 = localToGlobal(tri.vertices[1].posU.xyz, obj) - p0;
+    vec3 e2 = localToGlobal(tri.vertices[2].posU.xyz, obj) - p0;
+    vec3 geomNorm = cross(e1, e2);
+
     vec3 norm = localToGlobalDir(getTriangleNormalAt(tri, ray.uv.x, ray.uv.y), obj);
-    ray.surfaceNormal = dot(norm, ray.dir) <= 0 ? norm : -norm;
+    geomNorm = dot(geomNorm, norm) < 0 ? -geomNorm : geomNorm;
+    ray.surfaceNormal = dot(geomNorm, ray.dir) <= 0 ? norm : -norm;
 
     vec2 uv0 = vec2(tri.vertices[0].posU.w, tri.vertices[0].normalV.w);
     vec2 uv1 = vec2(tri.vertices[1].posU.w, tri.vertices[1].normalV.w);
