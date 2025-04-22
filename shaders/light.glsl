@@ -206,17 +206,18 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
 //     return shadowMult * selectedRadiance * brdf * NdotL / lightPdf;
 // }
 
-float probToSampleDiffuse(vec3 diffColor, vec3 specColor)
+float probToSampleDiffuse(vec3 diffColor, vec3 specColor, float metallic)
 {
     float lumDiff = max(0.01, luminance(diffColor));
     float lumSpec = max(0.01, luminance(specColor));
-    return lumDiff / (lumDiff + lumSpec);
+    float blend = lumDiff / (lumDiff + lumSpec);
+    return (1.0 - metallic) * blend;
 }
 
-vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput, out float pdf)
+vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, float metallic, int bounce, inout vec3 throughput, out float pdf)
 {
     vec2 r = genRandoms(bounce);
-    float probDiff = probToSampleDiffuse(diffColor, specColor);
+    float probDiff = probToSampleDiffuse(diffColor, specColor, metallic);
 
     if (rand() < probDiff)
     {
@@ -247,13 +248,13 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, in
         return L;
     }
 }
-vec3 getRadiance(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, inout vec3 throughput, out vec3 L, out float brdfPdf)
+vec3 getRadiance(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 bounceDir, out float brdfPdf)
 {
     float lightPdf;
     vec3 directLighting = /*throughput * */ (misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
     // directLighting = clampMax(directLighting, 1);
 
-    L = scatter(N, V, diffColor, specColor, roughness, bounce, throughput, brdfPdf);
+    bounceDir = scatter(N, V, diffColor, specColor, roughness, metallic, bounce, throughput, brdfPdf);
 
     float lightMis = powerHeuristic(lightPdf, misSampleBrdf ? brdfPdf : 0);
     return directLighting * lightMis;

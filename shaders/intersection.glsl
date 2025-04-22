@@ -322,11 +322,11 @@ bool intersectBVHBottom(int rootNode, inout Ray ray, bool castingShadows)
         else
             curr = node.links.y;
 
-        if (c++ >= 2000)
-        {
-            COLOR_DEBUG = GREEN;
-            break;
-        }
+        // if (c++ >= 2000)
+        // {
+        //     COLOR_DEBUG = GREEN;
+        //     break;
+        // }
     }
     return hit;
 }

@@ -20,9 +20,8 @@ void SceneSetup::setupScene()
 #else
 void SceneSetup::setupScene()
 {
-	ecosysScene();
-	//SceneLoader::loadScene("assets/scenes-pbrt/city-env.pbrt");
-	//emptyScene();
+	//ecosysScene();
+	SceneLoader::loadScene("assets/scenes-pbrt/sanmiguel.pbrt");
 }
 #endif
 

@@ -103,7 +103,10 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 			case minipbrt::TextureType::Scale:
 			{
 				auto t = dynamic_cast<const minipbrt::ScaleTexture*>(tex);
-				parsedTex = parsedTextures[t->tex1.texture];
+				if (t->tex1.texture != minipbrt::kInvalidIndex)
+					parsedTex = parsedTextures[t->tex1.texture];
+				else
+					parsedTex = new Texture(Color(t->tex1.value[0], t->tex1.value[1], t->tex1.value[2]));
 				break;
 			}
 			case minipbrt::TextureType::Windy:
@@ -169,9 +172,17 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 			case minipbrt::MaterialType::Metal:
 			{
 				auto m = dynamic_cast<const minipbrt::MetalMaterial*>(mat);
-				baseColor = Color(m->eta.value[0], m->eta.value[1], m->eta.value[2]);
+
+				auto eta = glm::vec3(m->eta.value[0], m->eta.value[1], m->eta.value[2]);
+				auto k = glm::vec3(m->k.value[0], m->k.value[1], m->k.value[2]);
+
+				auto numerator = (eta - glm::vec3(1.0f)) * (eta - glm::vec3(1.0f)) + k * k;
+				auto denominator = (eta + glm::vec3(1.0f)) * (eta + glm::vec3(1.0f)) + k * k;
+				auto f0 = numerator / denominator;
+				specColor = Color(f0.x, f0.y, f0.z);
+
 				metallic = 1.0f;
-				roughness = (m->uroughness.value + m->vroughness.value) * 0.5f;
+				roughness = m->uroughness.value;
 				break;
 			}
 			case minipbrt::MaterialType::Glass:
@@ -208,7 +219,16 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 					opacityTex = parsedTextures[m->opacity.texture];
 				else
 					opacity = (m->opacity.value[0] + m->opacity.value[1] + m->opacity.value[2]) / 3.0f;
-				roughness = (m->uroughness.value + m->vroughness.value) * 0.5f;
+				roughness = m->uroughness.value;
+				break;
+			}
+			case minipbrt::MaterialType::Translucent:
+			{
+				auto m = dynamic_cast<const minipbrt::TranslucentMaterial*>(mat);
+				baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
+				roughness = m->roughness.value;
+				opacity = 1.0f - m->transmit.value[0];
 				break;
 			}
 			default:
@@ -357,7 +377,8 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			{
 				auto l = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
 				auto emissionColor = Color(l->L[0], l->L[1], l->L[2]);
-				obj->material()->setEmission(emissionColor * obj->material()->color());
+				obj->material()->setEmission(emissionColor * obj->materialNoCopy()->color());
+				obj->setScale(glm::vec3(l->scale[0], l->scale[1], l->scale[2]));
 				break;
 			}
 		}

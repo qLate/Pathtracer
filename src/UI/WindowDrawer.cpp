@@ -155,7 +155,7 @@ void WindowDrawer::displayStats(bool barVisible)
 
 	ImGui::SetCursorPos(ImVec2(5, 5 + (barVisible ? 20 : 0)));
 	ImGui::Text("%.1f FPS (%.3fms)\n"
-	            "%d Base Triangles\n"
+	            "%d Triangles\n"
 	            "Total samples: %d\n"
 	            "Variance: %.3f (x1000)\n"
 	            "Render time: %.3fms\n"

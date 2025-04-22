@@ -134,7 +134,7 @@ vec3 castRay(Ray ray)
         // Shade
         vec3 oldThroughput = throughput;
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
-        vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, bounce, throughput, bounceDir, lastBrdfPdf);
+        vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, mat.metallic, bounce, throughput, bounceDir, lastBrdfPdf);
 
         if (misSampleBrdf) color += clamp01(oldThroughput * radiance);
         else color += oldThroughput * radiance;

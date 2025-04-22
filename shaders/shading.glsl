@@ -19,7 +19,7 @@ vec3 ggxSchlickFresnel(vec3 f0, float LdotH)
 }
 vec3 sampleGGXMicrofacet(vec3 N, float roughness, float r1, float r2)
 {
-    if (roughness < 0.02) return N;
+    if (roughness <= 0.001) return N;
     float a2 = roughness * roughness;
     float phi = TWO_PI * r1;
     float cosTheta = sqrt(clamp0((1.0 - r2) / (1.0 + (a2 - 1.0) * r2)));
