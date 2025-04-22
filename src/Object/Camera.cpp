@@ -50,7 +50,7 @@ void Camera::setRot(glm::quat rot, bool notify)
 }
 void Camera::setRot(float pitch, float yaw, float roll)
 {
-	setRot(angleAxis(glm::radians(yaw), vec3::UP) * angleAxis(glm::radians(roll), vec3::FORWARD) * angleAxis(glm::radians(pitch), vec3::RIGHT));
+	setRot(glm::quat(radians(glm::vec3(pitch, yaw, roll))));
 
 	_pitch = pitch;
 	_yaw = yaw;

@@ -11,7 +11,7 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 {
 	Scene::textures.push_back(this);
 
-	std::vector<uint8_t> image;
+	std::vector<float> image;
 	if (!readImage(image, path))
 	{
 		Debug::logError("Error loading texture: ", path);
@@ -19,7 +19,7 @@ Texture::Texture(const std::filesystem::path& path) : _id(_nextAvailableId++), _
 	}
 	initData(image);
 
-	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
+	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data, GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT);
 	_glTex->setWrapMode(GL_REPEAT);
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
@@ -31,22 +31,16 @@ Texture::Texture(Color color) : _id(_nextAvailableId++)
 	_width = 2;
 	_height = 2;
 
-	_data = new unsigned char[4 * sizeof(Color)];
-
-	auto r = Utils::toByte(color.x);
-	auto g = Utils::toByte(color.y);
-	auto b = Utils::toByte(color.z);
-	auto a = Utils::toByte(color.w);
-
+	_data = new float[4 * sizeof(Color)];
 	for (int i = 0; i < _width * _height; ++i)
 	{
-		_data[i * 4 + 0] = r;
-		_data[i * 4 + 1] = g;
-		_data[i * 4 + 2] = b;
-		_data[i * 4 + 3] = a;
+		_data[i * 4 + 0] = color.x;
+		_data[i * 4 + 1] = color.y;
+		_data[i * 4 + 2] = color.z;
+		_data[i * 4 + 3] = color.w;
 	}
 
-	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data);
+	_glTex = std::make_unique<GLTexture2D>(_width, _height, _data, GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT);
 
 	BufferController::markBufferForUpdate(BufferType::Textures);
 }
@@ -64,7 +58,7 @@ Texture* Texture::defaultTex()
 	return &instance;
 }
 
-bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
+bool Texture::readImage(std::vector<float>& data_v, const std::filesystem::path& path)
 {
 	int n;
 	if (path.extension() == ".exr")
@@ -73,12 +67,16 @@ bool Texture::readImage(std::vector<uint8_t>& data_v, const std::filesystem::pat
 	unsigned char* data = stbi_load(path.string().c_str(), &_width, &_height, &n, STBI_rgb_alpha);
 
 	if (data != nullptr)
-		data_v = std::vector(data, data + _width * _height * 4);
+	{
+		data_v.resize(_width * _height * 4);
+		for (int i = 0; i < _width * _height * 4; ++i)
+			data_v[i] = data[i] / 255.0f;
+	}
 
 	stbi_image_free(data);
 	return true;
 }
-bool Texture::readImageExr(std::vector<uint8_t>& data_v, const std::filesystem::path& path)
+bool Texture::readImageExr(std::vector<float>& data_v, const std::filesystem::path& path)
 {
 	float* exrData = nullptr;
 	const char* err;
@@ -101,24 +99,19 @@ bool Texture::readImageExr(std::vector<uint8_t>& data_v, const std::filesystem::
 		float b = exrData[4 * i + 2];
 		float a = exrData[4 * i + 3];
 
-		r = powf(glm::clamp(r, 0.0f, 1.0f), 1.0f / 2.2f);
-		g = powf(glm::clamp(g, 0.0f, 1.0f), 1.0f / 2.2f);
-		b = powf(glm::clamp(b, 0.0f, 1.0f), 1.0f / 2.2f);
-		a = glm::clamp(a, 0.0f, 1.0f);
-
-		data_v[4 * i + 0] = r * 255.0f;
-		data_v[4 * i + 1] = g * 255.0f;
-		data_v[4 * i + 2] = b * 255.0f;
-		data_v[4 * i + 3] = a * 255.0f;
+		data_v[4 * i + 0] = powf(r, 1.0f / 2.2f);
+		data_v[4 * i + 1] = powf(g, 1.0f / 2.2f);
+		data_v[4 * i + 2] = powf(b, 1.0f / 2.2f);
+		data_v[4 * i + 3] = a;
 	}
 
 	return true;
 }
 
-void Texture::initData(const std::vector<uint8_t>& image)
+void Texture::initData(const std::vector<float>& image)
 {
-	_data = new unsigned char[_width * _height * 4];
-	memcpy(_data, image.data(), _width * _height * 4);
+	_data = new float[_width * _height * 4];
+	memcpy(_data, image.data(), _width * _height * 4 * sizeof(float));
 }
 
 void Texture::setWrapMode(GLint wrapMode) const
@@ -128,7 +121,7 @@ void Texture::setWrapMode(GLint wrapMode) const
 Color Texture::colorAt(int x, int y) const
 {
 	int i = (y * _width + x) * 4;
-    return Color(_data[i + 0] / 255.0f, _data[i + 1] / 255.0f, _data[i + 2] / 255.0f, _data[i + 3] / 255.0f);
+	return Color(_data[i + 0], _data[i + 1], _data[i + 2], _data[i + 3]);
 }
 void WindyTexture::setScale(float scale)
 {

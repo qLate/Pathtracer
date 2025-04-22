@@ -18,15 +18,15 @@ class Texture
 	std::string _path;
 	std::string _name;
 
-	unsigned char* _data;
+	float* _data;
 	int _width = 0, _height = 0;
 
 	UPtr<GLTexture2D> _glTex;
 
-	bool readImage(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
-	bool readImageExr(std::vector<uint8_t>& data_v, const std::filesystem::path& path);
+	bool readImage(std::vector<float>& data_v, const std::filesystem::path& path);
+	bool readImageExr(std::vector<float>& data_v, const std::filesystem::path& path);
 
-	void initData(const std::vector<uint8_t>& image);
+	void initData(const std::vector<float>& image);
 
 	Texture(const std::filesystem::path& path);
 	Texture(const Texture& other);
@@ -41,7 +41,7 @@ public:
 	int id() const { return _id; }
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
-	unsigned char* data() const { return _data; }
+	float* data() const { return _data; }
 	int width() const { return _width; }
 	int height() const { return _height; }
 	UPtr<GLTexture2D>& glTex() { return _glTex; }

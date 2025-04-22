@@ -147,6 +147,13 @@ void Input::handleSDLEvent(const SDL_Event& event)
 			float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
 			float roll = camera->roll();
 
+			if (abs(roll - 180) < 0.01f)
+			{
+				roll = 180 - roll;
+				pitch = Math::mod(pitch - 180.0f, 360.0f);
+				yaw = 180 - yaw;
+			}
+
 			pitch = glm::clamp(pitch, -89.99f, 89.99f);
 
 			camera->setRot(pitch, yaw, roll);

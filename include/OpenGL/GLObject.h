@@ -100,40 +100,19 @@ public:
 };
 
 
-class GLCubeMap : public GLTexture
-{
-public:
-	GLCubeMap();
-
-	void setFaceTexture(const unsigned char* data, int faceInd, int width, int height, GLenum typeInternal = GL_RGB, GLenum type = GL_RGB, GLenum dataType = GL_RGB) const;
-};
-
-
 class GLTexture2D : public GLTexture
 {
 	int _width, _height;
 	GLenum _format;
 
 public:
-	GLTexture2D(int width, int height, const unsigned char* data = nullptr, GLenum format = GL_RGBA, GLenum internalFormat = GL_RGBA, GLenum filter = GL_LINEAR);
+	GLTexture2D(int width, int height, const void* data, GLenum format = GL_RGBA, GLenum internalFormat = GL_RGBA, GLenum filter = GL_LINEAR, GLenum type = GL_UNSIGNED_BYTE);
 
 	template <typename T>
 	std::vector<T> readData() const;
 
 	uint64_t getHandle() const;
 	void setWrapMode(GLint wrapMode) const;
-};
-
-
-class GLTexture2DArray : public GLTexture
-{
-	int _width, _height, _layers;
-	int _currentFreeSpotIndex = 0;
-
-public:
-	GLTexture2DArray(int width, int height, int layers, GLenum type = GL_RGBA8);
-
-	int addTexture(const Texture* tex, GLenum type = GL_RGBA);
 };
 
 

@@ -135,6 +135,11 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 		parsedTextures.push_back(parsedTex);
 	}
 }
+
+static float remapRoughness(float roughness)
+{
+	return std::sqrt(roughness);
+}
 void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const std::vector<Texture*>& parsedTextures, std::vector<Material*>& materials)
 {
 	materials.resize(scene->materials.size());
@@ -189,6 +194,8 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 
 				metallic = 1.0f;
 				roughness = m->uroughness.value;
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
 				break;
 			}
 			case minipbrt::MaterialType::Glass:
@@ -196,6 +203,8 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				auto m = dynamic_cast<const minipbrt::GlassMaterial*>(mat);
 				baseColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
 				roughness = 0.0f;
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
 				break;
 			}
 			case minipbrt::MaterialType::Plastic:
@@ -210,6 +219,8 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				else
 					specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 				roughness = m->roughness.value;
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
 				break;
 			}
 			case minipbrt::MaterialType::Uber:
@@ -226,6 +237,8 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				else
 					opacity = (m->opacity.value[0] + m->opacity.value[1] + m->opacity.value[2]) / 3.0f;
 				roughness = m->uroughness.value;
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
 				break;
 			}
 			case minipbrt::MaterialType::Translucent:
@@ -238,6 +251,34 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
 				roughness = m->roughness.value;
 				opacity = 1.0f - m->transmit.value[0];
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
+				break;
+			}
+			case minipbrt::MaterialType::Fourier:
+			{
+				auto m = dynamic_cast<const minipbrt::FourierMaterial*>(mat);
+				break;
+			}
+			case minipbrt::MaterialType::Mix:
+			{
+				auto m = dynamic_cast<const minipbrt::MixMaterial*>(mat);
+				break;
+			}
+			case minipbrt::MaterialType::Substrate:
+			{
+				auto m = dynamic_cast<const minipbrt::SubstrateMaterial*>(mat);
+				if (m->Kd.texture != minipbrt::kInvalidIndex)
+					tex = parsedTextures[m->Kd.texture];
+				else
+					baseColor = Color(m->Kd.value[0], m->Kd.value[1], m->Kd.value[2]);
+				if (m->Ks.texture != minipbrt::kInvalidIndex)
+					specColor = parsedTextures[m->Ks.texture]->colorAt(0, 0);
+				else
+					specColor = Color(m->Ks.value[0], m->Ks.value[1], m->Ks.value[2]);
+				roughness = m->uroughness.value;
+				if (m->remaproughness)
+					roughness = remapRoughness(roughness);
 				break;
 			}
 			default:

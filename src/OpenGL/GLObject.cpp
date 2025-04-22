@@ -124,34 +124,12 @@ GLTexture::~GLTexture()
 	glDeleteTextures(1, &_id);
 }
 
-GLCubeMap::GLCubeMap()
-{
-	glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-}
-
-void GLCubeMap::setFaceTexture(const unsigned char* data, int faceInd, int width, int height, GLenum typeInternal, GLenum type, GLenum dataType) const
-{
-	glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
-
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceInd, 0, typeInternal, width, height, 0, type, dataType, data);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-GLTexture2D::GLTexture2D(int width, int height, const unsigned char* data, GLenum format, GLenum internalFormat, GLenum filter) : _width(width), _height(height),
+GLTexture2D::GLTexture2D(int width, int height, const void* data, GLenum format, GLenum internalFormat, GLenum filter, GLenum type) : _width(width), _height(height),
 	_format(format)
 {
 	glBindTexture(GL_TEXTURE_2D, _id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -173,29 +151,6 @@ void GLTexture2D::setWrapMode(GLint wrapMode) const
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-GLTexture2DArray::GLTexture2DArray(int width, int height, int layers, GLenum type) : _width(width), _height(height), _layers(layers)
-{
-	glBindTexture(GL_TEXTURE_2D_ARRAY, _id);
-
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, type, width, height, layers);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-}
-
-int GLTexture2DArray::addTexture(const Texture* tex, GLenum type)
-{
-	glBindTexture(GL_TEXTURE_2D_ARRAY, _id);
-	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, _currentFreeSpotIndex, tex->width(), tex->height(), 1, type, GL_UNSIGNED_BYTE, tex->data());
-	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
-	return _currentFreeSpotIndex++;
 }
 
 GLFrameBuffer::GLFrameBuffer(glm::ivec2 size)
