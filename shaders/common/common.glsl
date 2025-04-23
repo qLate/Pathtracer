@@ -50,6 +50,9 @@ void blue() {
     COLOR_DEBUG = BLUE;
 }
 
+void debug(bool val) {
+    COLOR_DEBUG = vec3(val ? 1 : 0, 0, 0);
+}
 void debug(float val) {
     COLOR_DEBUG = vec3(val, 0, 0);
 }

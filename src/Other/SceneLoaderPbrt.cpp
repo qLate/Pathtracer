@@ -116,10 +116,45 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 					parsedTex = new Texture(Color(t->tex1.value[0], t->tex1.value[1], t->tex1.value[2]));
 				break;
 			}
+			case minipbrt::TextureType::Mix:
+			{
+				auto t = dynamic_cast<const minipbrt::MixTexture*>(tex);
+				Texture* tex1;
+				Texture* tex2;
+				if (t->tex1.texture != minipbrt::kInvalidIndex)
+					tex1 = parsedTextures[t->tex1.texture];
+				else
+					tex1 = new Texture(Color(t->tex1.value[0], t->tex1.value[1], t->tex1.value[2]));
+				if (t->tex2.texture != minipbrt::kInvalidIndex)
+					tex2 = parsedTextures[t->tex2.texture];
+				else
+					tex2 = new Texture(Color(t->tex2.value[0], t->tex2.value[1], t->tex2.value[2]));
+
+				parsedTex = tex1;
+				break;
+			}
 			case minipbrt::TextureType::Windy:
 			{
 				auto t = dynamic_cast<const minipbrt::WindyTexture*>(tex);
 				parsedTex = new WindyTexture(Color::white(), t->scale * 6, 60.0f);
+				break;
+			}
+			case minipbrt::TextureType::FBM:
+			{
+				auto t = dynamic_cast<const minipbrt::FBMTexture*>(tex);
+				parsedTex = new WindyTexture(Color::white(), 1, t->roughness);
+				break;
+			}
+			case minipbrt::TextureType::Wrinkled:
+			{
+				auto t = dynamic_cast<const minipbrt::WrinkledTexture*>(tex);
+				parsedTex = new WindyTexture(Color::white(), 1, t->roughness);
+				break;
+			}
+			case minipbrt::TextureType::Marble:
+			{
+				auto t = dynamic_cast<const minipbrt::MarbleTexture*>(tex);
+				parsedTex = new WindyTexture(Color::white(), 1, t->roughness);
 				break;
 			}
 			default:
@@ -130,15 +165,13 @@ void SceneLoaderPbrt::loadScene_textures(const minipbrt::Scene* scene, std::vect
 		if (parsedTex)
 			parsedTex->setName(tex->name);
 
-		if (parsedTex->name() == std::string("grass-specular"))
-			int x = 1;
 		parsedTextures.push_back(parsedTex);
 	}
 }
 
 static float remapRoughness(float roughness)
 {
-	return std::sqrt(roughness);
+	return sqrt(roughness);
 }
 void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const std::vector<Texture*>& parsedTextures, std::vector<Material*>& materials)
 {
@@ -203,6 +236,7 @@ void SceneLoaderPbrt::loadScene_materials(const minipbrt::Scene* scene, const st
 				auto m = dynamic_cast<const minipbrt::GlassMaterial*>(mat);
 				baseColor = Color(m->Kr.value[0], m->Kr.value[1], m->Kr.value[2]);
 				roughness = 0.0f;
+				opacity = 1.0f - m->Kt.value[0];
 				if (m->remaproughness)
 					roughness = remapRoughness(roughness);
 				break;
@@ -409,6 +443,13 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			obj = new Disk({0, 0, 0}, disk->radius);
 			break;
 		}
+		case minipbrt::ShapeType::LoopSubdiv:
+		{
+			auto loop = dynamic_cast<const minipbrt::LoopSubdiv*>(shape);
+			auto loopModel = new Model(loadModelTriangles(loop->triangle_mesh()));
+			obj = new Mesh(loopModel);
+			break;
+		}
 		default:
 		{
 			Debug::logError("!!! Unsupported shape type: ", static_cast<int>(shape->type()));
@@ -437,7 +478,9 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 			{
 				auto l = dynamic_cast<const minipbrt::DiffuseAreaLight*>(areaLight);
 				auto emissionColor = Color(l->L[0] * l->scale[0], l->L[1] * l->scale[1], l->L[2] * l->scale[2]);
-				obj->material()->setEmission(emissionColor /** obj->materialNoCopy()->color()*/);
+				if (emissionColor.x > 1e13)
+					emissionColor /= 1e17;
+				obj->material()->setEmission(emissionColor);
 				break;
 			}
 		}
@@ -446,7 +489,7 @@ Graphical* SceneLoaderPbrt::spawnObjectFromShape(const minipbrt::Shape* shape, c
 	return obj;
 }
 
-void SceneLoaderPbrt::loadScene_lights(minipbrt::Scene* scene)
+void SceneLoaderPbrt::loadScene_lights(const minipbrt::Scene* scene)
 {
 	for (auto light : scene->lights)
 	{

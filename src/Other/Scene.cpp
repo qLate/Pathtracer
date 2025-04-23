@@ -20,7 +20,7 @@ void SceneSetup::setupScene()
 void SceneSetup::setupScene()
 {
 	//ecosysScene();
-	SceneLoader::loadScene("assets/scenes-pbrt-v3/bmw-m6/bmw-m6.pbrt");
+	SceneLoader::loadScene("assets/scenes-pbrt-v3/dragon/f8-4a.pbrt");
 }
 #endif
 

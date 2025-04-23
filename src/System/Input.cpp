@@ -136,38 +136,49 @@ void Input::handleSDLEvent(const SDL_Event& event)
 
 	if (event.type == SDL_MOUSEMOTION && ImGuiHandler::isWindowFocused(WindowType::Scene) && isMouseDown(false))
 	{
-		static glm::vec3 startUp = camera->up();
+		static const glm::vec3 START_UP = camera->up();
+		static float pitchMin = dot(START_UP, vec3::UP) > 1 / sqrt(2) ? -89.99f : -179.99f;
+		static float pitchMax = dot(START_UP, vec3::UP) > 1 / sqrt(2) ? 89.99f : -0.01f;
+		static float xRotSign = 1;
 
 		auto dx = (float)event.motion.xrel;
 		auto dy = (float)event.motion.yrel;
 
-		if (dot(startUp, vec3::UP) > 1 / sqrt(2))
+		float pitch = camera->pitch();
+		float yaw = camera->yaw();
+		float roll = camera->roll();
+
+		bool flipRot = false;
+		if (dot(START_UP, vec3::UP) > 1 / sqrt(2))
 		{
-			float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
-			float yaw = camera->yaw() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
-			float roll = camera->roll();
+			pitch += dy * MOUSE_ROTATION_SPEED;
+			yaw += dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x) * xRotSign;
 
 			if (abs(roll - 180) < 0.01f)
-			{
-				roll = 180 - roll;
-				pitch = Math::mod(pitch - 180.0f, 360.0f);
-				yaw = 180 - yaw;
-			}
-
-			pitch = glm::clamp(pitch, -89.99f, 89.99f);
-
-			camera->setRot(pitch, yaw, roll);
+				flipRot = true;
 		}
-		else if (dot(startUp, vec3::FORWARD) > 1 / sqrt(2))
+		else if (dot(START_UP, vec3::FORWARD) > 1 / sqrt(2))
 		{
-			float pitch = camera->pitch() + dy * MOUSE_ROTATION_SPEED;
-			float yaw = camera->yaw();
-			float roll = camera->roll() + dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x);
+			pitch += dy * MOUSE_ROTATION_SPEED;
+			roll += dx * MOUSE_ROTATION_SPEED * glm::sign(camera->scale().x) * xRotSign;
 
-			pitch = glm::clamp(pitch, -179.99f, -0.01f);
-
-			camera->setRot(pitch, yaw, roll);
+			if (abs(yaw - 180) < 0.01f)
+				flipRot = true;
 		}
+
+		if (flipRot)
+		{
+			pitch = Math::mod(pitch + 180.0f, 360.0f);
+			yaw = 180 - yaw;
+			roll = 180 - roll;
+			pitchMin += 180;
+			pitchMax += 180;
+			//xRotSign = -1;
+		}
+
+		pitch = glm::clamp(pitch, pitchMin, pitchMax);
+
+		camera->setRot(pitch, yaw, roll);
 	}
 
 	if (event.type == SDL_MOUSEWHEEL)

@@ -18,7 +18,7 @@ class SceneLoaderPbrt
 	static Graphical* spawnObjectFromShape(const minipbrt::Shape* shape, const std::vector<Material*>& materials, const std::vector<Texture*>& textures, Model* model,
 	                                       const minipbrt::Scene* scene);
 
-	static void loadScene_lights(minipbrt::Scene* scene);
+	static void loadScene_lights(const minipbrt::Scene* scene);
 
 public:
 	static void loadScene(const std::string& path);

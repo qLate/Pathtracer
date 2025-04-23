@@ -5,7 +5,7 @@
 
 class Input
 {
-	static constexpr float MOVE_SPEED = 15.0f;
+	static constexpr float MOVE_SPEED = 5.0f;
 	static constexpr float MOVE_SPEED_BOOST = 3.0f;
 	static constexpr float MOVE_ACCELERATION = 0.45f;
 

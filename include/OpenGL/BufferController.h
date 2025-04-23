@@ -28,6 +28,9 @@ class BufferController
 	static constexpr int BVH_NODE_ALIGN = 16;
 	static constexpr int PRIM_OBJ_INDICES_ALIGN = 1;
 
+	static constexpr int UBO_TEXTURES_SIZE = 5000;
+	static constexpr int UBO_LIGHTS_SIZE = 5000;
+
 	inline static UPtr<UBO> _uboTextures;
 	inline static UPtr<SSBO> _uboMaterials;
 	inline static UPtr<UBO> _uboLights;
@@ -61,7 +64,7 @@ public:
 
 	static float lastPrimObjCount() { return _lastPrimObjCount; }
 
-	static void updateTexInfos();
+	static void updateTextures();
 	static void updateMaterials();
 	static void updateLights();
 	static void updateObjects();

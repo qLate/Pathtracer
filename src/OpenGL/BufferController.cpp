@@ -20,14 +20,14 @@ void BufferController::init()
 	_ssboBVHNodes = make_unique<SSBO>(BVH_NODE_ALIGN, 6);
 	_ssboPrimObjIndices = make_unique<SSBO>(PRIM_OBJ_INDICES_ALIGN, 7);
 
-	_uboTextures->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
-	_uboLights->setStorage(1000, GL_DYNAMIC_STORAGE_BIT);
+	_uboTextures->setStorage(UBO_TEXTURES_SIZE, GL_DYNAMIC_STORAGE_BIT);
+	_uboLights->setStorage(UBO_LIGHTS_SIZE, GL_DYNAMIC_STORAGE_BIT);
 }
 
 void BufferController::checkIfBufferUpdateRequired()
 {
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Textures))
-		updateTexInfos();
+		updateTextures();
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Materials))
 		updateMaterials();
 	if (Utils::hasFlag(_buffersForUpdate, BufferType::Lights))
@@ -55,7 +55,7 @@ void BufferController::initBuffers()
 {
 	bindBuffers();
 
-	updateTexInfos();
+	updateTextures();
 	updateMaterials();
 	updateLights();
 	updateTriangles();
@@ -74,11 +74,10 @@ void BufferController::bindBuffers()
 	_ssboPrimObjIndices->bindDefault();
 }
 
-void BufferController::updateTexInfos()
+void BufferController::updateTextures()
 {
 	auto textures = Scene::textures;
 	std::vector<TextureStruct> data(textures.size());
-	//#pragma omp parallel for
 	for (int i = 0; i < textures.size(); i++)
 	{
 		auto tex = textures[i];
@@ -90,6 +89,9 @@ void BufferController::updateTexInfos()
 	}
 	_uboTextures->setSubData((float*)data.data(), data.size());
 	Renderer::resetSamples();
+
+	if (data.size() > UBO_TEXTURES_SIZE)
+		Debug::logError("Exceeded texture UBO size.");
 }
 
 void BufferController::updateMaterials()
@@ -205,6 +207,9 @@ void BufferController::updateLights()
 	_uboLights->setSubData((float*)data.data(), data.size());
 	Renderer::renderProgram()->fragShader()->setInt("lightCount", data.size());
 	Renderer::resetSamples();
+
+	if (data.size() > UBO_LIGHTS_SIZE)
+		Debug::logError("Exceeded light UBO size.");
 }
 
 void BufferController::updateObjects()

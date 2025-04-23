@@ -90,7 +90,7 @@ void GraphicalInspectorDrawer::draw(Graphical* target)
 			material->setEmission(emission);
 
 		auto emissionIntensity = material->emission().intensity();
-		if (ImGui::LabeledSliderFloat("Emission Intensity", emissionIntensity, 0, 20.0f))
+		if (ImGui::LabeledSliderFloat("Emission Intensity", emissionIntensity, 0, 100.0f))
 			material->setEmission(emission.withIntensity(emissionIntensity));
 
 		if (target->sharedMaterial() == material && ImGui::Button("Clone Material"))

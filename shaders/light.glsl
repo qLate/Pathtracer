@@ -32,7 +32,7 @@ vec3 sampleEnvMap(vec3 dir)
 float getTriangleLightPdf(Light light, Triangle tri, Object obj, vec3 P, vec3 L, vec3 LP)
 {
     vec3 LN = localToGlobalDir(tri.vertices[0].normalV.xyz, obj);
-    float LNdotL = max(dot(-L, LN), 0.0);
+    float LNdotL = clamp0(dot(-L, LN));
 
     float dist = length(LP - P);
     return dist * dist / max(LNdotL * light.properties1.y, EPSILON);
@@ -100,7 +100,6 @@ void sampleLight(int lightIndex, vec3 P, out vec3 L, out vec3 radiance, out floa
         dist = length(LP - P);
 
         radiance = findMaterial(obj.materialIndex).emission;
-
         pdf = getTriangleLightPdf(light, tri, obj, P, L, LP);
     }
     else if (light.lightType == LIGHT_TYPE_DISK)
@@ -137,6 +136,7 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
     float dist;
     int ind = randInt(0, lightCount - 1);
     sampleLight(ind, P, L, radiance, dist, lightPdf);
+    lightPdf /= lightCount;
 
     float NdotL = clamp0(dot(L, N));
     if (NdotL < 1e-5 || lightPdf > 1e15)
@@ -147,64 +147,10 @@ vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, f
 
     Ray shadowRay = Ray(P, L, dist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
     float shadowMult = intersectWorld(shadowRay, true) ? 0.0 : 1.0;
-    lightPdf /= lightCount;
 
     vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor);
     return shadowMult * radiance * brdf * NdotL / lightPdf;
 }
-
-// RIS
-// vec3 getDirectLighting(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, int bounce, out float lightPdf)
-// {
-//     if (lightCount == 0) return vec3(0);
-
-//     const int RIS_CANDIDATE_COUNT = 4;
-
-//     float sumWeight = 0.0;
-//     float chosenWeight = 0.0;
-//     float accum = 0.0;
-//     float r = rand();
-
-//     vec3 selectedL = vec3(0), selectedRadiance = vec3(0);
-//     float selectedDist = 1.0;
-//     float selectedPdf = 1.0;
-
-//     for (int i = 0; i < RIS_CANDIDATE_COUNT; i++)
-//     {
-//         int ind = randInt(0, lightCount - 1);
-//         vec3 L, radiance;
-//         float dist, pdf;
-//         sampleLight(ind, P, L, radiance, dist, pdf);
-
-//         float NdotL = clamp0(dot(N, L));
-//         if (pdf <= 0.0 || NdotL <= 0.0) continue;
-
-//         vec3 brdf = ggxBRDF(N, L, V, NdotL, roughness, specColor, diffColor);
-//         float weight = luminance(radiance * brdf * NdotL / pdf);
-//         sumWeight += weight;
-
-//         accum += weight;
-//         if (r * sumWeight <= accum)
-//         {
-//             selectedL = L;
-//             selectedRadiance = radiance;
-//             selectedDist = dist;
-//             selectedPdf = pdf;
-//             chosenWeight = weight;
-//         }
-//     }
-
-//     if (sumWeight == 0.0 || chosenWeight == 0.0) return vec3(0);
-
-//     Ray shadowRay = Ray(P, selectedL, selectedDist - 0.001, RAY_DEFAULT_ARGS_WO_DIST);
-//     float shadowMult = (intersectWorld(shadowRay, true) ? 0.0 : 1.0);
-
-//     float NdotL = clamp0(dot(N, selectedL));
-//     vec3 brdf = ggxBRDF(N, selectedL, V, NdotL, roughness, specColor, diffColor);
-
-//     lightPdf = selectedPdf / lightCount;
-//     return shadowMult * selectedRadiance * brdf * NdotL / lightPdf;
-// }
 
 float probToSampleDiffuse(vec3 diffColor, vec3 specColor, float metallic)
 {
@@ -218,7 +164,6 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, fl
 {
     vec2 r = genRandoms(bounce);
     float probDiff = probToSampleDiffuse(diffColor, specColor, metallic);
-
     if (rand() < probDiff)
     {
         vec3 L_local = sampleHemisphereCosine(r.x, r.y);
@@ -251,7 +196,7 @@ vec3 scatter(vec3 N, vec3 V, vec3 diffColor, vec3 specColor, float roughness, fl
 vec3 getRadiance(vec3 N, vec3 V, vec3 P, vec3 diffColor, vec3 specColor, float roughness, float metallic, int bounce, inout vec3 throughput, out vec3 bounceDir, out float brdfPdf)
 {
     float lightPdf;
-    vec3 directLighting = /*throughput * */ (misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0));
+    vec3 directLighting = misSampleLight ? getDirectLighting(N, V, P, diffColor, specColor, roughness, bounce, lightPdf) : vec3(0);
     // directLighting = clampMax(directLighting, 1);
 
     bounceDir = scatter(N, V, diffColor, specColor, roughness, metallic, bounce, throughput, brdfPdf);

@@ -88,7 +88,7 @@ vec3 castRay(Ray ray)
         // Opacity
         float opacity = mat.opacity;
         if (mat.opacityTexIndex != -1)
-            opacity *= average(texture(textures[mat.opacityTexIndex], uv));
+            opacity *= average(texture(textures[mat.opacityTexIndex], uv).xyz);
 
         if (opacity < 1 && rand() > opacity)
         {
@@ -136,8 +136,10 @@ vec3 castRay(Ray ray)
         vec3 specColor = mat.specColor != vec3(0) ? mat.specColor : mix(vec3(0.05), albedo, mat.metallic);
         vec3 radiance = getRadiance(ray.surfaceNormal, -ray.dir, ray.hitPoint, albedo, specColor, roughness, mat.metallic, bounce, throughput, bounceDir, lastBrdfPdf);
 
-        if (misSampleBrdf) color += clamp01(oldThroughput * radiance);
-        else color += oldThroughput * radiance;
+        if (misSampleBrdf)
+            color += clamp(oldThroughput * radiance, 0, 1);
+        else
+            color += oldThroughput * radiance;
 
         if (length(throughput) < 0.01) break;
         ray = Ray(ray.hitPoint, bounceDir, RAY_DEFAULT_ARGS);

@@ -226,16 +226,16 @@ float powerHeuristic(float pdf1, float pdf2)
 {
     float a2 = pdf1 * pdf1;
     float b2 = pdf2 * pdf2;
-    return a2 / (a2 + b2 + 0.0001);
-}
-float balancedHeuristic(float pdf1, float pdf2)
-{
-    return pdf1 / (pdf1 + pdf2 + 0.0001);
+    return a2 / (a2 + b2 + 1e-10);
 }
 
 float average(vec4 v)
 {
     return (v.x + v.y + v.z + v.w) * 0.25;
+}
+float average(vec3 v)
+{
+    return (v.x + v.y + v.z) * 0.3333333;
 }
 
 float perlin_hash(vec3 p)
